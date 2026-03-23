@@ -46,6 +46,42 @@ def health() -> dict:
         raise HTTPException(status_code=503, detail=str(e))
 
 
+@router.get("/stats")
+def stats() -> dict:
+    """Return key warehouse statistics for the landing page."""
+    conn = get_db()
+    try:
+        result: dict = {}
+
+        row = conn.execute("SELECT COUNT(*) FROM dim_occupation WHERE is_current = true").fetchone()
+        result["occupation_count"] = row[0] if row else 0
+
+        row = conn.execute("SELECT COUNT(*) FROM dim_geography WHERE is_current = true").fetchone()
+        result["geography_count"] = row[0] if row else 0
+
+        row = conn.execute("SELECT COUNT(DISTINCT source_dataset) FROM fact_occupation_employment_wages").fetchone()
+        result["source_count"] = row[0] if row else 0
+
+        row = conn.execute(
+            "SELECT DISTINCT soc_version FROM dim_occupation WHERE is_current = true LIMIT 1"
+        ).fetchone()
+        result["soc_version"] = row[0] if row else None
+
+        row = conn.execute(
+            "SELECT COUNT(DISTINCT element_id) FROM dim_skill WHERE is_current = true"
+        ).fetchone()
+        result["skill_count"] = row[0] if row else 0
+
+        row = conn.execute(
+            "SELECT COUNT(DISTINCT task_id) FROM dim_task WHERE is_current = true"
+        ).fetchone()
+        result["task_count"] = row[0] if row else 0
+
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+
 @router.get("/metadata")
 def metadata() -> dict:
     """Return source versions, release IDs, and last load timestamps."""

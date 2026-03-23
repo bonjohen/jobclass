@@ -77,6 +77,14 @@ def create_app() -> FastAPI:
             "soc_code": soc_code,
         })
 
+    @app.get("/methodology", response_class=HTMLResponse)
+    async def methodology_page(request: Request):
+        return templates.TemplateResponse("base.html", {
+            "request": request,
+            "page_title": "Methodology — JobClass",
+            "content_template": "methodology.html",
+        })
+
     @app.get("/occupation/{soc_code}/wages", response_class=HTMLResponse)
     async def wages_comparison_page(request: Request, soc_code: str):
         return templates.TemplateResponse("base.html", {

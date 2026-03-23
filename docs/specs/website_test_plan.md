@@ -143,12 +143,12 @@ This document defines all tests for the JobClass reporting website, aligned phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | WT6-01 | API | Stats endpoint returns key warehouse statistics | Response includes occupation_count, geography_count, latest_release, source_count; all values non-null | WFR-10 | W6-01 | | |
-| `[ ]` | WT6-02 | RENDER | Landing page displays project summary and key statistics | Page contains statistics cards with occupation count, geography count; project description present | WFR-10, WNF-5 | W6-02 | | |
-| `[ ]` | WT6-03 | RENDER | Landing page includes featured occupation spotlight | Page contains spotlight section with a specific occupation's summary data | WFR-10, WNF-5 | W6-03 | | |
-| `[ ]` | WT6-04 | RENDER | Navigation header contains links to all major sections | Header has links to search, hierarchy, methodology; all links resolve to valid pages | WNF-3, WNF-5 | W6-04 | | |
-| `[ ]` | WT6-05 | ERROR | 404 page renders helpful navigation options | 404 page contains error message and links to search and landing page | WNF-6, WNF-5 | W6-05 | | |
-| `[ ]` | WT6-06 | RENDER | All pages have unique, descriptive `<title>` and meta description | Each page's title reflects content; meta description is non-empty | WNF-4 | W6-06 | | |
+| `[X]` | WT6-01 | API | Stats endpoint returns key warehouse statistics | Response includes occupation_count, geography_count, latest_release, source_count; all values non-null | WFR-10 | W6-01 | 2026-03-23 19:45 | 2026-03-23 19:45 |
+| `[X]` | WT6-02 | RENDER | Landing page displays project summary and key statistics | Page contains statistics cards with occupation count, geography count; project description present | WFR-10, WNF-5 | W6-02 | 2026-03-23 19:45 | 2026-03-23 19:45 |
+| `[X]` | WT6-03 | RENDER | Landing page includes featured occupation spotlight | Page contains spotlight section with a specific occupation's summary data | WFR-10, WNF-5 | W6-03 | 2026-03-23 19:45 | 2026-03-23 19:45 |
+| `[X]` | WT6-04 | RENDER | Navigation header contains links to all major sections | Header has links to search, hierarchy, methodology; all links resolve to valid pages | WNF-3, WNF-5 | W6-04 | 2026-03-23 19:45 | 2026-03-23 19:45 |
+| `[X]` | WT6-05 | ERROR | 404 page renders helpful navigation options | 404 page contains error message and links to search and landing page | WNF-6, WNF-5 | W6-05 | 2026-03-23 19:45 | 2026-03-23 19:45 |
+| `[X]` | WT6-06 | RENDER | All pages have unique, descriptive `<title>` and meta description | Each page's title reflects content; meta description is non-empty | WNF-4 | W6-06 | 2026-03-23 19:45 | 2026-03-23 19:45 |
 | `[ ]` | WT6-07 | E2E | Navigation flow: landing → search → profile → wages → back to search | Each step renders correct page; back navigation works; no broken links | WNF-3, WNF-5 | W6-04 | | |
 
 ---

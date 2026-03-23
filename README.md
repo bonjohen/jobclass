@@ -48,6 +48,7 @@ Status of each phase's commit upon completion.
 | W3 | Website: Employment & Wages Display | Phase W3: Wages API, geography API, state comparison page, suppression handling, 13 tests | Complete |
 | W4 | Website: Skills & Tasks Display | Phase W4: Skills, tasks, similarity APIs with O*NET lineage, 13 tests | Complete |
 | W5 | Website: Trends & Projections Display | Phase W5: Projections API with education/training, profile integration, 9 tests | Complete |
+| W6 | Website: Landing Page & Navigation | Phase W6: Stats API, landing spotlight, methodology page, navigation, 14 tests | Complete |
 
 ## Project Structure
 

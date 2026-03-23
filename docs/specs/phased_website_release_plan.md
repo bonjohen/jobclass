@@ -170,14 +170,14 @@ Build the overview landing page and finalize navigation across all sections.
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | W6-01 | Implement `/api/stats` endpoint: key warehouse statistics (occupation count, geography count, latest release) | WFR-10, WAR-2 | | |
-| `[ ]` | W6-02 | Build landing page: project summary, key statistics cards, navigation entry points | WFR-10, WNF-5 | | |
-| `[ ]` | W6-03 | Add featured occupation spotlight to landing page (e.g., Software Developers) | WFR-10, WNF-5 | | |
-| `[ ]` | W6-04 | Finalize site navigation: header links, breadcrumbs, back-to-search patterns | WNF-3, WNF-5 | | |
-| `[ ]` | W6-05 | Implement 404 and error pages with helpful navigation | WNF-6, WNF-5 | | |
-| `[ ]` | W6-06 | Add page titles and meta descriptions for all pages | WNF-4 | | |
-| `[ ]` | W6-07 | Write landing page tests: statistics present, navigation functional | — | | |
-| `[ ]` | W6-08 | Write navigation integration tests: all major paths reachable | — | | |
+| `[X]` | W6-01 | Implement `/api/stats` endpoint: key warehouse statistics (occupation count, geography count, latest release) | WFR-10, WAR-2 | 2026-03-23 19:15 | 2026-03-23 19:45 |
+| `[X]` | W6-02 | Build landing page: project summary, key statistics cards, navigation entry points | WFR-10, WNF-5 | 2026-03-23 19:15 | 2026-03-23 19:45 |
+| `[X]` | W6-03 | Add featured occupation spotlight to landing page (e.g., Software Developers) | WFR-10, WNF-5 | 2026-03-23 19:15 | 2026-03-23 19:45 |
+| `[X]` | W6-04 | Finalize site navigation: header links, breadcrumbs, back-to-search patterns | WNF-3, WNF-5 | 2026-03-23 19:15 | 2026-03-23 19:45 |
+| `[X]` | W6-05 | Implement 404 and error pages with helpful navigation | WNF-6, WNF-5 | 2026-03-23 19:15 | 2026-03-23 19:45 |
+| `[X]` | W6-06 | Add page titles and meta descriptions for all pages | WNF-4 | 2026-03-23 19:15 | 2026-03-23 19:45 |
+| `[X]` | W6-07 | Write landing page tests: statistics present, navigation functional | — | 2026-03-23 19:15 | 2026-03-23 19:45 |
+| `[X]` | W6-08 | Write navigation integration tests: all major paths reachable | — | 2026-03-23 19:15 | 2026-03-23 19:45 |
 
 ---
 
