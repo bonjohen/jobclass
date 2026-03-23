@@ -1,0 +1,97 @@
+# Source Manifest — Declarative extraction configuration for Release 1
+# Each entry defines a downloadable source artifact for the pipeline.
+
+sources:
+  # --- SOC (Standard Occupational Classification) ---
+  - source_name: soc
+    dataset_name: soc_hierarchy
+    dataset_url: https://www.bls.gov/soc/2018/soc_2018_direct_match_title_file.csv
+    expected_format: csv
+    parser_name: soc_hierarchy_parser
+    refresh_cadence: on_revision
+    version_detection_rule: content_header
+    enabled: true
+
+  - source_name: soc
+    dataset_name: soc_definitions
+    dataset_url: https://www.bls.gov/soc/2018/soc_2018_definitions.csv
+    expected_format: csv
+    parser_name: soc_definitions_parser
+    refresh_cadence: on_revision
+    version_detection_rule: content_header
+    enabled: true
+
+  # --- OEWS (Occupational Employment and Wage Statistics) ---
+  - source_name: bls
+    dataset_name: oews_national
+    dataset_url: https://www.bls.gov/oes/special-requests/oesm2024_nat.zip
+    expected_format: xlsx_in_zip
+    parser_name: oews_national_parser
+    refresh_cadence: annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  - source_name: bls
+    dataset_name: oews_state
+    dataset_url: https://www.bls.gov/oes/special-requests/oesm2024_st.zip
+    expected_format: xlsx_in_zip
+    parser_name: oews_state_parser
+    refresh_cadence: annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  # --- O*NET ---
+  - source_name: onet
+    dataset_name: onet_skills
+    dataset_url: https://www.onetcenter.org/dl_files/database/db_29_1_text/Skills.txt
+    expected_format: tsv
+    parser_name: onet_skills_parser
+    refresh_cadence: semi_annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  - source_name: onet
+    dataset_name: onet_knowledge
+    dataset_url: https://www.onetcenter.org/dl_files/database/db_29_1_text/Knowledge.txt
+    expected_format: tsv
+    parser_name: onet_knowledge_parser
+    refresh_cadence: semi_annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  - source_name: onet
+    dataset_name: onet_abilities
+    dataset_url: https://www.onetcenter.org/dl_files/database/db_29_1_text/Abilities.txt
+    expected_format: tsv
+    parser_name: onet_abilities_parser
+    refresh_cadence: semi_annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  - source_name: onet
+    dataset_name: onet_tasks
+    dataset_url: https://www.onetcenter.org/dl_files/database/db_29_1_text/Task%20Statements.txt
+    expected_format: tsv
+    parser_name: onet_tasks_parser
+    refresh_cadence: semi_annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  - source_name: onet
+    dataset_name: onet_occupation_data
+    dataset_url: https://www.onetcenter.org/dl_files/database/db_29_1_text/Occupation%20Data.txt
+    expected_format: tsv
+    parser_name: onet_occupation_data_parser
+    refresh_cadence: semi_annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  # --- Employment Projections (Optional R1) ---
+  - source_name: bls
+    dataset_name: bls_employment_projections
+    dataset_url: https://www.bls.gov/emp/tables/emp-by-detailed-occupation.xlsx
+    expected_format: xlsx
+    parser_name: projections_parser
+    refresh_cadence: biennial
+    version_detection_rule: content_header
+    enabled: false

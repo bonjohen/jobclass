@@ -54,32 +54,32 @@ This document defines all tests for the JobClass pipeline, aligned phase-by-phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T2-01 | UNIT | HTTP download module returns content and captures metadata | Response includes body bytes, status code, headers dict, and UTC download timestamp | FR-1.7 | P2-05 | | |
-| `[ ]` | T2-02 | UNIT | HTTP download module raises on non-2xx status after retries exhausted | After configured retry count, raises DownloadError with status code and URL | FR-1.7, NFR-7 | P2-05, P2-12 | | |
-| `[ ]` | T2-03 | UNIT | Transient failure retry respects configured backoff and max attempts | 3 consecutive 503s with backoff=2s → retries at ~0s, ~2s, ~4s; 4th failure raises | NFR-7 | P2-12 | | |
-| `[ ]` | T2-04 | UNIT | SHA-256 checksum computation matches known digest for test file | Checksum of fixed byte content matches precomputed hex digest | FR-1.6 | P2-06 | | |
-| `[ ]` | T2-05 | UNIT | Raw storage writer creates file at correct path and content is byte-identical | File exists at expected path; reading it back produces identical bytes; checksum matches | FR-1.5, NFR-2 | P2-07 | | |
-| `[ ]` | T2-06 | UNIT | Raw storage writer does not overwrite existing file at same path | Second write to same path raises or skips (does not silently replace) | NFR-2 | P2-07 | | |
-| `[ ]` | T2-07 | UNIT | Release version detection extracts version from test metadata/content | Returns expected version string for each supported detection strategy | FR-1.9 | P2-08 | | |
+| `[X]` | T2-01 | UNIT | HTTP download module returns content and captures metadata | Response includes body bytes, status code, headers dict, and UTC download timestamp | FR-1.7 | P2-05 | 2026-03-23 12:47 | 2026-03-23 12:50 |
+| `[X]` | T2-02 | UNIT | HTTP download module raises on non-2xx status after retries exhausted | After configured retry count, raises DownloadError with status code and URL | FR-1.7, NFR-7 | P2-05, P2-12 | 2026-03-23 12:47 | 2026-03-23 12:50 |
+| `[X]` | T2-03 | UNIT | Transient failure retry respects configured backoff and max attempts | 3 consecutive 503s with backoff=2s → retries at ~0s, ~2s, ~4s; 4th failure raises | NFR-7 | P2-12 | 2026-03-23 12:47 | 2026-03-23 12:50 |
+| `[X]` | T2-04 | UNIT | SHA-256 checksum computation matches known digest for test file | Checksum of fixed byte content matches precomputed hex digest | FR-1.6 | P2-06 | 2026-03-23 12:47 | 2026-03-23 12:50 |
+| `[X]` | T2-05 | UNIT | Raw storage writer creates file at correct path and content is byte-identical | File exists at expected path; reading it back produces identical bytes; checksum matches | FR-1.5, NFR-2 | P2-07 | 2026-03-23 12:47 | 2026-03-23 12:50 |
+| `[X]` | T2-06 | UNIT | Raw storage writer does not overwrite existing file at same path | Second write to same path raises or skips (does not silently replace) | NFR-2 | P2-07 | 2026-03-23 12:47 | 2026-03-23 12:50 |
+| `[X]` | T2-07 | UNIT | Release version detection extracts version from test metadata/content | Returns expected version string for each supported detection strategy | FR-1.9 | P2-08 | 2026-03-23 12:47 | 2026-03-23 12:50 |
 
 ### Source Manifest
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T2-08 | UNIT | Manifest reader parses valid manifest file into structured entries | Each entry has source_name, dataset_name, dataset_url, expected_format, parser_name, enabled flag | FR-1.8 | P2-01 | | |
-| `[ ]` | T2-09 | UNIT | Manifest reader rejects manifest with missing required fields | Raises validation error identifying the missing field and entry | FR-1.8 | P2-01 | | |
-| `[ ]` | T2-10 | UNIT | Manifest reader filters disabled entries | Only entries with enabled=true are returned for execution | FR-1.8 | P2-01 | | |
-| `[ ]` | T2-11 | CONTRACT | SOC manifest entries contain required fields and valid URLs | Entries for soc_hierarchy and soc_definitions exist, have dataset_url, parser_name, and expected_format | FR-1.1 | P2-02 | | |
-| `[ ]` | T2-12 | CONTRACT | OEWS manifest entries contain required fields and valid URLs | Entries for oews_national and oews_state exist with all required fields | FR-1.2 | P2-03 | | |
-| `[ ]` | T2-13 | CONTRACT | O*NET manifest entries contain required fields and valid URLs | Entries for onet_skills, onet_knowledge, onet_abilities, onet_tasks exist with all required fields | FR-1.3 | P2-04 | | |
+| `[X]` | T2-08 | UNIT | Manifest reader parses valid manifest file into structured entries | Each entry has source_name, dataset_name, dataset_url, expected_format, parser_name, enabled flag | FR-1.8 | P2-01 | 2026-03-23 12:47 | 2026-03-23 12:50 |
+| `[X]` | T2-09 | UNIT | Manifest reader rejects manifest with missing required fields | Raises validation error identifying the missing field and entry | FR-1.8 | P2-01 | 2026-03-23 12:47 | 2026-03-23 12:50 |
+| `[X]` | T2-10 | UNIT | Manifest reader filters disabled entries | Only entries with enabled=true are returned for execution | FR-1.8 | P2-01 | 2026-03-23 12:47 | 2026-03-23 12:50 |
+| `[X]` | T2-11 | CONTRACT | SOC manifest entries contain required fields and valid URLs | Entries for soc_hierarchy and soc_definitions exist, have dataset_url, parser_name, and expected_format | FR-1.1 | P2-02 | 2026-03-23 12:47 | 2026-03-23 12:50 |
+| `[X]` | T2-12 | CONTRACT | OEWS manifest entries contain required fields and valid URLs | Entries for oews_national and oews_state exist with all required fields | FR-1.2 | P2-03 | 2026-03-23 12:47 | 2026-03-23 12:50 |
+| `[X]` | T2-13 | CONTRACT | O*NET manifest entries contain required fields and valid URLs | Entries for onet_skills, onet_knowledge, onet_abilities, onet_tasks exist with all required fields | FR-1.3 | P2-04 | 2026-03-23 12:47 | 2026-03-23 12:50 |
 
 ### Run Manifest
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T2-14 | UNIT | Run manifest creation inserts record with all required fields | Record contains run_id, pipeline_name, dataset_name, source_name, source_url, source_release_id, downloaded_at, parser_name, parser_version, raw_checksum | FR-6.1, FR-6.2 | P2-09, P2-10 | | |
-| `[ ]` | T2-15 | UNIT | Run manifest run_id is unique across concurrent creations | 100 concurrent manifest creations produce 100 distinct run_ids | FR-6.1 | P2-10 | | |
-| `[ ]` | T2-16 | INTEGRATION | Extraction orchestrator executes full sequence: read manifest → download → checksum → store → register | For a test manifest entry: raw file exists at correct path, checksum recorded in run manifest, all metadata fields populated | FR-1.5, FR-1.6, FR-1.7, FR-1.8 | P2-11 | | |
+| `[X]` | T2-14 | UNIT | Run manifest creation inserts record with all required fields | Record contains run_id, pipeline_name, dataset_name, source_name, source_url, source_release_id, downloaded_at, parser_name, parser_version, raw_checksum | FR-6.1, FR-6.2 | P2-09, P2-10 | 2026-03-23 12:47 | 2026-03-23 12:50 |
+| `[X]` | T2-15 | UNIT | Run manifest run_id is unique across concurrent creations | 100 concurrent manifest creations produce 100 distinct run_ids | FR-6.1 | P2-10 | 2026-03-23 12:47 | 2026-03-23 12:50 |
+| `[X]` | T2-16 | INTEGRATION | Extraction orchestrator executes full sequence: read manifest → download → checksum → store → register | For a test manifest entry: raw file exists at correct path, checksum recorded in run manifest, all metadata fields populated | FR-1.5, FR-1.6, FR-1.7, FR-1.8 | P2-11 | 2026-03-23 12:47 | 2026-03-23 12:50 |
 
 ---
 

@@ -40,19 +40,19 @@ Build the manifest-driven download system and run-tracking infrastructure. Requi
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | P2-01 | Design and create source manifest schema (YAML/JSON) with all R1 source entries | FR-1.8, DL-2 | | |
-| `[ ]` | P2-02 | Populate source manifest: SOC hierarchy and definitions | FR-1.1, FR-1.8 | | |
-| `[ ]` | P2-03 | Populate source manifest: OEWS national and state | FR-1.2, FR-1.8 | | |
-| `[ ]` | P2-04 | Populate source manifest: O*NET domains (skills, knowledge, abilities, tasks, occupation data) | FR-1.3, FR-1.8 | | |
-| `[ ]` | P2-05 | Build HTTP download module with metadata capture (headers, status, timestamp) | FR-1.7 | | |
-| `[ ]` | P2-06 | Implement SHA-256 checksum computation on downloaded artifacts | FR-1.6 | | |
-| `[ ]` | P2-07 | Implement raw storage writer enforcing path convention `raw/{source}/{dataset}/{release_id}/{run_id}/{filename}` | FR-1.5, NFR-2 | | |
-| `[ ]` | P2-08 | Implement release version detection from source metadata or parsed content | FR-1.9 | | |
-| `[ ]` | P2-09 | Create `run_manifest` database table | FR-6.1, FR-6.2 | | |
-| `[ ]` | P2-10 | Build run manifest creation logic (run_id, pipeline_name, dataset_name, source_name, source_url, source_release_id, downloaded_at, parser_name, parser_version, raw_checksum) | FR-6.1, FR-6.2, OR-6 | | |
-| `[ ]` | P2-11 | Build manifest-driven extraction orchestrator that reads manifest entries and executes download → checksum → store → register | FR-1.5, FR-1.6, FR-1.7, FR-1.8 | | |
-| `[ ]` | P2-12 | Implement transient download failure retry with configurable backoff | NFR-7 | | |
-| `[ ]` | P2-13 | Write unit tests for download module, checksum, path builder, and manifest reader | — | | |
+| `[X]` | P2-01 | Design and create source manifest schema (YAML/JSON) with all R1 source entries | FR-1.8, DL-2 | 2026-03-23 12:40 | 2026-03-23 12:42 |
+| `[X]` | P2-02 | Populate source manifest: SOC hierarchy and definitions | FR-1.1, FR-1.8 | 2026-03-23 12:40 | 2026-03-23 12:42 |
+| `[X]` | P2-03 | Populate source manifest: OEWS national and state | FR-1.2, FR-1.8 | 2026-03-23 12:40 | 2026-03-23 12:42 |
+| `[X]` | P2-04 | Populate source manifest: O*NET domains (skills, knowledge, abilities, tasks, occupation data) | FR-1.3, FR-1.8 | 2026-03-23 12:40 | 2026-03-23 12:42 |
+| `[X]` | P2-05 | Build HTTP download module with metadata capture (headers, status, timestamp) | FR-1.7 | 2026-03-23 12:42 | 2026-03-23 12:45 |
+| `[X]` | P2-06 | Implement SHA-256 checksum computation on downloaded artifacts | FR-1.6 | 2026-03-23 12:42 | 2026-03-23 12:45 |
+| `[X]` | P2-07 | Implement raw storage writer enforcing path convention `raw/{source}/{dataset}/{release_id}/{run_id}/{filename}` | FR-1.5, NFR-2 | 2026-03-23 12:42 | 2026-03-23 12:45 |
+| `[X]` | P2-08 | Implement release version detection from source metadata or parsed content | FR-1.9 | 2026-03-23 12:42 | 2026-03-23 12:45 |
+| `[X]` | P2-09 | Create `run_manifest` database table | FR-6.1, FR-6.2 | 2026-03-23 12:44 | 2026-03-23 12:46 |
+| `[X]` | P2-10 | Build run manifest creation logic (run_id, pipeline_name, dataset_name, source_name, source_url, source_release_id, downloaded_at, parser_name, parser_version, raw_checksum) | FR-6.1, FR-6.2, OR-6 | 2026-03-23 12:44 | 2026-03-23 12:46 |
+| `[X]` | P2-11 | Build manifest-driven extraction orchestrator that reads manifest entries and executes download → checksum → store → register | FR-1.5, FR-1.6, FR-1.7, FR-1.8 | 2026-03-23 12:44 | 2026-03-23 12:46 |
+| `[X]` | P2-12 | Implement transient download failure retry with configurable backoff | NFR-7 | 2026-03-23 12:44 | 2026-03-23 12:46 |
+| `[X]` | P2-13 | Write unit tests for download module, checksum, path builder, and manifest reader | — | 2026-03-23 12:46 | 2026-03-23 12:50 |
 
 ---
 

@@ -26,6 +26,25 @@ Four-layer warehouse: **Raw** (immutable source capture) → **Staging** (parsed
 
 Key properties: idempotent loading, version-aware modeling, immutable raw storage, fail-fast on schema drift, explicit source lineage on every record.
 
+  ## Phase Commit Log                
+
+    Status of each phase's commit upon completion.   
+    
+    | Phase | Description | Commit Message | Status | 
+    |-------|-------------|----------------|--------| 
+    | 1 | Project Foundation | Phase 1: Project foundation — structure, config, database, logging, tests | Complete |
+    | 2 | Extraction Framework & Run Manifest | | In Progress |
+    | 3 | SOC Taxonomy Pipeline | | Pending |  
+    | 4 | OEWS Employment & Wages Pipeline | | Pending |       
+    | 5 | O*NET Semantic Pipeline | | Pending |      
+    | 6 | Validation Framework & Failure Handling | | Pending |
+    | 7 | Observability & Run Reporting | | Pending |
+    | 8 | Orchestration | | Pending |
+    | 9 | Analyst Marts | | Pending |
+    | 10 | Employment Projections (Optional R1) | | Pending |
+    | 11 | End-to-End Integration & Deliverables | | Pending | 
+
+
 ## Project Structure
 
 ```
