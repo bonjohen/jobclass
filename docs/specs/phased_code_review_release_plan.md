@@ -87,28 +87,28 @@ Strengthen tests, add CI/CD, improve release validation, and close coverage gaps
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | CR3-01 | Replace `assert len(...) > 0` with exact expected counts in pipeline parser tests (`test_soc_parser.py`, `test_oews_parser.py`, `test_onet_parser.py`) | #12 | | |
-| `[ ]` | CR3-02 | Replace `assert > 0` with exact counts in pipeline integration tests (`test_orchestration.py`, `test_marts.py`, `test_end_to_end.py`) | #12 | | |
-| `[ ]` | CR3-03 | Replace `is not None` assertions with specific value checks in web API tests (all `test_w*.py` files) | #12 | | |
-| `[ ]` | CR3-04 | Add `TestInvalidInput` class to web tests: invalid SOC codes (`"15-XXXX"`, `"99-9999"`, empty string, too short/long) | #13 | | |
-| `[ ]` | CR3-05 | Add negative tests for invalid `geo_type` parameter and oversized search queries (>100 chars) | #13 | | |
-| `[ ]` | CR3-06 | Add negative tests for empty result sets: search with no matches, occupation with no wages/skills/projections | #13 | | |
-| `[ ]` | CR3-07 | Add parser edge-case tests: empty source files, header-only files, files with unexpected encoding | #13 | | |
-| `[ ]` | CR3-08 | Add test for database connection failure path (verify health endpoint returns 503) | #13 | | |
-| `[ ]` | CR3-09 | Create independent `soc_only_db` fixture that loads only SOC data (no OEWS or O\*NET) | #14 | | |
-| `[ ]` | CR3-10 | Create independent `oews_only_db` fixture that loads SOC + OEWS only (no O\*NET) | #14 | | |
-| `[ ]` | CR3-11 | Create independent `onet_only_db` fixture that loads SOC + O\*NET only (no OEWS) | #14 | | |
-| `[ ]` | CR3-12 | Refactor SOC-specific tests to use `soc_only_db`; verify they pass without OEWS/O\*NET loading | #14 | | |
-| `[ ]` | CR3-13 | Create `.github/workflows/ci.yml` with: checkout, Python setup, dependency install, ruff lint+format, pytest | #15 | | |
-| `[ ]` | CR3-14 | Add Python version matrix (3.11, 3.12) to CI workflow | #15 | | |
-| `[ ]` | CR3-15 | Add coverage reporting to CI (`--cov=jobclass --cov-report=xml`) with coverage upload step | #15 | | |
-| `[ ]` | CR3-16 | Add CI status badge to README.md | #15 | | |
-| `[ ]` | CR3-17 | Generate `requirements.lock` using `pip-compile pyproject.toml -o requirements.lock` | #17 | | |
-| `[ ]` | CR3-18 | Generate `requirements-dev.lock` for development dependencies | #17 | | |
-| `[ ]` | CR3-19 | Add CI step that installs from lock file and verifies tests pass | #17 | | |
-| `[ ]` | CR3-20 | Create `Dockerfile` with multi-stage build: install deps from lock file, copy source, run uvicorn | #16 | | |
-| `[ ]` | CR3-21 | Create `docker-compose.yml` with web service mounting `warehouse.duckdb` via volume | #16 | | |
-| `[ ]` | CR3-22 | Add container build and run instructions to README.md; verify `docker build .` and health check from container | #16 | | |
+| `[X]` | CR3-01 | Replace `assert len(...) > 0` with exact expected counts in pipeline parser tests (`test_soc_parser.py`, `test_oews_parser.py`, `test_onet_parser.py`) | #12 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-02 | Replace `assert > 0` with exact counts in pipeline integration tests (`test_orchestration.py`, `test_marts.py`, `test_end_to_end.py`) | #12 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-03 | Replace `is not None` assertions with specific value checks in web API tests (all `test_w*.py` files) | #12 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-04 | Add `TestInvalidInput` class to web tests: invalid SOC codes (`"15-XXXX"`, `"99-9999"`, empty string, too short/long) | #13 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-05 | Add negative tests for invalid `geo_type` parameter and oversized search queries (>100 chars) | #13 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-06 | Add negative tests for empty result sets: search with no matches, occupation with no wages/skills/projections | #13 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-07 | Add parser edge-case tests: empty source files, header-only files, files with unexpected encoding | #13 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-08 | Add test for database connection failure path (verify health endpoint returns 503) | #13 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-09 | Create independent `soc_only_db` fixture that loads only SOC data (no OEWS or O\*NET) | #14 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-10 | Create independent `oews_only_db` fixture that loads SOC + OEWS only (no O\*NET) | #14 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-11 | Create independent `onet_only_db` fixture that loads SOC + O\*NET only (no OEWS) | #14 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-12 | Refactor SOC-specific tests to use `soc_only_db`; verify they pass without OEWS/O\*NET loading | #14 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-13 | Create `.github/workflows/ci.yml` with: checkout, Python setup, dependency install, ruff lint+format, pytest | #15 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-14 | Add Python version matrix (3.11, 3.12) to CI workflow | #15 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-15 | Add coverage reporting to CI (`--cov=jobclass --cov-report=xml`) with coverage upload step | #15 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-16 | Add CI status badge to README.md | #15 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-17 | Generate `requirements.lock` using `pip-compile pyproject.toml -o requirements.lock` | #17 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-18 | Generate `requirements-dev.lock` for development dependencies | #17 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-19 | Add CI step that installs from lock file and verifies tests pass | #17 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-20 | Create `Dockerfile` with multi-stage build: install deps from lock file, copy source, run uvicorn | #16 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-21 | Create `docker-compose.yml` with web service mounting `warehouse.duckdb` via volume | #16 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR3-22 | Add container build and run instructions to README.md; verify `docker build .` and health check from container | #16 | 2026-03-23 | 2026-03-23 |
 
 ---
 

@@ -1,5 +1,7 @@
 # JobClass — Labor Market Occupation Pipeline
 
+![CI](https://github.com/YOUR_ORG/jobclass/actions/workflows/ci.yml/badge.svg)
+
 A data pipeline that ingests federal labor market data products into a layered analytical warehouse, with occupation as the stable external key.
 
 ## What It Does
@@ -86,6 +88,21 @@ jobclass-web --host 0.0.0.0 --port 8080 --reload
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `JOBCLASS_DB_PATH` | `warehouse.duckdb` | Path to the DuckDB database file |
+
+## Container
+
+```bash
+# Build
+docker build -t jobclass .
+
+# Run (mount your warehouse database)
+docker run -p 8000:8000 -v ./warehouse.duckdb:/app/warehouse.duckdb:ro jobclass
+
+# Or use docker-compose
+docker-compose up
+```
+
+The container runs the web server on port 8000 with a built-in health check at `/api/health`.
 
 ## Project Structure
 
