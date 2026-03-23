@@ -535,6 +535,16 @@ footer {
     line-height: 1.8;
 }
 
+.check-pass {
+    color: var(--color-success);
+    font-weight: 700;
+}
+
+.check-fail {
+    color: #e53e3e;
+    font-weight: 700;
+}
+
 /* --- Spotlight --- */
 
 .spotlight {

@@ -187,14 +187,14 @@ Build methodology pages that explain data sources, lineage, validation, and proj
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | W7-01 | Implement `/api/methodology/sources` endpoint: data source descriptions, URLs, refresh cadences | WFR-9, WAR-2 | | |
-| `[ ]` | W7-02 | Implement `/api/methodology/validation` endpoint: validation summary, pass/fail counts | WFR-9, WAR-2 | | |
-| `[ ]` | W7-03 | Build methodology landing page: project purpose, architecture overview, data flow diagram | WFR-9, WNF-5 | | |
-| `[ ]` | W7-04 | Build data sources page: SOC, OEWS, O*NET, Projections — descriptions, versions, links | WFR-9 | | |
-| `[ ]` | W7-05 | Build data quality page: validation approach, current validation status, lineage explanation | WFR-9, WFR-11 | | |
-| `[ ]` | W7-06 | Build version and release info page: all source versions, last refresh timestamps | WFR-9, WAR-5 | | |
-| `[ ]` | W7-07 | Write methodology endpoint tests: source descriptions complete, versions present | — | | |
-| `[ ]` | W7-08 | Write methodology page rendering tests: all sections present and populated | — | | |
+| `[X]` | W7-01 | Implement `/api/methodology/sources` endpoint: data source descriptions, URLs, refresh cadences | WFR-9, WAR-2 | 2026-03-23 20:00 | 2026-03-23 20:30 |
+| `[X]` | W7-02 | Implement `/api/methodology/validation` endpoint: validation summary, pass/fail counts | WFR-9, WAR-2 | 2026-03-23 20:00 | 2026-03-23 20:30 |
+| `[X]` | W7-03 | Build methodology landing page: project purpose, architecture overview, data flow diagram | WFR-9, WNF-5 | 2026-03-23 20:00 | 2026-03-23 20:30 |
+| `[X]` | W7-04 | Build data sources page: SOC, OEWS, O*NET, Projections — descriptions, versions, links | WFR-9 | 2026-03-23 20:00 | 2026-03-23 20:30 |
+| `[X]` | W7-05 | Build data quality page: validation approach, current validation status, lineage explanation | WFR-9, WFR-11 | 2026-03-23 20:00 | 2026-03-23 20:30 |
+| `[X]` | W7-06 | Build version and release info page: all source versions, last refresh timestamps | WFR-9, WAR-5 | 2026-03-23 20:00 | 2026-03-23 20:30 |
+| `[X]` | W7-07 | Write methodology endpoint tests: source descriptions complete, versions present | — | 2026-03-23 20:00 | 2026-03-23 20:30 |
+| `[X]` | W7-08 | Write methodology page rendering tests: all sections present and populated | — | 2026-03-23 20:00 | 2026-03-23 20:30 |
 
 ---
 

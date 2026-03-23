@@ -49,6 +49,7 @@ Status of each phase's commit upon completion.
 | W4 | Website: Skills & Tasks Display | Phase W4: Skills, tasks, similarity APIs with O*NET lineage, 13 tests | Complete |
 | W5 | Website: Trends & Projections Display | Phase W5: Projections API with education/training, profile integration, 9 tests | Complete |
 | W6 | Website: Landing Page & Navigation | Phase W6: Stats API, landing spotlight, methodology page, navigation, 14 tests | Complete |
+| W7 | Website: Methodology & Data Transparency | Phase W7: Sources API, validation API, methodology page with live status, 14 tests | Complete |
 
 ## Project Structure
 

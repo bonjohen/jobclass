@@ -157,12 +157,12 @@ This document defines all tests for the JobClass reporting website, aligned phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | WT7-01 | API | Sources endpoint returns descriptions for SOC, OEWS, O*NET, Projections | Response includes 4 source entries; each has name, description, url, refresh_cadence, current_version | WFR-9 | W7-01 | | |
-| `[ ]` | WT7-02 | API | Validation endpoint returns validation summary with pass/fail counts | Response includes total_checks, passed, failed; total_checks > 0 | WFR-9 | W7-02 | | |
-| `[ ]` | WT7-03 | RENDER | Methodology landing page contains project purpose and architecture overview | Page contains architecture description, data flow explanation, project motivation text | WFR-9, WNF-5 | W7-03 | | |
-| `[ ]` | WT7-04 | RENDER | Data sources page describes all four sources with versions and links | Page lists SOC, OEWS, O*NET, Projections; each has description, current version, source URL | WFR-9 | W7-04 | | |
-| `[ ]` | WT7-05 | RENDER | Data quality page shows validation approach and current status | Page contains validation methodology text and current pass/fail summary | WFR-9, WFR-11 | W7-05 | | |
-| `[ ]` | WT7-06 | RENDER | Version info page shows all source versions and refresh timestamps | Page displays SOC version, OEWS release, O*NET version, projections cycle, load timestamps | WFR-9, WAR-5 | W7-06 | | |
+| `[X]` | WT7-01 | API | Sources endpoint returns descriptions for SOC, OEWS, O*NET, Projections | Response includes 4 source entries; each has name, description, url, refresh_cadence, current_version | WFR-9 | W7-01 | 2026-03-23 20:30 | 2026-03-23 20:30 |
+| `[X]` | WT7-02 | API | Validation endpoint returns validation summary with pass/fail counts | Response includes total_checks, passed, failed; total_checks > 0 | WFR-9 | W7-02 | 2026-03-23 20:30 | 2026-03-23 20:30 |
+| `[X]` | WT7-03 | RENDER | Methodology landing page contains project purpose and architecture overview | Page contains architecture description, data flow explanation, project motivation text | WFR-9, WNF-5 | W7-03 | 2026-03-23 20:30 | 2026-03-23 20:30 |
+| `[X]` | WT7-04 | RENDER | Data sources page describes all four sources with versions and links | Page lists SOC, OEWS, O*NET, Projections; each has description, current version, source URL | WFR-9 | W7-04 | 2026-03-23 20:30 | 2026-03-23 20:30 |
+| `[X]` | WT7-05 | RENDER | Data quality page shows validation approach and current status | Page contains validation methodology text and current pass/fail summary | WFR-9, WFR-11 | W7-05 | 2026-03-23 20:30 | 2026-03-23 20:30 |
+| `[X]` | WT7-06 | RENDER | Version info page shows all source versions and refresh timestamps | Page displays SOC version, OEWS release, O*NET version, projections cycle, load timestamps | WFR-9, WAR-5 | W7-06 | 2026-03-23 20:30 | 2026-03-23 20:30 |
 
 ---
 

@@ -64,11 +64,17 @@
             <h2>Current Versions</h2>
             <div id="versions-content"><p class="loading">Loading version info...</p></div>
         </div>
+
+        <div class="methodology-section" id="validation-section">
+            <h2>Pipeline Validation Status</h2>
+            <div id="validation-content"><p class="loading">Loading validation status...</p></div>
+        </div>
     </div>
 </section>
 
 <script>
 (function() {
+    // Load versions
     fetch("/api/metadata")
         .then(function(r) { return r.json(); })
         .then(function(data) {
@@ -85,6 +91,26 @@
         })
         .catch(function() {
             document.getElementById("versions-content").innerHTML = '<p>Version info unavailable.</p>';
+        });
+
+    // Load validation status
+    fetch("/api/methodology/validation")
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var html = '<p><strong>' + data.passed + '/' + data.total_checks + '</strong> checks passed</p>';
+            html += '<table class="data-table"><thead><tr><th>Check</th><th>Status</th><th>Detail</th></tr></thead><tbody>';
+            data.checks.forEach(function(c) {
+                var status = c.passed ? '&#10003;' : '&#10007;';
+                var cls = c.passed ? 'check-pass' : 'check-fail';
+                html += '<tr><td>' + c.check + '</td>';
+                html += '<td class="' + cls + '">' + status + '</td>';
+                html += '<td>' + c.detail + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            document.getElementById("validation-content").innerHTML = html;
+        })
+        .catch(function() {
+            document.getElementById("validation-content").innerHTML = '<p>Validation status unavailable.</p>';
         });
 })();
 </script>

@@ -14,6 +14,7 @@ from jobclass.web.api.occupations import router as occupations_router
 from jobclass.web.api.wages import router as wages_router
 from jobclass.web.api.skills import router as skills_router
 from jobclass.web.api.projections import router as projections_router
+from jobclass.web.api.methodology import router as methodology_router
 
 _WEB_DIR = Path(__file__).parent
 _TEMPLATES_DIR = _WEB_DIR / "templates"
@@ -38,6 +39,7 @@ def create_app() -> FastAPI:
     app.include_router(wages_router)
     app.include_router(skills_router)
     app.include_router(projections_router)
+    app.include_router(methodology_router)
 
     # Template engine
     templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
