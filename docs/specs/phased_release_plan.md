@@ -248,17 +248,17 @@ Final verification and deliverable production. The "Software Developers" worked 
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | P11-01 | Run full end-to-end pipeline for Software Developers occupation (SOC 15-1252) as integration test | Design §18 | | |
-| `[ ]` | P11-02 | Verify: occupation code maps to active SOC version after load | FR-3.3 | | |
-| `[ ]` | P11-03 | Verify: OEWS fact row is unique at declared grain | FR-3.2 | | |
-| `[ ]` | P11-04 | Verify: O*NET bridge rows reference valid descriptor dimensions | FR-3.3 | | |
-| `[ ]` | P11-05 | Verify: analyst query returns state-level wage distribution for Software Developers | Design §18 | | |
-| `[ ]` | P11-06 | Verify: analyst query returns core skills and tasks for Software Developers | Design §18 | | |
-| `[ ]` | P11-07 | Run historical regression tests against known published totals | — | | |
-| `[ ]` | P11-08 | Run idempotent rerun tests: full pipeline re-execution produces no duplicates | FR-4.9 | | |
-| `[ ]` | P11-09 | Generate warehouse schema documentation | DL-6 | | |
-| `[ ]` | P11-10 | Create analyst notebook or dashboard with sample queries | DL-7 | | |
-| `[ ]` | P11-11 | Final review: confirm all DL-1 through DL-8 deliverables are present and complete | DL-1 through DL-8 | | |
+| `[X]` | P11-01 | Run full end-to-end pipeline for Software Developers occupation (SOC 15-1252) as integration test | Design §18 | 2026-03-23 14:20 | 2026-03-23 14:24 |
+| `[X]` | P11-02 | Verify: occupation code maps to active SOC version after load | FR-3.3 | 2026-03-23 14:20 | 2026-03-23 14:24 |
+| `[X]` | P11-03 | Verify: OEWS fact row is unique at declared grain | FR-3.2 | 2026-03-23 14:20 | 2026-03-23 14:24 |
+| `[X]` | P11-04 | Verify: O*NET bridge rows reference valid descriptor dimensions | FR-3.3 | 2026-03-23 14:20 | 2026-03-23 14:24 |
+| `[X]` | P11-05 | Verify: analyst query returns state-level wage distribution for Software Developers | Design §18 | 2026-03-23 14:20 | 2026-03-23 14:24 |
+| `[X]` | P11-06 | Verify: analyst query returns core skills and tasks for Software Developers | Design §18 | 2026-03-23 14:20 | 2026-03-23 14:24 |
+| `[X]` | P11-07 | Run historical regression tests against known published totals | — | 2026-03-23 14:20 | 2026-03-23 14:24 |
+| `[X]` | P11-08 | Run idempotent rerun tests: full pipeline re-execution produces no duplicates | FR-4.9 | 2026-03-23 14:20 | 2026-03-23 14:24 |
+| `[X]` | P11-09 | Generate warehouse schema documentation | DL-6 | 2026-03-23 14:20 | 2026-03-23 14:24 |
+| `[X]` | P11-10 | Create analyst notebook or dashboard with sample queries | DL-7 | 2026-03-23 14:20 | 2026-03-23 14:24 |
+| `[X]` | P11-11 | Final review: confirm all DL-1 through DL-8 deliverables are present and complete | DL-1 through DL-8 | 2026-03-23 14:20 | 2026-03-23 14:24 |
 
 ---
 

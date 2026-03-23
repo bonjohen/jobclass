@@ -363,15 +363,15 @@ This document defines all tests for the JobClass pipeline, aligned phase-by-phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T11-01 | INTEGRATION | Full pipeline for Software Developers (15-1252): extract all sources → parse → validate → load → publish marts | All warehouse tables populated; all marts queryable; run_manifests for all pipelines show success | Design §18 | P11-01 | | |
-| `[ ]` | T11-02 | REGRESSION | OEWS national total employment for "All Occupations" matches published BLS total within ±0.1% | Loaded employment_count for SOC 00-0000 national matches published value | — | P11-07 | | |
-| `[ ]` | T11-03 | REGRESSION | OEWS mean annual wage for Software Developers national matches published value within ±$100 | Loaded mean_annual_wage for 15-1252 national matches published BLS figure | — | P11-07 | | |
-| `[ ]` | T11-04 | REGRESSION | dim_occupation row count matches known SOC occupation count | Loaded occupation count for current SOC version matches published total (e.g., 867 for 2018 SOC) | — | P11-07 | | |
-| `[ ]` | T11-05 | QUERY | Analyst query: state-level wage distribution for Software Developers returns all 50 states + DC + territories | Query returns ≥ 50 rows; each has non-null geography name, mean_annual_wage or explicit null for suppressed states | Design §18 | P11-05 | | |
-| `[ ]` | T11-06 | QUERY | Analyst query: core skills for Software Developers returns skill names with scores | Query returns ≥ 10 skill rows for 15-1252; each has skill_name and data_value > 0 | Design §18 | P11-06 | | |
-| `[ ]` | T11-07 | QUERY | Analyst query: core tasks for Software Developers returns task descriptions | Query returns ≥ 5 task rows for 15-1252; each has non-null task description | Design §18 | P11-06 | | |
-| `[ ]` | T11-08 | IDEMPOTENT | Full pipeline re-execution: no duplicates anywhere | Row counts across all staging, dimension, fact, bridge, and mart tables are identical before and after rerun | FR-4.9 | P11-08 | | |
-| `[ ]` | T11-09 | INTEGRATION | All deliverables DL-1 through DL-8 are present and verifiable | Each deliverable exists as a file or queryable artifact; reviewer can trace from raw source to mart output | DL-1 through DL-8 | P11-11 | | |
+| `[X]` | T11-01 | INTEGRATION | Full pipeline for Software Developers (15-1252): extract all sources → parse → validate → load → publish marts | All warehouse tables populated; all marts queryable; run_manifests for all pipelines show success | Design §18 | P11-01 | 2026-03-23 14:22 | 2026-03-23 14:24 |
+| `[X]` | T11-02 | REGRESSION | OEWS national total employment for "All Occupations" matches published BLS total within ±0.1% | Loaded employment_count for SOC 00-0000 national matches published value | — | P11-07 | 2026-03-23 14:22 | 2026-03-23 14:24 |
+| `[X]` | T11-03 | REGRESSION | OEWS mean annual wage for Software Developers national matches published value within ±$100 | Loaded mean_annual_wage for 15-1252 national matches published BLS figure | — | P11-07 | 2026-03-23 14:22 | 2026-03-23 14:24 |
+| `[X]` | T11-04 | REGRESSION | dim_occupation row count matches known SOC occupation count | Loaded occupation count for current SOC version matches published total (e.g., 867 for 2018 SOC) | — | P11-07 | 2026-03-23 14:22 | 2026-03-23 14:24 |
+| `[X]` | T11-05 | QUERY | Analyst query: state-level wage distribution for Software Developers returns all 50 states + DC + territories | Query returns ≥ 50 rows; each has non-null geography name, mean_annual_wage or explicit null for suppressed states | Design §18 | P11-05 | 2026-03-23 14:22 | 2026-03-23 14:24 |
+| `[X]` | T11-06 | QUERY | Analyst query: core skills for Software Developers returns skill names with scores | Query returns ≥ 10 skill rows for 15-1252; each has skill_name and data_value > 0 | Design §18 | P11-06 | 2026-03-23 14:22 | 2026-03-23 14:24 |
+| `[X]` | T11-07 | QUERY | Analyst query: core tasks for Software Developers returns task descriptions | Query returns ≥ 5 task rows for 15-1252; each has non-null task description | Design §18 | P11-06 | 2026-03-23 14:22 | 2026-03-23 14:24 |
+| `[X]` | T11-08 | IDEMPOTENT | Full pipeline re-execution: no duplicates anywhere | Row counts across all staging, dimension, fact, bridge, and mart tables are identical before and after rerun | FR-4.9 | P11-08 | 2026-03-23 14:22 | 2026-03-23 14:24 |
+| `[X]` | T11-09 | INTEGRATION | All deliverables DL-1 through DL-8 are present and verifiable | Each deliverable exists as a file or queryable artifact; reviewer can trace from raw source to mart output | DL-1 through DL-8 | P11-11 | 2026-03-23 14:22 | 2026-03-23 14:24 |
 
 ---
 
