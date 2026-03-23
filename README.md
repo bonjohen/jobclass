@@ -55,13 +55,26 @@ Status of each phase's commit upon completion.
 | W8 | Website: Visual Polish & Responsive Design | Phase W8: Responsive CSS, accessibility (ARIA, skip-nav, focus), performance checks, 14 tests | Complete |
 | W9 | Website: End-to-End Integration & Deployment | Phase W9: E2E smoke tests, worked example, lineage verification, full suite 376 tests | Complete |
 
-## CLI Usage
-
-Install the package in development mode:
+## Quick Start
 
 ```bash
+# 1. Clone and install
+git clone <repo-url> && cd jobclass
 pip install -e ".[dev]"
+
+# 2. Run tests
+pytest
+
+# 3. Run the pipeline (builds the warehouse)
+jobclass-pipeline migrate
+jobclass-pipeline run-all
+
+# 4. Start the web app
+jobclass-web
+# Open http://127.0.0.1:8000
 ```
+
+## CLI Usage
 
 ### Pipeline CLI
 
@@ -71,6 +84,9 @@ jobclass-pipeline migrate
 
 # Check migration and database status
 jobclass-pipeline status
+
+# Run all pipelines
+jobclass-pipeline run-all
 ```
 
 ### Web Server CLI
@@ -89,7 +105,11 @@ jobclass-web --host 0.0.0.0 --port 8080 --reload
 |----------|---------|-------------|
 | `JOBCLASS_DB_PATH` | `warehouse.duckdb` | Path to the DuckDB database file |
 
-## Container
+See `.env.example` for a copy-paste template.
+
+## Deployment
+
+### Container
 
 ```bash
 # Build
@@ -103,6 +123,38 @@ docker-compose up
 ```
 
 The container runs the web server on port 8000 with a built-in health check at `/api/health`.
+
+### Health & Readiness Probes
+
+| Endpoint | Purpose | Failure Response |
+|----------|---------|-----------------|
+| `GET /api/health` | Liveness probe — database connectivity + table row counts | 503 if database unreachable |
+| `GET /api/ready` | Readiness probe — database connected + core tables present | 503 if not ready |
+| `GET /metrics` | Prometheus-formatted request metrics | — |
+
+### Data Directory
+
+The warehouse file (`warehouse.duckdb`) must be accessible to the web process. In container deployments, mount it as a read-only volume. The pipeline writes to this file, so run pipeline commands with write access before starting the read-only web server.
+
+## Operations
+
+### Monitoring
+
+- **Health**: `GET /api/health` returns table row counts and SOC version. Use as a Kubernetes/Docker liveness probe.
+- **Readiness**: `GET /api/ready` checks database connectivity and core table presence. Use as a readiness probe.
+- **Metrics**: `GET /metrics` exposes Prometheus counters (`jobclass_http_requests_total`) and histograms (`jobclass_http_request_duration_seconds`).
+
+### Backup & Recovery
+
+The warehouse is a single DuckDB file. Back up by copying `warehouse.duckdb`. To restore, replace the file and restart the web server.
+
+### Troubleshooting
+
+| Symptom | Likely Cause | Fix |
+|---------|-------------|-----|
+| `/api/health` returns 503 | Database file missing or corrupted | Verify `JOBCLASS_DB_PATH` and re-run `jobclass-pipeline migrate` |
+| Empty search results | Pipeline hasn't run | Run `jobclass-pipeline run-all` |
+| Stale data after pipeline run | Web server caching old connection | Restart web server (DuckDB read-only connection caches) |
 
 ## Project Structure
 
@@ -135,4 +187,4 @@ docs/specs/            # Design docs, release plan, test plan
 
 ## Status
 
-All 11 pipeline phases and 9 website phases complete. 376 tests passing — 243 pipeline tests (unit, integration, contract, grain, referential integrity, semantic, temporal, drift, idempotence, regression, failure-mode, query validation) and 133 web tests (API, page rendering, accessibility, E2E smoke).
+All 11 pipeline phases, 9 website phases, and 4 code review remediation phases complete. 484 tests passing — 243 pipeline tests (unit, integration, contract, grain, referential integrity, semantic, temporal, drift, idempotence, regression, failure-mode, query validation) and 241 web tests (API, security, quality, pagination, accessibility, metrics, E2E smoke).

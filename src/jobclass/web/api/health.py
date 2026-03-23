@@ -6,12 +6,18 @@ import re
 
 from fastapi import APIRouter, HTTPException
 
-from jobclass.web.api.models import HealthResponse, MetadataResponse, StatsResponse
+from jobclass.web.api.models import HealthResponse, MetadataResponse, ReadyResponse, StatsResponse
 from jobclass.web.database import get_db
 
 router = APIRouter(prefix="/api", tags=["system"])
 
 _IDENTIFIER_RE = re.compile(r"^[a-z_][a-z0-9_]*$")
+
+_CORE_TABLES = [
+    "dim_occupation", "dim_geography", "dim_industry",
+    "dim_skill", "dim_knowledge", "dim_ability", "dim_task",
+    "fact_occupation_employment_wages", "fact_occupation_projections",
+]
 
 
 def _safe_identifier(name: str) -> str:
@@ -24,15 +30,20 @@ def _safe_identifier(name: str) -> str:
 @router.get("/health", response_model=HealthResponse)
 def health() -> dict:
     """Return warehouse health: status, version info, and table row counts."""
-    conn = get_db()
     try:
-        tables = [
-            "dim_occupation", "dim_geography", "dim_industry",
-            "dim_skill", "dim_knowledge", "dim_ability", "dim_task",
-            "fact_occupation_employment_wages", "fact_occupation_projections",
-        ]
+        conn = get_db()
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Database unavailable: {e}")
+
+    try:
+        # Connectivity check
+        conn.execute("SELECT 1").fetchone()
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Database connectivity check failed: {e}")
+
+    try:
         table_counts = {}
-        for t in tables:
+        for t in _CORE_TABLES:
             try:
                 count = conn.execute(f"SELECT COUNT(*) FROM {_safe_identifier(t)}").fetchone()[0]
                 table_counts[t] = count
@@ -56,6 +67,38 @@ def health() -> dict:
         }
     except Exception as e:
         raise HTTPException(status_code=503, detail=str(e))
+
+
+@router.get("/ready", response_model=ReadyResponse)
+def ready() -> dict:
+    """Readiness probe: checks database connectivity and core table presence."""
+    db_connected = False
+    tables_present = False
+
+    try:
+        conn = get_db()
+        conn.execute("SELECT 1").fetchone()
+        db_connected = True
+
+        # Check that core tables exist
+        existing = {
+            r[0] for r in conn.execute(
+                "SELECT table_name FROM information_schema.tables WHERE table_schema = 'main'"
+            ).fetchall()
+        }
+        tables_present = all(t in existing for t in _CORE_TABLES)
+    except Exception:
+        pass
+
+    is_ready = db_connected and tables_present
+    if not is_ready:
+        raise HTTPException(status_code=503, detail="Not ready")
+
+    return {
+        "ready": is_ready,
+        "database_connected": db_connected,
+        "core_tables_present": tables_present,
+    }
 
 
 @router.get("/stats", response_model=StatsResponse)

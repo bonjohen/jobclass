@@ -2,12 +2,20 @@
 "use strict";
 
 (function() {
+    var FETCH_TIMEOUT_MS = 10000;
     var socCode = document.querySelector(".wages-comparison-page").dataset.socCode;
+    var container = document.getElementById("wages-table-container");
 
-    fetch("/api/occupations/" + encodeURIComponent(socCode) + "/wages?geo_type=state")
+    function fetchWithTimeout(url) {
+        var controller = new AbortController();
+        var timer = setTimeout(function() { controller.abort(); }, FETCH_TIMEOUT_MS);
+        return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
+    }
+
+    fetchWithTimeout("/api/occupations/" + encodeURIComponent(socCode) + "/wages?geo_type=state")
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            var container = document.getElementById("wages-table-container");
+            container.setAttribute("aria-busy", "false");
             if (!data.wages || data.wages.length === 0) {
                 container.innerHTML = "<p>No state-level wage data available.</p>";
                 container.className = "";
@@ -43,7 +51,9 @@
             container.className = "";
         })
         .catch(function() {
-            document.getElementById("wages-table-container").innerHTML = "<p>Failed to load wage data.</p>";
+            container.setAttribute("aria-busy", "false");
+            container.innerHTML = '<p class="error-message">Failed to load wage data. Please try again later.</p>';
+            container.className = "";
         });
 
 })();

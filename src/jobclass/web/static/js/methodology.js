@@ -2,8 +2,16 @@
 "use strict";
 
 (function() {
+    var FETCH_TIMEOUT_MS = 10000;
+
+    function fetchWithTimeout(url) {
+        var controller = new AbortController();
+        var timer = setTimeout(function() { controller.abort(); }, FETCH_TIMEOUT_MS);
+        return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
+    }
+
     // Load versions
-    fetch("/api/metadata")
+    fetchWithTimeout("/api/metadata")
         .then(function(r) { return r.json(); })
         .then(function(data) {
             var html = '<table class="data-table"><thead><tr><th>Source</th><th>Version</th></tr></thead><tbody>';
@@ -18,11 +26,11 @@
             document.getElementById("versions-content").innerHTML = html;
         })
         .catch(function() {
-            document.getElementById("versions-content").innerHTML = '<p>Version info unavailable.</p>';
+            document.getElementById("versions-content").innerHTML = '<p class="error-message">Version info unavailable.</p>';
         });
 
     // Load validation status
-    fetch("/api/methodology/validation")
+    fetchWithTimeout("/api/methodology/validation")
         .then(function(r) { return r.json(); })
         .then(function(data) {
             var html = '<p><strong>' + data.passed + '/' + data.total_checks + '</strong> checks passed</p>';
@@ -38,6 +46,6 @@
             document.getElementById("validation-content").innerHTML = html;
         })
         .catch(function() {
-            document.getElementById("validation-content").innerHTML = '<p>Validation status unavailable.</p>';
+            document.getElementById("validation-content").innerHTML = '<p class="error-message">Validation status unavailable.</p>';
         });
 })();

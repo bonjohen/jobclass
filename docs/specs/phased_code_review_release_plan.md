@@ -118,31 +118,31 @@ Improve observability, developer experience, documentation, and trust artifacts.
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | CR4-01 | Add `limit` (default 50, max 200) and `offset` (default 0) query parameters to search endpoint | #18 | | |
-| `[ ]` | CR4-02 | Add `limit` and `offset` query parameters to state-level wages endpoint | #18 | | |
-| `[ ]` | CR4-03 | Return pagination metadata in search and wages responses: `{"results": [...], "total": N, "limit": N, "offset": N}` | #18 | | |
-| `[ ]` | CR4-04 | Add pagination tests: verify limit, offset, total count accuracy | #18 | | |
-| `[ ]` | CR4-05 | Add `role="region" aria-live="polite"` to all dynamically loaded content sections in `occupation.html` | #19 | | |
-| `[ ]` | CR4-06 | Add `aria-live="polite"` to `wages_comparison.html` table container | #19 | | |
-| `[ ]` | CR4-07 | Add `aria-busy="true"` during loading and `aria-busy="false"` when content is ready on all dynamic sections | #19 | | |
-| `[ ]` | CR4-08 | Add keyboard event handlers (arrow keys, Enter, Space) for hierarchy tree navigation | #19 | | |
-| `[ ]` | CR4-09 | Change `autocomplete="off"` to `autocomplete="search"` in `search.html` | #19 | | |
-| `[ ]` | CR4-10 | Add `AbortController` with 10-second timeout to all fetch calls in external JS files | #20 | | |
-| `[ ]` | CR4-11 | Add error state UI (user-visible message) for every dynamically loaded section on fetch failure | #20 | | |
-| `[ ]` | CR4-12 | Add tests verifying fetch timeout triggers error message display | #20 | | |
-| `[ ]` | CR4-13 | Add version query parameter to static asset URLs in `base.html` (e.g., `/static/css/main.css?v=CR1`) | #21 | | |
-| `[ ]` | CR4-14 | Add `SELECT 1` connectivity check at start of `/api/health` endpoint; return 503 on failure | #22 | | |
-| `[ ]` | CR4-15 | Add migration state check to `/api/health`; verify all expected migrations are applied | #22 | | |
-| `[ ]` | CR4-16 | Add `/api/ready` readiness probe endpoint (separate from liveness health check) | #22 | | |
-| `[ ]` | CR4-17 | Add tests: health returns 503 when database is unavailable; health returns 503 when migrations incomplete | #22 | | |
-| `[ ]` | CR4-18 | Add "Quick Start" section to README.md: dev setup, running tests, starting web app, running pipeline | #23 | | |
-| `[ ]` | CR4-19 | Add "Deployment" section to README.md: environment variables, container build, data directory requirements | #23 | | |
-| `[ ]` | CR4-20 | Add "Operations" section to README.md: monitoring, backup, recovery, common troubleshooting | #23 | | |
-| `[ ]` | CR4-21 | Create `.env.example` documenting all environment variables with descriptions and defaults | #23 | | |
-| `[ ]` | CR4-22 | Add `prometheus_client` dependency; create pipeline run counters and duration histograms | #24 | | |
-| `[ ]` | CR4-23 | Add `/metrics` endpoint to web app exposing Prometheus-formatted request metrics | #24 | | |
-| `[ ]` | CR4-24 | Add tests verifying `/metrics` returns valid Prometheus output and pipeline runs increment counters | #24 | | |
-| `[ ]` | CR4-25 | Extract hardcoded drift thresholds (`20.0%`, `15.0%` in `validate/framework.py`) into named constants with documentation | #25 | | |
+| `[X]` | CR4-01 | Add `limit` (default 50, max 200) and `offset` (default 0) query parameters to search endpoint | #18 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-02 | Add `limit` and `offset` query parameters to state-level wages endpoint | #18 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-03 | Return pagination metadata in search and wages responses: `{"results": [...], "total": N, "limit": N, "offset": N}` | #18 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-04 | Add pagination tests: verify limit, offset, total count accuracy | #18 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-05 | Add `role="region" aria-live="polite"` to all dynamically loaded content sections in `occupation.html` | #19 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-06 | Add `aria-live="polite"` to `wages_comparison.html` table container | #19 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-07 | Add `aria-busy="true"` during loading and `aria-busy="false"` when content is ready on all dynamic sections | #19 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-08 | Add keyboard event handlers (arrow keys, Enter, Space) for hierarchy tree navigation | #19 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-09 | Change `autocomplete="off"` to `autocomplete="search"` in `search.html` | #19 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-10 | Add `AbortController` with 10-second timeout to all fetch calls in external JS files | #20 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-11 | Add error state UI (user-visible message) for every dynamically loaded section on fetch failure | #20 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-12 | Add tests verifying fetch timeout triggers error message display | #20 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-13 | Add version query parameter to static asset URLs in `base.html` (e.g., `/static/css/main.css?v=CR1`) | #21 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-14 | Add `SELECT 1` connectivity check at start of `/api/health` endpoint; return 503 on failure | #22 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-15 | Add migration state check to `/api/health`; verify all expected migrations are applied | #22 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-16 | Add `/api/ready` readiness probe endpoint (separate from liveness health check) | #22 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-17 | Add tests: health returns 503 when database is unavailable; health returns 503 when migrations incomplete | #22 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-18 | Add "Quick Start" section to README.md: dev setup, running tests, starting web app, running pipeline | #23 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-19 | Add "Deployment" section to README.md: environment variables, container build, data directory requirements | #23 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-20 | Add "Operations" section to README.md: monitoring, backup, recovery, common troubleshooting | #23 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-21 | Create `.env.example` documenting all environment variables with descriptions and defaults | #23 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-22 | Add `prometheus_client` dependency; create pipeline run counters and duration histograms | #24 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-23 | Add `/metrics` endpoint to web app exposing Prometheus-formatted request metrics | #24 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-24 | Add tests verifying `/metrics` returns valid Prometheus output and pipeline runs increment counters | #24 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR4-25 | Extract hardcoded drift thresholds (`20.0%`, `15.0%` in `validate/framework.py`) into named constants with documentation | #25 | 2026-03-23 | 2026-03-23 |
 
 ---
 

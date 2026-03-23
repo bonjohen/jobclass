@@ -13,6 +13,12 @@ class HealthResponse(BaseModel):
     table_counts: dict[str, int]
 
 
+class ReadyResponse(BaseModel):
+    ready: bool
+    database_connected: bool
+    core_tables_present: bool
+
+
 class StatsResponse(BaseModel):
     occupation_count: int
     geography_count: int
@@ -41,6 +47,9 @@ class SearchResult(BaseModel):
 
 class SearchResponse(BaseModel):
     query: str
+    total: int = 0
+    limit: int = 50
+    offset: int = 0
     results: list[SearchResult]
 
 
@@ -102,6 +111,9 @@ class WageEntry(BaseModel):
 class WagesResponse(BaseModel):
     soc_code: str
     geo_type: str
+    total: int = 0
+    limit: int = 100
+    offset: int = 0
     wages: list[WageEntry]
 
 

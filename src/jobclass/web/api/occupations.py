@@ -15,12 +15,24 @@ _SOC_CODE_RE = re.compile(r"^\d{2}-\d{4}$")
 
 
 @router.get("/occupations/search", response_model=SearchResponse)
-def search_occupations(q: str = Query("", max_length=100, description="Search keyword or SOC code")) -> dict:
+def search_occupations(
+    q: str = Query("", max_length=100, description="Search keyword or SOC code"),
+    limit: int = Query(50, ge=1, le=200, description="Max results to return"),
+    offset: int = Query(0, ge=0, description="Number of results to skip"),
+) -> dict:
     """Search occupations by keyword or SOC code."""
     conn = get_db()
     q = q.strip()
     if not q:
-        return {"query": q, "results": []}
+        return {"query": q, "results": [], "total": 0, "limit": limit, "offset": offset}
+
+    count_row = conn.execute("""
+        SELECT COUNT(*)
+        FROM dim_occupation
+        WHERE is_current = true
+          AND (soc_code ILIKE ? OR occupation_title ILIKE ?)
+    """, [f"%{q}%", f"%{q}%"]).fetchone()
+    total = count_row[0] if count_row else 0
 
     rows = conn.execute("""
         SELECT soc_code, occupation_title, occupation_level, occupation_level_name
@@ -31,10 +43,14 @@ def search_occupations(q: str = Query("", max_length=100, description="Search ke
             OR occupation_title ILIKE ?
           )
         ORDER BY soc_code
-    """, [f"%{q}%", f"%{q}%"]).fetchall()
+        LIMIT ? OFFSET ?
+    """, [f"%{q}%", f"%{q}%", limit, offset]).fetchall()
 
     return {
         "query": q,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
         "results": [
             {
                 "soc_code": r[0],

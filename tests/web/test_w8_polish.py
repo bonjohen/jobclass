@@ -50,13 +50,13 @@ class TestVisualConsistency:
         pages = ["/", "/search", "/hierarchy", "/methodology"]
         for page in pages:
             html = client.get(page).text
-            assert 'href="/static/css/main.css"' in html
+            assert '/static/css/main.css' in html
 
     def test_all_pages_include_js(self, client):
         pages = ["/", "/search", "/hierarchy", "/methodology"]
         for page in pages:
             html = client.get(page).text
-            assert 'src="/static/js/main.js"' in html
+            assert '/static/js/main.js' in html
 
     def test_all_pages_have_header_footer(self, client):
         pages = ["/", "/search", "/hierarchy", "/methodology"]

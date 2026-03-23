@@ -13,6 +13,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
 from jobclass.web.api.health import router as health_router
+from jobclass.web.api.metrics import MetricsMiddleware, router as metrics_router
 from jobclass.web.api.occupations import router as occupations_router
 from jobclass.web.api.wages import router as wages_router
 from jobclass.web.api.skills import router as skills_router
@@ -53,6 +54,7 @@ def create_app() -> FastAPI:
             return response
 
     app.add_middleware(CSPMiddleware)
+    app.add_middleware(MetricsMiddleware)
 
     # Mount static files
     if _STATIC_DIR.exists():
@@ -60,6 +62,7 @@ def create_app() -> FastAPI:
 
     # Register API routers
     app.include_router(health_router)
+    app.include_router(metrics_router)
     app.include_router(occupations_router)
     app.include_router(wages_router)
     app.include_router(skills_router)

@@ -2,6 +2,7 @@
 "use strict";
 
 (function() {
+    var FETCH_TIMEOUT_MS = 10000;
     var input = document.getElementById("search-input");
     var resultsDiv = document.getElementById("search-results");
     var debounceTimer = null;
@@ -21,10 +22,12 @@
     function doSearch(q) {
         if (abortController) abortController.abort();
         abortController = new AbortController();
+        var timeoutId = setTimeout(function() { abortController.abort(); }, FETCH_TIMEOUT_MS);
 
         fetch("/api/occupations/search?q=" + encodeURIComponent(q), { signal: abortController.signal })
             .then(function(r) { return r.json(); })
             .then(function(data) {
+                clearTimeout(timeoutId);
                 if (!data.results || data.results.length === 0) {
                     resultsDiv.innerHTML = '<p class="search-hint">No occupations found.</p>';
                     return;
@@ -39,8 +42,9 @@
                 resultsDiv.innerHTML = html;
             })
             .catch(function(err) {
+                clearTimeout(timeoutId);
                 if (err.name === 'AbortError') return;
-                resultsDiv.innerHTML = '<p class="search-hint">Search failed. Please try again.</p>';
+                resultsDiv.innerHTML = '<p class="error-message">Search failed. Please try again.</p>';
             });
     }
 

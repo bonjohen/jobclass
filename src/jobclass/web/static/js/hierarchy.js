@@ -2,9 +2,16 @@
 "use strict";
 
 (function() {
+    var FETCH_TIMEOUT_MS = 10000;
     var treeDiv = document.getElementById("hierarchy-tree");
 
-    fetch("/api/occupations/hierarchy")
+    function fetchWithTimeout(url) {
+        var controller = new AbortController();
+        var timer = setTimeout(function() { controller.abort(); }, FETCH_TIMEOUT_MS);
+        return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
+    }
+
+    fetchWithTimeout("/api/occupations/hierarchy")
         .then(function(r) { return r.json(); })
         .then(function(data) {
             if (!data.hierarchy || data.hierarchy.length === 0) {
@@ -15,16 +22,57 @@
             treeDiv.addEventListener("click", function(e) {
                 var toggle = e.target.closest(".tree-toggle");
                 if (toggle) {
+                    toggleNode(toggle);
+                }
+            });
+            // Keyboard navigation
+            treeDiv.addEventListener("keydown", function(e) {
+                var toggle = e.target.closest(".tree-toggle");
+                if (!toggle) return;
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    toggleNode(toggle);
+                } else if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    focusNextTreeItem(toggle, 1);
+                } else if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    focusNextTreeItem(toggle, -1);
+                } else if (e.key === "ArrowRight") {
+                    e.preventDefault();
                     var li = toggle.closest("li");
-                    li.classList.toggle("collapsed");
-                    toggle.setAttribute("aria-expanded",
-                        li.classList.contains("collapsed") ? "false" : "true");
+                    if (li.classList.contains("collapsed")) {
+                        toggleNode(toggle);
+                    }
+                } else if (e.key === "ArrowLeft") {
+                    e.preventDefault();
+                    var li = toggle.closest("li");
+                    if (!li.classList.contains("collapsed")) {
+                        toggleNode(toggle);
+                    }
                 }
             });
         })
         .catch(function() {
-            treeDiv.innerHTML = '<p>Failed to load hierarchy.</p>';
+            treeDiv.innerHTML = '<p class="error-message">Failed to load hierarchy. Please try again later.</p>';
         });
+
+    function toggleNode(toggle) {
+        var li = toggle.closest("li");
+        li.classList.toggle("collapsed");
+        toggle.setAttribute("aria-expanded",
+            li.classList.contains("collapsed") ? "false" : "true");
+    }
+
+    function focusNextTreeItem(current, direction) {
+        var items = Array.prototype.slice.call(treeDiv.querySelectorAll(".tree-toggle, .tree-link"));
+        var idx = items.indexOf(current);
+        if (idx === -1) return;
+        var next = idx + direction;
+        if (next >= 0 && next < items.length) {
+            items[next].focus();
+        }
+    }
 
     function buildTree(nodes) {
         if (!nodes || nodes.length === 0) return "";

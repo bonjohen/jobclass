@@ -10,6 +10,15 @@ import duckdb
 
 from jobclass.validate.soc import ValidationResult
 
+# Drift detection thresholds — percentage change above which a warning is raised.
+# ROW_COUNT_SHIFT: flags when total row count changes by more than this percentage
+# between source releases (e.g., OEWS adds or drops many records).
+ROW_COUNT_SHIFT_THRESHOLD_PCT = 20.0
+
+# MATERIAL_DELTA: flags when individual measure values (e.g., mean_annual_wage
+# for a specific occupation) change by more than this percentage between releases.
+MATERIAL_DELTA_THRESHOLD_PCT = 15.0
+
 
 # ============================================================
 # Failure Classification (P6-08)
@@ -249,7 +258,7 @@ def get_table_schema(conn: duckdb.DuckDBPyConnection, table_name: str) -> dict[s
 def detect_row_count_shift(
     prior_count: int,
     current_count: int,
-    threshold_pct: float = 20.0,
+    threshold_pct: float = ROW_COUNT_SHIFT_THRESHOLD_PCT,
 ) -> ValidationResult:
     """Detect row count shift above threshold percentage."""
     if prior_count == 0:
@@ -373,7 +382,7 @@ def classify_material_delta(
     measure_name: str,
     prior_measures: dict[str, float],
     current_measures: dict[str, float],
-    threshold_pct: float = 15.0,
+    threshold_pct: float = MATERIAL_DELTA_THRESHOLD_PCT,
     top_n: int = 5,
 ) -> DeltaReport:
     """Detect material deltas and produce a report."""

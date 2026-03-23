@@ -19,6 +19,8 @@ _VALID_GEO_TYPES = {"national", "state"}
 def occupation_wages(
     soc_code: str,
     geo_type: str = Query("national", description="Geography type: national or state"),
+    limit: int = Query(100, ge=1, le=500, description="Max results to return"),
+    offset: int = Query(0, ge=0, description="Number of results to skip"),
 ) -> dict:
     """Return wage data for an occupation, optionally filtered by geography type."""
     if not _SOC_CODE_RE.match(soc_code):
@@ -35,6 +37,16 @@ def occupation_wages(
     if not occ:
         raise HTTPException(status_code=404, detail=f"Occupation {soc_code} not found")
 
+    count_row = conn.execute("""
+        SELECT COUNT(*)
+        FROM fact_occupation_employment_wages f
+        JOIN dim_occupation o ON f.occupation_key = o.occupation_key
+        JOIN dim_geography g ON f.geography_key = g.geography_key
+        WHERE o.soc_code = ? AND o.is_current = true
+          AND g.geo_type = ?
+    """, [soc_code, geo_type]).fetchone()
+    total = count_row[0] if count_row else 0
+
     rows = conn.execute("""
         SELECT
             g.geo_type, g.geo_code, g.geo_name,
@@ -48,7 +60,8 @@ def occupation_wages(
         WHERE o.soc_code = ? AND o.is_current = true
           AND g.geo_type = ?
         ORDER BY g.geo_name
-    """, [soc_code, geo_type]).fetchall()
+        LIMIT ? OFFSET ?
+    """, [soc_code, geo_type, limit, offset]).fetchall()
 
     results = []
     for r in rows:
@@ -69,7 +82,7 @@ def occupation_wages(
             "reference_period": r[13],
         })
 
-    return {"soc_code": soc_code, "geo_type": geo_type, "wages": results}
+    return {"soc_code": soc_code, "geo_type": geo_type, "total": total, "limit": limit, "offset": offset, "wages": results}
 
 
 @router.get("/geographies", response_model=GeographiesResponse)

@@ -2,11 +2,30 @@
 "use strict";
 
 (function() {
+    var FETCH_TIMEOUT_MS = 10000;
     var socCode = document.getElementById("occupation-page").dataset.socCode;
     var loading = document.getElementById("profile-loading");
     var content = document.getElementById("profile-content");
 
-    fetch("/api/occupations/" + encodeURIComponent(socCode))
+    function fetchWithTimeout(url) {
+        var controller = new AbortController();
+        var timer = setTimeout(function() { controller.abort(); }, FETCH_TIMEOUT_MS);
+        return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
+    }
+
+    function showError(elementId, message) {
+        var el = document.getElementById(elementId);
+        if (el) {
+            el.innerHTML = '<p class="error-message">' + escapeHtml(message) + '</p>';
+        }
+    }
+
+    function setBusy(sectionId, busy) {
+        var el = document.getElementById(sectionId);
+        if (el) el.setAttribute("aria-busy", busy ? "true" : "false");
+    }
+
+    fetchWithTimeout("/api/occupations/" + encodeURIComponent(socCode))
         .then(function(r) {
             if (!r.ok) throw new Error("Not found");
             return r.json();
@@ -73,13 +92,14 @@
             loadSimilar(socCode);
         })
         .catch(function() {
-            loading.innerHTML = '<p>Occupation not found.</p><p><a href="/search">Return to Search</a></p>';
+            loading.innerHTML = '<p class="error-message">Occupation not found or request timed out.</p><p><a href="/search">Return to Search</a></p>';
         });
 
     function loadWages(code) {
-        fetch("/api/occupations/" + encodeURIComponent(code) + "/wages?geo_type=national")
+        fetchWithTimeout("/api/occupations/" + encodeURIComponent(code) + "/wages?geo_type=national")
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(data) {
+                setBusy("wages-section", false);
                 if (!data || !data.wages || data.wages.length === 0) return;
                 var w = data.wages[0];
                 var section = document.getElementById("wages-section");
@@ -103,13 +123,19 @@
                 html += '<p><a href="/occupation/' + escapeAttr(code) + '/wages" class="btn">Compare by State</a></p>';
                 html += '<div class="lineage-badge">OEWS ' + escapeHtml(w.source_release_id) + ' | ' + escapeHtml(w.reference_period) + '</div>';
                 document.getElementById("wages-content").innerHTML = html;
+            })
+            .catch(function() {
+                setBusy("wages-section", false);
+                document.getElementById("wages-section").style.display = "block";
+                showError("wages-content", "Failed to load wage data.");
             });
     }
 
     function loadSkills(code) {
-        fetch("/api/occupations/" + encodeURIComponent(code) + "/skills")
+        fetchWithTimeout("/api/occupations/" + encodeURIComponent(code) + "/skills")
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(data) {
+                setBusy("skills-section", false);
                 if (!data || !data.skills || data.skills.length === 0) return;
                 var section = document.getElementById("skills-section");
                 section.style.display = "block";
@@ -122,13 +148,19 @@
                 html += '</tbody></table>';
                 if (data.source_version) html += '<div class="lineage-badge">O*NET ' + escapeHtml(data.source_version) + '</div>';
                 document.getElementById("skills-content").innerHTML = html;
+            })
+            .catch(function() {
+                setBusy("skills-section", false);
+                document.getElementById("skills-section").style.display = "block";
+                showError("skills-content", "Failed to load skills data.");
             });
     }
 
     function loadTasks(code) {
-        fetch("/api/occupations/" + encodeURIComponent(code) + "/tasks")
+        fetchWithTimeout("/api/occupations/" + encodeURIComponent(code) + "/tasks")
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(data) {
+                setBusy("tasks-section", false);
                 if (!data || !data.tasks || data.tasks.length === 0) return;
                 var section = document.getElementById("tasks-section");
                 section.style.display = "block";
@@ -141,13 +173,19 @@
                 html += '</ul>';
                 if (data.source_version) html += '<div class="lineage-badge">O*NET ' + escapeHtml(data.source_version) + '</div>';
                 document.getElementById("tasks-content").innerHTML = html;
+            })
+            .catch(function() {
+                setBusy("tasks-section", false);
+                document.getElementById("tasks-section").style.display = "block";
+                showError("tasks-content", "Failed to load tasks data.");
             });
     }
 
     function loadProjections(code) {
-        fetch("/api/occupations/" + encodeURIComponent(code) + "/projections")
+        fetchWithTimeout("/api/occupations/" + encodeURIComponent(code) + "/projections")
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(data) {
+                setBusy("projections-section", false);
                 if (!data || !data.projections) return;
                 var p = data.projections;
                 var section = document.getElementById("projections-section");
@@ -163,13 +201,19 @@
                 }
                 if (p.source_release_id) html += '<div class="lineage-badge">Projections ' + escapeHtml(p.projection_cycle) + ' | ' + escapeHtml(p.source_release_id) + '</div>';
                 document.getElementById("projections-content").innerHTML = html;
+            })
+            .catch(function() {
+                setBusy("projections-section", false);
+                document.getElementById("projections-section").style.display = "block";
+                showError("projections-content", "Failed to load projections data.");
             });
     }
 
     function loadSimilar(code) {
-        fetch("/api/occupations/" + encodeURIComponent(code) + "/similar")
+        fetchWithTimeout("/api/occupations/" + encodeURIComponent(code) + "/similar")
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(data) {
+                setBusy("similar-section", false);
                 if (!data || !data.similar || data.similar.length === 0) return;
                 var section = document.getElementById("similar-section");
                 section.style.display = "block";
@@ -180,6 +224,11 @@
                 });
                 html += '</tbody></table>';
                 document.getElementById("similar-content").innerHTML = html;
+            })
+            .catch(function() {
+                setBusy("similar-section", false);
+                document.getElementById("similar-section").style.display = "block";
+                showError("similar-content", "Failed to load similar occupations.");
             });
     }
 
