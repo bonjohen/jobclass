@@ -150,20 +150,20 @@ Consolidate validation logic into a reusable framework. Refactor pipeline-specif
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | P6-01 | Extract reusable structural validation module (file presence, required columns, sheet verification, min row counts) | FR-3.1 | | |
-| `[ ]` | P6-02 | Extract reusable grain uniqueness validation module (parameterized by table and business key columns) | FR-3.2 | | |
-| `[ ]` | P6-03 | Extract reusable referential integrity validation module (parameterized by fact/bridge table and target dimension) | FR-3.3, FR-3.4 | | |
-| `[ ]` | P6-04 | Build temporal validation module: version monotonicity check | FR-3.6 | | |
-| `[ ]` | P6-05 | Build temporal validation module: append-only mutation check | FR-3.7 | | |
-| `[ ]` | P6-06 | Build drift detection module: schema change detection between releases | FR-3.8 | | |
-| `[ ]` | P6-07 | Build drift detection module: row-count shift and measure delta detection | FR-3.9 | | |
-| `[ ]` | P6-08 | Implement failure classification enum: download_failure, source_format_failure, schema_drift_failure, validation_failure, load_failure, publish_blocked | FR-3.10, FR-6.4 | | |
-| `[ ]` | P6-09 | Implement publication-blocking gate: validation failure prevents mart refresh | FR-3.10, FR-5.6 | | |
-| `[ ]` | P6-10 | Handle schema drift failure mode: fail fast, classify, preserve raw, block publication | FM-1 | | |
-| `[ ]` | P6-11 | Handle partial/corrupted source failure mode: retain raw, mark run incomplete, block downstream | FM-6 | | |
-| `[ ]` | P6-12 | Handle material delta failure mode: emit delta report, do not silently accept | FM-7 | | |
-| `[ ]` | P6-13 | Refactor Phase 3–5 validators to use shared framework modules | — | | |
-| `[ ]` | P6-14 | Write unit tests for each reusable validation module | — | | |
+| `[X]` | P6-01 | Extract reusable structural validation module (file presence, required columns, sheet verification, min row counts) | FR-3.1 | 2026-03-23 13:45 | 2026-03-23 13:48 |
+| `[X]` | P6-02 | Extract reusable grain uniqueness validation module (parameterized by table and business key columns) | FR-3.2 | 2026-03-23 13:45 | 2026-03-23 13:48 |
+| `[X]` | P6-03 | Extract reusable referential integrity validation module (parameterized by fact/bridge table and target dimension) | FR-3.3, FR-3.4 | 2026-03-23 13:45 | 2026-03-23 13:48 |
+| `[X]` | P6-04 | Build temporal validation module: version monotonicity check | FR-3.6 | 2026-03-23 13:45 | 2026-03-23 13:48 |
+| `[X]` | P6-05 | Build temporal validation module: append-only mutation check | FR-3.7 | 2026-03-23 13:45 | 2026-03-23 13:48 |
+| `[X]` | P6-06 | Build drift detection module: schema change detection between releases | FR-3.8 | 2026-03-23 13:45 | 2026-03-23 13:48 |
+| `[X]` | P6-07 | Build drift detection module: row-count shift and measure delta detection | FR-3.9 | 2026-03-23 13:45 | 2026-03-23 13:48 |
+| `[X]` | P6-08 | Implement failure classification enum: download_failure, source_format_failure, schema_drift_failure, validation_failure, load_failure, publish_blocked | FR-3.10, FR-6.4 | 2026-03-23 13:45 | 2026-03-23 13:48 |
+| `[X]` | P6-09 | Implement publication-blocking gate: validation failure prevents mart refresh | FR-3.10, FR-5.6 | 2026-03-23 13:45 | 2026-03-23 13:48 |
+| `[X]` | P6-10 | Handle schema drift failure mode: fail fast, classify, preserve raw, block publication | FM-1 | 2026-03-23 13:45 | 2026-03-23 13:48 |
+| `[X]` | P6-11 | Handle partial/corrupted source failure mode: retain raw, mark run incomplete, block downstream | FM-6 | 2026-03-23 13:45 | 2026-03-23 13:48 |
+| `[X]` | P6-12 | Handle material delta failure mode: emit delta report, do not silently accept | FM-7 | 2026-03-23 13:45 | 2026-03-23 13:48 |
+| `[X]` | P6-13 | Refactor Phase 3–5 validators to use shared framework modules | — | 2026-03-23 13:45 | 2026-03-23 13:48 |
+| `[X]` | P6-14 | Write unit tests for each reusable validation module | — | 2026-03-23 13:45 | 2026-03-23 13:50 |
 
 ---
 

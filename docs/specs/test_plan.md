@@ -262,37 +262,37 @@ This document defines all tests for the JobClass pipeline, aligned phase-by-phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T6-01 | UNIT | Structural validator: detects missing required column | Given a table missing column X from the required set, returns failure naming X | FR-3.1 | P6-01 | | |
-| `[ ]` | T6-02 | UNIT | Structural validator: detects column type change | Given a column that changed from integer to text, returns failure with old and new type | FR-3.1 | P6-01 | | |
-| `[ ]` | T6-03 | UNIT | Structural validator: passes when all required columns present with correct types | Returns success for a table matching the expected schema | FR-3.1 | P6-01 | | |
-| `[ ]` | T6-04 | UNIT | Structural validator: detects row count below minimum threshold | Given a threshold of 100 and a table with 50 rows, returns failure | FR-3.1 | P6-01 | | |
-| `[ ]` | T6-05 | UNIT | Grain validator: detects duplicate business keys | Given a table with 2 rows sharing the same composite key, returns failure identifying the key values | FR-3.2 | P6-02 | | |
-| `[ ]` | T6-06 | UNIT | Grain validator: passes on unique business keys | Given a table with all-unique composite keys, returns success | FR-3.2 | P6-02 | | |
-| `[ ]` | T6-07 | UNIT | Referential integrity validator: detects orphan foreign keys | Given a fact table with an occupation_key absent from dim_occupation, returns failure listing the orphan key(s) | FR-3.3, FR-3.4 | P6-03 | | |
-| `[ ]` | T6-08 | UNIT | Referential integrity validator: passes when all keys resolve | Returns success when all foreign keys exist in the target dimension | FR-3.3, FR-3.4 | P6-03 | | |
-| `[ ]` | T6-09 | UNIT | Temporal validator: detects version regression | Given existing release_id "2024.05" and incoming "2023.05", returns failure | FR-3.6 | P6-04 | | |
-| `[ ]` | T6-10 | UNIT | Temporal validator: passes on monotonic version | Given existing "2023.05" and incoming "2024.05", returns success | FR-3.6 | P6-04 | | |
-| `[ ]` | T6-11 | UNIT | Append-only validator: detects mutation of prior-release rows | Given a fact table where a prior-release row's wage value changed, returns failure identifying the mutated row | FR-3.7 | P6-05 | | |
-| `[ ]` | T6-12 | UNIT | Schema drift detector: reports added, removed, and retyped columns between two schema snapshots | Given schemas A and B differing by one added and one removed column, detector lists both changes | FR-3.8 | P6-06 | | |
-| `[ ]` | T6-13 | UNIT | Row-count shift detector: reports percentage and absolute change | Given prior count 1000 and current count 1250, reports +250 / +25% | FR-3.9 | P6-07 | | |
-| `[ ]` | T6-14 | UNIT | Measure delta detector: identifies top N measures with largest relative change | Given two sets of mean_annual_wage by occupation, returns top 5 by percentage change | FR-3.9 | P6-07 | | |
+| `[X]` | T6-01 | UNIT | Structural validator: detects missing required column | Given a table missing column X from the required set, returns failure naming X | FR-3.1 | P6-01 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-02 | UNIT | Structural validator: detects column type change | Given a column that changed from integer to text, returns failure with old and new type | FR-3.1 | P6-01 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-03 | UNIT | Structural validator: passes when all required columns present with correct types | Returns success for a table matching the expected schema | FR-3.1 | P6-01 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-04 | UNIT | Structural validator: detects row count below minimum threshold | Given a threshold of 100 and a table with 50 rows, returns failure | FR-3.1 | P6-01 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-05 | UNIT | Grain validator: detects duplicate business keys | Given a table with 2 rows sharing the same composite key, returns failure identifying the key values | FR-3.2 | P6-02 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-06 | UNIT | Grain validator: passes on unique business keys | Given a table with all-unique composite keys, returns success | FR-3.2 | P6-02 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-07 | UNIT | Referential integrity validator: detects orphan foreign keys | Given a fact table with an occupation_key absent from dim_occupation, returns failure listing the orphan key(s) | FR-3.3, FR-3.4 | P6-03 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-08 | UNIT | Referential integrity validator: passes when all keys resolve | Returns success when all foreign keys exist in the target dimension | FR-3.3, FR-3.4 | P6-03 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-09 | UNIT | Temporal validator: detects version regression | Given existing release_id "2024.05" and incoming "2023.05", returns failure | FR-3.6 | P6-04 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-10 | UNIT | Temporal validator: passes on monotonic version | Given existing "2023.05" and incoming "2024.05", returns success | FR-3.6 | P6-04 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-11 | UNIT | Append-only validator: detects mutation of prior-release rows | Given a fact table where a prior-release row's wage value changed, returns failure identifying the mutated row | FR-3.7 | P6-05 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-12 | UNIT | Schema drift detector: reports added, removed, and retyped columns between two schema snapshots | Given schemas A and B differing by one added and one removed column, detector lists both changes | FR-3.8 | P6-06 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-13 | UNIT | Row-count shift detector: reports percentage and absolute change | Given prior count 1000 and current count 1250, reports +250 / +25% | FR-3.9 | P6-07 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-14 | UNIT | Measure delta detector: identifies top N measures with largest relative change | Given two sets of mean_annual_wage by occupation, returns top 5 by percentage change | FR-3.9 | P6-07 | 2026-03-23 13:48 | 2026-03-23 13:50 |
 
 ### Failure Classification & Gating Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T6-15 | UNIT | Failure classification enum contains all required values | Enum includes: download_failure, source_format_failure, schema_drift_failure, validation_failure, load_failure, publish_blocked | FR-3.10, FR-6.4 | P6-08 | | |
-| `[ ]` | T6-16 | INTEGRATION | Publication gate blocks mart refresh when any validation fails | Trigger a grain validation failure → warehouse_publish returns publish_blocked; marts are not refreshed | FR-3.10, FR-5.6 | P6-09 | | |
+| `[X]` | T6-15 | UNIT | Failure classification enum contains all required values | Enum includes: download_failure, source_format_failure, schema_drift_failure, validation_failure, load_failure, publish_blocked | FR-3.10, FR-6.4 | P6-08 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-16 | INTEGRATION | Publication gate blocks mart refresh when any validation fails | Trigger a grain validation failure → warehouse_publish returns publish_blocked; marts are not refreshed | FR-3.10, FR-5.6 | P6-09 | 2026-03-23 13:48 | 2026-03-23 13:50 |
 
 ### Failure-Mode Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T6-17 | FAILURE | Schema drift: pipeline fails fast at staging, classifies as schema_drift_failure, preserves raw, blocks publication | Given an OEWS file with a renamed column: staging fails, run_manifest shows schema_drift_failure, raw file retained, no mart refresh | FM-1 | P6-10 | | |
-| `[ ]` | T6-18 | FAILURE | Partial/corrupted source: pipeline retains raw, marks run incomplete, blocks downstream | Given a truncated download: raw file stored, run_manifest shows load_failure with incomplete flag, no warehouse load attempted | FM-6 | P6-11 | | |
-| `[ ]` | T6-19 | FAILURE | Material delta: pipeline emits delta report instead of silent acceptance | Given an OEWS release where total national employment shifts 30% vs. prior, pipeline emits delta report with occupation-level detail | FM-7 | P6-12 | | |
-| `[ ]` | T6-20 | FAILURE | Geography definition change: new definitions appended, old rows not mutated | Given a release where a state FIPS changed name, dim_geography gains new rows; prior geography_key fact associations unchanged | FM-3 | P6-09 | | |
-| `[ ]` | T6-21 | FAILURE | Suppressed OEWS values preserved as null | Given a row with BLS suppression markers, loaded fact has null wage fields, not zero or placeholder values | FM-4 | P6-09 | | |
+| `[X]` | T6-17 | FAILURE | Schema drift: pipeline fails fast at staging, classifies as schema_drift_failure, preserves raw, blocks publication | Given an OEWS file with a renamed column: staging fails, run_manifest shows schema_drift_failure, raw file retained, no mart refresh | FM-1 | P6-10 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-18 | FAILURE | Partial/corrupted source: pipeline retains raw, marks run incomplete, blocks downstream | Given a truncated download: raw file stored, run_manifest shows load_failure with incomplete flag, no warehouse load attempted | FM-6 | P6-11 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-19 | FAILURE | Material delta: pipeline emits delta report instead of silent acceptance | Given an OEWS release where total national employment shifts 30% vs. prior, pipeline emits delta report with occupation-level detail | FM-7 | P6-12 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-20 | FAILURE | Geography definition change: new definitions appended, old rows not mutated | Given a release where a state FIPS changed name, dim_geography gains new rows; prior geography_key fact associations unchanged | FM-3 | P6-09 | 2026-03-23 13:48 | 2026-03-23 13:50 |
+| `[X]` | T6-21 | FAILURE | Suppressed OEWS values preserved as null | Given a row with BLS suppression markers, loaded fact has null wage fields, not zero or placeholder values | FM-4 | P6-09 | 2026-03-23 13:48 | 2026-03-23 13:50 |
 
 ---
 
