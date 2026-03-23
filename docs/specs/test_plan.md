@@ -89,39 +89,39 @@ This document defines all tests for the JobClass pipeline, aligned phase-by-phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T3-01 | UNIT | SOC hierarchy parser extracts correct code, title, level, and parent link from representative sample | Parsed rows match expected values for at least: one major group (XX-0000), one minor group, one broad occupation, one detailed occupation | FR-2.1 | P3-02 | | |
-| `[ ]` | T3-02 | UNIT | SOC hierarchy parser handles edge cases: codes with trailing zeros, "All Other" categories | Edge-case rows parse without error; codes and titles preserved exactly | FR-2.1 | P3-02 | | |
-| `[ ]` | T3-03 | UNIT | SOC definitions parser extracts code and definition text from representative sample | Each row has non-null soc_code and occupation_definition; code format matches `\d{2}-\d{4}` | FR-2.1 | P3-03 | | |
-| `[ ]` | T3-04 | UNIT | SOC parsers apply snake_case column names and explicit types | All output column names are snake_case; code columns are text; level columns are integer | FR-2.5, FR-2.6 | P3-02, P3-03 | | |
+| `[X]` | T3-01 | UNIT | SOC hierarchy parser extracts correct code, title, level, and parent link from representative sample | Parsed rows match expected values for at least: one major group (XX-0000), one minor group, one broad occupation, one detailed occupation | FR-2.1 | P3-02 | 2026-03-23 13:00 | 2026-03-23 13:05 |
+| `[X]` | T3-02 | UNIT | SOC hierarchy parser handles edge cases: codes with trailing zeros, "All Other" categories | Edge-case rows parse without error; codes and titles preserved exactly | FR-2.1 | P3-02 | 2026-03-23 13:00 | 2026-03-23 13:05 |
+| `[X]` | T3-03 | UNIT | SOC definitions parser extracts code and definition text from representative sample | Each row has non-null soc_code and occupation_definition; code format matches `\d{2}-\d{4}` | FR-2.1 | P3-03 | 2026-03-23 13:00 | 2026-03-23 13:05 |
+| `[X]` | T3-04 | UNIT | SOC parsers apply snake_case column names and explicit types | All output column names are snake_case; code columns are text; level columns are integer | FR-2.5, FR-2.6 | P3-02, P3-03 | 2026-03-23 13:00 | 2026-03-23 13:05 |
 
 ### Staging Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T3-05 | CONTRACT | `stage__soc__hierarchy` has all required columns with correct types | Table exists; columns include soc_code (text), occupation_title (text), occupation_level (integer), parent_soc_code (text), source_release_id (text), parser_version (text) | FR-2.5, FR-2.6, FR-2.8, FR-2.9 | P3-04, P3-06 | | |
-| `[ ]` | T3-06 | CONTRACT | `stage__soc__definitions` has all required columns with correct types | Table exists; columns include soc_code (text), occupation_definition (text), source_release_id (text), parser_version (text) | FR-2.5, FR-2.6, FR-2.8, FR-2.9 | P3-05, P3-07 | | |
-| `[ ]` | T3-07 | GRAIN | `stage__soc__hierarchy` has no duplicate business keys | Zero rows returned by: `SELECT soc_code, source_release_id, COUNT(*) ... HAVING COUNT(*) > 1` | FR-3.2 | P3-08, P3-16 | | |
-| `[ ]` | T3-08 | GRAIN | `stage__soc__definitions` has no duplicate business keys | Zero duplicates on soc_code + source_release_id | FR-3.2 | P3-08, P3-16 | | |
+| `[X]` | T3-05 | CONTRACT | `stage__soc__hierarchy` has all required columns with correct types | Table exists; columns include soc_code (text), occupation_title (text), occupation_level (integer), parent_soc_code (text), source_release_id (text), parser_version (text) | FR-2.5, FR-2.6, FR-2.8, FR-2.9 | P3-04, P3-06 | 2026-03-23 13:00 | 2026-03-23 13:05 |
+| `[X]` | T3-06 | CONTRACT | `stage__soc__definitions` has all required columns with correct types | Table exists; columns include soc_code (text), occupation_definition (text), source_release_id (text), parser_version (text) | FR-2.5, FR-2.6, FR-2.8, FR-2.9 | P3-05, P3-07 | 2026-03-23 13:00 | 2026-03-23 13:05 |
+| `[X]` | T3-07 | GRAIN | `stage__soc__hierarchy` has no duplicate business keys | Zero rows returned by: `SELECT soc_code, source_release_id, COUNT(*) ... HAVING COUNT(*) > 1` | FR-3.2 | P3-08, P3-16 | 2026-03-23 13:00 | 2026-03-23 13:05 |
+| `[X]` | T3-08 | GRAIN | `stage__soc__definitions` has no duplicate business keys | Zero duplicates on soc_code + source_release_id | FR-3.2 | P3-08, P3-16 | 2026-03-23 13:00 | 2026-03-23 13:05 |
 
 ### Structural & Semantic Validations
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T3-09 | SEMANTIC | SOC hierarchy is complete: every leaf occupation has a path to its major group | For every row where is_leaf=true, recursive parent traversal reaches a row with occupation_level = major group | FR-3.5 | P3-09 | | |
-| `[ ]` | T3-10 | SEMANTIC | Every parent_soc_code in hierarchy references an existing soc_code | Zero orphan parent references within the same source_release_id | FR-3.5 | P3-09 | | |
-| `[ ]` | T3-11 | SEMANTIC | SOC staging row count meets minimum threshold | Row count ≥ 800 (2018 SOC has 867 detailed occupations) | FR-3.1 | P3-08 | | |
+| `[X]` | T3-09 | SEMANTIC | SOC hierarchy is complete: every leaf occupation has a path to its major group | For every row where is_leaf=true, recursive parent traversal reaches a row with occupation_level = major group | FR-3.5 | P3-09 | 2026-03-23 13:00 | 2026-03-23 13:05 |
+| `[X]` | T3-10 | SEMANTIC | Every parent_soc_code in hierarchy references an existing soc_code | Zero orphan parent references within the same source_release_id | FR-3.5 | P3-09 | 2026-03-23 13:00 | 2026-03-23 13:05 |
+| `[X]` | T3-11 | SEMANTIC | SOC staging row count meets minimum threshold | Row count ≥ 800 (2018 SOC has 867 detailed occupations) | FR-3.1 | P3-08 | 2026-03-23 13:00 | 2026-03-23 13:05 |
 
 ### Dimension & Bridge Loading Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T3-12 | GRAIN | `dim_occupation` has no duplicate business keys (soc_code + soc_version) | Zero duplicates on business key | FR-3.2 | P3-10, P3-16 | | |
-| `[ ]` | T3-13 | CONTRACT | `dim_occupation` contains all required fields from data model | Table has: occupation_key, soc_code, occupation_title, occupation_level, occupation_level_name, parent_soc_code, soc_version, is_leaf, is_current, source_release_id | FR-4.1 | P3-10 | | |
-| `[ ]` | T3-14 | SEMANTIC | `dim_occupation` surrogate keys are unique and non-null | Zero null occupation_key values; zero duplicate occupation_key values | FR-4.1 | P3-11 | | |
-| `[ ]` | T3-15 | SEMANTIC | `dim_occupation` version-aware insert: loading a new SOC version creates new rows without mutating prior rows | After loading version B, all version A rows remain identical (bitwise compare); version B rows added | FR-4.1 | P3-11 | | |
-| `[ ]` | T3-16 | GRAIN | `bridge_occupation_hierarchy` has no duplicate business keys (parent + child + soc_version) | Zero duplicates on composite key | FR-3.2 | P3-12, P3-16 | | |
-| `[ ]` | T3-17 | REF | `bridge_occupation_hierarchy` parent and child keys reference valid `dim_occupation` rows | Zero orphan references in parent_occupation_key or child_occupation_key | FR-3.3 | P3-13 | | |
-| `[ ]` | T3-18 | UNIT | Run manifest updated with row counts and load_status after SOC load | run_manifest record for SOC run has non-null row_count_raw, row_count_stage, row_count_loaded, and load_status = 'success' | FR-6.3, FR-6.4 | P3-14 | | |
+| `[X]` | T3-12 | GRAIN | `dim_occupation` has no duplicate business keys (soc_code + soc_version) | Zero duplicates on business key | FR-3.2 | P3-10, P3-16 | 2026-03-23 13:00 | 2026-03-23 13:05 |
+| `[X]` | T3-13 | CONTRACT | `dim_occupation` contains all required fields from data model | Table has: occupation_key, soc_code, occupation_title, occupation_level, occupation_level_name, parent_soc_code, soc_version, is_leaf, is_current, source_release_id | FR-4.1 | P3-10 | 2026-03-23 13:00 | 2026-03-23 13:05 |
+| `[X]` | T3-14 | SEMANTIC | `dim_occupation` surrogate keys are unique and non-null | Zero null occupation_key values; zero duplicate occupation_key values | FR-4.1 | P3-11 | 2026-03-23 13:00 | 2026-03-23 13:05 |
+| `[X]` | T3-15 | SEMANTIC | `dim_occupation` version-aware insert: loading a new SOC version creates new rows without mutating prior rows | After loading version B, all version A rows remain identical (bitwise compare); version B rows added | FR-4.1 | P3-11 | 2026-03-23 13:00 | 2026-03-23 13:05 |
+| `[X]` | T3-16 | GRAIN | `bridge_occupation_hierarchy` has no duplicate business keys (parent + child + soc_version) | Zero duplicates on composite key | FR-3.2 | P3-12, P3-16 | 2026-03-23 13:00 | 2026-03-23 13:05 |
+| `[X]` | T3-17 | REF | `bridge_occupation_hierarchy` parent and child keys reference valid `dim_occupation` rows | Zero orphan references in parent_occupation_key or child_occupation_key | FR-3.3 | P3-13 | 2026-03-23 13:00 | 2026-03-23 13:05 |
+| `[X]` | T3-18 | UNIT | Run manifest updated with row counts and load_status after SOC load | run_manifest record for SOC run has non-null row_count_raw, row_count_stage, row_count_loaded, and load_status = 'success' | FR-6.3, FR-6.4 | P3-14 | 2026-03-23 13:00 | 2026-03-23 13:05 |
 
 ---
 

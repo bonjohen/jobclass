@@ -62,22 +62,22 @@ First pipeline to build — occupation dimension is the backbone for all downstr
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | P3-01 | Analyze SOC source file format (structure, sheets, encoding, edge cases) | FR-2.1 | | |
-| `[ ]` | P3-02 | Build SOC hierarchy parser: extract code, title, level, parent link | FR-2.1 | | |
-| `[ ]` | P3-03 | Build SOC definitions parser: extract code and definition text | FR-2.1 | | |
-| `[ ]` | P3-04 | Create `stage__soc__hierarchy` table with standardized schema | FR-2.5, FR-2.6, FR-2.9 | | |
-| `[ ]` | P3-05 | Create `stage__soc__definitions` table with standardized schema | FR-2.5, FR-2.6, FR-2.9 | | |
-| `[ ]` | P3-06 | Build staging loader: SOC hierarchy (snake_case, explicit types, source_release_id, parser_version) | FR-2.5, FR-2.6, FR-2.8 | | |
-| `[ ]` | P3-07 | Build staging loader: SOC definitions | FR-2.5, FR-2.6, FR-2.8 | | |
-| `[ ]` | P3-08 | Implement SOC structural validations: file presence, required columns, minimum row counts, grain uniqueness | FR-3.1, FR-3.2 | | |
-| `[ ]` | P3-09 | Implement SOC semantic validation: hierarchy completeness — every leaf has path to major group | FR-3.5 | | |
-| `[ ]` | P3-10 | Create `dim_occupation` table (surrogate key, business key: soc_code + soc_version, all suggested fields) | FR-4.1 | | |
-| `[ ]` | P3-11 | Build `dim_occupation` loader with version-aware insert (new row on classification change, historical retention) | FR-4.1 | | |
-| `[ ]` | P3-12 | Create `bridge_occupation_hierarchy` table (parent-child per classification version) | FR-4.2 | | |
-| `[ ]` | P3-13 | Build `bridge_occupation_hierarchy` loader | FR-4.2 | | |
-| `[ ]` | P3-14 | Update run manifest with row_count_raw, row_count_stage, row_count_loaded, load_status | FR-6.3, FR-6.4 | | |
-| `[ ]` | P3-15 | Write parser unit tests with representative SOC source samples | — | | |
-| `[ ]` | P3-16 | Write grain uniqueness tests for stage and dim tables | FR-3.2 | | |
+| `[X]` | P3-01 | Analyze SOC source file format (structure, sheets, encoding, edge cases) | FR-2.1 | 2026-03-23 12:52 | 2026-03-23 12:53 |
+| `[X]` | P3-02 | Build SOC hierarchy parser: extract code, title, level, parent link | FR-2.1 | 2026-03-23 12:52 | 2026-03-23 12:55 |
+| `[X]` | P3-03 | Build SOC definitions parser: extract code and definition text | FR-2.1 | 2026-03-23 12:52 | 2026-03-23 12:55 |
+| `[X]` | P3-04 | Create `stage__soc__hierarchy` table with standardized schema | FR-2.5, FR-2.6, FR-2.9 | 2026-03-23 12:55 | 2026-03-23 12:56 |
+| `[X]` | P3-05 | Create `stage__soc__definitions` table with standardized schema | FR-2.5, FR-2.6, FR-2.9 | 2026-03-23 12:55 | 2026-03-23 12:56 |
+| `[X]` | P3-06 | Build staging loader: SOC hierarchy (snake_case, explicit types, source_release_id, parser_version) | FR-2.5, FR-2.6, FR-2.8 | 2026-03-23 12:56 | 2026-03-23 12:58 |
+| `[X]` | P3-07 | Build staging loader: SOC definitions | FR-2.5, FR-2.6, FR-2.8 | 2026-03-23 12:56 | 2026-03-23 12:58 |
+| `[X]` | P3-08 | Implement SOC structural validations: file presence, required columns, minimum row counts, grain uniqueness | FR-3.1, FR-3.2 | 2026-03-23 12:58 | 2026-03-23 12:59 |
+| `[X]` | P3-09 | Implement SOC semantic validation: hierarchy completeness — every leaf has path to major group | FR-3.5 | 2026-03-23 12:59 | 2026-03-23 13:00 |
+| `[X]` | P3-10 | Create `dim_occupation` table (surrogate key, business key: soc_code + soc_version, all suggested fields) | FR-4.1 | 2026-03-23 12:56 | 2026-03-23 12:56 |
+| `[X]` | P3-11 | Build `dim_occupation` loader with version-aware insert (new row on classification change, historical retention) | FR-4.1 | 2026-03-23 12:56 | 2026-03-23 12:58 |
+| `[X]` | P3-12 | Create `bridge_occupation_hierarchy` table (parent-child per classification version) | FR-4.2 | 2026-03-23 12:56 | 2026-03-23 12:56 |
+| `[X]` | P3-13 | Build `bridge_occupation_hierarchy` loader | FR-4.2 | 2026-03-23 12:56 | 2026-03-23 12:58 |
+| `[X]` | P3-14 | Update run manifest with row_count_raw, row_count_stage, row_count_loaded, load_status | FR-6.3, FR-6.4 | 2026-03-23 12:58 | 2026-03-23 12:58 |
+| `[X]` | P3-15 | Write parser unit tests with representative SOC source samples | — | 2026-03-23 13:00 | 2026-03-23 13:05 |
+| `[X]` | P3-16 | Write grain uniqueness tests for stage and dim tables | FR-3.2 | 2026-03-23 13:00 | 2026-03-23 13:05 |
 
 ---
 

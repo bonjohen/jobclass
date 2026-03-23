@@ -6,7 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Labor market occupation data pipeline that ingests federal data products (SOC, OEWS, O*NET, Employment Projections) into a layered analytical warehouse. The core design principle: **occupation is the stable external key**; job titles, roles, and internal classifications map onto it, not the other way around.
 
-The full design specification lives in `docs/specs/design_document_v1.md`.
+The full design specification lives in `docs\specs\base_design_document.md`.
+This was consolidated into 'docs\specs\project_detail_design.md'
+This was used to construct two working documents:
+* docs\specs\phased_release_plan.md
+* docs\specs\test_plan.md
+
+Implementation of the project follows the phased release of both design and test plans.
 
 ## Architecture: Four-Layer Warehouse
 
