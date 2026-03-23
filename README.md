@@ -46,6 +46,7 @@ Status of each phase's commit upon completion.
 | W1 | Website: Project Setup & API Foundation | Phase W1: FastAPI app, health/metadata APIs, base layout, CSS, test framework | Complete |
 | W2 | Website: Occupation Search & Hierarchy | Phase W2: Search, hierarchy, profile APIs, search/hierarchy/profile pages, 16 tests | Complete |
 | W3 | Website: Employment & Wages Display | Phase W3: Wages API, geography API, state comparison page, suppression handling, 13 tests | Complete |
+| W4 | Website: Skills & Tasks Display | Phase W4: Skills, tasks, similarity APIs with O*NET lineage, 13 tests | Complete |
 
 ## Project Structure
 

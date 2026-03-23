@@ -133,17 +133,17 @@ Add O*NET skill and task profile data to occupation pages with semantic explorat
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | W4-01 | Implement `/api/occupations/{soc_code}/skills` endpoint: skills with importance/level scores | WFR-5, WAR-2 | | |
-| `[ ]` | W4-02 | Implement `/api/occupations/{soc_code}/tasks` endpoint: task descriptions with scores | WFR-6, WAR-2 | | |
-| `[ ]` | W4-03 | Implement `/api/occupations/{soc_code}/similar` endpoint: similar occupations with similarity scores | WFR-7, WAR-2 | | |
-| `[ ]` | W4-04 | Build skill profile section on occupation page: ranked list or chart of skills by importance | WFR-5, WNF-5 | | |
-| `[ ]` | W4-05 | Build task profile section on occupation page: task descriptions with relevance indicators | WFR-6, WNF-5 | | |
-| `[ ]` | W4-06 | Build similar occupations section: list of related occupations with Jaccard similarity scores | WFR-7, WNF-5 | | |
-| `[ ]` | W4-07 | Add O*NET version and lineage to skill/task sections | WFR-11, WAR-5 | | |
-| `[ ]` | W4-08 | Build standalone skill exploration page: browse skills across occupations | WFR-5, WNF-5 | | |
-| `[ ]` | W4-09 | Write skills endpoint tests: correct skill names and scores for known occupation | — | | |
-| `[ ]` | W4-10 | Write tasks endpoint tests: task descriptions present, score values valid | — | | |
-| `[ ]` | W4-11 | Write similarity endpoint tests: non-trivial results, scores between 0 and 1 | — | | |
+| `[X]` | W4-01 | Implement `/api/occupations/{soc_code}/skills` endpoint: skills with importance/level scores | WFR-5, WAR-2 | 2026-03-23 18:00 | 2026-03-23 18:30 |
+| `[X]` | W4-02 | Implement `/api/occupations/{soc_code}/tasks` endpoint: task descriptions with scores | WFR-6, WAR-2 | 2026-03-23 18:00 | 2026-03-23 18:30 |
+| `[X]` | W4-03 | Implement `/api/occupations/{soc_code}/similar` endpoint: similar occupations with similarity scores | WFR-7, WAR-2 | 2026-03-23 18:00 | 2026-03-23 18:30 |
+| `[X]` | W4-04 | Build skill profile section on occupation page: ranked list or chart of skills by importance | WFR-5, WNF-5 | 2026-03-23 18:00 | 2026-03-23 18:30 |
+| `[X]` | W4-05 | Build task profile section on occupation page: task descriptions with relevance indicators | WFR-6, WNF-5 | 2026-03-23 18:00 | 2026-03-23 18:30 |
+| `[X]` | W4-06 | Build similar occupations section: list of related occupations with Jaccard similarity scores | WFR-7, WNF-5 | 2026-03-23 18:00 | 2026-03-23 18:30 |
+| `[X]` | W4-07 | Add O*NET version and lineage to skill/task sections | WFR-11, WAR-5 | 2026-03-23 18:00 | 2026-03-23 18:30 |
+| `[X]` | W4-08 | Build standalone skill exploration page: browse skills across occupations | WFR-5, WNF-5 | 2026-03-23 18:00 | 2026-03-23 18:30 |
+| `[X]` | W4-09 | Write skills endpoint tests: correct skill names and scores for known occupation | — | 2026-03-23 18:00 | 2026-03-23 18:30 |
+| `[X]` | W4-10 | Write tasks endpoint tests: task descriptions present, score values valid | — | 2026-03-23 18:00 | 2026-03-23 18:30 |
+| `[X]` | W4-11 | Write similarity endpoint tests: non-trivial results, scores between 0 and 1 | — | 2026-03-23 18:00 | 2026-03-23 18:30 |
 
 ---
 

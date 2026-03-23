@@ -107,21 +107,21 @@ This document defines all tests for the JobClass reporting website, aligned phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | WT4-01 | API | Skills endpoint for 15-1252 returns skill names with importance and level scores | Response includes array of skills; each has skill_name, scale_type, data_value; at least 1 skill returned | WFR-5 | W4-01 | | |
-| `[ ]` | WT4-02 | API | Tasks endpoint for 15-1252 returns task descriptions with scores | Response includes array of tasks; each has task_description, data_value; at least 1 task returned | WFR-6 | W4-02 | | |
-| `[ ]` | WT4-03 | API | Similarity endpoint for 15-1252 returns related occupations with Jaccard scores | Response includes array of similar occupations; each has soc_code, title, jaccard_similarity between 0 and 1 | WFR-7 | W4-03 | | |
-| `[ ]` | WT4-04 | CONTRACT | Skills response schema: array of `{skill_name, skill_id, scale_type, data_value, source_version}` | All fields present; data_value is numeric; source_version is non-null | WAR-2, WFR-5 | W4-01 | | |
-| `[ ]` | WT4-05 | CONTRACT | Tasks response schema: array of `{task_id, task_description, task_type, data_value, source_version}` | All fields present; task_description is non-empty text | WAR-2, WFR-6 | W4-02 | | |
+| `[X]` | WT4-01 | API | Skills endpoint for 15-1252 returns skill names with importance and level scores | Response includes array of skills; each has skill_name, scale_type, data_value; at least 1 skill returned | WFR-5 | W4-01 | 2026-03-23 18:30 | 2026-03-23 18:30 |
+| `[X]` | WT4-02 | API | Tasks endpoint for 15-1252 returns task descriptions with scores | Response includes array of tasks; each has task_description, data_value; at least 1 task returned | WFR-6 | W4-02 | 2026-03-23 18:30 | 2026-03-23 18:30 |
+| `[X]` | WT4-03 | API | Similarity endpoint for 15-1252 returns related occupations with Jaccard scores | Response includes array of similar occupations; each has soc_code, title, jaccard_similarity between 0 and 1 | WFR-7 | W4-03 | 2026-03-23 18:30 | 2026-03-23 18:30 |
+| `[X]` | WT4-04 | CONTRACT | Skills response schema: array of `{skill_name, skill_id, scale_type, data_value, source_version}` | All fields present; data_value is numeric; source_version is non-null | WAR-2, WFR-5 | W4-01 | 2026-03-23 18:30 | 2026-03-23 18:30 |
+| `[X]` | WT4-05 | CONTRACT | Tasks response schema: array of `{task_id, task_description, task_type, data_value, source_version}` | All fields present; task_description is non-empty text | WAR-2, WFR-6 | W4-02 | 2026-03-23 18:30 | 2026-03-23 18:30 |
 
 ### Skills & Tasks Display Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | WT4-06 | RENDER | Skill profile section renders ranked skill list for 15-1252 | Page contains skill names with scores; ordered by importance or level | WFR-5, WNF-5 | W4-04 | | |
-| `[ ]` | WT4-07 | RENDER | Task profile section renders task descriptions for 15-1252 | Page contains task description text; at least 1 task visible | WFR-6, WNF-5 | W4-05 | | |
-| `[ ]` | WT4-08 | RENDER | Similar occupations section shows related occupations with scores | Page lists related occupations with Jaccard similarity values | WFR-7, WNF-5 | W4-06 | | |
-| `[ ]` | WT4-09 | RENDER | Skill/task sections include O*NET version lineage | Page displays O*NET source_version and release ID | WFR-11, WAR-5 | W4-07 | | |
-| `[ ]` | WT4-10 | RENDER | Skill exploration page renders skill-to-occupation matrix | Page contains browsable skill listing with associated occupations | WFR-5, WNF-5 | W4-08 | | |
+| `[X]` | WT4-06 | RENDER | Skill profile section renders ranked skill list for 15-1252 | Page contains skill names with scores; ordered by importance or level | WFR-5, WNF-5 | W4-04 | 2026-03-23 18:30 | 2026-03-23 18:30 |
+| `[X]` | WT4-07 | RENDER | Task profile section renders task descriptions for 15-1252 | Page contains task description text; at least 1 task visible | WFR-6, WNF-5 | W4-05 | 2026-03-23 18:30 | 2026-03-23 18:30 |
+| `[X]` | WT4-08 | RENDER | Similar occupations section shows related occupations with scores | Page lists related occupations with Jaccard similarity values | WFR-7, WNF-5 | W4-06 | 2026-03-23 18:30 | 2026-03-23 18:30 |
+| `[X]` | WT4-09 | RENDER | Skill/task sections include O*NET version lineage | Page displays O*NET source_version and release ID | WFR-11, WAR-5 | W4-07 | 2026-03-23 18:30 | 2026-03-23 18:30 |
+| `[X]` | WT4-10 | RENDER | Skill exploration page renders skill-to-occupation matrix | Page contains browsable skill listing with associated occupations | WFR-5, WNF-5 | W4-08 | 2026-03-23 18:30 | 2026-03-23 18:30 |
 
 ---
 
