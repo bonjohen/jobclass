@@ -129,13 +129,13 @@ This document defines all tests for the JobClass reporting website, aligned phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | WT5-01 | API | Projections endpoint for 15-1252 returns employment outlook | Response includes projection_cycle, employment_base, employment_projected, employment_change_pct, annual_openings | WFR-8 | W5-01 | | |
-| `[ ]` | WT5-02 | CONTRACT | Projections response schema: `{projection_cycle, employment_base, employment_projected, employment_change_pct, annual_openings, education_category}` | All fields present; employment values are integers or null | WAR-2, WFR-8 | W5-01 | | |
-| `[ ]` | WT5-03 | RENDER | Projections section shows base and projected employment with growth rate | Page displays base employment, projected employment, and percentage change | WFR-8, WNF-5 | W5-02 | | |
-| `[ ]` | WT5-04 | RENDER | Projections chart renders base vs. projected comparison | Chart element present with two data series (base and projected) | WFR-8, WNF-5 | W5-03 | | |
-| `[ ]` | WT5-05 | RENDER | Education and training requirements displayed from projection data | Page shows education category (e.g., "Bachelor's degree") | WFR-8 | W5-04 | | |
-| `[ ]` | WT5-06 | RENDER | Projections section includes source lineage | Page displays projection cycle and source release ID | WFR-11, WAR-5 | W5-05 | | |
-| `[ ]` | WT5-07 | RENDER | Trend comparison page renders growth rate comparison across occupations | Page contains table or chart comparing multiple occupations' growth rates | WFR-8, WNF-5 | W5-06 | | |
+| `[X]` | WT5-01 | API | Projections endpoint for 15-1252 returns employment outlook | Response includes projection_cycle, employment_base, employment_projected, employment_change_pct, annual_openings | WFR-8 | W5-01 | 2026-03-23 19:00 | 2026-03-23 19:00 |
+| `[X]` | WT5-02 | CONTRACT | Projections response schema: `{projection_cycle, employment_base, employment_projected, employment_change_pct, annual_openings, education_category}` | All fields present; employment values are integers or null | WAR-2, WFR-8 | W5-01 | 2026-03-23 19:00 | 2026-03-23 19:00 |
+| `[X]` | WT5-03 | RENDER | Projections section shows base and projected employment with growth rate | Page displays base employment, projected employment, and percentage change | WFR-8, WNF-5 | W5-02 | 2026-03-23 19:00 | 2026-03-23 19:00 |
+| `[X]` | WT5-04 | RENDER | Projections chart renders base vs. projected comparison | Chart element present with two data series (base and projected) | WFR-8, WNF-5 | W5-03 | 2026-03-23 19:00 | 2026-03-23 19:00 |
+| `[X]` | WT5-05 | RENDER | Education and training requirements displayed from projection data | Page shows education category (e.g., "Bachelor's degree") | WFR-8 | W5-04 | 2026-03-23 19:00 | 2026-03-23 19:00 |
+| `[X]` | WT5-06 | RENDER | Projections section includes source lineage | Page displays projection cycle and source release ID | WFR-11, WAR-5 | W5-05 | 2026-03-23 19:00 | 2026-03-23 19:00 |
+| `[X]` | WT5-07 | RENDER | Trend comparison page renders growth rate comparison across occupations | Page contains table or chart comparing multiple occupations' growth rates | WFR-8, WNF-5 | W5-06 | 2026-03-23 19:00 | 2026-03-23 19:00 |
 
 ---
 

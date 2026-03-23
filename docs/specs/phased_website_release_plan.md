@@ -153,14 +153,14 @@ Add employment projections and trend data to the occupation experience.
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | W5-01 | Implement `/api/occupations/{soc_code}/projections` endpoint: employment outlook data | WFR-8, WAR-2 | | |
-| `[ ]` | W5-02 | Build projections section on profile page: base/projected employment, growth rate, annual openings | WFR-8, WNF-5 | | |
-| `[ ]` | W5-03 | Build projections chart: visual comparison of base vs. projected employment | WFR-8, WNF-5 | | |
-| `[ ]` | W5-04 | Display education and training requirements from projection data | WFR-8 | | |
-| `[ ]` | W5-05 | Add lineage to projections section: projection cycle, source release ID | WFR-11, WAR-5 | | |
-| `[ ]` | W5-06 | Build standalone trend comparison page: compare growth rates across occupations | WFR-8, WNF-5 | | |
-| `[ ]` | W5-07 | Write projections endpoint tests: correct values for known occupation | — | | |
-| `[ ]` | W5-08 | Write trend chart rendering tests: data-to-visual correctness | — | | |
+| `[X]` | W5-01 | Implement `/api/occupations/{soc_code}/projections` endpoint: employment outlook data | WFR-8, WAR-2 | 2026-03-23 18:45 | 2026-03-23 19:00 |
+| `[X]` | W5-02 | Build projections section on profile page: base/projected employment, growth rate, annual openings | WFR-8, WNF-5 | 2026-03-23 18:45 | 2026-03-23 19:00 |
+| `[X]` | W5-03 | Build projections chart: visual comparison of base vs. projected employment | WFR-8, WNF-5 | 2026-03-23 18:45 | 2026-03-23 19:00 |
+| `[X]` | W5-04 | Display education and training requirements from projection data | WFR-8 | 2026-03-23 18:45 | 2026-03-23 19:00 |
+| `[X]` | W5-05 | Add lineage to projections section: projection cycle, source release ID | WFR-11, WAR-5 | 2026-03-23 18:45 | 2026-03-23 19:00 |
+| `[X]` | W5-06 | Build standalone trend comparison page: compare growth rates across occupations | WFR-8, WNF-5 | 2026-03-23 18:45 | 2026-03-23 19:00 |
+| `[X]` | W5-07 | Write projections endpoint tests: correct values for known occupation | — | 2026-03-23 18:45 | 2026-03-23 19:00 |
+| `[X]` | W5-08 | Write trend chart rendering tests: data-to-visual correctness | — | 2026-03-23 18:45 | 2026-03-23 19:00 |
 
 ---
 
