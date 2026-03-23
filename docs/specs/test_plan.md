@@ -300,13 +300,13 @@ This document defines all tests for the JobClass pipeline, aligned phase-by-phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T7-01 | UNIT | Run manifest completion update populates all required fields | After pipeline completion, run_manifest record has non-null: row_count_raw, row_count_stage, row_count_loaded, load_status, failure_classification (or null on success), validation_summary | FR-6.3, FR-6.4 | P7-01 | | |
-| `[ ]` | T7-02 | UNIT | Row-count delta reporter computes correct delta against prior successful run | Given prior run with 1000 rows and current with 1050, reports +50 / +5.0% | FR-6.5 | P7-02 | | |
-| `[ ]` | T7-03 | UNIT | Row-count delta reporter handles first run (no prior) without error | Returns "no prior run" indicator, not an error | FR-6.5 | P7-02 | | |
-| `[ ]` | T7-04 | UNIT | Schema drift report emitter produces structured output listing all changes | Given a schema change, output includes dataset name, release pair, and list of added/removed/retyped columns | FR-6.6 | P7-03 | | |
-| `[ ]` | T7-05 | UNIT | Top measure delta reporter identifies correct top-N measures by change magnitude | Given wage data for 10 occupations across two releases, correctly ranks the top 5 by percentage change | FR-6.7 | P7-04 | | |
-| `[ ]` | T7-06 | UNIT | Reconciliation summary reporter compares loaded totals against published reference | Given loaded national total employment and published BLS total, reports match/mismatch with percentage difference | FR-6.8 | P7-05 | | |
-| `[ ]` | T7-07 | INTEGRATION | Run inspection view: querying a single run_id returns all metadata, row counts, validation results, and failure classification | Single query by run_id returns complete run picture without additional joins or code inspection | FR-6.9 | P7-06 | | |
+| `[X]` | T7-01 | UNIT | Run manifest completion update populates all required fields | After pipeline completion, run_manifest record has non-null: row_count_raw, row_count_stage, row_count_loaded, load_status, failure_classification (or null on success), validation_summary | FR-6.3, FR-6.4 | P7-01 | 2026-03-23 13:54 | 2026-03-23 13:56 |
+| `[X]` | T7-02 | UNIT | Row-count delta reporter computes correct delta against prior successful run | Given prior run with 1000 rows and current with 1050, reports +50 / +5.0% | FR-6.5 | P7-02 | 2026-03-23 13:54 | 2026-03-23 13:56 |
+| `[X]` | T7-03 | UNIT | Row-count delta reporter handles first run (no prior) without error | Returns "no prior run" indicator, not an error | FR-6.5 | P7-02 | 2026-03-23 13:54 | 2026-03-23 13:56 |
+| `[X]` | T7-04 | UNIT | Schema drift report emitter produces structured output listing all changes | Given a schema change, output includes dataset name, release pair, and list of added/removed/retyped columns | FR-6.6 | P7-03 | 2026-03-23 13:54 | 2026-03-23 13:56 |
+| `[X]` | T7-05 | UNIT | Top measure delta reporter identifies correct top-N measures by change magnitude | Given wage data for 10 occupations across two releases, correctly ranks the top 5 by percentage change | FR-6.7 | P7-04 | 2026-03-23 13:54 | 2026-03-23 13:56 |
+| `[X]` | T7-06 | UNIT | Reconciliation summary reporter compares loaded totals against published reference | Given loaded national total employment and published BLS total, reports match/mismatch with percentage difference | FR-6.8 | P7-05 | 2026-03-23 13:54 | 2026-03-23 13:56 |
+| `[X]` | T7-07 | INTEGRATION | Run inspection view: querying a single run_id returns all metadata, row counts, validation results, and failure classification | Single query by run_id returns complete run picture without additional joins or code inspection | FR-6.9 | P7-06 | 2026-03-23 13:54 | 2026-03-23 13:56 |
 
 ---
 

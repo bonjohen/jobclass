@@ -173,15 +173,15 @@ Complete the run metadata system and reporting outputs. Builds on run manifest f
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | P7-01 | Extend run manifest with completion fields: row_count_raw, row_count_stage, row_count_loaded, load_status, failure_classification, validation_summary | FR-6.3, FR-6.4 | | |
-| `[ ]` | P7-02 | Build row-count delta reporter (current vs. prior successful run per dataset) | FR-6.5 | | |
-| `[ ]` | P7-03 | Build schema drift report emitter (per dataset, per release) | FR-6.6 | | |
-| `[ ]` | P7-04 | Build top measure delta reporter (per dataset) | FR-6.7 | | |
-| `[ ]` | P7-05 | Build reconciliation summary reporter (where published totals are available) | FR-6.8 | | |
-| `[ ]` | P7-06 | Build run inspection view: single run fully inspectable from metadata alone | FR-6.9 | | |
-| `[ ]` | P7-07 | Generate example run manifest output for portfolio deliverable | DL-4 | | |
-| `[ ]` | P7-08 | Generate example validation report output for portfolio deliverable | DL-5 | | |
-| `[ ]` | P7-09 | Write tests for all report emitters | — | | |
+| `[X]` | P7-01 | Extend run manifest with completion fields: row_count_raw, row_count_stage, row_count_loaded, load_status, failure_classification, validation_summary | FR-6.3, FR-6.4 | 2026-03-23 13:52 | 2026-03-23 13:54 |
+| `[X]` | P7-02 | Build row-count delta reporter (current vs. prior successful run per dataset) | FR-6.5 | 2026-03-23 13:52 | 2026-03-23 13:54 |
+| `[X]` | P7-03 | Build schema drift report emitter (per dataset, per release) | FR-6.6 | 2026-03-23 13:52 | 2026-03-23 13:54 |
+| `[X]` | P7-04 | Build top measure delta reporter (per dataset) | FR-6.7 | 2026-03-23 13:52 | 2026-03-23 13:54 |
+| `[X]` | P7-05 | Build reconciliation summary reporter (where published totals are available) | FR-6.8 | 2026-03-23 13:52 | 2026-03-23 13:54 |
+| `[X]` | P7-06 | Build run inspection view: single run fully inspectable from metadata alone | FR-6.9 | 2026-03-23 13:52 | 2026-03-23 13:54 |
+| `[X]` | P7-07 | Generate example run manifest output for portfolio deliverable | DL-4 | 2026-03-23 13:52 | 2026-03-23 13:54 |
+| `[X]` | P7-08 | Generate example validation report output for portfolio deliverable | DL-5 | 2026-03-23 13:52 | 2026-03-23 13:54 |
+| `[X]` | P7-09 | Write tests for all report emitters | — | 2026-03-23 13:52 | 2026-03-23 13:56 |
 
 ---
 

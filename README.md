@@ -38,7 +38,7 @@ Status of each phase's commit upon completion.
 | 4 | OEWS Employment & Wages Pipeline | Phase 4: OEWS pipeline — parser, staging, dim_geography, dim_industry, fact table, validations | Complete |
 | 5 | O*NET Semantic Pipeline | Phase 5: O*NET pipeline — parsers, staging, dim_skill/knowledge/ability/task, bridges, validations | Complete |
 | 6 | Validation Framework & Failure Handling | Phase 6: Validation framework — structural, grain, ref integrity, temporal, drift, failure modes | Complete |
-| 7 | Observability & Run Reporting | | Pending |
+| 7 | Observability & Run Reporting | Phase 7: Observability — reporters, run inspection, row-count deltas, reconciliation | Complete |
 | 8 | Orchestration | | Pending |
 | 9 | Analyst Marts | | Pending |
 | 10 | Employment Projections (Optional R1) | | Pending |
@@ -74,4 +74,4 @@ docs/specs/            # Design docs, release plan, test plan
 
 ## Status
 
-Implementation in progress. Phases 1–6 complete. Currently working through Phase 7 (observability).
+Implementation in progress. Phases 1–7 complete. Currently working through Phase 8 (orchestration).
