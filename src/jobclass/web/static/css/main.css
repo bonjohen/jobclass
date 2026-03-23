@@ -1,0 +1,278 @@
+/* JobClass — Main Stylesheet */
+
+:root {
+    --color-primary: #1a365d;
+    --color-primary-light: #2b6cb0;
+    --color-accent: #3182ce;
+    --color-bg: #f7fafc;
+    --color-surface: #ffffff;
+    --color-text: #1a202c;
+    --color-text-muted: #718096;
+    --color-border: #e2e8f0;
+    --color-success: #38a169;
+    --color-warning: #d69e2e;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --max-width: 1200px;
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    background: var(--color-bg);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Header & Navigation --- */
+
+header {
+    background: var(--color-primary);
+    color: white;
+    padding: var(--space-md) var(--space-xl);
+}
+
+nav {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-brand a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: var(--space-lg);
+}
+
+.nav-links a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover,
+.nav-links a:focus {
+    color: white;
+}
+
+/* --- Main Content --- */
+
+main {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-xl);
+    flex: 1;
+    width: 100%;
+}
+
+/* --- Hero --- */
+
+.hero {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+}
+
+.hero h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: var(--space-md);
+    color: var(--color-primary);
+}
+
+.hero p {
+    font-size: 1.1rem;
+    color: var(--color-text-muted);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* --- Cards --- */
+
+.entry-points {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-xl);
+}
+
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: var(--space-xl);
+    transition: box-shadow 0.2s;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card h2 {
+    font-size: 1.15rem;
+    margin-bottom: var(--space-sm);
+    color: var(--color-primary);
+}
+
+.card p {
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-md);
+    font-size: 0.95rem;
+}
+
+/* --- Buttons --- */
+
+.btn {
+    display: inline-block;
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn:hover,
+.btn:focus {
+    background: var(--color-primary-light);
+}
+
+/* --- Footer --- */
+
+footer {
+    background: var(--color-primary);
+    color: rgba(255, 255, 255, 0.75);
+    padding: var(--space-lg) var(--space-xl);
+    margin-top: auto;
+}
+
+.footer-content {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.footer-meta {
+    margin-top: var(--space-xs);
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+/* --- Error Pages --- */
+
+.error-page {
+    text-align: center;
+    padding: var(--space-2xl) 0;
+}
+
+.error-page h1 {
+    font-size: 1.75rem;
+    color: var(--color-primary);
+    margin-bottom: var(--space-md);
+}
+
+.error-page ul {
+    list-style: none;
+    margin-top: var(--space-lg);
+}
+
+.error-page ul li {
+    margin-bottom: var(--space-sm);
+}
+
+.error-page a {
+    color: var(--color-accent);
+}
+
+/* --- Lineage Badge --- */
+
+.lineage-badge {
+    display: inline-block;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
+}
+
+/* --- Tables --- */
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--space-md) 0;
+}
+
+.data-table th,
+.data-table td {
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+}
+
+.data-table th {
+    background: var(--color-bg);
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.data-table td {
+    font-size: 0.95rem;
+}
+
+.data-table tr:hover {
+    background: var(--color-bg);
+}
+
+/* --- Responsive --- */
+
+@media (max-width: 768px) {
+    .nav-links {
+        gap: var(--space-md);
+    }
+
+    main {
+        padding: var(--space-lg) var(--space-md);
+    }
+
+    .hero h1 {
+        font-size: 1.5rem;
+    }
+
+    .entry-points {
+        grid-template-columns: 1fr;
+    }
+}

@@ -43,6 +43,7 @@ Status of each phase's commit upon completion.
 | 9 | Analyst Marts | Phase 9: Analyst marts — 5 views, Jaccard similarity, query tests, publish gating | Complete |
 | 10 | Employment Projections (Optional R1) | Phase 10: Employment Projections — parser, staging, fact, validations, pipeline | Complete |
 | 11 | End-to-End Integration & Deliverables | Phase 11: E2E integration, schema docs, sample queries, deliverable verification | Complete |
+| W1 | Website: Project Setup & API Foundation | Phase W1: FastAPI app, health/metadata APIs, base layout, CSS, test framework | Complete |
 
 ## Project Structure
 

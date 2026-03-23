@@ -37,12 +37,12 @@ This document defines all tests for the JobClass reporting website, aligned phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | WT1-01 | UNIT | Database connection module reads from existing warehouse | Connection opens successfully; query against dim_occupation returns rows | WAR-1 | W1-04 | | |
-| `[ ]` | WT1-02 | API | `/api/health` returns 200 with warehouse version and table row counts | Response JSON contains `status`, `warehouse_version`, `table_counts` object with non-zero values | WAR-5 | W1-06 | | |
-| `[ ]` | WT1-03 | API | `/api/metadata` returns source versions and release IDs for all loaded datasets | Response includes `soc_version`, `oews_release_id`, `onet_version`, `last_load_timestamp` | WAR-5, WFR-11 | W1-07 | | |
-| `[ ]` | WT1-04 | RENDER | Base layout renders header, navigation, and footer | HTML response contains `<header>`, `<nav>`, `<footer>` elements with expected content | WNF-1, WNF-3 | W1-08 | | |
-| `[ ]` | WT1-05 | ERROR | API returns structured error JSON for invalid routes | 404 response has `error` and `message` fields; no stack trace exposed | WNF-6 | W1-05 | | |
-| `[ ]` | WT1-06 | CONTRACT | Health endpoint schema: `status` (string), `warehouse_version` (string), `table_counts` (object) | Schema matches expected structure; no extra or missing fields | WAR-2, WAR-5 | W1-06 | | |
+| `[X]` | WT1-01 | UNIT | Database connection module reads from existing warehouse | Connection opens successfully; query against dim_occupation returns rows | WAR-1 | W1-04 | 2026-03-23 16:00 | 2026-03-23 16:00 |
+| `[X]` | WT1-02 | API | `/api/health` returns 200 with warehouse version and table row counts | Response JSON contains `status`, `warehouse_version`, `table_counts` object with non-zero values | WAR-5 | W1-06 | 2026-03-23 16:00 | 2026-03-23 16:00 |
+| `[X]` | WT1-03 | API | `/api/metadata` returns source versions and release IDs for all loaded datasets | Response includes `soc_version`, `oews_release_id`, `onet_version`, `last_load_timestamp` | WAR-5, WFR-11 | W1-07 | 2026-03-23 16:00 | 2026-03-23 16:00 |
+| `[X]` | WT1-04 | RENDER | Base layout renders header, navigation, and footer | HTML response contains `<header>`, `<nav>`, `<footer>` elements with expected content | WNF-1, WNF-3 | W1-08 | 2026-03-23 16:00 | 2026-03-23 16:00 |
+| `[X]` | WT1-05 | ERROR | API returns structured error JSON for invalid routes | 404 response has `error` and `message` fields; no stack trace exposed | WNF-6 | W1-05 | 2026-03-23 16:00 | 2026-03-23 16:00 |
+| `[X]` | WT1-06 | CONTRACT | Health endpoint schema: `status` (string), `warehouse_version` (string), `table_counts` (object) | Schema matches expected structure; no extra or missing fields | WAR-2, WAR-5 | W1-06 | 2026-03-23 16:00 | 2026-03-23 16:00 |
 
 ---
 

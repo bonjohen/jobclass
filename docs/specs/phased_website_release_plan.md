@@ -74,16 +74,16 @@ Establish the website project structure, tech stack, and application service lay
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | W1-01 | Select and document website tech stack (framework, API layer, charting library, CSS approach) | WAR-1, WAR-6 | | |
-| `[ ]` | W1-02 | Initialize website project structure (app directory, static assets, templates or components, config) | WAR-6 | | |
-| `[ ]` | W1-03 | Configure development server with hot reload, linting, and test runner | WNF-2 | | |
-| `[ ]` | W1-04 | Create database connection module: read-only access to existing DuckDB warehouse | WAR-1, WAR-3 | | |
-| `[ ]` | W1-05 | Build API foundation: router structure, request/response patterns, error handling | WAR-1, WAR-2, WNF-6 | | |
-| `[ ]` | W1-06 | Implement `/api/health` endpoint returning warehouse version and row counts | WAR-5 | | |
-| `[ ]` | W1-07 | Implement `/api/metadata` endpoint returning source versions, release IDs, last load timestamps | WAR-5, WFR-11 | | |
-| `[ ]` | W1-08 | Create base page layout: header, navigation, footer, content area | WNF-1, WNF-3, WNF-5 | | |
-| `[ ]` | W1-09 | Set up test framework for API endpoints and page rendering | — | | |
-| `[ ]` | W1-10 | Configure static asset pipeline (CSS, JS bundling or serving) | WNF-2 | | |
+| `[X]` | W1-01 | Select and document website tech stack (framework, API layer, charting library, CSS approach) | WAR-1, WAR-6 | 2026-03-23 15:00 | 2026-03-23 16:00 |
+| `[X]` | W1-02 | Initialize website project structure (app directory, static assets, templates or components, config) | WAR-6 | 2026-03-23 15:00 | 2026-03-23 16:00 |
+| `[X]` | W1-03 | Configure development server with hot reload, linting, and test runner | WNF-2 | 2026-03-23 15:00 | 2026-03-23 16:00 |
+| `[X]` | W1-04 | Create database connection module: read-only access to existing DuckDB warehouse | WAR-1, WAR-3 | 2026-03-23 15:00 | 2026-03-23 16:00 |
+| `[X]` | W1-05 | Build API foundation: router structure, request/response patterns, error handling | WAR-1, WAR-2, WNF-6 | 2026-03-23 15:00 | 2026-03-23 16:00 |
+| `[X]` | W1-06 | Implement `/api/health` endpoint returning warehouse version and row counts | WAR-5 | 2026-03-23 15:00 | 2026-03-23 16:00 |
+| `[X]` | W1-07 | Implement `/api/metadata` endpoint returning source versions, release IDs, last load timestamps | WAR-5, WFR-11 | 2026-03-23 15:00 | 2026-03-23 16:00 |
+| `[X]` | W1-08 | Create base page layout: header, navigation, footer, content area | WNF-1, WNF-3, WNF-5 | 2026-03-23 15:00 | 2026-03-23 16:00 |
+| `[X]` | W1-09 | Set up test framework for API endpoints and page rendering | — | 2026-03-23 15:00 | 2026-03-23 16:00 |
+| `[X]` | W1-10 | Configure static asset pipeline (CSS, JS bundling or serving) | WNF-2 | 2026-03-23 15:00 | 2026-03-23 16:00 |
 
 ---
 
