@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import duckdb
 
+from jobclass.load import _safe_identifier
 from jobclass.parse.onet import OnetDescriptorRow, OnetTaskRow
 
 
@@ -17,6 +18,7 @@ def load_onet_descriptor_staging(
 
     Idempotent: deletes existing rows for this release before inserting.
     """
+    table_name = _safe_identifier(table_name)
     conn.execute(f"DELETE FROM {table_name} WHERE source_release_id = ?", [source_release_id])
     for r in rows:
         conn.execute(
@@ -65,6 +67,8 @@ def load_dim_descriptor(
 
     Inserts distinct element_id + element_name pairs not already present for this version.
     """
+    table_name = _safe_identifier(table_name)
+    staging_table = _safe_identifier(staging_table)
     conn.execute(
         f"""INSERT INTO {table_name} (element_id, element_name, source_version)
             SELECT DISTINCT s.element_id, s.element_name, ?
@@ -108,6 +112,10 @@ def load_bridge_occupation_descriptor(
 
     Idempotent: skips if rows already exist for this source_version + source_release_id.
     """
+    bridge_table = _safe_identifier(bridge_table)
+    dim_table = _safe_identifier(dim_table)
+    dim_key_column = _safe_identifier(dim_key_column)
+    staging_table = _safe_identifier(staging_table)
     existing = conn.execute(
         f"SELECT COUNT(*) FROM {bridge_table} WHERE source_version = ? AND source_release_id = ?",
         [source_version, source_release_id],

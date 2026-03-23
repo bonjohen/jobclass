@@ -2,6 +2,7 @@
 
 import duckdb
 
+from jobclass.load import _safe_identifier
 from jobclass.parse.oews import OewsRow
 
 _STAGING_COLS = (
@@ -37,6 +38,7 @@ def load_oews_staging(
     source_release_id: str,
 ) -> int:
     """Load parsed OEWS rows into a staging table. Idempotent per release."""
+    table_name = _safe_identifier(table_name)
     conn.execute(f"DELETE FROM {table_name} WHERE source_release_id = ?", [source_release_id])
     placeholders = ", ".join(["?"] * 28)
     for row in rows:
@@ -138,6 +140,7 @@ def load_fact_occupation_employment_wages(
     if existing > 0:
         return 0
 
+    _safe_identifier(source_dataset)
     table = f"stage__bls__{source_dataset}"
     estimate_year = int(reference_period.split(".")[0]) if "." in reference_period else int(reference_period[:4])
 

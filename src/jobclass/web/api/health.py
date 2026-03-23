@@ -2,11 +2,22 @@
 
 from __future__ import annotations
 
+import re
+
 from fastapi import APIRouter, HTTPException
 
 from jobclass.web.database import get_db
 
 router = APIRouter(prefix="/api", tags=["system"])
+
+_IDENTIFIER_RE = re.compile(r"^[a-z_][a-z0-9_]*$")
+
+
+def _safe_identifier(name: str) -> str:
+    """Validate and return a SQL identifier, raising ValueError if unsafe."""
+    if not _IDENTIFIER_RE.match(name):
+        raise ValueError(f"Invalid SQL identifier: {name!r}")
+    return name
 
 
 @router.get("/health")
@@ -22,7 +33,7 @@ def health() -> dict:
         table_counts = {}
         for t in tables:
             try:
-                count = conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
+                count = conn.execute(f"SELECT COUNT(*) FROM {_safe_identifier(t)}").fetchone()[0]
                 table_counts[t] = count
             except Exception:
                 table_counts[t] = 0

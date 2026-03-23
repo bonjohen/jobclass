@@ -103,7 +103,7 @@
                     if (item.soc_code === socCode) {
                         html += '<span class="bc-current">' + escapeHtml(item.occupation_title) + '</span>';
                     } else {
-                        html += '<a href="/occupation/' + item.soc_code + '">' + escapeHtml(item.occupation_title) + '</a>';
+                        html += '<a href="/occupation/' + escapeAttr(item.soc_code) + '">' + escapeHtml(item.occupation_title) + '</a>';
                     }
                 });
                 bc.innerHTML = html;
@@ -114,7 +114,7 @@
                 document.getElementById("siblings-section").style.display = "block";
                 var sl = document.getElementById("siblings-list");
                 sl.innerHTML = data.siblings.map(function(s) {
-                    return '<li><a href="/occupation/' + s.soc_code + '">' + s.soc_code + ' — ' + escapeHtml(s.occupation_title) + '</a></li>';
+                    return '<li><a href="/occupation/' + escapeAttr(s.soc_code) + '">' + escapeHtml(s.soc_code) + ' — ' + escapeHtml(s.occupation_title) + '</a></li>';
                 }).join("");
             }
 
@@ -123,7 +123,7 @@
                 document.getElementById("children-section").style.display = "block";
                 var cl = document.getElementById("children-list");
                 cl.innerHTML = data.children.map(function(c) {
-                    return '<li><a href="/occupation/' + c.soc_code + '">' + c.soc_code + ' — ' + escapeHtml(c.occupation_title) + '</a></li>';
+                    return '<li><a href="/occupation/' + escapeAttr(c.soc_code) + '">' + escapeHtml(c.soc_code) + ' — ' + escapeHtml(c.occupation_title) + '</a></li>';
                 }).join("");
             }
 
@@ -166,8 +166,8 @@
                 html += '<td>' + formatWage(w.p75_hourly_wage) + '</td>';
                 html += '<td>' + formatWage(w.p90_hourly_wage) + '</td>';
                 html += '</tr></tbody></table></div>';
-                html += '<p><a href="/occupation/' + code + '/wages" class="btn">Compare by State</a></p>';
-                html += '<div class="lineage-badge">OEWS ' + (w.source_release_id || '') + ' | ' + (w.reference_period || '') + '</div>';
+                html += '<p><a href="/occupation/' + escapeAttr(code) + '/wages" class="btn">Compare by State</a></p>';
+                html += '<div class="lineage-badge">OEWS ' + escapeHtml(w.source_release_id) + ' | ' + escapeHtml(w.reference_period) + '</div>';
                 document.getElementById("wages-content").innerHTML = html;
             });
     }
@@ -186,7 +186,7 @@
                     html += '<td>' + (s.level != null ? s.level.toFixed(2) : 'N/A') + '</td></tr>';
                 });
                 html += '</tbody></table>';
-                if (data.source_version) html += '<div class="lineage-badge">O*NET ' + data.source_version + '</div>';
+                if (data.source_version) html += '<div class="lineage-badge">O*NET ' + escapeHtml(data.source_version) + '</div>';
                 document.getElementById("skills-content").innerHTML = html;
             });
     }
@@ -205,7 +205,7 @@
                     html += '</li>';
                 });
                 html += '</ul>';
-                if (data.source_version) html += '<div class="lineage-badge">O*NET ' + data.source_version + '</div>';
+                if (data.source_version) html += '<div class="lineage-badge">O*NET ' + escapeHtml(data.source_version) + '</div>';
                 document.getElementById("tasks-content").innerHTML = html;
             });
     }
@@ -219,15 +219,15 @@
                 var section = document.getElementById("projections-section");
                 section.style.display = "block";
                 var html = '<div class="wages-grid">';
-                html += wageCard("Base Employment (" + (p.base_year || '') + ")", formatNumber(p.base_employment));
-                html += wageCard("Projected Employment (" + (p.projection_year || '') + ")", formatNumber(p.projected_employment));
+                html += wageCard("Base Employment (" + escapeHtml(p.base_year) + ")", formatNumber(p.base_employment));
+                html += wageCard("Projected Employment (" + escapeHtml(p.projection_year) + ")", formatNumber(p.projected_employment));
                 html += wageCard("Growth Rate", p.percent_change != null ? p.percent_change.toFixed(1) + "%" : "N/A");
                 html += wageCard("Annual Openings", formatNumber(p.annual_openings));
                 html += '</div>';
                 if (p.education_category) {
                     html += '<p><strong>Typical Education:</strong> ' + escapeHtml(p.education_category) + '</p>';
                 }
-                if (p.source_release_id) html += '<div class="lineage-badge">Projections ' + p.projection_cycle + ' | ' + p.source_release_id + '</div>';
+                if (p.source_release_id) html += '<div class="lineage-badge">Projections ' + escapeHtml(p.projection_cycle) + ' | ' + escapeHtml(p.source_release_id) + '</div>';
                 document.getElementById("projections-content").innerHTML = html;
             });
     }
@@ -241,7 +241,7 @@
                 section.style.display = "block";
                 var html = '<table class="data-table"><thead><tr><th>Occupation</th><th>Similarity</th></tr></thead><tbody>';
                 data.similar.forEach(function(s) {
-                    html += '<tr><td><a href="/occupation/' + s.soc_code + '">' + s.soc_code + ' — ' + escapeHtml(s.occupation_title) + '</a></td>';
+                    html += '<tr><td><a href="/occupation/' + escapeAttr(s.soc_code) + '">' + escapeHtml(s.soc_code) + ' — ' + escapeHtml(s.occupation_title) + '</a></td>';
                     html += '<td>' + (s.similarity_score * 100).toFixed(1) + '%</td></tr>';
                 });
                 html += '</tbody></table>';
@@ -253,10 +253,5 @@
         return '<div class="stat-card"><div class="stat-label">' + label + '</div><div class="stat-value">' + value + '</div></div>';
     }
 
-    function escapeHtml(text) {
-        var div = document.createElement("div");
-        div.appendChild(document.createTextNode(text));
-        return div.innerHTML;
-    }
 })();
 </script>

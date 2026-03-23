@@ -38,8 +38,8 @@
                 }
                 var html = '<table class="data-table"><thead><tr><th>SOC Code</th><th>Title</th><th>Level</th></tr></thead><tbody>';
                 data.results.forEach(function(r) {
-                    html += '<tr><td><a href="/occupation/' + r.soc_code + '">' + r.soc_code + '</a></td>';
-                    html += '<td><a href="/occupation/' + r.soc_code + '">' + escapeHtml(r.occupation_title) + '</a></td>';
+                    html += '<tr><td><a href="/occupation/' + escapeAttr(r.soc_code) + '">' + escapeHtml(r.soc_code) + '</a></td>';
+                    html += '<td><a href="/occupation/' + escapeAttr(r.soc_code) + '">' + escapeHtml(r.occupation_title) + '</a></td>';
                     html += '<td>' + escapeHtml(r.occupation_level_name) + '</td></tr>';
                 });
                 html += '</tbody></table>';
@@ -48,12 +48,6 @@
             .catch(function() {
                 resultsDiv.innerHTML = '<p class="search-hint">Search failed. Please try again.</p>';
             });
-    }
-
-    function escapeHtml(text) {
-        var div = document.createElement("div");
-        div.appendChild(document.createTextNode(text));
-        return div.innerHTML;
     }
 
     input.focus();

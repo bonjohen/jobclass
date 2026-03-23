@@ -36,7 +36,8 @@ def validate_required_columns(
     """Check that all required columns exist in the table."""
     actual_cols = {
         r[0] for r in conn.execute(
-            f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table_name}'"
+            "SELECT column_name FROM information_schema.columns WHERE table_name = ?",
+            [table_name],
         ).fetchall()
     }
     missing = set(required_columns) - actual_cols
@@ -56,7 +57,8 @@ def validate_column_types(
     """Check that columns have expected types."""
     actual_types = {
         r[0]: r[1] for r in conn.execute(
-            f"SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '{table_name}'"
+            "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ?",
+            [table_name],
         ).fetchall()
     }
     mismatches = {}
@@ -238,7 +240,8 @@ def get_table_schema(conn: duckdb.DuckDBPyConnection, table_name: str) -> dict[s
     """Get column name → data type mapping for a table."""
     return {
         r[0]: r[1] for r in conn.execute(
-            f"SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '{table_name}'"
+            "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ?",
+            [table_name],
         ).fetchall()
     }
 

@@ -52,12 +52,15 @@
         .then(function(data) {
             if (!data) return;
             document.getElementById("spotlight").style.display = "block";
-            var html = '<p>' + (data.occupation_definition || '') + '</p>';
-            document.getElementById("spotlight-content").innerHTML = html;
+            var p = document.createElement("p");
+            p.textContent = data.occupation_definition || '';
+            var container = document.getElementById("spotlight-content");
+            container.innerHTML = '';
+            container.appendChild(p);
         });
 
     function statCard(label, value) {
-        return '<div class="stat-card"><div class="stat-label">' + label + '</div><div class="stat-value">' + value + '</div></div>';
+        return '<div class="stat-card"><div class="stat-label">' + escapeHtml(label) + '</div><div class="stat-value">' + escapeHtml(value) + '</div></div>';
     }
 })();
 </script>

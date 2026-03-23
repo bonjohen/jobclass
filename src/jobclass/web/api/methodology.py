@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import re
+
 from fastapi import APIRouter, HTTPException
 
 from jobclass.web.database import get_db
+
+_IDENTIFIER_RE = re.compile(r"^[a-z_][a-z0-9_]*$")
 
 router = APIRouter(prefix="/api/methodology", tags=["methodology"])
 
@@ -156,6 +160,8 @@ def validation_summary() -> dict:
     ]
     for view in mart_views:
         try:
+            if not _IDENTIFIER_RE.match(view):
+                raise ValueError(f"Invalid view name: {view!r}")
             row = conn.execute(f"SELECT COUNT(*) FROM {view}").fetchone()
             count = row[0] if row else 0
             checks.append({

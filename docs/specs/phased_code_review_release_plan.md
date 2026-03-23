@@ -21,25 +21,25 @@ Fix issues that block safe execution, clear understanding, or basic trust. Addre
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | CR1-01 | Move `escapeHtml()` function from template duplicates into `static/js/main.js` as shared utility | #1 | | |
-| `[ ]` | CR1-02 | Replace `innerHTML` with `textContent` or DOM methods in `templates/landing.html` (spotlight definition) | #1 | | |
-| `[ ]` | CR1-03 | Replace `innerHTML` with escaped DOM construction in `templates/occupation.html` (wages, skills, tasks, projections, similar sections) | #1 | | |
-| `[ ]` | CR1-04 | Escape `soc_code` values in `href` attributes across all templates (breadcrumb, search results, hierarchy links) | #1 | | |
-| `[ ]` | CR1-05 | Add tests that verify HTML characters in API response fields render as text, not executed markup | #1 | | |
-| `[ ]` | CR1-06 | Parameterize `table_name` in `validate/framework.py` information_schema queries (lines 39, 59) using `WHERE table_name = ?` | #2 | | |
-| `[ ]` | CR1-07 | Parameterize table names in source-specific validators (`validate/soc.py:25`, `validate/oews.py:22`, `validate/onet.py:30,51,74,100`) | #2 | | |
-| `[ ]` | CR1-08 | Add allowlist validation for dynamic table names in `load/onet.py:69,119` and `load/oews.py:40` before f-string interpolation | #2 | | |
-| `[ ]` | CR1-09 | Add regex assertion (`^[a-z_]+$`) for table/view names in `web/api/health.py:25,159` before interpolation | #2 | | |
-| `[ ]` | CR1-10 | Add test that crafted table name injection (e.g., `"; DROP TABLE dim_occupation; --"`) is rejected | #2 | | |
-| `[ ]` | CR1-11 | Create `src/jobclass/cli.py` with CLI commands for pipeline operations (run-all, taxonomy-refresh, oews-refresh, onet-refresh, projections-refresh, warehouse-publish) | #5 | | |
-| `[ ]` | CR1-12 | Create `src/jobclass/web/cli.py` with CLI command to start web server (host, port, reload options) | #5 | | |
-| `[ ]` | CR1-13 | Add `[project.scripts]` to `pyproject.toml`: `jobclass-pipeline` and `jobclass-web` entrypoints | #5 | | |
-| `[ ]` | CR1-14 | Document CLI usage in README.md (pipeline commands, web server start) | #5 | | |
-| `[ ]` | CR1-15 | Add `CORSMiddleware` to `web/app.py` with explicit `allowed_origins` defaulting to same-origin | #3 | | |
-| `[ ]` | CR1-16 | Add CSP middleware to `web/app.py` setting `Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'` | #4 | | |
-| `[ ]` | CR1-17 | Add tests verifying CORS rejection of cross-origin requests and CSP header presence | #3, #4 | | |
-| `[ ]` | CR1-18 | Refactor `config/database.py` to import `DB_PATH` and `MIGRATIONS_DIR` from `config/settings.py` instead of recomputing paths | #6 | | |
-| `[ ]` | CR1-19 | Add test verifying `JOBCLASS_DB_PATH` environment variable is respected by both pipeline and web database modules | #6 | | |
+| `[X]` | CR1-01 | Move `escapeHtml()` function from template duplicates into `static/js/main.js` as shared utility | #1 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-02 | Replace `innerHTML` with `textContent` or DOM methods in `templates/landing.html` (spotlight definition) | #1 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-03 | Replace `innerHTML` with escaped DOM construction in `templates/occupation.html` (wages, skills, tasks, projections, similar sections) | #1 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-04 | Escape `soc_code` values in `href` attributes across all templates (breadcrumb, search results, hierarchy links) | #1 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-05 | Add tests that verify HTML characters in API response fields render as text, not executed markup | #1 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-06 | Parameterize `table_name` in `validate/framework.py` information_schema queries (lines 39, 59) using `WHERE table_name = ?` | #2 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-07 | Parameterize table names in source-specific validators (`validate/soc.py:25`, `validate/oews.py:22`, `validate/onet.py:30,51,74,100`) | #2 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-08 | Add allowlist validation for dynamic table names in `load/onet.py:69,119` and `load/oews.py:40` before f-string interpolation | #2 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-09 | Add regex assertion (`^[a-z_]+$`) for table/view names in `web/api/health.py:25,159` before interpolation | #2 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-10 | Add test that crafted table name injection (e.g., `"; DROP TABLE dim_occupation; --"`) is rejected | #2 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-11 | Create `src/jobclass/cli.py` with CLI commands for pipeline operations (run-all, taxonomy-refresh, oews-refresh, onet-refresh, projections-refresh, warehouse-publish) | #5 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-12 | Create `src/jobclass/web/cli.py` with CLI command to start web server (host, port, reload options) | #5 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-13 | Add `[project.scripts]` to `pyproject.toml`: `jobclass-pipeline` and `jobclass-web` entrypoints | #5 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-14 | Document CLI usage in README.md (pipeline commands, web server start) | #5 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-15 | Add `CORSMiddleware` to `web/app.py` with explicit `allowed_origins` defaulting to same-origin | #3 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-16 | Add CSP middleware to `web/app.py` setting `Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'` | #4 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-17 | Add tests verifying CORS rejection of cross-origin requests and CSP header presence | #3, #4 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-18 | Refactor `config/database.py` to import `DB_PATH` and `MIGRATIONS_DIR` from `config/settings.py` instead of recomputing paths | #6 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR1-19 | Add test verifying `JOBCLASS_DB_PATH` environment variable is respected by both pipeline and web database modules | #6 | 2026-03-23 | 2026-03-23 |
 
 ---
 

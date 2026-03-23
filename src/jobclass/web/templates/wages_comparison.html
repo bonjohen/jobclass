@@ -41,7 +41,7 @@
             html += '</tbody></table>';
 
             if (data.wages[0].source_release_id) {
-                html += '<div class="lineage-badge">OEWS ' + data.wages[0].source_release_id + '</div>';
+                html += '<div class="lineage-badge">OEWS ' + escapeHtml(data.wages[0].source_release_id) + '</div>';
             }
 
             container.innerHTML = html;
@@ -51,10 +51,5 @@
             document.getElementById("wages-table-container").innerHTML = "<p>Failed to load wage data.</p>";
         });
 
-    function escapeHtml(text) {
-        var div = document.createElement("div");
-        div.appendChild(document.createTextNode(text));
-        return div.innerHTML;
-    }
 })();
 </script>

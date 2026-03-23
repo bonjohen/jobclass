@@ -27,7 +27,8 @@ def validate_onet_structural(
 
     actual_cols = {
         r[0] for r in conn.execute(
-            f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table_name}'"
+            "SELECT column_name FROM information_schema.columns WHERE table_name = ?",
+            [table_name],
         ).fetchall()
     }
     missing = set(required_cols) - actual_cols

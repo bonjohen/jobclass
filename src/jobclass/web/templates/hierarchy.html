@@ -46,8 +46,8 @@
             } else {
                 html += '<span class="tree-spacer"></span>';
             }
-            html += '<a href="/occupation/' + n.soc_code + '" class="tree-link">';
-            html += '<span class="tree-code">' + n.soc_code + '</span> ';
+            html += '<a href="/occupation/' + escapeAttr(n.soc_code) + '" class="tree-link">';
+            html += '<span class="tree-code">' + escapeHtml(n.soc_code) + '</span> ';
             html += '<span class="tree-title">' + escapeHtml(n.occupation_title) + '</span>';
             html += '</a>';
             if (hasChildren) {
@@ -59,10 +59,5 @@
         return html;
     }
 
-    function escapeHtml(text) {
-        var div = document.createElement("div");
-        div.appendChild(document.createTextNode(text));
-        return div.innerHTML;
-    }
 })();
 </script>

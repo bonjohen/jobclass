@@ -79,12 +79,12 @@
         .then(function(r) { return r.json(); })
         .then(function(data) {
             var html = '<table class="data-table"><thead><tr><th>Source</th><th>Version</th></tr></thead><tbody>';
-            html += '<tr><td>SOC</td><td>' + (data.soc_version || 'N/A') + '</td></tr>';
-            html += '<tr><td>OEWS</td><td>' + (data.oews_release_id || 'N/A') + '</td></tr>';
-            html += '<tr><td>O*NET</td><td>' + (data.onet_version || 'N/A') + '</td></tr>';
-            html += '<tr><td>Projections</td><td>' + (data.projections_cycle || 'N/A') + '</td></tr>';
+            html += '<tr><td>SOC</td><td>' + escapeHtml(data.soc_version || 'N/A') + '</td></tr>';
+            html += '<tr><td>OEWS</td><td>' + escapeHtml(data.oews_release_id || 'N/A') + '</td></tr>';
+            html += '<tr><td>O*NET</td><td>' + escapeHtml(data.onet_version || 'N/A') + '</td></tr>';
+            html += '<tr><td>Projections</td><td>' + escapeHtml(data.projections_cycle || 'N/A') + '</td></tr>';
             if (data.last_load_timestamp) {
-                html += '<tr><td>Last Load</td><td>' + data.last_load_timestamp + '</td></tr>';
+                html += '<tr><td>Last Load</td><td>' + escapeHtml(data.last_load_timestamp) + '</td></tr>';
             }
             html += '</tbody></table>';
             document.getElementById("versions-content").innerHTML = html;
@@ -102,9 +102,9 @@
             data.checks.forEach(function(c) {
                 var status = c.passed ? '&#10003;' : '&#10007;';
                 var cls = c.passed ? 'check-pass' : 'check-fail';
-                html += '<tr><td>' + c.check + '</td>';
+                html += '<tr><td>' + escapeHtml(c.check) + '</td>';
                 html += '<td class="' + cls + '">' + status + '</td>';
-                html += '<td>' + c.detail + '</td></tr>';
+                html += '<td>' + escapeHtml(c.detail) + '</td></tr>';
             });
             html += '</tbody></table>';
             document.getElementById("validation-content").innerHTML = html;

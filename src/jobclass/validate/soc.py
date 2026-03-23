@@ -22,7 +22,7 @@ def validate_soc_structural(conn: duckdb.DuckDBPyConnection, source_release_id: 
         ("stage__soc__hierarchy", ["soc_code", "occupation_title", "occupation_level", "occupation_level_name", "parent_soc_code", "source_release_id", "parser_version"]),
         ("stage__soc__definitions", ["soc_code", "occupation_definition", "source_release_id", "parser_version"]),
     ]:
-        actual_cols = {row[0] for row in conn.execute(f"SELECT column_name FROM information_schema.columns WHERE table_name = '{table}'").fetchall()}
+        actual_cols = {row[0] for row in conn.execute("SELECT column_name FROM information_schema.columns WHERE table_name = ?", [table]).fetchall()}
         missing = set(required_cols) - actual_cols
         results.append(ValidationResult(
             passed=len(missing) == 0,

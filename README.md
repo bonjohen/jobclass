@@ -53,6 +53,40 @@ Status of each phase's commit upon completion.
 | W8 | Website: Visual Polish & Responsive Design | Phase W8: Responsive CSS, accessibility (ARIA, skip-nav, focus), performance checks, 14 tests | Complete |
 | W9 | Website: End-to-End Integration & Deployment | Phase W9: E2E smoke tests, worked example, lineage verification, full suite 376 tests | Complete |
 
+## CLI Usage
+
+Install the package in development mode:
+
+```bash
+pip install -e ".[dev]"
+```
+
+### Pipeline CLI
+
+```bash
+# Run database migrations
+jobclass-pipeline migrate
+
+# Check migration and database status
+jobclass-pipeline status
+```
+
+### Web Server CLI
+
+```bash
+# Start the web server (default: http://127.0.0.1:8000)
+jobclass-web
+
+# Custom host/port with auto-reload for development
+jobclass-web --host 0.0.0.0 --port 8080 --reload
+```
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `JOBCLASS_DB_PATH` | `warehouse.duckdb` | Path to the DuckDB database file |
+
 ## Project Structure
 
 ```

@@ -4,8 +4,11 @@ from pathlib import Path
 
 import duckdb
 
-_MIGRATIONS_DIR = Path(__file__).parent.parent.parent.parent / "migrations"
-DEFAULT_DB_PATH = Path(__file__).parent.parent.parent.parent / "warehouse.duckdb"
+from jobclass.config.settings import DB_PATH as _SETTINGS_DB_PATH
+from jobclass.config.settings import MIGRATIONS_DIR as _SETTINGS_MIGRATIONS_DIR
+
+_MIGRATIONS_DIR = _SETTINGS_MIGRATIONS_DIR
+DEFAULT_DB_PATH = _SETTINGS_DB_PATH
 
 
 def get_connection(db_path: Path | str | None = None) -> duckdb.DuckDBPyConnection:
