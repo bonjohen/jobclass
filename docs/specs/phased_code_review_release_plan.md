@@ -49,35 +49,35 @@ Strengthen code quality, reduce duplication, improve error handling, and make th
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | CR2-01 | Create `parse/common.py` with unified `SUPPRESSION_MARKERS` set (union of all current markers: `""`, `"*"`, `"**"`, `"#"`, `"-"`, `"--"`, `"N/A"`) | #7 | | |
-| `[ ]` | CR2-02 | Add shared `parse_numeric()`, `parse_float()`, `parse_int()` functions to `parse/common.py` | #7 | | |
-| `[ ]` | CR2-03 | Refactor `parse/oews.py` to import suppression markers and numeric parsers from `parse/common.py` | #7 | | |
-| `[ ]` | CR2-04 | Refactor `parse/onet.py` to import suppression markers and numeric parsers from `parse/common.py` | #7 | | |
-| `[ ]` | CR2-05 | Refactor `parse/projections.py` to import suppression markers and numeric parsers from `parse/common.py` | #7 | | |
-| `[ ]` | CR2-06 | Add `max_length=100` to search query parameter in `web/api/occupations.py` | #8 | | |
-| `[ ]` | CR2-07 | Validate `geo_type` against `Literal["national", "state"]` in `web/api/wages.py`; return 400 for invalid values | #8 | | |
-| `[ ]` | CR2-08 | Validate SOC code format with regex `^\d{2}-\d{4}$` in all endpoints accepting `soc_code`; return 400 for malformed codes | #8 | | |
-| `[ ]` | CR2-09 | Ensure all validation failures return HTTP 400 with `{"error": "bad_request", "message": "..."}` response body | #8 | | |
-| `[ ]` | CR2-10 | Add tests for input validation: oversized search, invalid geo_type, malformed SOC codes all return 400 | #8 | | |
-| `[ ]` | CR2-11 | Add `threading.Lock()` to `web/database.py` around connection initialization in `get_db()` | #9 | | |
-| `[ ]` | CR2-12 | Add concurrent access test: call `get_db()` from multiple threads simultaneously and verify no errors | #9 | | |
-| `[ ]` | CR2-13 | Replace `except Exception: pass` in `extract/orchestrator.py:103` with `except Exception as e: logger.warning(...)` | #10 | | |
-| `[ ]` | CR2-14 | Replace `except Exception: pass` in `web/database.py:38` with specific `except duckdb.Error` and logging | #10 | | |
-| `[ ]` | CR2-15 | Replace `except Exception: pass` in `load/oews.py:62,102` with `except duckdb.CatalogException` for missing tables | #10 | | |
-| `[ ]` | CR2-16 | Verify all exception handlers either log or re-raise; no silent swallowing remains | #10 | | |
-| `[ ]` | CR2-17 | Add `AbortController` to `search.html` to cancel previous in-flight request on new search dispatch | #11 | | |
-| `[ ]` | CR2-18 | Extract inline `<script>` from `templates/landing.html` into `static/js/landing.js` | #4, #11 | | |
-| `[ ]` | CR2-19 | Extract inline `<script>` from `templates/search.html` into `static/js/search.js` | #4, #11 | | |
-| `[ ]` | CR2-20 | Extract inline `<script>` from `templates/hierarchy.html` into `static/js/hierarchy.js` | #4 | | |
-| `[ ]` | CR2-21 | Extract inline `<script>` from `templates/occupation.html` into `static/js/occupation.js` | #4 | | |
-| `[ ]` | CR2-22 | Extract inline `<script>` from `templates/wages_comparison.html` into `static/js/wages.js` | #4 | | |
-| `[ ]` | CR2-23 | Extract inline `<script>` from `templates/methodology.html` into `static/js/methodology.js` | #4 | | |
-| `[ ]` | CR2-24 | Remove duplicate `escapeHtml()` from all templates; verify all pages reference `main.js` copy | #1, #4 | | |
-| `[ ]` | CR2-25 | Define Pydantic response models for `/api/health`, `/api/metadata`, `/api/stats` endpoints | #26 | | |
-| `[ ]` | CR2-26 | Define Pydantic response models for `/api/occupations/search`, `/api/occupations/hierarchy`, `/api/occupations/{soc_code}` | #26 | | |
-| `[ ]` | CR2-27 | Define Pydantic response models for wages, skills, tasks, similar, projections, methodology endpoints | #26 | | |
-| `[ ]` | CR2-28 | Apply `response_model` parameter to all FastAPI endpoint decorators | #26 | | |
-| `[ ]` | CR2-29 | Add contract tests: validate each API response against its Pydantic model | #26 | | |
+| `[X]` | CR2-01 | Create `parse/common.py` with unified `SUPPRESSION_MARKERS` set (union of all current markers: `""`, `"*"`, `"**"`, `"#"`, `"-"`, `"--"`, `"N/A"`) | #7 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-02 | Add shared `parse_numeric()`, `parse_float()`, `parse_int()` functions to `parse/common.py` | #7 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-03 | Refactor `parse/oews.py` to import suppression markers and numeric parsers from `parse/common.py` | #7 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-04 | Refactor `parse/onet.py` to import suppression markers and numeric parsers from `parse/common.py` | #7 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-05 | Refactor `parse/projections.py` to import suppression markers and numeric parsers from `parse/common.py` | #7 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-06 | Add `max_length=100` to search query parameter in `web/api/occupations.py` | #8 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-07 | Validate `geo_type` against `Literal["national", "state"]` in `web/api/wages.py`; return 400 for invalid values | #8 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-08 | Validate SOC code format with regex `^\d{2}-\d{4}$` in all endpoints accepting `soc_code`; return 400 for malformed codes | #8 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-09 | Ensure all validation failures return HTTP 400 with `{"error": "bad_request", "message": "..."}` response body | #8 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-10 | Add tests for input validation: oversized search, invalid geo_type, malformed SOC codes all return 400 | #8 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-11 | Add `threading.Lock()` to `web/database.py` around connection initialization in `get_db()` | #9 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-12 | Add concurrent access test: call `get_db()` from multiple threads simultaneously and verify no errors | #9 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-13 | Replace `except Exception: pass` in `extract/orchestrator.py:103` with `except Exception as e: logger.warning(...)` | #10 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-14 | Replace `except Exception: pass` in `web/database.py:38` with specific `except duckdb.Error` and logging | #10 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-15 | Replace `except Exception: pass` in `load/oews.py:62,102` with `except duckdb.CatalogException` for missing tables | #10 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-16 | Verify all exception handlers either log or re-raise; no silent swallowing remains | #10 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-17 | Add `AbortController` to `search.html` to cancel previous in-flight request on new search dispatch | #11 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-18 | Extract inline `<script>` from `templates/landing.html` into `static/js/landing.js` | #4, #11 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-19 | Extract inline `<script>` from `templates/search.html` into `static/js/search.js` | #4, #11 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-20 | Extract inline `<script>` from `templates/hierarchy.html` into `static/js/hierarchy.js` | #4 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-21 | Extract inline `<script>` from `templates/occupation.html` into `static/js/occupation.js` | #4 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-22 | Extract inline `<script>` from `templates/wages_comparison.html` into `static/js/wages.js` | #4 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-23 | Extract inline `<script>` from `templates/methodology.html` into `static/js/methodology.js` | #4 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-24 | Remove duplicate `escapeHtml()` from all templates; verify all pages reference `main.js` copy | #1, #4 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-25 | Define Pydantic response models for `/api/health`, `/api/metadata`, `/api/stats` endpoints | #26 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-26 | Define Pydantic response models for `/api/occupations/search`, `/api/occupations/hierarchy`, `/api/occupations/{soc_code}` | #26 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-27 | Define Pydantic response models for wages, skills, tasks, similar, projections, methodology endpoints | #26 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-28 | Apply `response_model` parameter to all FastAPI endpoint decorators | #26 | 2026-03-23 | 2026-03-23 |
+| `[X]` | CR2-29 | Add contract tests: validate each API response against its Pydantic model | #26 | 2026-03-23 | 2026-03-23 |
 
 ---
 

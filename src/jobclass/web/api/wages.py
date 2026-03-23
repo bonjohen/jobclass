@@ -2,19 +2,29 @@
 
 from __future__ import annotations
 
+import re
+
 from fastapi import APIRouter, HTTPException, Query
 
+from jobclass.web.api.models import GeographiesResponse, WagesResponse
 from jobclass.web.database import get_db
 
 router = APIRouter(prefix="/api", tags=["wages"])
 
+_SOC_CODE_RE = re.compile(r"^\d{2}-\d{4}$")
+_VALID_GEO_TYPES = {"national", "state"}
 
-@router.get("/occupations/{soc_code}/wages")
+
+@router.get("/occupations/{soc_code}/wages", response_model=WagesResponse)
 def occupation_wages(
     soc_code: str,
     geo_type: str = Query("national", description="Geography type: national or state"),
 ) -> dict:
     """Return wage data for an occupation, optionally filtered by geography type."""
+    if not _SOC_CODE_RE.match(soc_code):
+        raise HTTPException(status_code=400, detail=f"Invalid SOC code format: {soc_code}")
+    if geo_type not in _VALID_GEO_TYPES:
+        raise HTTPException(status_code=400, detail=f"Invalid geo_type: {geo_type}. Must be one of: {', '.join(sorted(_VALID_GEO_TYPES))}")
     conn = get_db()
 
     # Verify occupation exists
@@ -62,7 +72,7 @@ def occupation_wages(
     return {"soc_code": soc_code, "geo_type": geo_type, "wages": results}
 
 
-@router.get("/geographies")
+@router.get("/geographies", response_model=GeographiesResponse)
 def list_geographies() -> dict:
     """Return all available geographies with metadata."""
     conn = get_db()

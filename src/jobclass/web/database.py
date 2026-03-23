@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import threading
 from pathlib import Path
 
 import duckdb
@@ -9,6 +10,7 @@ import duckdb
 from jobclass.config.settings import get_config
 
 _conn: duckdb.DuckDBPyConnection | None = None
+_lock = threading.Lock()
 
 
 def get_db(db_path: str | Path | None = None) -> duckdb.DuckDBPyConnection:
@@ -16,17 +18,23 @@ def get_db(db_path: str | Path | None = None) -> duckdb.DuckDBPyConnection:
 
     Reuses a module-level connection for the lifetime of the process.
     Pass db_path explicitly in tests; otherwise reads from config.
+    Thread-safe: uses a lock around connection initialization.
     """
     global _conn
     if _conn is not None:
         return _conn
 
-    if db_path is None:
-        cfg = get_config()
-        db_path = cfg["db_path"]
+    with _lock:
+        # Double-check after acquiring lock
+        if _conn is not None:
+            return _conn
 
-    _conn = duckdb.connect(str(db_path), read_only=True)
-    return _conn
+        if db_path is None:
+            cfg = get_config()
+            db_path = cfg["db_path"]
+
+        _conn = duckdb.connect(str(db_path), read_only=True)
+        return _conn
 
 
 def reset_db() -> None:
@@ -35,7 +43,7 @@ def reset_db() -> None:
     if _conn is not None:
         try:
             _conn.close()
-        except Exception:
+        except duckdb.Error:
             pass
         _conn = None
 

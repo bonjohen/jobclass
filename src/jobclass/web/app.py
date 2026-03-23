@@ -45,7 +45,7 @@ def create_app() -> FastAPI:
             response = await call_next(request)
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
-                "script-src 'self' 'unsafe-inline'; "
+                "script-src 'self'; "
                 "style-src 'self' 'unsafe-inline'"
             )
             response.headers["X-Content-Type-Options"] = "nosniff"

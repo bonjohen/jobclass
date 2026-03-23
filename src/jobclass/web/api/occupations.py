@@ -2,15 +2,20 @@
 
 from __future__ import annotations
 
+import re
+
 from fastapi import APIRouter, HTTPException, Query
 
+from jobclass.web.api.models import HierarchyResponse, OccupationProfileResponse, SearchResponse
 from jobclass.web.database import get_db
 
 router = APIRouter(prefix="/api", tags=["occupations"])
 
+_SOC_CODE_RE = re.compile(r"^\d{2}-\d{4}$")
 
-@router.get("/occupations/search")
-def search_occupations(q: str = Query("", description="Search keyword or SOC code")) -> dict:
+
+@router.get("/occupations/search", response_model=SearchResponse)
+def search_occupations(q: str = Query("", max_length=100, description="Search keyword or SOC code")) -> dict:
     """Search occupations by keyword or SOC code."""
     conn = get_db()
     q = q.strip()
@@ -42,7 +47,7 @@ def search_occupations(q: str = Query("", description="Search keyword or SOC cod
     }
 
 
-@router.get("/occupations/hierarchy")
+@router.get("/occupations/hierarchy", response_model=HierarchyResponse)
 def occupation_hierarchy() -> dict:
     """Return the full SOC hierarchy tree."""
     conn = get_db()
@@ -76,9 +81,11 @@ def occupation_hierarchy() -> dict:
     return {"hierarchy": roots}
 
 
-@router.get("/occupations/{soc_code}")
+@router.get("/occupations/{soc_code}", response_model=OccupationProfileResponse)
 def occupation_profile(soc_code: str) -> dict:
     """Return full profile data for a single occupation."""
+    if not _SOC_CODE_RE.match(soc_code):
+        raise HTTPException(status_code=400, detail=f"Invalid SOC code format: {soc_code}")
     conn = get_db()
 
     row = conn.execute("""

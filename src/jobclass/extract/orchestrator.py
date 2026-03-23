@@ -100,8 +100,8 @@ def extract_entry(
                 source_url=entry.dataset_url,
             )
             update_run_counts(conn, rid, load_status="failed", failure_classification="download_failure")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to register failed run %s: %s", rid, e)
 
         return ExtractionResult(
             run_id=rid,

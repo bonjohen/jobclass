@@ -16,47 +16,60 @@ class TestXSSPrevention:
         assert resp.status_code == 200
         assert "function escapeAttr" in resp.text
 
-    def test_landing_no_inner_html_with_api_data(self, client):
+    def test_landing_js_uses_dom_methods(self, client):
         """Landing spotlight uses DOM methods, not innerHTML with raw API data."""
-        html = client.get("/").text
-        # Should use textContent or createElement, not raw innerHTML for definition
-        assert "textContent = data.occupation_definition" in html or "createElement" in html
+        resp = client.get("/static/js/landing.js")
+        assert resp.status_code == 200
+        assert "textContent" in resp.text or "createElement" in resp.text
 
-    def test_occupation_page_escapes_lineage(self, client):
-        """Occupation page escapes source_release_id and source_version in lineage badges."""
-        html = client.get("/occupation/15-1252").text
-        assert "escapeHtml(w.source_release_id)" in html
-        assert "escapeHtml(data.source_version)" in html
+    def test_occupation_js_escapes_lineage(self, client):
+        """Occupation JS escapes source_release_id and source_version in lineage badges."""
+        resp = client.get("/static/js/occupation.js")
+        assert resp.status_code == 200
+        assert "escapeHtml(w.source_release_id)" in resp.text
+        assert "escapeHtml(data.source_version)" in resp.text
 
-    def test_occupation_page_escapes_soc_in_href(self, client):
-        """Occupation page uses escapeAttr for soc_code in href attributes."""
-        html = client.get("/occupation/15-1252").text
-        assert "escapeAttr(" in html
+    def test_occupation_js_escapes_soc_in_href(self, client):
+        """Occupation JS uses escapeAttr for soc_code in href attributes."""
+        resp = client.get("/static/js/occupation.js")
+        assert resp.status_code == 200
+        assert "escapeAttr(" in resp.text
 
-    def test_search_page_escapes_soc_in_href(self, client):
+    def test_search_js_escapes_soc_in_href(self, client):
+        resp = client.get("/static/js/search.js")
+        assert resp.status_code == 200
+        assert "escapeAttr(r.soc_code)" in resp.text
+
+    def test_hierarchy_js_escapes_soc_in_href(self, client):
+        resp = client.get("/static/js/hierarchy.js")
+        assert resp.status_code == 200
+        assert "escapeAttr(n.soc_code)" in resp.text
+
+    def test_no_inline_script_in_search(self, client):
+        """Search page uses external JS, no inline script blocks."""
         html = client.get("/search").text
-        assert "escapeAttr(r.soc_code)" in html
-
-    def test_hierarchy_page_escapes_soc_in_href(self, client):
-        html = client.get("/hierarchy").text
-        assert "escapeAttr(n.soc_code)" in html
-
-    def test_no_local_escape_html_in_search(self, client):
-        """escapeHtml should come from main.js, not defined locally in search."""
-        html = client.get("/search").text
         assert "function escapeHtml" not in html
+        assert 'src="/static/js/search.js"' in html
 
-    def test_no_local_escape_html_in_hierarchy(self, client):
+    def test_no_inline_script_in_hierarchy(self, client):
         html = client.get("/hierarchy").text
         assert "function escapeHtml" not in html
+        assert 'src="/static/js/hierarchy.js"' in html
 
-    def test_no_local_escape_html_in_occupation(self, client):
+    def test_no_inline_script_in_occupation(self, client):
         html = client.get("/occupation/15-1252").text
         assert "function escapeHtml" not in html
+        assert 'src="/static/js/occupation.js"' in html
 
-    def test_methodology_escapes_versions(self, client):
+    def test_methodology_page_uses_external_js(self, client):
         html = client.get("/methodology").text
-        assert "escapeHtml(data.soc_version" in html
+        assert 'src="/static/js/methodology.js"' in html
+
+    def test_search_js_has_abort_controller(self, client):
+        """Search uses AbortController to cancel in-flight requests."""
+        resp = client.get("/static/js/search.js")
+        assert resp.status_code == 200
+        assert "AbortController" in resp.text
 
 
 class TestSQLIdentifierSafety:
@@ -88,6 +101,13 @@ class TestSecurityHeaders:
         csp = resp.headers["content-security-policy"]
         assert "default-src 'self'" in csp
 
+    def test_csp_no_unsafe_inline_script(self, client):
+        """CSP should not allow unsafe-inline for scripts after script extraction."""
+        resp = client.get("/")
+        csp = resp.headers["content-security-policy"]
+        assert "script-src 'self'" in csp
+        assert "'unsafe-inline'" not in csp.split("script-src")[1].split(";")[0]
+
     def test_x_content_type_options(self, client):
         resp = client.get("/")
         assert resp.headers.get("x-content-type-options") == "nosniff"
@@ -104,6 +124,52 @@ class TestSecurityHeaders:
         """CORS is configured (not rejecting standard requests)."""
         resp = client.get("/api/health")
         assert resp.status_code == 200
+
+
+class TestInputValidation:
+    """CR2-06 through CR2-10: API input validation."""
+
+    def test_search_query_max_length(self, client):
+        """Search rejects queries over 100 characters."""
+        resp = client.get("/api/occupations/search?q=" + "a" * 101)
+        assert resp.status_code == 422
+
+    def test_invalid_soc_code_returns_400(self, client):
+        """Invalid SOC code format returns 400."""
+        resp = client.get("/api/occupations/INVALID")
+        assert resp.status_code == 400
+
+    def test_malformed_soc_code_returns_400(self, client):
+        resp = client.get("/api/occupations/15-XXXX")
+        assert resp.status_code == 400
+
+    def test_empty_soc_code_wages_returns_400(self, client):
+        resp = client.get("/api/occupations/abc/wages")
+        assert resp.status_code == 400
+
+    def test_invalid_geo_type_returns_400(self, client):
+        resp = client.get("/api/occupations/15-1252/wages?geo_type=invalid")
+        assert resp.status_code == 400
+
+    def test_valid_geo_type_accepted(self, client):
+        resp = client.get("/api/occupations/15-1252/wages?geo_type=national")
+        assert resp.status_code == 200
+
+    def test_invalid_soc_skills_returns_400(self, client):
+        resp = client.get("/api/occupations/bad/skills")
+        assert resp.status_code == 400
+
+    def test_invalid_soc_tasks_returns_400(self, client):
+        resp = client.get("/api/occupations/bad/tasks")
+        assert resp.status_code == 400
+
+    def test_invalid_soc_similar_returns_400(self, client):
+        resp = client.get("/api/occupations/bad/similar")
+        assert resp.status_code == 400
+
+    def test_invalid_soc_projections_returns_400(self, client):
+        resp = client.get("/api/occupations/bad/projections")
+        assert resp.status_code == 400
 
 
 class TestConfigConsolidation:

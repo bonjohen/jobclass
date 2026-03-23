@@ -6,6 +6,7 @@ import re
 
 from fastapi import APIRouter, HTTPException
 
+from jobclass.web.api.models import SourcesResponse, ValidationResponse
 from jobclass.web.database import get_db
 
 _IDENTIFIER_RE = re.compile(r"^[a-z_][a-z0-9_]*$")
@@ -13,7 +14,7 @@ _IDENTIFIER_RE = re.compile(r"^[a-z_][a-z0-9_]*$")
 router = APIRouter(prefix="/api/methodology", tags=["methodology"])
 
 
-@router.get("/sources")
+@router.get("/sources", response_model=SourcesResponse)
 def data_sources() -> dict:
     """Return descriptions of all data sources with versions and refresh info."""
     conn = get_db()
@@ -97,7 +98,7 @@ def data_sources() -> dict:
     return {"sources": sources}
 
 
-@router.get("/validation")
+@router.get("/validation", response_model=ValidationResponse)
 def validation_summary() -> dict:
     """Return summary of pipeline validation status."""
     conn = get_db()

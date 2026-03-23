@@ -2,16 +2,23 @@
 
 from __future__ import annotations
 
+import re
+
 from fastapi import APIRouter, HTTPException
 
+from jobclass.web.api.models import SimilarResponse, SkillsResponse, TasksResponse
 from jobclass.web.database import get_db
 
 router = APIRouter(prefix="/api", tags=["skills"])
 
+_SOC_CODE_RE = re.compile(r"^\d{2}-\d{4}$")
 
-@router.get("/occupations/{soc_code}/skills")
+
+@router.get("/occupations/{soc_code}/skills", response_model=SkillsResponse)
 def occupation_skills(soc_code: str) -> dict:
     """Return skill profile for an occupation with importance and level scores."""
+    if not _SOC_CODE_RE.match(soc_code):
+        raise HTTPException(status_code=400, detail=f"Invalid SOC code format: {soc_code}")
     conn = get_db()
 
     occ = conn.execute(
@@ -58,9 +65,11 @@ def occupation_skills(soc_code: str) -> dict:
     }
 
 
-@router.get("/occupations/{soc_code}/tasks")
+@router.get("/occupations/{soc_code}/tasks", response_model=TasksResponse)
 def occupation_tasks(soc_code: str) -> dict:
     """Return task profile for an occupation."""
+    if not _SOC_CODE_RE.match(soc_code):
+        raise HTTPException(status_code=400, detail=f"Invalid SOC code format: {soc_code}")
     conn = get_db()
 
     occ = conn.execute(
@@ -100,9 +109,11 @@ def occupation_tasks(soc_code: str) -> dict:
     }
 
 
-@router.get("/occupations/{soc_code}/similar")
+@router.get("/occupations/{soc_code}/similar", response_model=SimilarResponse)
 def similar_occupations(soc_code: str) -> dict:
     """Return similar occupations based on Jaccard skill similarity."""
+    if not _SOC_CODE_RE.match(soc_code):
+        raise HTTPException(status_code=400, detail=f"Invalid SOC code format: {soc_code}")
     conn = get_db()
 
     occ = conn.execute(

@@ -6,6 +6,7 @@ import re
 
 from fastapi import APIRouter, HTTPException
 
+from jobclass.web.api.models import HealthResponse, MetadataResponse, StatsResponse
 from jobclass.web.database import get_db
 
 router = APIRouter(prefix="/api", tags=["system"])
@@ -20,7 +21,7 @@ def _safe_identifier(name: str) -> str:
     return name
 
 
-@router.get("/health")
+@router.get("/health", response_model=HealthResponse)
 def health() -> dict:
     """Return warehouse health: status, version info, and table row counts."""
     conn = get_db()
@@ -57,7 +58,7 @@ def health() -> dict:
         raise HTTPException(status_code=503, detail=str(e))
 
 
-@router.get("/stats")
+@router.get("/stats", response_model=StatsResponse)
 def stats() -> dict:
     """Return key warehouse statistics for the landing page."""
     conn = get_db()
@@ -93,7 +94,7 @@ def stats() -> dict:
         raise HTTPException(status_code=503, detail=str(e))
 
 
-@router.get("/metadata")
+@router.get("/metadata", response_model=MetadataResponse)
 def metadata() -> dict:
     """Return source versions, release IDs, and last load timestamps."""
     conn = get_db()

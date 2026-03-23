@@ -61,7 +61,7 @@ def load_dim_geography(
             ).fetchall()
             for r in results:
                 geo_rows.add(r)
-        except Exception:
+        except duckdb.CatalogException:
             pass
 
     loaded = 0
@@ -101,7 +101,7 @@ def load_dim_industry(
             for r in results:
                 if r[0]:
                     industry_rows.add(r)
-        except Exception:
+        except duckdb.CatalogException:
             pass
 
     loaded = 0

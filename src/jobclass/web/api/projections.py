@@ -2,16 +2,23 @@
 
 from __future__ import annotations
 
+import re
+
 from fastapi import APIRouter, HTTPException
 
+from jobclass.web.api.models import ProjectionsResponse
 from jobclass.web.database import get_db
 
 router = APIRouter(prefix="/api", tags=["projections"])
 
+_SOC_CODE_RE = re.compile(r"^\d{2}-\d{4}$")
 
-@router.get("/occupations/{soc_code}/projections")
+
+@router.get("/occupations/{soc_code}/projections", response_model=ProjectionsResponse)
 def occupation_projections(soc_code: str) -> dict:
     """Return employment projections for an occupation."""
+    if not _SOC_CODE_RE.match(soc_code):
+        raise HTTPException(status_code=400, detail=f"Invalid SOC code format: {soc_code}")
     conn = get_db()
 
     occ = conn.execute(

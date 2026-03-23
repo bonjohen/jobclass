@@ -4,29 +4,12 @@ import csv
 import io
 from dataclasses import dataclass
 
-PARSER_VERSION = "1.0.0"
+from jobclass.parse.common import parse_float, parse_int
 
-# BLS suppression markers that should become None
-SUPPRESSION_MARKERS = {"**", "#", "N/A", "*", "-", ""}
+PARSER_VERSION = "1.0.0"
 
 # Area type mapping
 AREA_TYPES = {"1": "national", "2": "state", "3": "msa", "4": "nonmetro"}
-
-
-def _parse_numeric(value: str | None) -> float | None:
-    """Parse a numeric value, preserving BLS suppressions as None."""
-    if value is None or value.strip() in SUPPRESSION_MARKERS:
-        return None
-    try:
-        return float(value.strip().replace(",", ""))
-    except (ValueError, TypeError):
-        return None
-
-
-def _parse_int(value: str | None) -> int | None:
-    """Parse an integer value, preserving BLS suppressions as None."""
-    f = _parse_numeric(value)
-    return int(f) if f is not None else None
 
 
 @dataclass
@@ -88,23 +71,23 @@ def parse_oews(content: str | bytes, source_release_id: str) -> list[OewsRow]:
             occupation_code=occ_code,
             occupation_title=raw.get("occ_title", "").strip().strip('"'),
             occupation_group=raw.get("o_group", "").strip(),
-            employment_count=_parse_int(raw.get("tot_emp")),
-            employment_rse=_parse_numeric(raw.get("emp_prse")),
-            jobs_per_1000=_parse_numeric(raw.get("jobs_1000")),
-            location_quotient=_parse_numeric(raw.get("loc_quotient")),
-            mean_hourly_wage=_parse_numeric(raw.get("h_mean")),
-            mean_annual_wage=_parse_numeric(raw.get("a_mean")),
-            mean_wage_rse=_parse_numeric(raw.get("mean_prse")),
-            median_hourly_wage=_parse_numeric(raw.get("h_median")),
-            median_annual_wage=_parse_numeric(raw.get("a_median")),
-            p10_hourly_wage=_parse_numeric(raw.get("h_pct10")),
-            p25_hourly_wage=_parse_numeric(raw.get("h_pct25")),
-            p75_hourly_wage=_parse_numeric(raw.get("h_pct75")),
-            p90_hourly_wage=_parse_numeric(raw.get("h_pct90")),
-            p10_annual_wage=_parse_numeric(raw.get("a_pct10")),
-            p25_annual_wage=_parse_numeric(raw.get("a_pct25")),
-            p75_annual_wage=_parse_numeric(raw.get("a_pct75")),
-            p90_annual_wage=_parse_numeric(raw.get("a_pct90")),
+            employment_count=parse_int(raw.get("tot_emp")),
+            employment_rse=parse_float(raw.get("emp_prse")),
+            jobs_per_1000=parse_float(raw.get("jobs_1000")),
+            location_quotient=parse_float(raw.get("loc_quotient")),
+            mean_hourly_wage=parse_float(raw.get("h_mean")),
+            mean_annual_wage=parse_float(raw.get("a_mean")),
+            mean_wage_rse=parse_float(raw.get("mean_prse")),
+            median_hourly_wage=parse_float(raw.get("h_median")),
+            median_annual_wage=parse_float(raw.get("a_median")),
+            p10_hourly_wage=parse_float(raw.get("h_pct10")),
+            p25_hourly_wage=parse_float(raw.get("h_pct25")),
+            p75_hourly_wage=parse_float(raw.get("h_pct75")),
+            p90_hourly_wage=parse_float(raw.get("h_pct90")),
+            p10_annual_wage=parse_float(raw.get("a_pct10")),
+            p25_annual_wage=parse_float(raw.get("a_pct25")),
+            p75_annual_wage=parse_float(raw.get("a_pct75")),
+            p90_annual_wage=parse_float(raw.get("a_pct90")),
             source_release_id=source_release_id,
         ))
 

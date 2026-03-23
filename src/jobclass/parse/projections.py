@@ -6,6 +6,8 @@ import csv
 import io
 from dataclasses import dataclass
 
+from jobclass.parse.common import parse_float, parse_int
+
 PARSER_VERSION = "1.0.0"
 
 
@@ -29,27 +31,6 @@ class ProjectionRow:
     parser_version: str
 
 
-def _safe_int(value: str | None) -> int | None:
-    """Parse integer, returning None for empty/suppressed values."""
-    if not value or value.strip() in ("", "--", "N/A", "#", "**", "*"):
-        return None
-    cleaned = value.strip().replace(",", "")
-    try:
-        return int(float(cleaned))
-    except (ValueError, TypeError):
-        return None
-
-
-def _safe_float(value: str | None) -> float | None:
-    """Parse float, returning None for empty/suppressed values."""
-    if not value or value.strip() in ("", "--", "N/A", "#", "**", "*"):
-        return None
-    cleaned = value.strip().replace(",", "").replace("%", "")
-    try:
-        return float(cleaned)
-    except (ValueError, TypeError):
-        return None
-
 
 def parse_employment_projections(
     content: str,
@@ -72,8 +53,8 @@ def parse_employment_projections(
         occ_code = rec.get("occupation_code", rec.get("soc_code", "")).strip()
         occ_title = rec.get("occupation_title", rec.get("title", "")).strip()
 
-        base_year = _safe_int(rec.get("base_year", rec.get("employment_base_year", "")))
-        proj_year = _safe_int(rec.get("projection_year", rec.get("employment_projection_year", "")))
+        base_year = parse_int(rec.get("base_year", rec.get("employment_base_year", "")))
+        proj_year = parse_int(rec.get("projection_year", rec.get("employment_projection_year", "")))
 
         cycle = projection_cycle
         if not cycle and base_year and proj_year:
@@ -86,11 +67,11 @@ def parse_employment_projections(
             occupation_title=occ_title,
             base_year=base_year or 0,
             projection_year=proj_year or 0,
-            employment_base=_safe_int(rec.get("employment_base", rec.get("employment_2022", ""))),
-            employment_projected=_safe_int(rec.get("employment_projected", rec.get("employment_2032", ""))),
-            employment_change_abs=_safe_int(rec.get("employment_change_abs", rec.get("employment_change", ""))),
-            employment_change_pct=_safe_float(rec.get("employment_change_pct", rec.get("employment_change_percent", ""))),
-            annual_openings=_safe_int(rec.get("annual_openings", rec.get("occupational_openings", ""))),
+            employment_base=parse_int(rec.get("employment_base", rec.get("employment_2022", ""))),
+            employment_projected=parse_int(rec.get("employment_projected", rec.get("employment_2032", ""))),
+            employment_change_abs=parse_int(rec.get("employment_change_abs", rec.get("employment_change", ""))),
+            employment_change_pct=parse_float(rec.get("employment_change_pct", rec.get("employment_change_percent", ""))),
+            annual_openings=parse_int(rec.get("annual_openings", rec.get("occupational_openings", ""))),
             education_category=rec.get("education_category", rec.get("typical_entry_level_education", None)),
             training_category=rec.get("training_category", rec.get("on_the_job_training", None)),
             work_experience_category=rec.get("work_experience_category", rec.get("work_experience", None)),
