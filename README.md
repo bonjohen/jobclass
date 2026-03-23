@@ -39,7 +39,7 @@ Status of each phase's commit upon completion.
 | 5 | O*NET Semantic Pipeline | Phase 5: O*NET pipeline — parsers, staging, dim_skill/knowledge/ability/task, bridges, validations | Complete |
 | 6 | Validation Framework & Failure Handling | Phase 6: Validation framework — structural, grain, ref integrity, temporal, drift, failure modes | Complete |
 | 7 | Observability & Run Reporting | Phase 7: Observability — reporters, run inspection, row-count deltas, reconciliation | Complete |
-| 8 | Orchestration | | Pending |
+| 8 | Orchestration | Phase 8: Orchestration — pipelines, dependency enforcement, publish gating, idempotence | Complete |
 | 9 | Analyst Marts | | Pending |
 | 10 | Employment Projections (Optional R1) | | Pending |
 | 11 | End-to-End Integration & Deliverables | | Pending |
@@ -74,4 +74,4 @@ docs/specs/            # Design docs, release plan, test plan
 
 ## Status
 
-Implementation in progress. Phases 1–7 complete. Currently working through Phase 8 (orchestration).
+Implementation in progress. Phases 1–8 complete. Currently working through Phase 9 (analyst marts).

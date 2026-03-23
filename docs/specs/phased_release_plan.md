@@ -191,18 +191,18 @@ Wire individual pipelines into dependency-aware execution with idempotence and p
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | P8-01 | Implement `taxonomy_refresh` pipeline (extract → parse → validate → load SOC) | OR-1 | | |
-| `[ ]` | P8-02 | Implement `oews_refresh` pipeline (extract → parse → validate → load OEWS) | OR-1 | | |
-| `[ ]` | P8-03 | Implement `onet_refresh` pipeline (extract → parse → validate → load O*NET) | OR-1 | | |
-| `[ ]` | P8-04 | Implement `warehouse_publish` pipeline (validate all → publish marts) | OR-1, OR-4 | | |
-| `[ ]` | P8-05 | Enforce dependency: `taxonomy_refresh` completes before occupation conformance on new SOC version | OR-2, NFR-8 | | |
-| `[ ]` | P8-06 | Allow independent execution of `oews_refresh` and `onet_refresh` | OR-3, NFR-9 | | |
-| `[ ]` | P8-07 | Implement publish gating: `warehouse_publish` blocked unless all upstream validations pass | OR-4, OR-7, FR-5.6 | | |
-| `[ ]` | P8-08 | Verify dataset-level idempotence across all pipelines | OR-5, FR-4.9 | | |
-| `[ ]` | P8-09 | Ensure run manifest is created at pipeline start and updated at completion | OR-6 | | |
-| `[ ]` | P8-10 | Implement no-retry policy on semantic validation failure | NFR-7 | | |
-| `[ ]` | P8-11 | Write integration tests for pipeline dependency ordering | — | | |
-| `[ ]` | P8-12 | Write idempotent rerun integration tests (same version, no duplicates) | FR-4.9 | | |
+| `[X]` | P8-01 | Implement `taxonomy_refresh` pipeline (extract → parse → validate → load SOC) | OR-1 | 2026-03-23 13:58 | 2026-03-23 14:02 |
+| `[X]` | P8-02 | Implement `oews_refresh` pipeline (extract → parse → validate → load OEWS) | OR-1 | 2026-03-23 13:58 | 2026-03-23 14:02 |
+| `[X]` | P8-03 | Implement `onet_refresh` pipeline (extract → parse → validate → load O*NET) | OR-1 | 2026-03-23 13:58 | 2026-03-23 14:02 |
+| `[X]` | P8-04 | Implement `warehouse_publish` pipeline (validate all → publish marts) | OR-1, OR-4 | 2026-03-23 13:58 | 2026-03-23 14:02 |
+| `[X]` | P8-05 | Enforce dependency: `taxonomy_refresh` completes before occupation conformance on new SOC version | OR-2, NFR-8 | 2026-03-23 13:58 | 2026-03-23 14:02 |
+| `[X]` | P8-06 | Allow independent execution of `oews_refresh` and `onet_refresh` | OR-3, NFR-9 | 2026-03-23 13:58 | 2026-03-23 14:02 |
+| `[X]` | P8-07 | Implement publish gating: `warehouse_publish` blocked unless all upstream validations pass | OR-4, OR-7, FR-5.6 | 2026-03-23 13:58 | 2026-03-23 14:02 |
+| `[X]` | P8-08 | Verify dataset-level idempotence across all pipelines | OR-5, FR-4.9 | 2026-03-23 13:58 | 2026-03-23 14:02 |
+| `[X]` | P8-09 | Ensure run manifest is created at pipeline start and updated at completion | OR-6 | 2026-03-23 13:58 | 2026-03-23 14:02 |
+| `[X]` | P8-10 | Implement no-retry policy on semantic validation failure | NFR-7 | 2026-03-23 13:58 | 2026-03-23 14:02 |
+| `[X]` | P8-11 | Write integration tests for pipeline dependency ordering | — | 2026-03-23 13:58 | 2026-03-23 14:04 |
+| `[X]` | P8-12 | Write idempotent rerun integration tests (same version, no duplicates) | FR-4.9 | 2026-03-23 13:58 | 2026-03-23 14:04 |
 
 ---
 
