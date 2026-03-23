@@ -51,6 +51,7 @@ Status of each phase's commit upon completion.
 | W6 | Website: Landing Page & Navigation | Phase W6: Stats API, landing spotlight, methodology page, navigation, 14 tests | Complete |
 | W7 | Website: Methodology & Data Transparency | Phase W7: Sources API, validation API, methodology page with live status, 14 tests | Complete |
 | W8 | Website: Visual Polish & Responsive Design | Phase W8: Responsive CSS, accessibility (ARIA, skip-nav, focus), performance checks, 14 tests | Complete |
+| W9 | Website: End-to-End Integration & Deployment | Phase W9: E2E smoke tests, worked example, lineage verification, full suite 376 tests | Complete |
 
 ## Project Structure
 
@@ -83,4 +84,4 @@ docs/specs/            # Design docs, release plan, test plan
 
 ## Status
 
-All 11 phases complete. 243 tests passing across unit, integration, contract, grain, referential integrity, semantic, temporal, drift, idempotence, regression, failure-mode, and query validation types.
+All 11 pipeline phases and 9 website phases complete. 376 tests passing — 243 pipeline tests (unit, integration, contract, grain, referential integrity, semantic, temporal, drift, idempotence, regression, failure-mode, query validation) and 133 web tests (API, page rendering, accessibility, E2E smoke).

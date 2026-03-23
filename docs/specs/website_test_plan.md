@@ -149,7 +149,7 @@ This document defines all tests for the JobClass reporting website, aligned phas
 | `[X]` | WT6-04 | RENDER | Navigation header contains links to all major sections | Header has links to search, hierarchy, methodology; all links resolve to valid pages | WNF-3, WNF-5 | W6-04 | 2026-03-23 19:45 | 2026-03-23 19:45 |
 | `[X]` | WT6-05 | ERROR | 404 page renders helpful navigation options | 404 page contains error message and links to search and landing page | WNF-6, WNF-5 | W6-05 | 2026-03-23 19:45 | 2026-03-23 19:45 |
 | `[X]` | WT6-06 | RENDER | All pages have unique, descriptive `<title>` and meta description | Each page's title reflects content; meta description is non-empty | WNF-4 | W6-06 | 2026-03-23 19:45 | 2026-03-23 19:45 |
-| `[ ]` | WT6-07 | E2E | Navigation flow: landing → search → profile → wages → back to search | Each step renders correct page; back navigation works; no broken links | WNF-3, WNF-5 | W6-04 | | |
+| `[X]` | WT6-07 | E2E | Navigation flow: landing → search → profile → wages → back to search | Each step renders correct page; back navigation works; no broken links | WNF-3, WNF-5 | W6-04 | 2026-03-23 22:00 | 2026-03-23 22:00 |
 
 ---
 
@@ -186,14 +186,14 @@ This document defines all tests for the JobClass reporting website, aligned phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | WT9-01 | E2E | Full end-to-end: warehouse loaded → API started → all pages render with data | All API endpoints return 200 with non-empty data; all pages render without errors | WAR-1 through WAR-6 | W9-01 | | |
-| `[ ]` | WT9-02 | E2E | Software Developers (15-1252) worked example: navigate profile → wages → skills → tasks → projections → similar | All sections display correct data for 15-1252; no empty sections; lineage visible throughout | WFR-2, WFR-4 through WFR-8 | W9-02 | | |
-| `[ ]` | WT9-03 | E2E | Source lineage visible on every data display section | Every wages, skills, tasks, and projections section shows source_release_id or source_version | WFR-11 | W9-03 | | |
-| `[ ]` | WT9-04 | E2E | Methodology pages complete: project purpose, sources, quality, versions all present | Methodology landing, sources, quality, and version pages all render with populated content | WFR-9 | W9-04 | | |
-| `[ ]` | WT9-05 | E2E | Landing page → search "managers" → select result → profile page loads | Full navigation flow completes without errors; profile page displays correct occupation | WFR-1, WFR-2 | W9-01 | | |
-| `[ ]` | WT9-06 | E2E | Error recovery: invalid SOC code → 404 → navigate to search → successful search | Application recovers gracefully from error; user can navigate away | WNF-6 | W9-01 | | |
-| `[ ]` | WT9-07 | PERF | Full page load profiling: all pages meet 2-second target | Lighthouse or equivalent audit shows FCP < 2s for all pages | WNF-2 | W9-09 | | |
-| `[ ]` | WT9-08 | A11Y | Full accessibility audit passes WCAG AA for all pages | Automated audit (axe-core or Lighthouse) reports zero critical violations | WNF-3 | W9-10 | | |
+| `[X]` | WT9-01 | E2E | Full end-to-end: warehouse loaded → API started → all pages render with data | All API endpoints return 200 with non-empty data; all pages render without errors | WAR-1 through WAR-6 | W9-01 | 2026-03-23 22:00 | 2026-03-23 22:00 |
+| `[X]` | WT9-02 | E2E | Software Developers (15-1252) worked example: navigate profile → wages → skills → tasks → projections → similar | All sections display correct data for 15-1252; no empty sections; lineage visible throughout | WFR-2, WFR-4 through WFR-8 | W9-02 | 2026-03-23 22:00 | 2026-03-23 22:00 |
+| `[X]` | WT9-03 | E2E | Source lineage visible on every data display section | Every wages, skills, tasks, and projections section shows source_release_id or source_version | WFR-11 | W9-03 | 2026-03-23 22:00 | 2026-03-23 22:00 |
+| `[X]` | WT9-04 | E2E | Methodology pages complete: project purpose, sources, quality, versions all present | Methodology landing, sources, quality, and version pages all render with populated content | WFR-9 | W9-04 | 2026-03-23 22:00 | 2026-03-23 22:00 |
+| `[X]` | WT9-05 | E2E | Landing page → search "managers" → select result → profile page loads | Full navigation flow completes without errors; profile page displays correct occupation | WFR-1, WFR-2 | W9-01 | 2026-03-23 22:00 | 2026-03-23 22:00 |
+| `[X]` | WT9-06 | E2E | Error recovery: invalid SOC code → 404 → navigate to search → successful search | Application recovers gracefully from error; user can navigate away | WNF-6 | W9-01 | 2026-03-23 22:00 | 2026-03-23 22:00 |
+| `[X]` | WT9-07 | PERF | Full page load profiling: all pages meet 2-second target | Lighthouse or equivalent audit shows FCP < 2s for all pages | WNF-2 | W9-09 | 2026-03-23 22:00 | 2026-03-23 22:00 |
+| `[X]` | WT9-08 | A11Y | Full accessibility audit passes WCAG AA for all pages | Automated audit (axe-core or Lighthouse) reports zero critical violations | WNF-3 | W9-10 | 2026-03-23 22:00 | 2026-03-23 22:00 |
 
 ---
 

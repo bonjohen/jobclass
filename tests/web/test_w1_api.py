@@ -68,7 +68,7 @@ class TestLandingPage:
 
     def test_landing_has_header(self, client):
         html = client.get("/").text
-        assert "<header>" in html
+        assert "<header" in html
 
     def test_landing_has_nav(self, client):
         html = client.get("/").text
@@ -76,7 +76,7 @@ class TestLandingPage:
 
     def test_landing_has_footer(self, client):
         html = client.get("/").text
-        assert "<footer>" in html
+        assert "<footer" in html
 
     def test_landing_has_content(self, client):
         html = client.get("/").text

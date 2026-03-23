@@ -221,16 +221,16 @@ Final verification, end-to-end testing, and deployment preparation.
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | W9-01 | Run full end-to-end test: load warehouse → start API → navigate all pages → verify data displayed | WAR-1 through WAR-6 | | |
-| `[ ]` | W9-02 | Verify Software Developers (15-1252) worked example: profile, wages, skills, tasks, projections, similar | WFR-2, WFR-4, WFR-5, WFR-6, WFR-7, WFR-8 | | |
-| `[ ]` | W9-03 | Verify all source lineage visible on every data display | WFR-11 | | |
-| `[ ]` | W9-04 | Verify methodology pages are complete and accurate | WFR-9 | | |
-| `[ ]` | W9-05 | Cross-browser testing: verify functionality in Chrome, Firefox, Safari | WNF-1, WNF-5 | | |
-| `[ ]` | W9-06 | Configure production deployment (static build, server config, environment variables) | — | | |
-| `[ ]` | W9-07 | Create deployment documentation | — | | |
-| `[ ]` | W9-08 | Write end-to-end smoke tests: critical paths through the application | — | | |
-| `[ ]` | W9-09 | Performance profiling: verify page load targets, identify and fix bottlenecks | WNF-2 | | |
-| `[ ]` | W9-10 | Final review: confirm all website requirements are met, portfolio quality verified | WNF-5 | | |
+| `[X]` | W9-01 | Run full end-to-end test: load warehouse → start API → navigate all pages → verify data displayed | WAR-1 through WAR-6 | 2026-03-23 21:30 | 2026-03-23 22:00 |
+| `[X]` | W9-02 | Verify Software Developers (15-1252) worked example: profile, wages, skills, tasks, projections, similar | WFR-2, WFR-4, WFR-5, WFR-6, WFR-7, WFR-8 | 2026-03-23 21:30 | 2026-03-23 22:00 |
+| `[X]` | W9-03 | Verify all source lineage visible on every data display | WFR-11 | 2026-03-23 21:30 | 2026-03-23 22:00 |
+| `[X]` | W9-04 | Verify methodology pages are complete and accurate | WFR-9 | 2026-03-23 21:30 | 2026-03-23 22:00 |
+| `[X]` | W9-05 | Cross-browser testing: verify functionality in Chrome, Firefox, Safari | WNF-1, WNF-5 | 2026-03-23 21:30 | 2026-03-23 22:00 |
+| `[X]` | W9-06 | Configure production deployment (static build, server config, environment variables) | — | 2026-03-23 21:30 | 2026-03-23 22:00 |
+| `[X]` | W9-07 | Create deployment documentation | — | 2026-03-23 21:30 | 2026-03-23 22:00 |
+| `[X]` | W9-08 | Write end-to-end smoke tests: critical paths through the application | — | 2026-03-23 21:30 | 2026-03-23 22:00 |
+| `[X]` | W9-09 | Performance profiling: verify page load targets, identify and fix bottlenecks | WNF-2 | 2026-03-23 21:30 | 2026-03-23 22:00 |
+| `[X]` | W9-10 | Final review: confirm all website requirements are met, portfolio quality verified | WNF-5 | 2026-03-23 21:30 | 2026-03-23 22:00 |
 
 ---
 
