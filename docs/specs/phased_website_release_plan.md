@@ -204,14 +204,14 @@ Finalize visual design, responsive behavior, accessibility, and portfolio-qualit
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | W8-01 | Implement consistent color scheme, typography, and spacing across all pages | WNF-5 | | |
-| `[ ]` | W8-02 | Ensure responsive layout: test and fix all pages at desktop, tablet, and mobile breakpoints | WNF-1 | | |
-| `[ ]` | W8-03 | Verify accessibility: semantic HTML, ARIA labels, keyboard navigation, focus management | WNF-3 | | |
-| `[ ]` | W8-04 | Optimize chart rendering: consistent styling, tooltips, legends, responsive sizing | WNF-5, WNF-2 | | |
-| `[ ]` | W8-05 | Add loading states and skeleton screens for data-dependent content | WNF-2, WNF-6 | | |
-| `[ ]` | W8-06 | Optimize API query performance: verify sub-second response times for all endpoints | WNF-2, WAR-1 | | |
-| `[ ]` | W8-07 | Write responsive layout tests: critical content visible at all breakpoints | — | | |
-| `[ ]` | W8-08 | Write accessibility audit: automated checks for WCAG compliance | — | | |
+| `[X]` | W8-01 | Implement consistent color scheme, typography, and spacing across all pages | WNF-5 | 2026-03-23 20:45 | 2026-03-23 21:15 |
+| `[X]` | W8-02 | Ensure responsive layout: test and fix all pages at desktop, tablet, and mobile breakpoints | WNF-1 | 2026-03-23 20:45 | 2026-03-23 21:15 |
+| `[X]` | W8-03 | Verify accessibility: semantic HTML, ARIA labels, keyboard navigation, focus management | WNF-3 | 2026-03-23 20:45 | 2026-03-23 21:15 |
+| `[X]` | W8-04 | Optimize chart rendering: consistent styling, tooltips, legends, responsive sizing | WNF-5, WNF-2 | 2026-03-23 20:45 | 2026-03-23 21:15 |
+| `[X]` | W8-05 | Add loading states and skeleton screens for data-dependent content | WNF-2, WNF-6 | 2026-03-23 20:45 | 2026-03-23 21:15 |
+| `[X]` | W8-06 | Optimize API query performance: verify sub-second response times for all endpoints | WNF-2, WAR-1 | 2026-03-23 20:45 | 2026-03-23 21:15 |
+| `[X]` | W8-07 | Write responsive layout tests: critical content visible at all breakpoints | — | 2026-03-23 20:45 | 2026-03-23 21:15 |
+| `[X]` | W8-08 | Write accessibility audit: automated checks for WCAG compliance | — | 2026-03-23 20:45 | 2026-03-23 21:15 |
 
 ---
 

@@ -170,15 +170,15 @@ This document defines all tests for the JobClass reporting website, aligned phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | WT8-01 | VISUAL | Consistent visual style across all pages | Color scheme, typography, and spacing match design system; no visual inconsistencies | WNF-5 | W8-01 | | |
-| `[ ]` | WT8-02 | VISUAL | Responsive layout at desktop (1280px), tablet (768px), and mobile (375px) breakpoints | All critical content visible at each breakpoint; no horizontal overflow; navigation accessible | WNF-1 | W8-02 | | |
-| `[ ]` | WT8-03 | A11Y | Semantic HTML structure on all pages | All pages use appropriate heading hierarchy, landmarks, and ARIA attributes | WNF-3 | W8-03 | | |
-| `[ ]` | WT8-04 | A11Y | Keyboard navigation works for all interactive elements | Tab order is logical; focus indicators visible; all actions reachable by keyboard | WNF-3 | W8-03 | | |
-| `[ ]` | WT8-05 | A11Y | Color contrast meets WCAG AA standards (4.5:1 for normal text, 3:1 for large text) | Automated contrast checker passes on all text/background combinations | WNF-3 | W8-03 | | |
-| `[ ]` | WT8-06 | VISUAL | Charts render consistently with tooltips, legends, and responsive sizing | Charts resize without distortion; tooltips display correct values; legends present | WNF-5, WNF-2 | W8-04 | | |
-| `[ ]` | WT8-07 | RENDER | Loading states display skeleton screens while data loads | Data-dependent sections show skeleton or spinner before content appears | WNF-2, WNF-6 | W8-05 | | |
-| `[ ]` | WT8-08 | PERF | All API endpoints respond within 500ms for typical queries | P95 response time < 500ms across all endpoints with test dataset | WNF-2 | W8-06 | | |
-| `[ ]` | WT8-09 | PERF | Page initial render completes within 2 seconds | Time to first contentful paint < 2s on simulated 4G connection | WNF-2 | W8-06 | | |
+| `[X]` | WT8-01 | VISUAL | Consistent visual style across all pages | Color scheme, typography, and spacing match design system; no visual inconsistencies | WNF-5 | W8-01 | 2026-03-23 21:15 | 2026-03-23 21:15 |
+| `[X]` | WT8-02 | VISUAL | Responsive layout at desktop (1280px), tablet (768px), and mobile (375px) breakpoints | All critical content visible at each breakpoint; no horizontal overflow; navigation accessible | WNF-1 | W8-02 | 2026-03-23 21:15 | 2026-03-23 21:15 |
+| `[X]` | WT8-03 | A11Y | Semantic HTML structure on all pages | All pages use appropriate heading hierarchy, landmarks, and ARIA attributes | WNF-3 | W8-03 | 2026-03-23 21:15 | 2026-03-23 21:15 |
+| `[X]` | WT8-04 | A11Y | Keyboard navigation works for all interactive elements | Tab order is logical; focus indicators visible; all actions reachable by keyboard | WNF-3 | W8-03 | 2026-03-23 21:15 | 2026-03-23 21:15 |
+| `[X]` | WT8-05 | A11Y | Color contrast meets WCAG AA standards (4.5:1 for normal text, 3:1 for large text) | Automated contrast checker passes on all text/background combinations | WNF-3 | W8-03 | 2026-03-23 21:15 | 2026-03-23 21:15 |
+| `[X]` | WT8-06 | VISUAL | Charts render consistently with tooltips, legends, and responsive sizing | Charts resize without distortion; tooltips display correct values; legends present | WNF-5, WNF-2 | W8-04 | 2026-03-23 21:15 | 2026-03-23 21:15 |
+| `[X]` | WT8-07 | RENDER | Loading states display skeleton screens while data loads | Data-dependent sections show skeleton or spinner before content appears | WNF-2, WNF-6 | W8-05 | 2026-03-23 21:15 | 2026-03-23 21:15 |
+| `[X]` | WT8-08 | PERF | All API endpoints respond within 500ms for typical queries | P95 response time < 500ms across all endpoints with test dataset | WNF-2 | W8-06 | 2026-03-23 21:15 | 2026-03-23 21:15 |
+| `[X]` | WT8-09 | PERF | Page initial render completes within 2 seconds | Time to first contentful paint < 2s on simulated 4G connection | WNF-2 | W8-06 | 2026-03-23 21:15 | 2026-03-23 21:15 |
 
 ---
 
