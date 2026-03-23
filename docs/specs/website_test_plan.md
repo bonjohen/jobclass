@@ -83,21 +83,21 @@ This document defines all tests for the JobClass reporting website, aligned phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | WT3-01 | API | Wages endpoint for 15-1252 returns national wage data | Response includes employment_count, mean_annual_wage, median_annual_wage; values are non-null for unsuppressed data | WFR-12 | W3-01 | | |
-| `[ ]` | WT3-02 | API | Wages endpoint with `geo_type=state` returns state-level data | Response includes multiple state entries; each has geo_name, mean_annual_wage | WFR-4 | W3-03 | | |
-| `[ ]` | WT3-03 | API | Geographies endpoint returns available geographies with metadata | Response includes geography entries with geo_type, geo_code, geo_name | WFR-4 | W3-02 | | |
-| `[ ]` | WT3-04 | CONTRACT | Wages response schema: `{employment_count, mean_annual_wage, median_annual_wage, p10–p90, source_release_id}` | All wage fields present; numeric or null (not zero for suppressed) | WAR-2, WFR-12 | W3-01 | | |
-| `[ ]` | WT3-05 | API | Suppressed wage values returned as null, not zero | For occupations with BLS suppression, wage fields are null in response | WFR-12, WNF-6 | W3-07 | | |
+| `[X]` | WT3-01 | API | Wages endpoint for 15-1252 returns national wage data | Response includes employment_count, mean_annual_wage, median_annual_wage; values are non-null for unsuppressed data | WFR-12 | W3-01 | 2026-03-23 17:45 | 2026-03-23 17:45 |
+| `[X]` | WT3-02 | API | Wages endpoint with `geo_type=state` returns state-level data | Response includes multiple state entries; each has geo_name, mean_annual_wage | WFR-4 | W3-03 | 2026-03-23 17:45 | 2026-03-23 17:45 |
+| `[X]` | WT3-03 | API | Geographies endpoint returns available geographies with metadata | Response includes geography entries with geo_type, geo_code, geo_name | WFR-4 | W3-02 | 2026-03-23 17:45 | 2026-03-23 17:45 |
+| `[X]` | WT3-04 | CONTRACT | Wages response schema: `{employment_count, mean_annual_wage, median_annual_wage, p10–p90, source_release_id}` | All wage fields present; numeric or null (not zero for suppressed) | WAR-2, WFR-12 | W3-01 | 2026-03-23 17:45 | 2026-03-23 17:45 |
+| `[X]` | WT3-05 | API | Suppressed wage values returned as null, not zero | For occupations with BLS suppression, wage fields are null in response | WFR-12, WNF-6 | W3-07 | 2026-03-23 17:45 | 2026-03-23 17:45 |
 
 ### Wages Display Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | WT3-06 | RENDER | Profile page wages section shows employment count, mean and median wages | Page displays employment_count, mean_annual_wage, median_annual_wage for 15-1252 | WFR-12, WNF-5 | W3-04 | | |
-| `[ ]` | WT3-07 | RENDER | Wage distribution chart renders with percentile data | Chart element present with p10, p25, median, p75, p90 data points | WFR-12, WNF-5 | W3-05 | | |
-| `[ ]` | WT3-08 | RENDER | Geography comparison page renders state-level wage table | Page contains table with state names and wage values; rows match API response count | WFR-4, WNF-5 | W3-06 | | |
-| `[ ]` | WT3-09 | RENDER | Suppressed wages display as "N/A" or "suppressed", not zero | For null wage values, display shows appropriate indicator text | WFR-12, WNF-6 | W3-07 | | |
-| `[ ]` | WT3-10 | RENDER | Wages section includes OEWS source lineage | Page displays OEWS release ID and reference period | WFR-11, WAR-5 | W3-08 | | |
+| `[X]` | WT3-06 | RENDER | Profile page wages section shows employment count, mean and median wages | Page displays employment_count, mean_annual_wage, median_annual_wage for 15-1252 | WFR-12, WNF-5 | W3-04 | 2026-03-23 17:45 | 2026-03-23 17:45 |
+| `[X]` | WT3-07 | RENDER | Wage distribution chart renders with percentile data | Chart element present with p10, p25, median, p75, p90 data points | WFR-12, WNF-5 | W3-05 | 2026-03-23 17:45 | 2026-03-23 17:45 |
+| `[X]` | WT3-08 | RENDER | Geography comparison page renders state-level wage table | Page contains table with state names and wage values; rows match API response count | WFR-4, WNF-5 | W3-06 | 2026-03-23 17:45 | 2026-03-23 17:45 |
+| `[X]` | WT3-09 | RENDER | Suppressed wages display as "N/A" or "suppressed", not zero | For null wage values, display shows appropriate indicator text | WFR-12, WNF-6 | W3-07 | 2026-03-23 17:45 | 2026-03-23 17:45 |
+| `[X]` | WT3-10 | RENDER | Wages section includes OEWS source lineage | Page displays OEWS release ID and reference period | WFR-11, WAR-5 | W3-08 | 2026-03-23 17:45 | 2026-03-23 17:45 |
 
 ---
 

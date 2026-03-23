@@ -11,6 +11,7 @@ from fastapi.templating import Jinja2Templates
 
 from jobclass.web.api.health import router as health_router
 from jobclass.web.api.occupations import router as occupations_router
+from jobclass.web.api.wages import router as wages_router
 
 _WEB_DIR = Path(__file__).parent
 _TEMPLATES_DIR = _WEB_DIR / "templates"
@@ -32,6 +33,7 @@ def create_app() -> FastAPI:
     # Register API routers
     app.include_router(health_router)
     app.include_router(occupations_router)
+    app.include_router(wages_router)
 
     # Template engine
     templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
@@ -68,6 +70,15 @@ def create_app() -> FastAPI:
             "request": request,
             "page_title": f"{soc_code} — JobClass",
             "content_template": "occupation.html",
+            "soc_code": soc_code,
+        })
+
+    @app.get("/occupation/{soc_code}/wages", response_class=HTMLResponse)
+    async def wages_comparison_page(request: Request, soc_code: str):
+        return templates.TemplateResponse("base.html", {
+            "request": request,
+            "page_title": f"Wages by State — {soc_code} — JobClass",
+            "content_template": "wages_comparison.html",
             "soc_code": soc_code,
         })
 

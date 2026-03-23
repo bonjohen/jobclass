@@ -113,17 +113,17 @@ Add employment counts and wage distribution data to occupation profiles, with ge
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | W3-01 | Implement `/api/occupations/{soc_code}/wages` endpoint: national and state-level wage data | WFR-4, WFR-12, WAR-2 | | |
-| `[ ]` | W3-02 | Implement `/api/geographies` endpoint: list available geographies with metadata | WFR-4, WAR-2 | | |
-| `[ ]` | W3-03 | Implement `/api/occupations/{soc_code}/wages?geo_type=state` endpoint: state comparison data | WFR-4, WAR-2 | | |
-| `[ ]` | W3-04 | Build wages summary section on profile page: employment count, mean/median wages, wage percentiles | WFR-12, WNF-5 | | |
-| `[ ]` | W3-05 | Build wage distribution chart: bar or box chart showing p10/p25/median/p75/p90 | WFR-12, WNF-5 | | |
-| `[ ]` | W3-06 | Build geography comparison page: table and map/chart of state-level wages for an occupation | WFR-4, WNF-5 | | |
-| `[ ]` | W3-07 | Handle BLS suppression display: show "N/A" or "suppressed" for null wage values, never zero | WFR-12, WNF-6 | | |
-| `[ ]` | W3-08 | Add source lineage to wages section: OEWS release ID, reference period | WFR-11, WAR-5 | | |
-| `[ ]` | W3-09 | Write wages endpoint tests: correct values for known occupation, suppression handling | — | | |
-| `[ ]` | W3-10 | Write geography comparison tests: state count, no fan-out, null handling | — | | |
-| `[ ]` | W3-11 | Write chart rendering tests: data-to-visual mapping correctness | — | | |
+| `[X]` | W3-01 | Implement `/api/occupations/{soc_code}/wages` endpoint: national and state-level wage data | WFR-4, WFR-12, WAR-2 | 2026-03-23 17:15 | 2026-03-23 17:45 |
+| `[X]` | W3-02 | Implement `/api/geographies` endpoint: list available geographies with metadata | WFR-4, WAR-2 | 2026-03-23 17:15 | 2026-03-23 17:45 |
+| `[X]` | W3-03 | Implement `/api/occupations/{soc_code}/wages?geo_type=state` endpoint: state comparison data | WFR-4, WAR-2 | 2026-03-23 17:15 | 2026-03-23 17:45 |
+| `[X]` | W3-04 | Build wages summary section on profile page: employment count, mean/median wages, wage percentiles | WFR-12, WNF-5 | 2026-03-23 17:15 | 2026-03-23 17:45 |
+| `[X]` | W3-05 | Build wage distribution chart: bar or box chart showing p10/p25/median/p75/p90 | WFR-12, WNF-5 | 2026-03-23 17:15 | 2026-03-23 17:45 |
+| `[X]` | W3-06 | Build geography comparison page: table and map/chart of state-level wages for an occupation | WFR-4, WNF-5 | 2026-03-23 17:15 | 2026-03-23 17:45 |
+| `[X]` | W3-07 | Handle BLS suppression display: show "N/A" or "suppressed" for null wage values, never zero | WFR-12, WNF-6 | 2026-03-23 17:15 | 2026-03-23 17:45 |
+| `[X]` | W3-08 | Add source lineage to wages section: OEWS release ID, reference period | WFR-11, WAR-5 | 2026-03-23 17:15 | 2026-03-23 17:45 |
+| `[X]` | W3-09 | Write wages endpoint tests: correct values for known occupation, suppression handling | — | 2026-03-23 17:15 | 2026-03-23 17:45 |
+| `[X]` | W3-10 | Write geography comparison tests: state count, no fan-out, null handling | — | 2026-03-23 17:15 | 2026-03-23 17:45 |
+| `[X]` | W3-11 | Write chart rendering tests: data-to-visual mapping correctness | — | 2026-03-23 17:15 | 2026-03-23 17:45 |
 
 ---
 

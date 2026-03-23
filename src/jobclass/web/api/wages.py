@@ -1,0 +1,81 @@
+"""Employment and wages API endpoints."""
+
+from __future__ import annotations
+
+from fastapi import APIRouter, HTTPException, Query
+
+from jobclass.web.database import get_db
+
+router = APIRouter(prefix="/api", tags=["wages"])
+
+
+@router.get("/occupations/{soc_code}/wages")
+def occupation_wages(
+    soc_code: str,
+    geo_type: str = Query("national", description="Geography type: national or state"),
+) -> dict:
+    """Return wage data for an occupation, optionally filtered by geography type."""
+    conn = get_db()
+
+    # Verify occupation exists
+    occ = conn.execute(
+        "SELECT occupation_key FROM dim_occupation WHERE soc_code = ? AND is_current = true",
+        [soc_code],
+    ).fetchone()
+    if not occ:
+        raise HTTPException(status_code=404, detail=f"Occupation {soc_code} not found")
+
+    rows = conn.execute("""
+        SELECT
+            g.geo_type, g.geo_code, g.geo_name,
+            f.employment_count, f.mean_annual_wage, f.median_annual_wage,
+            f.mean_hourly_wage, f.median_hourly_wage,
+            f.p10_hourly_wage, f.p25_hourly_wage, f.p75_hourly_wage, f.p90_hourly_wage,
+            f.source_release_id, f.reference_period
+        FROM fact_occupation_employment_wages f
+        JOIN dim_occupation o ON f.occupation_key = o.occupation_key
+        JOIN dim_geography g ON f.geography_key = g.geography_key
+        WHERE o.soc_code = ? AND o.is_current = true
+          AND g.geo_type = ?
+        ORDER BY g.geo_name
+    """, [soc_code, geo_type]).fetchall()
+
+    results = []
+    for r in rows:
+        results.append({
+            "geo_type": r[0],
+            "geo_code": r[1],
+            "geo_name": r[2],
+            "employment_count": r[3],
+            "mean_annual_wage": r[4],
+            "median_annual_wage": r[5],
+            "mean_hourly_wage": r[6],
+            "median_hourly_wage": r[7],
+            "p10_hourly_wage": r[8],
+            "p25_hourly_wage": r[9],
+            "p75_hourly_wage": r[10],
+            "p90_hourly_wage": r[11],
+            "source_release_id": r[12],
+            "reference_period": r[13],
+        })
+
+    return {"soc_code": soc_code, "geo_type": geo_type, "wages": results}
+
+
+@router.get("/geographies")
+def list_geographies() -> dict:
+    """Return all available geographies with metadata."""
+    conn = get_db()
+    rows = conn.execute("""
+        SELECT geo_type, geo_code, geo_name
+        FROM dim_geography
+        WHERE is_current = true
+        ORDER BY geo_type, geo_name
+    """).fetchall()
+
+    return {
+        "geographies": [
+            {"geo_type": r[0], "geo_code": r[1], "geo_name": r[2]}
+            for r in rows
+        ]
+    }
