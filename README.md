@@ -44,6 +44,7 @@ Status of each phase's commit upon completion.
 | 10 | Employment Projections (Optional R1) | Phase 10: Employment Projections — parser, staging, fact, validations, pipeline | Complete |
 | 11 | End-to-End Integration & Deliverables | Phase 11: E2E integration, schema docs, sample queries, deliverable verification | Complete |
 | W1 | Website: Project Setup & API Foundation | Phase W1: FastAPI app, health/metadata APIs, base layout, CSS, test framework | Complete |
+| W2 | Website: Occupation Search & Hierarchy | Phase W2: Search, hierarchy, profile APIs, search/hierarchy/profile pages, 16 tests | Complete |
 
 ## Project Structure
 

@@ -93,17 +93,17 @@ Build the occupation search, listing, and hierarchy browsing experience. This is
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | W2-01 | Implement `/api/occupations/search?q=` endpoint: keyword search across SOC codes and titles | WFR-1, WAR-2 | | |
-| `[ ]` | W2-02 | Implement `/api/occupations/hierarchy` endpoint: return hierarchy tree (major → minor → broad → detailed) | WFR-3, WAR-2 | | |
-| `[ ]` | W2-03 | Implement `/api/occupations/{soc_code}` endpoint: return full occupation profile data | WFR-2, WAR-2 | | |
-| `[ ]` | W2-04 | Build occupation search page: search box with live filtering, results list with SOC code and title | WFR-1, WNF-3 | | |
-| `[ ]` | W2-05 | Build occupation hierarchy browser: expandable/collapsible tree navigation | WFR-3, WNF-3 | | |
-| `[ ]` | W2-06 | Build occupation profile page shell: header with title, SOC code, hierarchy breadcrumb, definition | WFR-2, WNF-5 | | |
-| `[ ]` | W2-07 | Display hierarchy context on profile page: parent groups, sibling occupations, child specializations | WFR-2, WFR-3 | | |
-| `[ ]` | W2-08 | Add source lineage badge to profile page: SOC version, source release ID | WFR-11, WAR-5 | | |
-| `[ ]` | W2-09 | Write search endpoint tests: keyword matching, empty query, SOC code lookup | — | | |
-| `[ ]` | W2-10 | Write hierarchy endpoint tests: tree structure, parent-child relationships, level counts | — | | |
-| `[ ]` | W2-11 | Write profile page rendering tests: correct data displayed for known SOC code | — | | |
+| `[X]` | W2-01 | Implement `/api/occupations/search?q=` endpoint: keyword search across SOC codes and titles | WFR-1, WAR-2 | 2026-03-23 16:30 | 2026-03-23 17:00 |
+| `[X]` | W2-02 | Implement `/api/occupations/hierarchy` endpoint: return hierarchy tree (major → minor → broad → detailed) | WFR-3, WAR-2 | 2026-03-23 16:30 | 2026-03-23 17:00 |
+| `[X]` | W2-03 | Implement `/api/occupations/{soc_code}` endpoint: return full occupation profile data | WFR-2, WAR-2 | 2026-03-23 16:30 | 2026-03-23 17:00 |
+| `[X]` | W2-04 | Build occupation search page: search box with live filtering, results list with SOC code and title | WFR-1, WNF-3 | 2026-03-23 16:30 | 2026-03-23 17:00 |
+| `[X]` | W2-05 | Build occupation hierarchy browser: expandable/collapsible tree navigation | WFR-3, WNF-3 | 2026-03-23 16:30 | 2026-03-23 17:00 |
+| `[X]` | W2-06 | Build occupation profile page shell: header with title, SOC code, hierarchy breadcrumb, definition | WFR-2, WNF-5 | 2026-03-23 16:30 | 2026-03-23 17:00 |
+| `[X]` | W2-07 | Display hierarchy context on profile page: parent groups, sibling occupations, child specializations | WFR-2, WFR-3 | 2026-03-23 16:30 | 2026-03-23 17:00 |
+| `[X]` | W2-08 | Add source lineage badge to profile page: SOC version, source release ID | WFR-11, WAR-5 | 2026-03-23 16:30 | 2026-03-23 17:00 |
+| `[X]` | W2-09 | Write search endpoint tests: keyword matching, empty query, SOC code lookup | — | 2026-03-23 16:30 | 2026-03-23 17:00 |
+| `[X]` | W2-10 | Write hierarchy endpoint tests: tree structure, parent-child relationships, level counts | — | 2026-03-23 16:30 | 2026-03-23 17:00 |
+| `[X]` | W2-11 | Write profile page rendering tests: correct data displayed for known SOC code | — | 2026-03-23 16:30 | 2026-03-23 17:00 |
 
 ---
 

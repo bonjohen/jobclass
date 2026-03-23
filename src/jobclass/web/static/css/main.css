@@ -257,6 +257,200 @@ footer {
     background: var(--color-bg);
 }
 
+/* --- Search Page --- */
+
+.search-page h1 {
+    font-size: 1.75rem;
+    color: var(--color-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.search-page > p {
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-lg);
+}
+
+.search-box {
+    margin-bottom: var(--space-xl);
+}
+
+.search-box input {
+    width: 100%;
+    max-width: 600px;
+    padding: var(--space-sm) var(--space-md);
+    border: 2px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: var(--font-sans);
+    transition: border-color 0.2s;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.search-hint {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+}
+
+/* --- Hierarchy Page --- */
+
+.hierarchy-page h1 {
+    font-size: 1.75rem;
+    color: var(--color-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.hierarchy-page > p {
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-lg);
+}
+
+.tree-list {
+    list-style: none;
+    padding-left: var(--space-lg);
+}
+
+.tree-list .tree-list {
+    margin-top: var(--space-xs);
+}
+
+.tree-node {
+    margin-bottom: var(--space-xs);
+}
+
+.tree-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    vertical-align: middle;
+}
+
+.tree-spacer {
+    display: inline-block;
+    width: 20px;
+}
+
+.collapsed > .tree-list {
+    display: none;
+}
+
+.collapsed > .tree-toggle .toggle-icon {
+    display: inline-block;
+    transform: rotate(-90deg);
+}
+
+.tree-link {
+    text-decoration: none;
+    color: var(--color-text);
+}
+
+.tree-link:hover {
+    color: var(--color-accent);
+}
+
+.tree-code {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.tree-title {
+    font-size: 0.95rem;
+}
+
+/* --- Occupation Profile Page --- */
+
+.occupation-page .loading {
+    text-align: center;
+    color: var(--color-text-muted);
+    padding: var(--space-2xl);
+}
+
+.breadcrumb {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-lg);
+}
+
+.breadcrumb a {
+    color: var(--color-accent);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.bc-sep {
+    margin: 0 var(--space-xs);
+    color: var(--color-border);
+}
+
+.bc-current {
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.occupation-header h1 {
+    font-size: 1.75rem;
+    color: var(--color-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.occupation-meta {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.occupation-section {
+    margin-bottom: var(--space-2xl);
+}
+
+.occupation-section h2 {
+    font-size: 1.2rem;
+    color: var(--color-primary);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-xs);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.occupation-section h3 {
+    font-size: 1rem;
+    color: var(--color-text);
+    margin-bottom: var(--space-sm);
+}
+
+.context-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-xl);
+}
+
+.occ-link-list {
+    list-style: none;
+}
+
+.occ-link-list li {
+    margin-bottom: var(--space-xs);
+}
+
+.occ-link-list a {
+    color: var(--color-accent);
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.occ-link-list a:hover {
+    text-decoration: underline;
+}
+
 /* --- Responsive --- */
 
 @media (max-width: 768px) {

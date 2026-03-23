@@ -52,28 +52,28 @@ This document defines all tests for the JobClass reporting website, aligned phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | WT2-01 | API | Search by keyword "software" returns matching occupations | Response includes 15-1252 "Software Developers"; all results contain "software" in title or code | WFR-1 | W2-01 | | |
-| `[ ]` | WT2-02 | API | Search by SOC code "15-1252" returns exact match | Response includes exactly one result with soc_code "15-1252" | WFR-1 | W2-01 | | |
-| `[ ]` | WT2-03 | API | Empty search query returns empty results or all occupations | Response is valid JSON with empty results array or full listing; no error | WFR-1 | W2-01 | | |
-| `[ ]` | WT2-04 | CONTRACT | Search response schema: array of `{soc_code, occupation_title, occupation_level}` | Each result has required fields; soc_code is text; occupation_level is integer | WAR-2 | W2-01 | | |
-| `[ ]` | WT2-05 | RENDER | Search page renders search input and results list | Page contains `<input>` for search, results display as list items with SOC code and title | WFR-1, WNF-3 | W2-04 | | |
+| `[X]` | WT2-01 | API | Search by keyword "software" returns matching occupations | Response includes 15-1252 "Software Developers"; all results contain "software" in title or code | WFR-1 | W2-01 | 2026-03-23 17:00 | 2026-03-23 17:00 |
+| `[X]` | WT2-02 | API | Search by SOC code "15-1252" returns exact match | Response includes exactly one result with soc_code "15-1252" | WFR-1 | W2-01 | 2026-03-23 17:00 | 2026-03-23 17:00 |
+| `[X]` | WT2-03 | API | Empty search query returns empty results or all occupations | Response is valid JSON with empty results array or full listing; no error | WFR-1 | W2-01 | 2026-03-23 17:00 | 2026-03-23 17:00 |
+| `[X]` | WT2-04 | CONTRACT | Search response schema: array of `{soc_code, occupation_title, occupation_level}` | Each result has required fields; soc_code is text; occupation_level is integer | WAR-2 | W2-01 | 2026-03-23 17:00 | 2026-03-23 17:00 |
+| `[X]` | WT2-05 | RENDER | Search page renders search input and results list | Page contains `<input>` for search, results display as list items with SOC code and title | WFR-1, WNF-3 | W2-04 | 2026-03-23 17:00 | 2026-03-23 17:00 |
 
 ### Hierarchy Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | WT2-06 | API | Hierarchy endpoint returns tree with major → minor → broad → detailed levels | Response contains nested structure; major groups have children; leaf nodes are detailed occupations | WFR-3 | W2-02 | | |
-| `[ ]` | WT2-07 | API | Hierarchy includes Computer and Mathematical (15-0000) major group | Response contains node with soc_code "15-0000" having children | WFR-3 | W2-02 | | |
-| `[ ]` | WT2-08 | RENDER | Hierarchy browser renders expandable tree | Page contains tree structure with expand/collapse controls; clicking expands children | WFR-3, WNF-3 | W2-05 | | |
+| `[X]` | WT2-06 | API | Hierarchy endpoint returns tree with major → minor → broad → detailed levels | Response contains nested structure; major groups have children; leaf nodes are detailed occupations | WFR-3 | W2-02 | 2026-03-23 17:00 | 2026-03-23 17:00 |
+| `[X]` | WT2-07 | API | Hierarchy includes Computer and Mathematical (15-0000) major group | Response contains node with soc_code "15-0000" having children | WFR-3 | W2-02 | 2026-03-23 17:00 | 2026-03-23 17:00 |
+| `[X]` | WT2-08 | RENDER | Hierarchy browser renders expandable tree | Page contains tree structure with expand/collapse controls; clicking expands children | WFR-3, WNF-3 | W2-05 | 2026-03-23 17:00 | 2026-03-23 17:00 |
 
 ### Profile Page Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | WT2-09 | API | Profile endpoint for 15-1252 returns complete occupation data | Response includes soc_code, title, definition, hierarchy fields, soc_version | WFR-2 | W2-03 | | |
-| `[ ]` | WT2-10 | RENDER | Profile page for 15-1252 displays title, SOC code, hierarchy breadcrumb, definition | Page contains "Software Developers", "15-1252", breadcrumb from major group, definition text | WFR-2, WNF-5 | W2-06 | | |
-| `[ ]` | WT2-11 | RENDER | Profile page shows lineage badge with SOC version | Page displays SOC version "2018" and source_release_id | WFR-11, WAR-5 | W2-08 | | |
-| `[ ]` | WT2-12 | ERROR | Profile endpoint for nonexistent SOC code returns 404 | Response status 404 with meaningful error message | WNF-6 | W2-03 | | |
+| `[X]` | WT2-09 | API | Profile endpoint for 15-1252 returns complete occupation data | Response includes soc_code, title, definition, hierarchy fields, soc_version | WFR-2 | W2-03 | 2026-03-23 17:00 | 2026-03-23 17:00 |
+| `[X]` | WT2-10 | RENDER | Profile page for 15-1252 displays title, SOC code, hierarchy breadcrumb, definition | Page contains "Software Developers", "15-1252", breadcrumb from major group, definition text | WFR-2, WNF-5 | W2-06 | 2026-03-23 17:00 | 2026-03-23 17:00 |
+| `[X]` | WT2-11 | RENDER | Profile page shows lineage badge with SOC version | Page displays SOC version "2018" and source_release_id | WFR-11, WAR-5 | W2-08 | 2026-03-23 17:00 | 2026-03-23 17:00 |
+| `[X]` | WT2-12 | ERROR | Profile endpoint for nonexistent SOC code returns 404 | Response status 404 with meaningful error message | WNF-6 | W2-03 | 2026-03-23 17:00 | 2026-03-23 17:00 |
 
 ---
 

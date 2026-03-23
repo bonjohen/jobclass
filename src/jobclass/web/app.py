@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from jobclass.web.api.health import router as health_router
+from jobclass.web.api.occupations import router as occupations_router
 
 _WEB_DIR = Path(__file__).parent
 _TEMPLATES_DIR = _WEB_DIR / "templates"
@@ -30,6 +31,7 @@ def create_app() -> FastAPI:
 
     # Register API routers
     app.include_router(health_router)
+    app.include_router(occupations_router)
 
     # Template engine
     templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
@@ -42,6 +44,31 @@ def create_app() -> FastAPI:
             "request": request,
             "page_title": "JobClass — Labor Market Reporting",
             "content_template": "landing.html",
+        })
+
+    @app.get("/search", response_class=HTMLResponse)
+    async def search_page(request: Request):
+        return templates.TemplateResponse("base.html", {
+            "request": request,
+            "page_title": "Search Occupations — JobClass",
+            "content_template": "search.html",
+        })
+
+    @app.get("/hierarchy", response_class=HTMLResponse)
+    async def hierarchy_page(request: Request):
+        return templates.TemplateResponse("base.html", {
+            "request": request,
+            "page_title": "Occupation Hierarchy — JobClass",
+            "content_template": "hierarchy.html",
+        })
+
+    @app.get("/occupation/{soc_code}", response_class=HTMLResponse)
+    async def occupation_page(request: Request, soc_code: str):
+        return templates.TemplateResponse("base.html", {
+            "request": request,
+            "page_title": f"{soc_code} — JobClass",
+            "content_template": "occupation.html",
+            "soc_code": soc_code,
         })
 
     # --- Error handlers ---
