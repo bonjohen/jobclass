@@ -101,3 +101,78 @@ def oews_loaded_db(migrated_db, soc_hierarchy_content, soc_definitions_content,
     load_fact_occupation_employment_wages(migrated_db, "oews_state", release, release, soc_ver)
 
     return migrated_db
+
+
+@pytest.fixture
+def onet_skills_content():
+    """Return O*NET skills sample TSV content."""
+    return (FIXTURES_DIR / "onet_skills_sample.txt").read_text(encoding="utf-8")
+
+
+@pytest.fixture
+def onet_knowledge_content():
+    """Return O*NET knowledge sample TSV content."""
+    return (FIXTURES_DIR / "onet_knowledge_sample.txt").read_text(encoding="utf-8")
+
+
+@pytest.fixture
+def onet_abilities_content():
+    """Return O*NET abilities sample TSV content."""
+    return (FIXTURES_DIR / "onet_abilities_sample.txt").read_text(encoding="utf-8")
+
+
+@pytest.fixture
+def onet_tasks_content():
+    """Return O*NET tasks sample TSV content."""
+    return (FIXTURES_DIR / "onet_tasks_sample.txt").read_text(encoding="utf-8")
+
+
+@pytest.fixture
+def onet_loaded_db(oews_loaded_db, onet_skills_content, onet_knowledge_content,
+                   onet_abilities_content, onet_tasks_content):
+    """DB with SOC + OEWS + O*NET staging + warehouse fully loaded."""
+    from jobclass.parse.onet import parse_onet_descriptors, parse_onet_tasks
+    from jobclass.load.onet import (
+        load_onet_descriptor_staging, load_onet_task_staging,
+        load_dim_descriptor, load_dim_task,
+        load_bridge_occupation_descriptor, load_bridge_occupation_task,
+    )
+
+    release = "29.1"
+    soc_ver = "2018"
+    onet_ver = "29.1"
+
+    # Parse
+    skills = parse_onet_descriptors(onet_skills_content, release)
+    knowledge = parse_onet_descriptors(onet_knowledge_content, release)
+    abilities = parse_onet_descriptors(onet_abilities_content, release)
+    tasks = parse_onet_tasks(onet_tasks_content, release)
+
+    # Staging
+    load_onet_descriptor_staging(oews_loaded_db, skills, "stage__onet__skills", release)
+    load_onet_descriptor_staging(oews_loaded_db, knowledge, "stage__onet__knowledge", release)
+    load_onet_descriptor_staging(oews_loaded_db, abilities, "stage__onet__abilities", release)
+    load_onet_task_staging(oews_loaded_db, tasks, release)
+
+    # Dimensions
+    load_dim_descriptor(oews_loaded_db, "dim_skill", "skill_key", "stage__onet__skills", onet_ver)
+    load_dim_descriptor(oews_loaded_db, "dim_knowledge", "knowledge_key", "stage__onet__knowledge", onet_ver)
+    load_dim_descriptor(oews_loaded_db, "dim_ability", "ability_key", "stage__onet__abilities", onet_ver)
+    load_dim_task(oews_loaded_db, onet_ver)
+
+    # Bridges
+    load_bridge_occupation_descriptor(
+        oews_loaded_db, "bridge_occupation_skill", "dim_skill", "skill_key",
+        "stage__onet__skills", onet_ver, release, soc_ver,
+    )
+    load_bridge_occupation_descriptor(
+        oews_loaded_db, "bridge_occupation_knowledge", "dim_knowledge", "knowledge_key",
+        "stage__onet__knowledge", onet_ver, release, soc_ver,
+    )
+    load_bridge_occupation_descriptor(
+        oews_loaded_db, "bridge_occupation_ability", "dim_ability", "ability_key",
+        "stage__onet__abilities", onet_ver, release, soc_ver,
+    )
+    load_bridge_occupation_task(oews_loaded_db, onet_ver, release, soc_ver)
+
+    return oews_loaded_db

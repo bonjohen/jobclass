@@ -1,0 +1,10 @@
+O*NET-SOC Code	Task ID	Task	Task Type	Incumbents Responding	Date	Domain Source
+15-1252.00	19701	Analyze user needs and software requirements to determine feasibility of design within time and cost constraints.	Core	25	07/2024	Incumbent
+15-1252.00	19702	Design, develop and modify software systems, using scientific analysis and mathematical models to predict and measure outcomes.	Core	25	07/2024	Incumbent
+15-1252.00	19703	Debug and modify software components and existing software to correct errors.	Core	25	07/2024	Incumbent
+15-1252.00	19704	Write and test code, refining and rewriting as necessary.	Core	25	07/2024	Incumbent
+11-1021.00	4607	Review financial statements, sales or activity reports, or other performance data to measure productivity or goal achievement.	Core	20	07/2024	Incumbent
+11-1021.00	4608	Direct and coordinate activities of businesses or departments concerned with production, pricing, sales, or distribution of products.	Core	20	07/2024	Incumbent
+11-1021.00	4609	Prepare staff work schedules and assign specific duties.	Core	20	07/2024	Incumbent
+11-1011.00	4601	Direct or coordinate an organization's financial or budget activities to fund operations, maximize investments, or increase efficiency.	Core	15	07/2024	Incumbent
+11-1011.00	4602	Confer with board members, organization officials, or staff members to discuss issues, coordinate activities, or resolve problems.	Core	15	07/2024	Incumbent

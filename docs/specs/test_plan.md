@@ -196,63 +196,63 @@ This document defines all tests for the JobClass pipeline, aligned phase-by-phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T5-01 | UNIT | O*NET skills parser extracts occupation code, skill ID, skill name, scale type, data value from representative sample | Parsed rows match expected values for at least 3 known occupation-skill pairs | FR-2.4 | P5-02 | | |
-| `[ ]` | T5-02 | UNIT | O*NET knowledge parser extracts expected fields from representative sample | Parsed rows match expected values for known occupation-knowledge pairs | FR-2.4 | P5-03 | | |
-| `[ ]` | T5-03 | UNIT | O*NET abilities parser extracts expected fields from representative sample | Parsed rows match expected values for known occupation-ability pairs | FR-2.4 | P5-04 | | |
-| `[ ]` | T5-04 | UNIT | O*NET tasks parser extracts expected fields from representative sample | Parsed rows match expected values for known occupation-task pairs | FR-2.4 | P5-05 | | |
-| `[ ]` | T5-05 | UNIT | All O*NET parsers apply snake_case names and explicit types | All column names snake_case; data_value is numeric; codes are text | FR-2.5, FR-2.6 | P5-02 through P5-05 | | |
-| `[ ]` | T5-06 | UNIT | All O*NET parsers attach source_release_id and parser_version | Every output row has non-null source_release_id and parser_version | FR-2.8 | P5-07 | | |
+| `[X]` | T5-01 | UNIT | O*NET skills parser extracts occupation code, skill ID, skill name, scale type, data value from representative sample | Parsed rows match expected values for at least 3 known occupation-skill pairs | FR-2.4 | P5-02 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-02 | UNIT | O*NET knowledge parser extracts expected fields from representative sample | Parsed rows match expected values for known occupation-knowledge pairs | FR-2.4 | P5-03 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-03 | UNIT | O*NET abilities parser extracts expected fields from representative sample | Parsed rows match expected values for known occupation-ability pairs | FR-2.4 | P5-04 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-04 | UNIT | O*NET tasks parser extracts expected fields from representative sample | Parsed rows match expected values for known occupation-task pairs | FR-2.4 | P5-05 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-05 | UNIT | All O*NET parsers apply snake_case names and explicit types | All column names snake_case; data_value is numeric; codes are text | FR-2.5, FR-2.6 | P5-02 through P5-05 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-06 | UNIT | All O*NET parsers attach source_release_id and parser_version | Every output row has non-null source_release_id and parser_version | FR-2.8 | P5-07 | 2026-03-23 13:38 | 2026-03-23 13:42 |
 
 ### Staging Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T5-07 | CONTRACT | `stage__onet__skills` has all required columns with correct types | Table exists with expected columns and types | FR-2.9 | P5-06 | | |
-| `[ ]` | T5-08 | CONTRACT | `stage__onet__knowledge` has all required columns with correct types | Table exists with expected columns and types | FR-2.9 | P5-06 | | |
-| `[ ]` | T5-09 | CONTRACT | `stage__onet__abilities` has all required columns with correct types | Table exists with expected columns and types | FR-2.9 | P5-06 | | |
-| `[ ]` | T5-10 | CONTRACT | `stage__onet__tasks` has all required columns with correct types | Table exists with expected columns and types | FR-2.9 | P5-06 | | |
-| `[ ]` | T5-11 | GRAIN | `stage__onet__skills` has no duplicate rows at declared grain | Zero duplicates on occupation_code + skill_id + scale_type + source_release_id | FR-3.2 | P5-16, P5-23 | | |
-| `[ ]` | T5-12 | GRAIN | `stage__onet__knowledge` has no duplicate rows at declared grain | Zero duplicates on occupation_code + knowledge_id + scale_type + source_release_id | FR-3.2 | P5-16, P5-23 | | |
-| `[ ]` | T5-13 | GRAIN | `stage__onet__abilities` has no duplicate rows at declared grain | Zero duplicates on occupation_code + ability_id + scale_type + source_release_id | FR-3.2 | P5-16, P5-23 | | |
-| `[ ]` | T5-14 | GRAIN | `stage__onet__tasks` has no duplicate rows at declared grain | Zero duplicates on occupation_code + task_id + source_release_id | FR-3.2 | P5-16, P5-23 | | |
+| `[X]` | T5-07 | CONTRACT | `stage__onet__skills` has all required columns with correct types | Table exists with expected columns and types | FR-2.9 | P5-06 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-08 | CONTRACT | `stage__onet__knowledge` has all required columns with correct types | Table exists with expected columns and types | FR-2.9 | P5-06 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-09 | CONTRACT | `stage__onet__abilities` has all required columns with correct types | Table exists with expected columns and types | FR-2.9 | P5-06 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-10 | CONTRACT | `stage__onet__tasks` has all required columns with correct types | Table exists with expected columns and types | FR-2.9 | P5-06 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-11 | GRAIN | `stage__onet__skills` has no duplicate rows at declared grain | Zero duplicates on occupation_code + skill_id + scale_type + source_release_id | FR-3.2 | P5-16, P5-23 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-12 | GRAIN | `stage__onet__knowledge` has no duplicate rows at declared grain | Zero duplicates on occupation_code + knowledge_id + scale_type + source_release_id | FR-3.2 | P5-16, P5-23 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-13 | GRAIN | `stage__onet__abilities` has no duplicate rows at declared grain | Zero duplicates on occupation_code + ability_id + scale_type + source_release_id | FR-3.2 | P5-16, P5-23 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-14 | GRAIN | `stage__onet__tasks` has no duplicate rows at declared grain | Zero duplicates on occupation_code + task_id + source_release_id | FR-3.2 | P5-16, P5-23 | 2026-03-23 13:38 | 2026-03-23 13:42 |
 
 ### Dimension Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T5-15 | GRAIN | `dim_skill` has no duplicate business keys (skill_id + source_version) | Zero duplicates | FR-3.2 | P5-08, P5-23 | | |
-| `[ ]` | T5-16 | GRAIN | `dim_knowledge` has no duplicate business keys (knowledge_id + source_version) | Zero duplicates | FR-3.2 | P5-09, P5-23 | | |
-| `[ ]` | T5-17 | GRAIN | `dim_ability` has no duplicate business keys (ability_id + source_version) | Zero duplicates | FR-3.2 | P5-10, P5-23 | | |
-| `[ ]` | T5-18 | GRAIN | `dim_task` has no duplicate business keys (task_id + source_version) | Zero duplicates | FR-3.2 | P5-11, P5-23 | | |
-| `[ ]` | T5-19 | CONTRACT | All O*NET dimension tables contain required fields from data model | Each dim has surrogate key, descriptor ID, name, source_version, is_current | FR-4.6 | P5-08 through P5-11 | | |
+| `[X]` | T5-15 | GRAIN | `dim_skill` has no duplicate business keys (skill_id + source_version) | Zero duplicates | FR-3.2 | P5-08, P5-23 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-16 | GRAIN | `dim_knowledge` has no duplicate business keys (knowledge_id + source_version) | Zero duplicates | FR-3.2 | P5-09, P5-23 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-17 | GRAIN | `dim_ability` has no duplicate business keys (ability_id + source_version) | Zero duplicates | FR-3.2 | P5-10, P5-23 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-18 | GRAIN | `dim_task` has no duplicate business keys (task_id + source_version) | Zero duplicates | FR-3.2 | P5-11, P5-23 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-19 | CONTRACT | All O*NET dimension tables contain required fields from data model | Each dim has surrogate key, descriptor ID, name, source_version, is_current | FR-4.6 | P5-08 through P5-11 | 2026-03-23 13:38 | 2026-03-23 13:42 |
 
 ### Bridge Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T5-20 | GRAIN | `bridge_occupation_skill` has no duplicate business keys | Zero duplicates on occupation_key + skill_key + scale_type + source_version | FR-3.2 | P5-12, P5-23 | | |
-| `[ ]` | T5-21 | GRAIN | `bridge_occupation_knowledge` has no duplicate business keys | Zero duplicates on occupation_key + knowledge_key + scale_type + source_version | FR-3.2 | P5-13, P5-23 | | |
-| `[ ]` | T5-22 | GRAIN | `bridge_occupation_ability` has no duplicate business keys | Zero duplicates on occupation_key + ability_key + scale_type + source_version | FR-3.2 | P5-14, P5-23 | | |
-| `[ ]` | T5-23 | GRAIN | `bridge_occupation_task` has no duplicate business keys | Zero duplicates on occupation_key + task_key + source_version | FR-3.2 | P5-15, P5-23 | | |
-| `[ ]` | T5-24 | REF | `bridge_occupation_skill` occupation_key references valid `dim_occupation` | Zero orphans | FR-3.3 | P5-12, P5-22 | | |
-| `[ ]` | T5-25 | REF | `bridge_occupation_skill` skill_key references valid `dim_skill` | Zero orphans | FR-3.3 | P5-12, P5-22 | | |
-| `[ ]` | T5-26 | REF | `bridge_occupation_knowledge` references valid `dim_occupation` and `dim_knowledge` | Zero orphans on both keys | FR-3.3 | P5-13, P5-22 | | |
-| `[ ]` | T5-27 | REF | `bridge_occupation_ability` references valid `dim_occupation` and `dim_ability` | Zero orphans on both keys | FR-3.3 | P5-14, P5-22 | | |
-| `[ ]` | T5-28 | REF | `bridge_occupation_task` references valid `dim_occupation` and `dim_task` | Zero orphans on both keys | FR-3.3 | P5-15, P5-22 | | |
+| `[X]` | T5-20 | GRAIN | `bridge_occupation_skill` has no duplicate business keys | Zero duplicates on occupation_key + skill_key + scale_type + source_version | FR-3.2 | P5-12, P5-23 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-21 | GRAIN | `bridge_occupation_knowledge` has no duplicate business keys | Zero duplicates on occupation_key + knowledge_key + scale_type + source_version | FR-3.2 | P5-13, P5-23 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-22 | GRAIN | `bridge_occupation_ability` has no duplicate business keys | Zero duplicates on occupation_key + ability_key + scale_type + source_version | FR-3.2 | P5-14, P5-23 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-23 | GRAIN | `bridge_occupation_task` has no duplicate business keys | Zero duplicates on occupation_key + task_key + source_version | FR-3.2 | P5-15, P5-23 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-24 | REF | `bridge_occupation_skill` occupation_key references valid `dim_occupation` | Zero orphans | FR-3.3 | P5-12, P5-22 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-25 | REF | `bridge_occupation_skill` skill_key references valid `dim_skill` | Zero orphans | FR-3.3 | P5-12, P5-22 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-26 | REF | `bridge_occupation_knowledge` references valid `dim_occupation` and `dim_knowledge` | Zero orphans on both keys | FR-3.3 | P5-13, P5-22 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-27 | REF | `bridge_occupation_ability` references valid `dim_occupation` and `dim_ability` | Zero orphans on both keys | FR-3.3 | P5-14, P5-22 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-28 | REF | `bridge_occupation_task` references valid `dim_occupation` and `dim_task` | Zero orphans on both keys | FR-3.3 | P5-15, P5-22 | 2026-03-23 13:38 | 2026-03-23 13:42 |
 
 ### Semantic & Version Alignment Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T5-29 | SEMANTIC | O*NET–SOC version alignment: all O*NET occupation codes map to active `dim_occupation` rows | Zero unmapped occupation codes when versions are aligned | FM-5 | P5-17, P5-18 | | |
-| `[ ]` | T5-30 | SEMANTIC | O*NET–SOC version misalignment: unmapped rows are marked, semantic marts blocked | When O*NET version references codes absent from active SOC, those rows are flagged; semantic mart publication is blocked | FM-5 | P5-18 | | |
+| `[X]` | T5-29 | SEMANTIC | O*NET–SOC version alignment: all O*NET occupation codes map to active `dim_occupation` rows | Zero unmapped occupation codes when versions are aligned | FM-5 | P5-17, P5-18 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-30 | SEMANTIC | O*NET–SOC version misalignment: unmapped rows are marked, semantic marts blocked | When O*NET version references codes absent from active SOC, those rows are flagged; semantic mart publication is blocked | FM-5 | P5-18 | 2026-03-23 13:38 | 2026-03-23 13:42 |
 
 ### Idempotence Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T5-31 | IDEMPOTENT | Rerun O*NET skills load for same version: no duplicate dim or bridge rows | Row counts in dim_skill and bridge_occupation_skill unchanged after rerun | FR-4.9 | P5-19 | | |
-| `[ ]` | T5-32 | IDEMPOTENT | Rerun O*NET full load for same version: all tables unchanged | Row counts across all 8 O*NET tables unchanged after rerun | FR-4.9 | P5-19 | | |
+| `[X]` | T5-31 | IDEMPOTENT | Rerun O*NET skills load for same version: no duplicate dim or bridge rows | Row counts in dim_skill and bridge_occupation_skill unchanged after rerun | FR-4.9 | P5-19 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | T5-32 | IDEMPOTENT | Rerun O*NET full load for same version: all tables unchanged | Row counts across all 8 O*NET tables unchanged after rerun | FR-4.9 | P5-19 | 2026-03-23 13:38 | 2026-03-23 13:42 |
 
 ---
 

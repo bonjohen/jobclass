@@ -118,29 +118,29 @@ Loads descriptor dimensions and bridge tables. Depends on Phase 3 for occupation
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | P5-01 | Analyze O*NET source file formats (skills, knowledge, abilities, tasks, occupation data) | FR-2.4 | | |
-| `[ ]` | P5-02 | Build O*NET skills parser | FR-2.4 | | |
-| `[ ]` | P5-03 | Build O*NET knowledge parser | FR-2.4 | | |
-| `[ ]` | P5-04 | Build O*NET abilities parser | FR-2.4 | | |
-| `[ ]` | P5-05 | Build O*NET tasks parser | FR-2.4 | | |
-| `[ ]` | P5-06 | Create staging tables: `stage__onet__skills`, `stage__onet__knowledge`, `stage__onet__abilities`, `stage__onet__tasks` | FR-2.5, FR-2.6, FR-2.9 | | |
-| `[ ]` | P5-07 | Build staging loaders for all four O*NET domains (snake_case, explicit types, null semantics, source_release_id, parser_version) | FR-2.5, FR-2.6, FR-2.7, FR-2.8 | | |
-| `[ ]` | P5-08 | Create `dim_skill` table and loader | FR-4.6 | | |
-| `[ ]` | P5-09 | Create `dim_knowledge` table and loader | FR-4.6 | | |
-| `[ ]` | P5-10 | Create `dim_ability` table and loader | FR-4.6 | | |
-| `[ ]` | P5-11 | Create `dim_task` table and loader | FR-4.6 | | |
-| `[ ]` | P5-12 | Create `bridge_occupation_skill` table and loader | FR-4.7, NFR-5 | | |
-| `[ ]` | P5-13 | Create `bridge_occupation_knowledge` table and loader | FR-4.7, NFR-5 | | |
-| `[ ]` | P5-14 | Create `bridge_occupation_ability` table and loader | FR-4.7, NFR-5 | | |
-| `[ ]` | P5-15 | Create `bridge_occupation_task` table and loader | FR-4.7, NFR-5 | | |
-| `[ ]` | P5-16 | Implement O*NET structural validations: required columns, grain uniqueness per domain | FR-3.1, FR-3.2 | | |
-| `[ ]` | P5-17 | Implement O*NET semantic validation: every occupation code maps to active `dim_occupation` | FR-3.3 | | |
-| `[ ]` | P5-18 | Implement O*NET–SOC version alignment check; mark unmapped rows, block semantic marts if misaligned | FM-5 | | |
-| `[ ]` | P5-19 | Implement idempotent loading for all O*NET tables | FR-4.9, OR-5 | | |
-| `[ ]` | P5-20 | Update run manifest with row counts, load status, failure classification | FR-6.3, FR-6.4 | | |
-| `[ ]` | P5-21 | Write parser unit tests with representative O*NET source samples | — | | |
-| `[ ]` | P5-22 | Write referential integrity tests: bridges reference valid dimension rows | FR-3.3 | | |
-| `[ ]` | P5-23 | Write grain uniqueness tests for staging, dimension, and bridge tables | FR-3.2 | | |
+| `[X]` | P5-01 | Analyze O*NET source file formats (skills, knowledge, abilities, tasks, occupation data) | FR-2.4 | 2026-03-23 13:25 | 2026-03-23 13:27 |
+| `[X]` | P5-02 | Build O*NET skills parser | FR-2.4 | 2026-03-23 13:27 | 2026-03-23 13:29 |
+| `[X]` | P5-03 | Build O*NET knowledge parser | FR-2.4 | 2026-03-23 13:27 | 2026-03-23 13:29 |
+| `[X]` | P5-04 | Build O*NET abilities parser | FR-2.4 | 2026-03-23 13:27 | 2026-03-23 13:29 |
+| `[X]` | P5-05 | Build O*NET tasks parser | FR-2.4 | 2026-03-23 13:27 | 2026-03-23 13:29 |
+| `[X]` | P5-06 | Create staging tables: `stage__onet__skills`, `stage__onet__knowledge`, `stage__onet__abilities`, `stage__onet__tasks` | FR-2.5, FR-2.6, FR-2.9 | 2026-03-23 13:29 | 2026-03-23 13:32 |
+| `[X]` | P5-07 | Build staging loaders for all four O*NET domains (snake_case, explicit types, null semantics, source_release_id, parser_version) | FR-2.5, FR-2.6, FR-2.7, FR-2.8 | 2026-03-23 13:29 | 2026-03-23 13:32 |
+| `[X]` | P5-08 | Create `dim_skill` table and loader | FR-4.6 | 2026-03-23 13:32 | 2026-03-23 13:34 |
+| `[X]` | P5-09 | Create `dim_knowledge` table and loader | FR-4.6 | 2026-03-23 13:32 | 2026-03-23 13:34 |
+| `[X]` | P5-10 | Create `dim_ability` table and loader | FR-4.6 | 2026-03-23 13:32 | 2026-03-23 13:34 |
+| `[X]` | P5-11 | Create `dim_task` table and loader | FR-4.6 | 2026-03-23 13:32 | 2026-03-23 13:34 |
+| `[X]` | P5-12 | Create `bridge_occupation_skill` table and loader | FR-4.7, NFR-5 | 2026-03-23 13:34 | 2026-03-23 13:36 |
+| `[X]` | P5-13 | Create `bridge_occupation_knowledge` table and loader | FR-4.7, NFR-5 | 2026-03-23 13:34 | 2026-03-23 13:36 |
+| `[X]` | P5-14 | Create `bridge_occupation_ability` table and loader | FR-4.7, NFR-5 | 2026-03-23 13:34 | 2026-03-23 13:36 |
+| `[X]` | P5-15 | Create `bridge_occupation_task` table and loader | FR-4.7, NFR-5 | 2026-03-23 13:34 | 2026-03-23 13:36 |
+| `[X]` | P5-16 | Implement O*NET structural validations: required columns, grain uniqueness per domain | FR-3.1, FR-3.2 | 2026-03-23 13:36 | 2026-03-23 13:38 |
+| `[X]` | P5-17 | Implement O*NET semantic validation: every occupation code maps to active `dim_occupation` | FR-3.3 | 2026-03-23 13:36 | 2026-03-23 13:38 |
+| `[X]` | P5-18 | Implement O*NET–SOC version alignment check; mark unmapped rows, block semantic marts if misaligned | FM-5 | 2026-03-23 13:36 | 2026-03-23 13:38 |
+| `[X]` | P5-19 | Implement idempotent loading for all O*NET tables | FR-4.9, OR-5 | 2026-03-23 13:29 | 2026-03-23 13:36 |
+| `[X]` | P5-20 | Update run manifest with row counts, load status, failure classification | FR-6.3, FR-6.4 | 2026-03-23 13:36 | 2026-03-23 13:38 |
+| `[X]` | P5-21 | Write parser unit tests with representative O*NET source samples | — | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | P5-22 | Write referential integrity tests: bridges reference valid dimension rows | FR-3.3 | 2026-03-23 13:38 | 2026-03-23 13:42 |
+| `[X]` | P5-23 | Write grain uniqueness tests for staging, dimension, and bridge tables | FR-3.2 | 2026-03-23 13:38 | 2026-03-23 13:42 |
 
 ---
 

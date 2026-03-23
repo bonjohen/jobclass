@@ -36,7 +36,7 @@ Status of each phase's commit upon completion.
 | 2 | Extraction Framework & Run Manifest | Phase 2: Extraction framework, source manifest, run manifest, and tests | Complete |
 | 3 | SOC Taxonomy Pipeline | Phase 3: SOC taxonomy pipeline — parser, staging, dim_occupation, bridge, validations | Complete |
 | 4 | OEWS Employment & Wages Pipeline | Phase 4: OEWS pipeline — parser, staging, dim_geography, dim_industry, fact table, validations | Complete |
-| 5 | O*NET Semantic Pipeline | | Pending |
+| 5 | O*NET Semantic Pipeline | Phase 5: O*NET pipeline — parsers, staging, dim_skill/knowledge/ability/task, bridges, validations | Complete |
 | 6 | Validation Framework & Failure Handling | | Pending |
 | 7 | Observability & Run Reporting | | Pending |
 | 8 | Orchestration | | Pending |
@@ -74,4 +74,4 @@ docs/specs/            # Design docs, release plan, test plan
 
 ## Status
 
-Implementation in progress. Phases 1–4 complete. Currently working through Phase 5 (O*NET semantic pipeline).
+Implementation in progress. Phases 1–5 complete. Currently working through Phase 6 (validation framework).

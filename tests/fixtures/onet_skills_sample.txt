@@ -1,0 +1,13 @@
+O*NET-SOC Code	Element ID	Element Name	Scale ID	Data Value	N	Standard Error	Lower CI Bound	Upper CI Bound	Recommend Suppress	Not Relevant	Date	Domain Source
+15-1252.00	2.A.1.a	Reading Comprehension	IM	4.25	30	0.10	4.05	4.45	N	N	07/2024	Analyst
+15-1252.00	2.A.1.a	Reading Comprehension	LV	5.50	30	0.12	5.26	5.74	N	N	07/2024	Analyst
+15-1252.00	2.A.1.b	Active Listening	IM	4.00	30	0.11	3.78	4.22	N	N	07/2024	Analyst
+15-1252.00	2.A.1.b	Active Listening	LV	5.25	30	0.13	4.99	5.51	N	N	07/2024	Analyst
+15-1252.00	2.B.3.a	Programming	IM	4.75	30	0.08	4.59	4.91	N	N	07/2024	Analyst
+15-1252.00	2.B.3.a	Programming	LV	6.25	30	0.09	6.07	6.43	N	N	07/2024	Analyst
+11-1021.00	2.A.1.a	Reading Comprehension	IM	4.50	25	0.14	4.22	4.78	N	N	07/2024	Analyst
+11-1021.00	2.A.1.a	Reading Comprehension	LV	5.75	25	0.15	5.45	6.05	N	N	07/2024	Analyst
+11-1021.00	2.A.1.b	Active Listening	IM	4.50	25	0.12	4.26	4.74	N	N	07/2024	Analyst
+11-1021.00	2.A.1.b	Active Listening	LV	6.00	25	0.11	5.78	6.22	N	N	07/2024	Analyst
+11-1011.00	2.A.1.a	Reading Comprehension	IM	4.62	20	0.16	4.30	4.94	N	Y	07/2024	Analyst
+11-1011.00	2.A.1.a	Reading Comprehension	LV	6.00	20	0.18	5.64	6.36	N	Y	07/2024	Analyst
