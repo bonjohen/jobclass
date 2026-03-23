@@ -1,0 +1,7 @@
+area_type,area_code,area_title,naics_code,naics_title,own_code,occ_code,occ_title,o_group,tot_emp,emp_prse,jobs_1000,loc_quotient,pct_total,h_mean,a_mean,mean_prse,h_pct10,h_pct25,h_median,h_pct75,h_pct90,a_pct10,a_pct25,a_median,a_pct75,a_pct90,annual,hourly
+1,0000000,U.S.,000000,Cross-industry,1235,00-0000,All Occupations,total,155761400,0.3,1000.000,1.00,100.0,31.49,65490,0.1,14.01,18.32,26.54,38.74,54.39,29150,38100,55210,80570,113110,,
+1,0000000,U.S.,000000,Cross-industry,1235,11-0000,Management Occupations,major,8537240,0.7,54.809,1.00,5.5,62.39,129780,0.2,28.15,39.43,55.63,78.17,**,58550,82010,115740,162590,**,,
+1,0000000,U.S.,000000,Cross-industry,1235,11-1011,Chief Executives,detailed,210380,2.3,1.351,1.00,0.1,**,**,**,50.63,73.04,**,**,**,105290,151930,**,**,**,,
+1,0000000,U.S.,000000,Cross-industry,1235,11-1021,"General and Operations Managers",detailed,3010790,0.8,19.330,1.00,1.9,57.31,119200,0.4,24.68,34.81,49.64,70.42,100.79,51330,72410,103250,146480,209650,,
+1,0000000,U.S.,000000,Cross-industry,1235,15-1252,Software Developers,detailed,1795300,1.1,11.525,1.00,1.2,62.74,130490,0.3,37.89,48.09,60.26,75.44,93.34,78800,100030,125350,156920,194150,,
+1,0000000,U.S.,000000,Cross-industry,1235,15-1253,"Software Quality Assurance Analysts and Testers",detailed,210460,2.2,1.351,1.00,0.1,50.50,105030,0.5,28.13,36.28,48.09,62.39,77.25,58510,75460,100030,129780,160680,,

@@ -87,28 +87,28 @@ Introduces `dim_geography`, `dim_industry`, and the primary fact table. Depends 
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | P4-01 | Analyze OEWS national source file format (columns, sheets, encoding, suppressed values) | FR-2.2 | | |
-| `[ ]` | P4-02 | Analyze OEWS state source file format and confirm schema alignment with national | FR-2.3 | | |
-| `[ ]` | P4-03 | Build OEWS national file parser: standardize occupation code, estimate period, geography, employment, wage fields | FR-2.2 | | |
-| `[ ]` | P4-04 | Build OEWS state file parser with same output schema as national | FR-2.3 | | |
-| `[ ]` | P4-05 | Create `stage__bls__oews_national` table | FR-2.5, FR-2.6, FR-2.9 | | |
-| `[ ]` | P4-06 | Create `stage__bls__oews_state` table | FR-2.5, FR-2.6, FR-2.9 | | |
-| `[ ]` | P4-07 | Build staging loaders: OEWS national and state (snake_case, explicit types, null preservation, source_release_id, parser_version) | FR-2.5, FR-2.6, FR-2.7, FR-2.8, FM-4 | | |
-| `[ ]` | P4-08 | Create `dim_geography` table (surrogate key, business key: geo_type + geo_code + source_release_id) | FR-4.3 | | |
-| `[ ]` | P4-09 | Build `dim_geography` loader with append-on-definition-change behavior | FR-4.3, FM-3 | | |
-| `[ ]` | P4-10 | Create `dim_industry` table (surrogate key, business key: naics_code + naics_version) | FR-4.4 | | |
-| `[ ]` | P4-11 | Build `dim_industry` loader with append-on-revision behavior | FR-4.4 | | |
-| `[ ]` | P4-12 | Create `fact_occupation_employment_wages` table with full grain and all suggested fields | FR-4.5 | | |
-| `[ ]` | P4-13 | Build fact loader: enforce composite grain, separate release time from reference time, retain source_dataset | FR-4.5, FR-4.10, FR-4.11 | | |
-| `[ ]` | P4-14 | Implement idempotent loading: rerun same dataset-version produces no duplicates | FR-4.9, OR-5 | | |
-| `[ ]` | P4-15 | Implement OEWS structural validations: file presence, required columns, expected sheets, min row counts, grain uniqueness | FR-3.1, FR-3.2 | | |
-| `[ ]` | P4-16 | Implement OEWS semantic validations: every occupation code maps to active `dim_occupation`, every geography code maps to `dim_geography` | FR-3.3, FR-3.4 | | |
-| `[ ]` | P4-17 | Implement OEWS temporal validations: version monotonicity, append-only fact behavior | FR-3.6, FR-3.7 | | |
-| `[ ]` | P4-18 | Implement OEWS drift detection: row-count shifts, measure deltas vs. prior release | FR-3.8, FR-3.9 | | |
-| `[ ]` | P4-19 | Update run manifest with row counts, load status, failure classification | FR-6.3, FR-6.4 | | |
-| `[ ]` | P4-20 | Write parser unit tests with representative OEWS source samples | — | | |
-| `[ ]` | P4-21 | Write referential integrity tests: facts reference valid dimension rows | FR-3.3, FR-3.4 | | |
-| `[ ]` | P4-22 | Write grain uniqueness tests for staging and fact tables | FR-3.2 | | |
+| `[X]` | P4-01 | Analyze OEWS national source file format (columns, sheets, encoding, suppressed values) | FR-2.2 | 2026-03-23 13:08 | 2026-03-23 13:09 |
+| `[X]` | P4-02 | Analyze OEWS state source file format and confirm schema alignment with national | FR-2.3 | 2026-03-23 13:08 | 2026-03-23 13:09 |
+| `[X]` | P4-03 | Build OEWS national file parser: standardize occupation code, estimate period, geography, employment, wage fields | FR-2.2 | 2026-03-23 13:08 | 2026-03-23 13:10 |
+| `[X]` | P4-04 | Build OEWS state file parser with same output schema as national | FR-2.3 | 2026-03-23 13:08 | 2026-03-23 13:10 |
+| `[X]` | P4-05 | Create `stage__bls__oews_national` table | FR-2.5, FR-2.6, FR-2.9 | 2026-03-23 13:10 | 2026-03-23 13:12 |
+| `[X]` | P4-06 | Create `stage__bls__oews_state` table | FR-2.5, FR-2.6, FR-2.9 | 2026-03-23 13:10 | 2026-03-23 13:12 |
+| `[X]` | P4-07 | Build staging loaders: OEWS national and state (snake_case, explicit types, null preservation, source_release_id, parser_version) | FR-2.5, FR-2.6, FR-2.7, FR-2.8, FM-4 | 2026-03-23 13:12 | 2026-03-23 13:14 |
+| `[X]` | P4-08 | Create `dim_geography` table (surrogate key, business key: geo_type + geo_code + source_release_id) | FR-4.3 | 2026-03-23 13:10 | 2026-03-23 13:12 |
+| `[X]` | P4-09 | Build `dim_geography` loader with append-on-definition-change behavior | FR-4.3, FM-3 | 2026-03-23 13:12 | 2026-03-23 13:14 |
+| `[X]` | P4-10 | Create `dim_industry` table (surrogate key, business key: naics_code + naics_version) | FR-4.4 | 2026-03-23 13:10 | 2026-03-23 13:12 |
+| `[X]` | P4-11 | Build `dim_industry` loader with append-on-revision behavior | FR-4.4 | 2026-03-23 13:12 | 2026-03-23 13:14 |
+| `[X]` | P4-12 | Create `fact_occupation_employment_wages` table with full grain and all suggested fields | FR-4.5 | 2026-03-23 13:10 | 2026-03-23 13:12 |
+| `[X]` | P4-13 | Build fact loader: enforce composite grain, separate release time from reference time, retain source_dataset | FR-4.5, FR-4.10, FR-4.11 | 2026-03-23 13:12 | 2026-03-23 13:14 |
+| `[X]` | P4-14 | Implement idempotent loading: rerun same dataset-version produces no duplicates | FR-4.9, OR-5 | 2026-03-23 13:12 | 2026-03-23 13:14 |
+| `[X]` | P4-15 | Implement OEWS structural validations: file presence, required columns, expected sheets, min row counts, grain uniqueness | FR-3.1, FR-3.2 | 2026-03-23 13:14 | 2026-03-23 13:16 |
+| `[X]` | P4-16 | Implement OEWS semantic validations: every occupation code maps to active `dim_occupation`, every geography code maps to `dim_geography` | FR-3.3, FR-3.4 | 2026-03-23 13:14 | 2026-03-23 13:16 |
+| `[X]` | P4-17 | Implement OEWS temporal validations: version monotonicity, append-only fact behavior | FR-3.6, FR-3.7 | 2026-03-23 13:14 | 2026-03-23 13:16 |
+| `[X]` | P4-18 | Implement OEWS drift detection: row-count shifts, measure deltas vs. prior release | FR-3.8, FR-3.9 | 2026-03-23 13:14 | 2026-03-23 13:16 |
+| `[X]` | P4-19 | Update run manifest with row counts, load status, failure classification | FR-6.3, FR-6.4 | 2026-03-23 13:14 | 2026-03-23 13:16 |
+| `[X]` | P4-20 | Write parser unit tests with representative OEWS source samples | — | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | P4-21 | Write referential integrity tests: facts reference valid dimension rows | FR-3.3, FR-3.4 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | P4-22 | Write grain uniqueness tests for staging and fact tables | FR-3.2 | 2026-03-23 13:16 | 2026-03-23 13:22 |
 
 ---
 

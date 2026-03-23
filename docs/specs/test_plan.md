@@ -131,62 +131,62 @@ This document defines all tests for the JobClass pipeline, aligned phase-by-phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T4-01 | UNIT | OEWS national parser extracts occupation code, estimate period, geography, employment, and wage fields from representative sample | Parsed rows match expected values for at least 3 known occupations; wage fields are numeric or null | FR-2.2 | P4-03 | | |
-| `[ ]` | T4-02 | UNIT | OEWS state parser produces same output schema as national parser | Column names and types are identical between national and state parser output | FR-2.3 | P4-04 | | |
-| `[ ]` | T4-03 | UNIT | OEWS parsers preserve suppressed values as null, not as zero or placeholder | For a row with known BLS suppression markers (**, #, N/A), wage fields parse to null | FR-2.7, FM-4 | P4-03, P4-04 | | |
-| `[ ]` | T4-04 | UNIT | OEWS parsers apply snake_case names and explicit types | All column names are snake_case; employment is numeric; wage fields are numeric; codes are text | FR-2.5, FR-2.6 | P4-03, P4-04 | | |
-| `[ ]` | T4-05 | UNIT | OEWS parsers attach source_release_id and parser_version to every row | Every output row has non-null source_release_id and parser_version | FR-2.8 | P4-07 | | |
+| `[X]` | T4-01 | UNIT | OEWS national parser extracts occupation code, estimate period, geography, employment, and wage fields from representative sample | Parsed rows match expected values for at least 3 known occupations; wage fields are numeric or null | FR-2.2 | P4-03 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-02 | UNIT | OEWS state parser produces same output schema as national parser | Column names and types are identical between national and state parser output | FR-2.3 | P4-04 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-03 | UNIT | OEWS parsers preserve suppressed values as null, not as zero or placeholder | For a row with known BLS suppression markers (**, #, N/A), wage fields parse to null | FR-2.7, FM-4 | P4-03, P4-04 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-04 | UNIT | OEWS parsers apply snake_case names and explicit types | All column names are snake_case; employment is numeric; wage fields are numeric; codes are text | FR-2.5, FR-2.6 | P4-03, P4-04 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-05 | UNIT | OEWS parsers attach source_release_id and parser_version to every row | Every output row has non-null source_release_id and parser_version | FR-2.8 | P4-07 | 2026-03-23 13:16 | 2026-03-23 13:22 |
 
 ### Staging Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T4-06 | CONTRACT | `stage__bls__oews_national` has all required columns with correct types | Table exists with expected column names and types | FR-2.5, FR-2.6, FR-2.9 | P4-05 | | |
-| `[ ]` | T4-07 | CONTRACT | `stage__bls__oews_state` has all required columns with correct types | Table exists; schema matches national staging table | FR-2.5, FR-2.6, FR-2.9 | P4-06 | | |
-| `[ ]` | T4-08 | GRAIN | `stage__bls__oews_national` has no duplicate rows at declared grain | Zero duplicates on occupation_code + estimate_period + geography_code + industry_code + ownership_code + source_release_id | FR-3.2 | P4-15, P4-22 | | |
-| `[ ]` | T4-09 | GRAIN | `stage__bls__oews_state` has no duplicate rows at declared grain | Zero duplicates on same composite key as national | FR-3.2 | P4-15, P4-22 | | |
-| `[ ]` | T4-10 | SEMANTIC | OEWS staging row counts meet minimum thresholds | National ≥ 800 rows; state ≥ 25,000 rows | FR-3.1 | P4-15 | | |
+| `[X]` | T4-06 | CONTRACT | `stage__bls__oews_national` has all required columns with correct types | Table exists with expected column names and types | FR-2.5, FR-2.6, FR-2.9 | P4-05 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-07 | CONTRACT | `stage__bls__oews_state` has all required columns with correct types | Table exists; schema matches national staging table | FR-2.5, FR-2.6, FR-2.9 | P4-06 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-08 | GRAIN | `stage__bls__oews_national` has no duplicate rows at declared grain | Zero duplicates on occupation_code + estimate_period + geography_code + industry_code + ownership_code + source_release_id | FR-3.2 | P4-15, P4-22 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-09 | GRAIN | `stage__bls__oews_state` has no duplicate rows at declared grain | Zero duplicates on same composite key as national | FR-3.2 | P4-15, P4-22 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-10 | SEMANTIC | OEWS staging row counts meet minimum thresholds | National ≥ 800 rows; state ≥ 25,000 rows | FR-3.1 | P4-15 | 2026-03-23 13:16 | 2026-03-23 13:22 |
 
 ### Dimension Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T4-11 | GRAIN | `dim_geography` has no duplicate business keys (geo_type + geo_code + source_release_id) | Zero duplicates on business key | FR-3.2 | P4-08 | | |
-| `[ ]` | T4-12 | CONTRACT | `dim_geography` contains all required fields from data model | Table has: geography_key, geo_type, geo_code, geo_name, state_fips, is_current, source_release_id | FR-4.3 | P4-08 | | |
-| `[ ]` | T4-13 | SEMANTIC | `dim_geography` append-on-change: new definition set does not mutate existing rows | After loading release B definitions, all release A rows remain identical | FR-4.3, FM-3 | P4-09 | | |
-| `[ ]` | T4-14 | GRAIN | `dim_industry` has no duplicate business keys (naics_code + naics_version) | Zero duplicates on business key | FR-3.2 | P4-10 | | |
-| `[ ]` | T4-15 | CONTRACT | `dim_industry` contains all required fields from data model | Table has: industry_key, naics_code, industry_title, naics_version, is_current | FR-4.4 | P4-10 | | |
+| `[X]` | T4-11 | GRAIN | `dim_geography` has no duplicate business keys (geo_type + geo_code + source_release_id) | Zero duplicates on business key | FR-3.2 | P4-08 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-12 | CONTRACT | `dim_geography` contains all required fields from data model | Table has: geography_key, geo_type, geo_code, geo_name, state_fips, is_current, source_release_id | FR-4.3 | P4-08 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-13 | SEMANTIC | `dim_geography` append-on-change: new definition set does not mutate existing rows | After loading release B definitions, all release A rows remain identical | FR-4.3, FM-3 | P4-09 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-14 | GRAIN | `dim_industry` has no duplicate business keys (naics_code + naics_version) | Zero duplicates on business key | FR-3.2 | P4-10 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-15 | CONTRACT | `dim_industry` contains all required fields from data model | Table has: industry_key, naics_code, industry_title, naics_version, is_current | FR-4.4 | P4-10 | 2026-03-23 13:16 | 2026-03-23 13:22 |
 
 ### Fact Table Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T4-16 | GRAIN | `fact_occupation_employment_wages` has no duplicate rows at declared grain | Zero duplicates on reference_period + geography_key + industry_key + ownership_code + occupation_key + source_dataset | FR-3.2 | P4-12, P4-22 | | |
-| `[ ]` | T4-17 | CONTRACT | `fact_occupation_employment_wages` contains all required fields from data model | Table has all suggested fields including source_release_id, source_dataset, load_timestamp | FR-4.5 | P4-12 | | |
-| `[ ]` | T4-18 | SEMANTIC | Fact table separates source release time from business reference time | source_release_id and reference_period/estimate_year are independently populated; no rows where they are conflated | FR-4.10 | P4-13 | | |
-| `[ ]` | T4-19 | SEMANTIC | Fact table retains source_dataset on every row | Zero null source_dataset values | FR-4.11 | P4-13 | | |
-| `[ ]` | T4-20 | REF | Every occupation_key in fact table references valid `dim_occupation` row | Zero orphan occupation_key values | FR-3.3 | P4-16, P4-21 | | |
-| `[ ]` | T4-21 | REF | Every geography_key in fact table references valid `dim_geography` row | Zero orphan geography_key values | FR-3.4 | P4-16, P4-21 | | |
-| `[ ]` | T4-22 | REF | Every industry_key in fact table references valid `dim_industry` row | Zero orphan industry_key values | FR-3.4 | P4-16 | | |
+| `[X]` | T4-16 | GRAIN | `fact_occupation_employment_wages` has no duplicate rows at declared grain | Zero duplicates on reference_period + geography_key + industry_key + ownership_code + occupation_key + source_dataset | FR-3.2 | P4-12, P4-22 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-17 | CONTRACT | `fact_occupation_employment_wages` contains all required fields from data model | Table has all suggested fields including source_release_id, source_dataset, load_timestamp | FR-4.5 | P4-12 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-18 | SEMANTIC | Fact table separates source release time from business reference time | source_release_id and reference_period/estimate_year are independently populated; no rows where they are conflated | FR-4.10 | P4-13 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-19 | SEMANTIC | Fact table retains source_dataset on every row | Zero null source_dataset values | FR-4.11 | P4-13 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-20 | REF | Every occupation_key in fact table references valid `dim_occupation` row | Zero orphan occupation_key values | FR-3.3 | P4-16, P4-21 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-21 | REF | Every geography_key in fact table references valid `dim_geography` row | Zero orphan geography_key values | FR-3.4 | P4-16, P4-21 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-22 | REF | Every industry_key in fact table references valid `dim_industry` row | Zero orphan industry_key values | FR-3.4 | P4-16 | 2026-03-23 13:16 | 2026-03-23 13:22 |
 
 ### Temporal & Drift Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T4-23 | TEMPORAL | Version monotonicity: new OEWS load has source_release_id ≥ all existing release IDs for same dataset | No release ID regression detected | FR-3.6 | P4-17 | | |
-| `[ ]` | T4-24 | TEMPORAL | Append-only: loading new OEWS release does not modify any prior-release fact rows | Checksum of prior-release fact rows before and after load are identical | FR-3.7 | P4-17 | | |
-| `[ ]` | T4-25 | DRIFT | Schema drift detection: adding a column to OEWS source triggers detection | Drift detector reports the added column name and type | FR-3.8 | P4-18 | | |
-| `[ ]` | T4-26 | DRIFT | Schema drift detection: removing a required column from OEWS source triggers detection | Drift detector reports the missing column | FR-3.8 | P4-18 | | |
-| `[ ]` | T4-27 | DRIFT | Row-count shift detection: ±20% row count change vs. prior release triggers alert | Detector emits warning with absolute and percentage change | FR-3.9 | P4-18 | | |
-| `[ ]` | T4-28 | DRIFT | Measure delta detection: ≥15% change in mean_annual_wage for a major occupation group triggers alert | Detector emits report identifying the occupation group and delta magnitude | FR-3.9 | P4-18 | | |
+| `[X]` | T4-23 | TEMPORAL | Version monotonicity: new OEWS load has source_release_id ≥ all existing release IDs for same dataset | No release ID regression detected | FR-3.6 | P4-17 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-24 | TEMPORAL | Append-only: loading new OEWS release does not modify any prior-release fact rows | Checksum of prior-release fact rows before and after load are identical | FR-3.7 | P4-17 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-25 | DRIFT | Schema drift detection: adding a column to OEWS source triggers detection | Drift detector reports the added column name and type | FR-3.8 | P4-18 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-26 | DRIFT | Schema drift detection: removing a required column from OEWS source triggers detection | Drift detector reports the missing column | FR-3.8 | P4-18 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-27 | DRIFT | Row-count shift detection: ±20% row count change vs. prior release triggers alert | Detector emits warning with absolute and percentage change | FR-3.9 | P4-18 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-28 | DRIFT | Measure delta detection: ≥15% change in mean_annual_wage for a major occupation group triggers alert | Detector emits report identifying the occupation group and delta magnitude | FR-3.9 | P4-18 | 2026-03-23 13:16 | 2026-03-23 13:22 |
 
 ### Idempotence Tests
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T4-29 | IDEMPOTENT | Rerun OEWS national load for same release: no duplicate fact rows | Row count before and after rerun is identical; no new rows inserted | FR-4.9 | P4-14 | | |
-| `[ ]` | T4-30 | IDEMPOTENT | Rerun OEWS state load for same release: no duplicate fact rows | Row count before and after rerun is identical | FR-4.9 | P4-14 | | |
-| `[ ]` | T4-31 | IDEMPOTENT | Rerun OEWS load for same release: dim_geography not duplicated | Geography row count unchanged after rerun | FR-4.9 | P4-14 | | |
+| `[X]` | T4-29 | IDEMPOTENT | Rerun OEWS national load for same release: no duplicate fact rows | Row count before and after rerun is identical; no new rows inserted | FR-4.9 | P4-14 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-30 | IDEMPOTENT | Rerun OEWS state load for same release: no duplicate fact rows | Row count before and after rerun is identical | FR-4.9 | P4-14 | 2026-03-23 13:16 | 2026-03-23 13:22 |
+| `[X]` | T4-31 | IDEMPOTENT | Rerun OEWS load for same release: dim_geography not duplicated | Geography row count unchanged after rerun | FR-4.9 | P4-14 | 2026-03-23 13:16 | 2026-03-23 13:22 |
 
 ---
 

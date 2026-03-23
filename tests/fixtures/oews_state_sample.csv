@@ -1,0 +1,6 @@
+area_type,area_code,area_title,naics_code,naics_title,own_code,occ_code,occ_title,o_group,tot_emp,emp_prse,jobs_1000,loc_quotient,pct_total,h_mean,a_mean,mean_prse,h_pct10,h_pct25,h_median,h_pct75,h_pct90,a_pct10,a_pct25,a_median,a_pct75,a_pct90,annual,hourly
+2,0600000,California,000000,Cross-industry,1235,15-1252,Software Developers,detailed,305160,2.1,16.930,1.47,1.5,74.29,154530,0.5,42.86,55.50,71.52,90.48,112.28,89150,115450,148760,188190,233550,,
+2,3600000,New York,000000,Cross-industry,1235,15-1252,Software Developers,detailed,126480,2.8,13.244,1.15,1.2,68.86,143230,0.7,39.11,50.50,65.34,83.84,106.10,81350,105040,135910,174380,220680,,
+2,4800000,Texas,000000,Cross-industry,1235,15-1252,Software Developers,detailed,182950,2.4,13.254,1.15,1.4,62.21,129420,0.5,35.55,46.23,59.54,75.70,94.63,73940,96170,123850,157450,196830,,
+2,5300000,Washington,000000,Cross-industry,1235,15-1252,Software Developers,detailed,107630,3.1,27.831,2.41,2.3,82.14,170860,0.7,45.12,59.91,79.76,101.78,**,93840,124610,165900,211710,**,,
+2,0600000,California,000000,Cross-industry,1235,11-1021,"General and Operations Managers",detailed,311510,1.5,17.286,0.89,1.7,63.22,131500,0.7,27.32,37.84,54.88,77.89,113.22,56830,78710,114150,162010,235510,,

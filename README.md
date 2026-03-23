@@ -26,41 +26,52 @@ Four-layer warehouse: **Raw** (immutable source capture) → **Staging** (parsed
 
 Key properties: idempotent loading, version-aware modeling, immutable raw storage, fail-fast on schema drift, explicit source lineage on every record.
 
-  ## Phase Commit Log                
+## Phase Commit Log
 
-    Status of each phase's commit upon completion.   
-    
-    | Phase | Description | Commit Message | Status | 
-    |-------|-------------|----------------|--------| 
-    | 1 | Project Foundation | Phase 1: Project foundation — structure, config, database, logging, tests | Complete |
-    | 2 | Extraction Framework & Run Manifest | | In Progress |
-    | 3 | SOC Taxonomy Pipeline | | Pending |  
-    | 4 | OEWS Employment & Wages Pipeline | | Pending |       
-    | 5 | O*NET Semantic Pipeline | | Pending |      
-    | 6 | Validation Framework & Failure Handling | | Pending |
-    | 7 | Observability & Run Reporting | | Pending |
-    | 8 | Orchestration | | Pending |
-    | 9 | Analyst Marts | | Pending |
-    | 10 | Employment Projections (Optional R1) | | Pending |
-    | 11 | End-to-End Integration & Deliverables | | Pending | 
+Status of each phase's commit upon completion.
 
+| Phase | Description | Commit Message | Status |
+|-------|-------------|----------------|--------|
+| 1 | Project Foundation | Phase 1: Project foundation — structure, config, database, logging, tests | Complete |
+| 2 | Extraction Framework & Run Manifest | Phase 2: Extraction framework, source manifest, run manifest, and tests | Complete |
+| 3 | SOC Taxonomy Pipeline | Phase 3: SOC taxonomy pipeline — parser, staging, dim_occupation, bridge, validations | Complete |
+| 4 | OEWS Employment & Wages Pipeline | Phase 4: OEWS pipeline — parser, staging, dim_geography, dim_industry, fact table, validations | Complete |
+| 5 | O*NET Semantic Pipeline | | Pending |
+| 6 | Validation Framework & Failure Handling | | Pending |
+| 7 | Observability & Run Reporting | | Pending |
+| 8 | Orchestration | | Pending |
+| 9 | Analyst Marts | | Pending |
+| 10 | Employment Projections (Optional R1) | | Pending |
+| 11 | End-to-End Integration & Deliverables | | Pending |
 
 ## Project Structure
 
 ```
-docs/
-  specs/
-    design_document_v1.md       # Full design specification
-    project_detail_design.md    # Requirements and downstream user needs
+src/jobclass/          # Main package
+  config/              # Settings, database connection, migrations
+  extract/             # Download, manifest reader, storage, version detection
+  parse/               # Source-specific parsers (SOC, OEWS, O*NET)
+  load/                # Staging and warehouse loaders
+  validate/            # Structural, semantic, temporal validations
+  observe/             # Logging, run manifest operations
+  orchestrate/         # Pipeline orchestration
+  utils/               # Path builder, shared utilities
+tests/                 # pytest suite (unit + integration)
+  fixtures/            # Sample source files for parser tests
+migrations/            # SQL schema migrations (DuckDB)
+config/                # Source manifest (YAML)
+docs/specs/            # Design docs, release plan, test plan
 ```
 
 ## Documentation
 
 | Document | Purpose |
 |----------|---------|
-| [Design Document](docs/specs/design_document_v1.md) | Full architectural specification, data model, pipeline flow, and design tradeoffs |
+| [Design Document](docs/specs/base_design_document.md) | Full architectural specification, data model, pipeline flow, and design tradeoffs |
 | [Project Detail Design](docs/specs/project_detail_design.md) | Requirements from the perspective of downstream users; input for release and test planning |
+| [Phased Release Plan](docs/specs/phased_release_plan.md) | Task-level tracking with status, timestamps, and requirement traceability |
+| [Test Plan](docs/specs/test_plan.md) | 167 tests across 12 types, aligned phase-by-phase with the release plan |
 
 ## Status
 
-Pre-implementation. Design phase complete. Next steps: phased release plan and test plan.
+Implementation in progress. Phases 1–4 complete. Currently working through Phase 5 (O*NET semantic pipeline).
