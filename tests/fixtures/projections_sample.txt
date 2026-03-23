@@ -1,0 +1,4 @@
+occupation_code	occupation_title	base_year	projection_year	employment_base	employment_projected	employment_change_abs	employment_change_pct	annual_openings	education_category	training_category	work_experience_category
+15-1252	Software Developers	2022	2032	1795300	2094600	299200	16.7	140600	Bachelor's degree	None	None
+15-1253	Software Quality Assurance Analysts and Testers	2022	2032	210600	231800	21200	10.1	25300	Bachelor's degree	None	None
+11-1021	General and Operations Managers	2022	2032	3123100	3280400	157300	5.0	371800	Bachelor's degree	None	5 years or more

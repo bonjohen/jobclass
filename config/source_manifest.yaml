@@ -94,4 +94,4 @@ sources:
     parser_name: projections_parser
     refresh_cadence: biennial
     version_detection_rule: content_header
-    enabled: false
+    enabled: true

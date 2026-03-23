@@ -176,3 +176,26 @@ def onet_loaded_db(oews_loaded_db, onet_skills_content, onet_knowledge_content,
     load_bridge_occupation_task(oews_loaded_db, onet_ver, release, soc_ver)
 
     return oews_loaded_db
+
+
+@pytest.fixture
+def projections_content():
+    """Return Employment Projections sample TSV content."""
+    return (FIXTURES_DIR / "projections_sample.txt").read_text(encoding="utf-8")
+
+
+@pytest.fixture
+def projections_loaded_db(oews_loaded_db, projections_content):
+    """DB with SOC + OEWS + projections staging + fact loaded."""
+    from jobclass.parse.projections import parse_employment_projections
+    from jobclass.load.projections import load_projections_staging, load_fact_occupation_projections
+
+    release = "2024.1"
+    soc_ver = "2018"
+    cycle = "2022-2032"
+
+    rows = parse_employment_projections(projections_content, release, cycle)
+    load_projections_staging(oews_loaded_db, rows, release)
+    load_fact_occupation_projections(oews_loaded_db, release, soc_ver)
+
+    return oews_loaded_db

@@ -1,4 +1,4 @@
-"""Pipeline orchestration: taxonomy_refresh, oews_refresh, onet_refresh, warehouse_publish."""
+"""Pipeline orchestration: taxonomy_refresh, oews_refresh, onet_refresh, projections_refresh, warehouse_publish."""
 
 from __future__ import annotations
 
@@ -353,3 +353,97 @@ def warehouse_publish(
         message="All validations passed — marts published",
         validation_results=validations,
     )
+
+
+# ============================================================
+# projections_refresh (P10-09)
+# ============================================================
+
+def projections_refresh(
+    conn: duckdb.DuckDBPyConnection,
+    content: str,
+    source_release_id: str,
+    projection_cycle: str,
+    soc_version: str,
+) -> PipelineResult:
+    """Execute the Employment Projections pipeline: parse → validate → load."""
+    from jobclass.parse.projections import parse_employment_projections
+    from jobclass.load.projections import load_projections_staging, load_fact_occupation_projections
+    from jobclass.validate.projections import (
+        validate_projections_structural,
+        validate_projections_occupation_mapping,
+        validate_projections_fact_integrity,
+    )
+
+    if not check_taxonomy_loaded(conn, soc_version):
+        return PipelineResult(
+            pipeline_name="projections_refresh",
+            status=PipelineStatus.DEPENDENCY_BLOCKED,
+            message=f"dim_occupation not loaded for SOC version {soc_version}",
+        )
+
+    run_id = generate_run_id()
+    create_run_record(
+        conn, run_id=run_id, pipeline_name="projections_refresh",
+        dataset_name="employment_projections", source_name="bls",
+        source_release_id=source_release_id,
+    )
+
+    try:
+        rows = parse_employment_projections(content, source_release_id, projection_cycle)
+        load_projections_staging(conn, rows, source_release_id)
+
+        validations = validate_projections_structural(conn, source_release_id)
+        occ_map = validate_projections_occupation_mapping(conn, source_release_id, soc_version)
+        validations.append(occ_map)
+
+        failures = [v for v in validations if not v.passed]
+        if failures:
+            update_run_counts(
+                conn, run_id, load_status="validation_failure",
+                failure_classification=FailureClassification.VALIDATION_FAILURE.value,
+                validation_summary=f"{len(failures)} checks failed",
+            )
+            return PipelineResult(
+                pipeline_name="projections_refresh",
+                status=PipelineStatus.VALIDATION_FAILURE,
+                run_id=run_id,
+                message=f"{len(failures)} validation(s) failed",
+                validation_results=validations,
+            )
+
+        load_fact_occupation_projections(conn, source_release_id, soc_version)
+
+        fact_ref = validate_projections_fact_integrity(conn)
+        validations.append(fact_ref)
+
+        fact_count = conn.execute(
+            "SELECT COUNT(*) FROM fact_occupation_projections WHERE source_release_id = ?",
+            [source_release_id],
+        ).fetchone()[0]
+
+        update_run_counts(
+            conn, run_id,
+            row_count_raw=len(rows),
+            row_count_stage=len(rows),
+            row_count_loaded=fact_count,
+            load_status="success",
+            validation_summary=f"{len(validations)} checks passed",
+        )
+        return PipelineResult(
+            pipeline_name="projections_refresh",
+            status=PipelineStatus.SUCCESS,
+            run_id=run_id,
+            validation_results=validations,
+        )
+    except Exception as e:
+        update_run_counts(
+            conn, run_id, load_status="load_failure",
+            failure_classification=FailureClassification.LOAD_FAILURE.value,
+        )
+        return PipelineResult(
+            pipeline_name="projections_refresh",
+            status=PipelineStatus.LOAD_FAILURE,
+            run_id=run_id,
+            message=str(e),
+        )

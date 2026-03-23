@@ -348,14 +348,14 @@ This document defines all tests for the JobClass pipeline, aligned phase-by-phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T10-01 | UNIT | Projections parser extracts projection cycle, base year, target year, occupation code, employment values | Parsed rows match expected values for at least 3 known occupations | FR-2.4 | P10-03 | | |
-| `[ ]` | T10-02 | CONTRACT | `stage__bls__employment_projections` has all required columns with correct types | Table exists with expected schema | FR-2.9 | P10-04 | | |
-| `[ ]` | T10-03 | GRAIN | `stage__bls__employment_projections` has no duplicate rows at declared grain | Zero duplicates on projection_cycle + occupation_code + source_release_id | FR-3.2 | P10-08 | | |
-| `[ ]` | T10-04 | GRAIN | `fact_occupation_projections` has no duplicate rows (projection_cycle + occupation_key) | Zero duplicates on business key | FR-3.2 | P10-06 | | |
-| `[ ]` | T10-05 | CONTRACT | `fact_occupation_projections` contains all required fields from data model | Table has: projection_cycle, occupation_key, base_year, projection_year, employment_base, employment_projected, employment_change_pct, source_release_id | FR-4.8 | P10-06 | | |
-| `[ ]` | T10-06 | REF | Every occupation_key in projections fact references valid `dim_occupation` | Zero orphans | FR-3.3 | P10-08 | | |
-| `[ ]` | T10-07 | IDEMPOTENT | Rerun projections load for same cycle: no duplicate fact rows | Row count unchanged after rerun | FR-4.9 | P10-07 | | |
-| `[ ]` | T10-08 | INTEGRATION | `projections_refresh` pipeline executes full sequence without error | Fact table populated; run_manifest completed with success | OR-1 | P10-09 | | |
+| `[X]` | T10-01 | UNIT | Projections parser extracts projection cycle, base year, target year, occupation code, employment values | Parsed rows match expected values for at least 3 known occupations | FR-2.4 | P10-03 | 2026-03-23 14:16 | 2026-03-23 14:18 |
+| `[X]` | T10-02 | CONTRACT | `stage__bls__employment_projections` has all required columns with correct types | Table exists with expected schema | FR-2.9 | P10-04 | 2026-03-23 14:16 | 2026-03-23 14:18 |
+| `[X]` | T10-03 | GRAIN | `stage__bls__employment_projections` has no duplicate rows at declared grain | Zero duplicates on projection_cycle + occupation_code + source_release_id | FR-3.2 | P10-08 | 2026-03-23 14:16 | 2026-03-23 14:18 |
+| `[X]` | T10-04 | GRAIN | `fact_occupation_projections` has no duplicate rows (projection_cycle + occupation_key) | Zero duplicates on business key | FR-3.2 | P10-06 | 2026-03-23 14:16 | 2026-03-23 14:18 |
+| `[X]` | T10-05 | CONTRACT | `fact_occupation_projections` contains all required fields from data model | Table has: projection_cycle, occupation_key, base_year, projection_year, employment_base, employment_projected, employment_change_pct, source_release_id | FR-4.8 | P10-06 | 2026-03-23 14:16 | 2026-03-23 14:18 |
+| `[X]` | T10-06 | REF | Every occupation_key in projections fact references valid `dim_occupation` | Zero orphans | FR-3.3 | P10-08 | 2026-03-23 14:16 | 2026-03-23 14:18 |
+| `[X]` | T10-07 | IDEMPOTENT | Rerun projections load for same cycle: no duplicate fact rows | Row count unchanged after rerun | FR-4.9 | P10-07 | 2026-03-23 14:16 | 2026-03-23 14:18 |
+| `[X]` | T10-08 | INTEGRATION | `projections_refresh` pipeline executes full sequence without error | Fact table populated; run_manifest completed with success | OR-1 | P10-09 | 2026-03-23 14:16 | 2026-03-23 14:18 |
 
 ---
 

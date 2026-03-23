@@ -41,7 +41,7 @@ Status of each phase's commit upon completion.
 | 7 | Observability & Run Reporting | Phase 7: Observability — reporters, run inspection, row-count deltas, reconciliation | Complete |
 | 8 | Orchestration | Phase 8: Orchestration — pipelines, dependency enforcement, publish gating, idempotence | Complete |
 | 9 | Analyst Marts | Phase 9: Analyst marts — 5 views, Jaccard similarity, query tests, publish gating | Complete |
-| 10 | Employment Projections (Optional R1) | | Pending |
+| 10 | Employment Projections (Optional R1) | Phase 10: Employment Projections — parser, staging, fact, validations, pipeline | Complete |
 | 11 | End-to-End Integration & Deliverables | | Pending |
 
 ## Project Structure
@@ -75,4 +75,4 @@ docs/specs/            # Design docs, release plan, test plan
 
 ## Status
 
-Implementation in progress. Phases 1–9 complete. Currently working through Phase 10 (employment projections).
+Implementation in progress. Phases 1–10 complete. Currently working through Phase 11 (end-to-end integration).

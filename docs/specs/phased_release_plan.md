@@ -229,16 +229,16 @@ Optional fourth source. Architecturally simple if Phases 1–8 are complete.
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | P10-01 | Populate source manifest entry for Employment Projections | FR-1.4, FR-1.8 | | |
-| `[ ]` | P10-02 | Analyze Employment Projections source file format | FR-1.4 | | |
-| `[ ]` | P10-03 | Build projections parser: normalize projection cycle, base year, target year, occupation code | FR-2.4 | | |
-| `[ ]` | P10-04 | Create staging table `stage__bls__employment_projections` | FR-2.9 | | |
-| `[ ]` | P10-05 | Build staging loader for projections | FR-2.5, FR-2.6, FR-2.8 | | |
-| `[ ]` | P10-06 | Create `fact_occupation_projections` table with full grain and suggested fields | FR-4.8 | | |
-| `[ ]` | P10-07 | Build fact loader with idempotent append-by-cycle behavior | FR-4.8, FR-4.9 | | |
-| `[ ]` | P10-08 | Implement projections validations (structural, semantic, temporal) | FR-3.1, FR-3.2, FR-3.3 | | |
-| `[ ]` | P10-09 | Implement `projections_refresh` pipeline | OR-1 | | |
-| `[ ]` | P10-10 | Write parser and loader tests | — | | |
+| `[X]` | P10-01 | Populate source manifest entry for Employment Projections | FR-1.4, FR-1.8 | 2026-03-23 14:14 | 2026-03-23 14:18 |
+| `[X]` | P10-02 | Analyze Employment Projections source file format | FR-1.4 | 2026-03-23 14:14 | 2026-03-23 14:18 |
+| `[X]` | P10-03 | Build projections parser: normalize projection cycle, base year, target year, occupation code | FR-2.4 | 2026-03-23 14:14 | 2026-03-23 14:18 |
+| `[X]` | P10-04 | Create staging table `stage__bls__employment_projections` | FR-2.9 | 2026-03-23 14:14 | 2026-03-23 14:18 |
+| `[X]` | P10-05 | Build staging loader for projections | FR-2.5, FR-2.6, FR-2.8 | 2026-03-23 14:14 | 2026-03-23 14:18 |
+| `[X]` | P10-06 | Create `fact_occupation_projections` table with full grain and suggested fields | FR-4.8 | 2026-03-23 14:14 | 2026-03-23 14:18 |
+| `[X]` | P10-07 | Build fact loader with idempotent append-by-cycle behavior | FR-4.8, FR-4.9 | 2026-03-23 14:14 | 2026-03-23 14:18 |
+| `[X]` | P10-08 | Implement projections validations (structural, semantic, temporal) | FR-3.1, FR-3.2, FR-3.3 | 2026-03-23 14:14 | 2026-03-23 14:18 |
+| `[X]` | P10-09 | Implement `projections_refresh` pipeline | OR-1 | 2026-03-23 14:14 | 2026-03-23 14:18 |
+| `[X]` | P10-10 | Write parser and loader tests | — | 2026-03-23 14:14 | 2026-03-23 14:18 |
 
 ---
 
