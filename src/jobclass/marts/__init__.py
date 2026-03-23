@@ -1,0 +1,1 @@
+"""Analyst mart views."""

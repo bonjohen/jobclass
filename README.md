@@ -40,7 +40,7 @@ Status of each phase's commit upon completion.
 | 6 | Validation Framework & Failure Handling | Phase 6: Validation framework — structural, grain, ref integrity, temporal, drift, failure modes | Complete |
 | 7 | Observability & Run Reporting | Phase 7: Observability — reporters, run inspection, row-count deltas, reconciliation | Complete |
 | 8 | Orchestration | Phase 8: Orchestration — pipelines, dependency enforcement, publish gating, idempotence | Complete |
-| 9 | Analyst Marts | | Pending |
+| 9 | Analyst Marts | Phase 9: Analyst marts — 5 views, Jaccard similarity, query tests, publish gating | Complete |
 | 10 | Employment Projections (Optional R1) | | Pending |
 | 11 | End-to-End Integration & Deliverables | | Pending |
 
@@ -55,6 +55,7 @@ src/jobclass/          # Main package
   validate/            # Structural, semantic, temporal validations
   observe/             # Logging, run manifest operations
   orchestrate/         # Pipeline orchestration
+  marts/               # Analyst-facing mart view helpers
   utils/               # Path builder, shared utilities
 tests/                 # pytest suite (unit + integration)
   fixtures/            # Sample source files for parser tests
@@ -74,4 +75,4 @@ docs/specs/            # Design docs, release plan, test plan
 
 ## Status
 
-Implementation in progress. Phases 1–8 complete. Currently working through Phase 9 (analyst marts).
+Implementation in progress. Phases 1–9 complete. Currently working through Phase 10 (employment projections).

@@ -331,16 +331,16 @@ This document defines all tests for the JobClass pipeline, aligned phase-by-phas
 
 | Status | Test ID | Type | Description | Pass Criteria | Traces To | Validates Task | Started | Completed |
 |--------|---------|------|-------------|---------------|-----------|----------------|---------|-----------|
-| `[ ]` | T9-01 | QUERY | `occupation_summary` grain is one row per occupation | Zero duplicates on occupation_key; every `dim_occupation` row with is_current=true appears | FR-5.1 | P9-01 | | |
-| `[ ]` | T9-02 | QUERY | `occupation_summary` includes hierarchy fields (major group, minor group, broad, detailed) | For SOC 15-1252, major_group = "15-0000", hierarchy fields non-null | FR-5.1 | P9-01 | | |
-| `[ ]` | T9-03 | QUERY | `occupation_wages_by_geography` grain is one row per occupation per geography | Zero duplicates on occupation_key + geography_key; contains employment_count, mean_annual_wage, median_annual_wage | FR-5.2 | P9-02 | | |
-| `[ ]` | T9-04 | QUERY | `occupation_wages_by_geography` joins resolve without fan-out or loss | Row count matches expected: (count of occupations in facts) × (count of geographies per occupation) | FR-5.2 | P9-02 | | |
-| `[ ]` | T9-05 | QUERY | `occupation_skill_profile` grain is one row per occupation per skill per scale type | Zero duplicates on occupation_key + skill_key + scale_type | FR-5.3 | P9-03 | | |
-| `[ ]` | T9-06 | QUERY | `occupation_skill_profile` uses current O*NET version only | All rows have source_version matching the latest loaded O*NET version | FR-5.3 | P9-03 | | |
-| `[ ]` | T9-07 | QUERY | `occupation_task_profile` grain is one row per occupation per task | Zero duplicates on occupation_key + task_key | FR-5.4 | P9-04 | | |
-| `[ ]` | T9-08 | QUERY | `occupation_similarity_seeded` produces non-trivial similarity scores | For Software Developers (15-1252), at least 5 similar occupations returned with similarity > 0 | FR-5.5 | P9-05 | | |
-| `[ ]` | T9-09 | QUERY | All marts trace back to source lineage | Every mart row can be joined back to a source_release_id via warehouse keys | FR-4.11 | P9-01 through P9-05 | | |
-| `[ ]` | T9-10 | INTEGRATION | Publish gating: marts not refreshed when upstream validation is in failed state | With a pending validation failure, mart tables retain prior content; no partial refresh | FR-5.6, OR-7 | P9-06 | | |
+| `[X]` | T9-01 | QUERY | `occupation_summary` grain is one row per occupation | Zero duplicates on occupation_key; every `dim_occupation` row with is_current=true appears | FR-5.1 | P9-01 | 2026-03-23 14:10 | 2026-03-23 14:12 |
+| `[X]` | T9-02 | QUERY | `occupation_summary` includes hierarchy fields (major group, minor group, broad, detailed) | For SOC 15-1252, major_group = "15-0000", hierarchy fields non-null | FR-5.1 | P9-01 | 2026-03-23 14:10 | 2026-03-23 14:12 |
+| `[X]` | T9-03 | QUERY | `occupation_wages_by_geography` grain is one row per occupation per geography | Zero duplicates on occupation_key + geography_key; contains employment_count, mean_annual_wage, median_annual_wage | FR-5.2 | P9-02 | 2026-03-23 14:10 | 2026-03-23 14:12 |
+| `[X]` | T9-04 | QUERY | `occupation_wages_by_geography` joins resolve without fan-out or loss | Row count matches expected: (count of occupations in facts) × (count of geographies per occupation) | FR-5.2 | P9-02 | 2026-03-23 14:10 | 2026-03-23 14:12 |
+| `[X]` | T9-05 | QUERY | `occupation_skill_profile` grain is one row per occupation per skill per scale type | Zero duplicates on occupation_key + skill_key + scale_type | FR-5.3 | P9-03 | 2026-03-23 14:10 | 2026-03-23 14:12 |
+| `[X]` | T9-06 | QUERY | `occupation_skill_profile` uses current O*NET version only | All rows have source_version matching the latest loaded O*NET version | FR-5.3 | P9-03 | 2026-03-23 14:10 | 2026-03-23 14:12 |
+| `[X]` | T9-07 | QUERY | `occupation_task_profile` grain is one row per occupation per task | Zero duplicates on occupation_key + task_key | FR-5.4 | P9-04 | 2026-03-23 14:10 | 2026-03-23 14:12 |
+| `[X]` | T9-08 | QUERY | `occupation_similarity_seeded` produces non-trivial similarity scores | For Software Developers (15-1252), at least 5 similar occupations returned with similarity > 0 | FR-5.5 | P9-05 | 2026-03-23 14:10 | 2026-03-23 14:12 |
+| `[X]` | T9-09 | QUERY | All marts trace back to source lineage | Every mart row can be joined back to a source_release_id via warehouse keys | FR-4.11 | P9-01 through P9-05 | 2026-03-23 14:10 | 2026-03-23 14:12 |
+| `[X]` | T9-10 | INTEGRATION | Publish gating: marts not refreshed when upstream validation is in failed state | With a pending validation failure, mart tables retain prior content; no partial refresh | FR-5.6, OR-7 | P9-06 | 2026-03-23 14:10 | 2026-03-23 14:12 |
 
 ---
 

@@ -212,14 +212,14 @@ Build the five analyst-facing views. Depends on Phases 3–5 (data loaded) and P
 
 | Status | Task ID | Description | Traces To | Started | Completed |
 |--------|---------|-------------|-----------|---------|-----------|
-| `[ ]` | P9-01 | Build `occupation_summary` mart: one row per occupation with hierarchy fields and profile attributes | FR-5.1 | | |
-| `[ ]` | P9-02 | Build `occupation_wages_by_geography` mart: employment and wage measures by occupation and geography | FR-5.2 | | |
-| `[ ]` | P9-03 | Build `occupation_skill_profile` mart: occupation-to-skill relationships from current O*NET version | FR-5.3 | | |
-| `[ ]` | P9-04 | Build `occupation_task_profile` mart: occupation-to-task relationships for selected occupations | FR-5.4 | | |
-| `[ ]` | P9-05 | Build `occupation_similarity_seeded` mart: similarity view based on shared skill/task structures | FR-5.5 | | |
-| `[ ]` | P9-06 | Enforce publish gating: marts only refresh after upstream validation succeeds | FR-5.6, OR-7 | | |
-| `[ ]` | P9-07 | Write query-level tests: verify grain, join correctness, and lineage traceability for each mart | — | | |
-| `[ ]` | P9-08 | Populate example marts with real data for portfolio deliverable | DL-8 | | |
+| `[X]` | P9-01 | Build `occupation_summary` mart: one row per occupation with hierarchy fields and profile attributes | FR-5.1 | 2026-03-23 14:06 | 2026-03-23 14:12 |
+| `[X]` | P9-02 | Build `occupation_wages_by_geography` mart: employment and wage measures by occupation and geography | FR-5.2 | 2026-03-23 14:06 | 2026-03-23 14:12 |
+| `[X]` | P9-03 | Build `occupation_skill_profile` mart: occupation-to-skill relationships from current O*NET version | FR-5.3 | 2026-03-23 14:06 | 2026-03-23 14:12 |
+| `[X]` | P9-04 | Build `occupation_task_profile` mart: occupation-to-task relationships for selected occupations | FR-5.4 | 2026-03-23 14:06 | 2026-03-23 14:12 |
+| `[X]` | P9-05 | Build `occupation_similarity_seeded` mart: similarity view based on shared skill/task structures | FR-5.5 | 2026-03-23 14:06 | 2026-03-23 14:12 |
+| `[X]` | P9-06 | Enforce publish gating: marts only refresh after upstream validation succeeds | FR-5.6, OR-7 | 2026-03-23 14:06 | 2026-03-23 14:12 |
+| `[X]` | P9-07 | Write query-level tests: verify grain, join correctness, and lineage traceability for each mart | — | 2026-03-23 14:06 | 2026-03-23 14:12 |
+| `[X]` | P9-08 | Populate example marts with real data for portfolio deliverable | DL-8 | 2026-03-23 14:06 | 2026-03-23 14:12 |
 
 ---
 
