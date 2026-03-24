@@ -68,6 +68,7 @@ The warehouse extends point-in-time occupation reporting with time-series analys
 
 - **Conformed metric catalog** (`dim_metric`) — 6 base metrics + 5 derived metrics with units, display format, comparability constraints
 - **Time-period dimension** (`dim_time_period`) — annual periods auto-populated from warehouse fact years
+- **Multi-vintage OEWS** — pipeline downloads and loads 3 years of OEWS data (2021–2023) for true multi-year time-series
 - **Observation fact** (`fact_time_series_observation`) — normalized from OEWS and projections at the grain of metric + occupation + geography + period + source release + comparability mode
 - **Derived-series fact** (`fact_derived_series`) — year-over-year change, percent change, 3-year rolling average, state-vs-national gap, rank delta
 - **Comparable history** — as-published vs. comparable-history modes; projection metrics excluded from comparable series
@@ -81,7 +82,7 @@ jobclass-pipeline timeseries-refresh
 ## Testing
 
 ```bash
-# Full suite (526+ tests)
+# Full suite (543+ tests)
 pytest
 
 # Warehouse-only tests (real data validation)

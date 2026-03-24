@@ -61,14 +61,14 @@ Extend the pipeline to download and process multiple historical OEWS releases so
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | TS3-01 | Add multi-vintage OEWS URLs to `source_manifest.yaml` (at least 3 years: e.g. 2021, 2022, 2023) | | |
-| `[ ]` | TS3-02 | Update extraction pipeline to iterate over multiple source releases per dataset | | |
-| `[ ]` | TS3-03 | Ensure parsers handle minor column variations across OEWS vintages | | |
-| `[ ]` | TS3-04 | Run `run-all` for multi-vintage OEWS and verify staging tables contain rows from all vintages | | |
-| `[ ]` | TS3-05 | Verify `fact_occupation_employment_wages` contains rows tagged to each source_release_id | | |
-| `[ ]` | TS3-06 | Re-run TS2 normalizers — verify `fact_time_series_observation` contains multi-year observations | | |
-| `[ ]` | TS3-07 | Test: observation table has >= 3 distinct period_keys for employment_count at national level | | |
-| `[ ]` | TS3-08 | Test: a known occupation (e.g. 15-1251) has observations for all extracted vintages | | |
+| `[X]` | TS3-01 | Add multi-vintage OEWS URLs to `source_manifest.yaml` (at least 3 years: e.g. 2021, 2022, 2023) | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS3-02 | Update extraction pipeline to iterate over multiple source releases per dataset | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS3-03 | Ensure parsers handle minor column variations across OEWS vintages | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS3-04 | Run `run-all` for multi-vintage OEWS and verify staging tables contain rows from all vintages | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS3-05 | Verify `fact_occupation_employment_wages` contains rows tagged to each source_release_id | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS3-06 | Re-run TS2 normalizers — verify `fact_time_series_observation` contains multi-year observations | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS3-07 | Test: observation table has >= 3 distinct period_keys for employment_count at national level | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS3-08 | Test: a known occupation (e.g. 15-1251) has observations for all extracted vintages | 2026-03-23 | 2026-03-23 |
 
 ---
 
@@ -212,7 +212,7 @@ Run the full pipeline and website against real data and verify key user flows.
 |-------|-------------|------------|-----------|
 | TS1 | Conformed Metric Catalog and Time-Period Dimension | 8 | 8 |
 | TS2 | Base Time-Series Observation Fact | 14 | 14 |
-| TS3 | Multi-Vintage Data Extraction | 8 | 0 |
+| TS3 | Multi-Vintage Data Extraction | 8 | 8 |
 | TS4 | Comparable History Series | 6 | 6 |
 | TS5 | Derived Metric Library | 17 | 17 |
 | TS6 | Time-Series Pipeline Orchestration | 8 | 8 |
@@ -220,7 +220,7 @@ Run the full pipeline and website against real data and verify key user flows.
 | TS8 | Reporting Marts | 11 | 11 |
 | TS9 | Website — Trend Explorer and Comparison Pages | 10 | 10 |
 | TS10 | Real Data End-to-End Verification | 11 | 0 |
-| **Total** | | **101** | **82** |
+| **Total** | | **101** | **90** |
 
 ---
 

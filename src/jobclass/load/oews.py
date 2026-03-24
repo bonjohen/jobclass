@@ -66,9 +66,11 @@ def load_dim_geography(
 
     loaded = 0
     for geo_type, geo_code, geo_name in geo_rows:
+        # Deduplicate by geo_type + geo_code across all vintages so that
+        # multi-vintage OEWS releases share geography dimension keys.
         exists = conn.execute(
-            "SELECT COUNT(*) FROM dim_geography WHERE geo_type = ? AND geo_code = ? AND source_release_id = ?",
-            [geo_type, geo_code, source_release_id],
+            "SELECT COUNT(*) FROM dim_geography WHERE geo_type = ? AND geo_code = ?",
+            [geo_type, geo_code],
         ).fetchone()[0]
         if exists > 0:
             continue
@@ -166,8 +168,8 @@ def load_fact_occupation_employment_wages(
         occ_key = occ_key[0]
 
         geo_key = conn.execute(
-            "SELECT geography_key FROM dim_geography WHERE geo_type = ? AND geo_code = ? AND source_release_id = ?",
-            [s["area_type"], s["area_code"], source_release_id],
+            "SELECT geography_key FROM dim_geography WHERE geo_type = ? AND geo_code = ? LIMIT 1",
+            [s["area_type"], s["area_code"]],
         ).fetchone()
         if not geo_key:
             continue

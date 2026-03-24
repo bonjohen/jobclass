@@ -23,6 +23,12 @@ _OEWS_COLUMN_ALIASES = {
     "pct_rpt": "pct_rpt",
     "annual": "annual",
     "hourly": "hourly",
+    # Older vintage variations (pre-2022 column names)
+    "group": "o_group",        # some vintages use GROUP instead of O_GROUP
+    "occ_group": "o_group",    # alternate occupation group column name
+    "area_name": "area_title", # some vintages use AREA_NAME instead of AREA_TITLE
+    "naics_title": "naics_title",
+    "own_code": "own_code",
 }
 
 

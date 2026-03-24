@@ -24,9 +24,47 @@ sources:
     enabled: true
 
   # --- OEWS (Occupational Employment and Wage Statistics) ---
-  # OEWS 2024 data not yet available as downloadable ZIPs; using 2023.
+  # Multi-vintage: 2021, 2022, 2023 for time-series analysis.
+  # Each vintage is a pair of national + state files.
+
   - source_name: bls
-    dataset_name: oews_national
+    dataset_name: oews_national_2021
+    dataset_url: https://www.bls.gov/oes/special-requests/oesm21nat.zip
+    expected_format: xlsx_in_zip
+    parser_name: oews_national_parser
+    refresh_cadence: annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  - source_name: bls
+    dataset_name: oews_state_2021
+    dataset_url: https://www.bls.gov/oes/special-requests/oesm21st.zip
+    expected_format: xlsx_in_zip
+    parser_name: oews_state_parser
+    refresh_cadence: annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  - source_name: bls
+    dataset_name: oews_national_2022
+    dataset_url: https://www.bls.gov/oes/special-requests/oesm22nat.zip
+    expected_format: xlsx_in_zip
+    parser_name: oews_national_parser
+    refresh_cadence: annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  - source_name: bls
+    dataset_name: oews_state_2022
+    dataset_url: https://www.bls.gov/oes/special-requests/oesm22st.zip
+    expected_format: xlsx_in_zip
+    parser_name: oews_state_parser
+    refresh_cadence: annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  - source_name: bls
+    dataset_name: oews_national_2023
     dataset_url: https://www.bls.gov/oes/special-requests/oesm23nat.zip
     expected_format: xlsx_in_zip
     parser_name: oews_national_parser
@@ -35,7 +73,7 @@ sources:
     enabled: true
 
   - source_name: bls
-    dataset_name: oews_state
+    dataset_name: oews_state_2023
     dataset_url: https://www.bls.gov/oes/special-requests/oesm23st.zip
     expected_format: xlsx_in_zip
     parser_name: oews_state_parser

@@ -88,7 +88,7 @@ def run_all_pipelines(
     by_name: dict[str, ManifestEntry] = {e.dataset_name: e for e in entries}
 
     # --- 1. SOC Taxonomy ---
-    print("\n[1/5] SOC Taxonomy Pipeline")
+    print("\n[1/6] SOC Taxonomy Pipeline")
     summary.pipelines_attempted += 1
     try:
         soc_h_entry = by_name["soc_hierarchy"]
@@ -113,34 +113,51 @@ def run_all_pipelines(
         summary.errors.append(msg)
         soc_version = "2018"  # fallback for downstream
 
-    # --- 2. OEWS Employment & Wages ---
-    print("\n[2/5] OEWS Employment & Wages Pipeline")
-    summary.pipelines_attempted += 1
-    try:
-        nat_entry = by_name["oews_national"]
-        st_entry = by_name["oews_state"]
+    # --- 2. OEWS Employment & Wages (multi-vintage) ---
+    # Find all OEWS national/state pairs and process each vintage
+    oews_nat_entries = sorted(
+        [e for e in entries if e.dataset_name.startswith("oews_national")],
+        key=lambda e: e.dataset_name,
+    )
+    oews_st_entries = {
+        e.dataset_name.replace("oews_state", ""): e
+        for e in entries if e.dataset_name.startswith("oews_state")
+    }
+    oews_vintages = len(oews_nat_entries)
+    oews_release = "unknown"
+    for vi, nat_entry in enumerate(oews_nat_entries, 1):
+        suffix = nat_entry.dataset_name.replace("oews_national", "")
+        st_key = suffix
+        st_entry = oews_st_entries.get(st_key)
+        if not st_entry:
+            msg = f"  SKIP — no matching oews_state{suffix} for {nat_entry.dataset_name}"
+            print(msg)
+            continue
 
-        nat_text, oews_release = _download_and_convert(nat_entry, raw_root)
-        st_text, _ = _download_and_convert(st_entry, raw_root)
+        print(f"\n[2/6] OEWS Employment & Wages Pipeline (vintage {vi}/{oews_vintages}: {nat_entry.dataset_name})")
+        summary.pipelines_attempted += 1
+        try:
+            nat_text, vintage_release = _download_and_convert(nat_entry, raw_root)
+            st_text, _ = _download_and_convert(st_entry, raw_root)
 
-        result = oews_refresh(conn, nat_text, st_text, oews_release, soc_version)
-        if result.status == PipelineStatus.SUCCESS:
-            print(f"  OK — OEWS loaded (run_id: {result.run_id})")
-            summary.pipelines_succeeded += 1
-        else:
-            msg = f"  FAILED — {result.status.value}: {result.message}"
+            result = oews_refresh(conn, nat_text, st_text, vintage_release, soc_version)
+            if result.status == PipelineStatus.SUCCESS:
+                print(f"  OK — OEWS {vintage_release} loaded (run_id: {result.run_id})")
+                summary.pipelines_succeeded += 1
+                oews_release = vintage_release  # track last successful release
+            else:
+                msg = f"  FAILED — {result.status.value}: {result.message}"
+                print(msg)
+                summary.pipelines_failed += 1
+                summary.errors.append(msg)
+        except Exception as e:
+            msg = f"  ERROR — OEWS {nat_entry.dataset_name}: {e}"
             print(msg)
             summary.pipelines_failed += 1
             summary.errors.append(msg)
-    except Exception as e:
-        msg = f"  ERROR — OEWS: {e}"
-        print(msg)
-        summary.pipelines_failed += 1
-        summary.errors.append(msg)
-        oews_release = "unknown"
 
     # --- 3. O*NET Semantic Descriptors ---
-    print("\n[3/5] O*NET Semantic Descriptors Pipeline")
+    print("\n[3/6] O*NET Semantic Descriptors Pipeline")
     summary.pipelines_attempted += 1
     try:
         skills_entry = by_name["onet_skills"]
@@ -173,7 +190,7 @@ def run_all_pipelines(
         onet_version = "unknown"
 
     # --- 4. Employment Projections ---
-    print("\n[4/5] Employment Projections Pipeline")
+    print("\n[4/6] Employment Projections Pipeline")
     summary.pipelines_attempted += 1
     try:
         proj_entry = by_name["bls_employment_projections"]

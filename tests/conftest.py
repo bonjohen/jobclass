@@ -112,6 +112,53 @@ def oews_loaded_db(migrated_db, soc_hierarchy_content, soc_definitions_content,
 
 
 @pytest.fixture
+def multi_vintage_oews_db(migrated_db, soc_hierarchy_content, soc_definitions_content,
+                          oews_national_content, oews_state_content):
+    """DB with SOC + 3 vintages of OEWS loaded (simulating 2021, 2022, 2023).
+
+    Uses the same fixture data for all vintages with different release IDs,
+    testing the multi-vintage extraction infrastructure.
+    """
+    from jobclass.load.oews import (
+        load_dim_geography,
+        load_dim_industry,
+        load_fact_occupation_employment_wages,
+        load_oews_staging,
+    )
+    from jobclass.load.soc import (
+        load_bridge_occupation_hierarchy,
+        load_dim_occupation,
+        load_soc_definitions_staging,
+        load_soc_hierarchy_staging,
+    )
+    from jobclass.parse.oews import parse_oews
+    from jobclass.parse.soc import parse_soc_definitions, parse_soc_hierarchy
+
+    soc_ver = "2018"
+
+    # SOC first
+    h = parse_soc_hierarchy(soc_hierarchy_content, soc_ver)
+    d = parse_soc_definitions(soc_definitions_content, soc_ver)
+    load_soc_hierarchy_staging(migrated_db, h, soc_ver)
+    load_soc_definitions_staging(migrated_db, d, soc_ver)
+    load_dim_occupation(migrated_db, soc_ver, soc_ver)
+    load_bridge_occupation_hierarchy(migrated_db, soc_ver, soc_ver)
+
+    # Load 3 OEWS vintages
+    for release in ["2021.05", "2022.05", "2023.05"]:
+        nat = parse_oews(oews_national_content, release)
+        st = parse_oews(oews_state_content, release)
+        load_oews_staging(migrated_db, nat, "stage__bls__oews_national", release)
+        load_oews_staging(migrated_db, st, "stage__bls__oews_state", release)
+        load_dim_geography(migrated_db, release)
+        load_dim_industry(migrated_db, "2022", release)
+        load_fact_occupation_employment_wages(migrated_db, "oews_national", release, release, soc_ver)
+        load_fact_occupation_employment_wages(migrated_db, "oews_state", release, release, soc_ver)
+
+    return migrated_db
+
+
+@pytest.fixture
 def onet_skills_content():
     """Return O*NET skills sample TSV content."""
     return (FIXTURES_DIR / "onet_skills_sample.txt").read_text(encoding="utf-8")

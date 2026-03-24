@@ -83,8 +83,10 @@ class TestOewsManifestContract:
     def test_oews_entries_exist(self):
         entries = load_manifest(MANIFEST_PATH)
         bls_datasets = {e.dataset_name for e in entries if e.source_name == "bls"}
-        assert "oews_national" in bls_datasets
-        assert "oews_state" in bls_datasets
+        oews_nat = [d for d in bls_datasets if d.startswith("oews_national")]
+        oews_st = [d for d in bls_datasets if d.startswith("oews_state")]
+        assert len(oews_nat) >= 1, "No OEWS national entries found"
+        assert len(oews_st) >= 1, "No OEWS state entries found"
 
     def test_oews_entries_have_urls_and_parsers(self):
         entries = load_manifest(MANIFEST_PATH)
