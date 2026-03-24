@@ -100,50 +100,56 @@ WHERE o.is_current = true
 
 
 -- ============================================================
--- occupation_similarity_seeded: similarity based on shared skills
--- Uses Jaccard-like overlap: count of shared skill element_ids / union of skill element_ids
+-- occupation_similarity_seeded: cosine similarity on skill importance scores
+-- O*NET rates ALL 35 skills for ALL occupations (binary presence = always 100%).
+-- Cosine similarity on the importance (IM) score vectors captures which
+-- occupations emphasise the same skills, not just which skills exist.
 -- ============================================================
 CREATE OR REPLACE VIEW occupation_similarity_seeded AS
-WITH occ_skills AS (
-    SELECT DISTINCT
+WITH occ_skill_scores AS (
+    SELECT
         b.occupation_key,
-        s.element_id
+        s.element_id,
+        AVG(b.data_value) AS importance
     FROM bridge_occupation_skill b
     JOIN dim_skill s ON b.skill_key = s.skill_key
     JOIN dim_occupation o ON b.occupation_key = o.occupation_key
     WHERE o.is_current = true
       AND s.is_current = true
+      AND b.scale_id = 'IM'
+    GROUP BY b.occupation_key, s.element_id
 ),
-pairs AS (
+norms AS (
+    SELECT occupation_key,
+           SQRT(SUM(importance * importance)) AS norm,
+           COUNT(*) AS total_skills
+    FROM occ_skill_scores
+    GROUP BY occupation_key
+),
+dot_products AS (
     SELECT
         a.occupation_key AS occupation_key_a,
         b.occupation_key AS occupation_key_b,
-        COUNT(*)         AS shared_skills
-    FROM occ_skills a
-    JOIN occ_skills b ON a.element_id = b.element_id
-                     AND a.occupation_key < b.occupation_key
+        SUM(a.importance * b.importance) AS dot_product,
+        COUNT(*) AS shared_skills
+    FROM occ_skill_scores a
+    JOIN occ_skill_scores b ON a.element_id = b.element_id
+                           AND a.occupation_key < b.occupation_key
     GROUP BY a.occupation_key, b.occupation_key
-),
-skill_counts AS (
-    SELECT occupation_key, COUNT(*) AS total_skills
-    FROM occ_skills
-    GROUP BY occupation_key
 )
 SELECT
-    p.occupation_key_a,
+    d.occupation_key_a,
     oa.soc_code  AS soc_code_a,
     oa.occupation_title AS title_a,
-    p.occupation_key_b,
+    d.occupation_key_b,
     ob.soc_code  AS soc_code_b,
     ob.occupation_title AS title_b,
-    p.shared_skills,
-    ca.total_skills AS total_skills_a,
-    cb.total_skills AS total_skills_b,
-    ROUND(CAST(p.shared_skills AS DOUBLE) /
-          (ca.total_skills + cb.total_skills - p.shared_skills), 4)
-        AS jaccard_similarity
-FROM pairs p
-JOIN dim_occupation oa ON p.occupation_key_a = oa.occupation_key
-JOIN dim_occupation ob ON p.occupation_key_b = ob.occupation_key
-JOIN skill_counts ca ON p.occupation_key_a = ca.occupation_key
-JOIN skill_counts cb ON p.occupation_key_b = cb.occupation_key;
+    d.shared_skills,
+    na.total_skills AS total_skills_a,
+    nb.total_skills AS total_skills_b,
+    ROUND(d.dot_product / (na.norm * nb.norm), 4) AS jaccard_similarity
+FROM dot_products d
+JOIN dim_occupation oa ON d.occupation_key_a = oa.occupation_key
+JOIN dim_occupation ob ON d.occupation_key_b = ob.occupation_key
+JOIN norms na ON d.occupation_key_a = na.occupation_key
+JOIN norms nb ON d.occupation_key_b = nb.occupation_key;
