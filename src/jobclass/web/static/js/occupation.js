@@ -130,9 +130,20 @@
                 html += '<td>' + formatWage(w.p75_hourly_wage) + '</td>';
                 html += '<td>' + formatWage(w.p90_hourly_wage) + '</td>';
                 html += '</tr></tbody></table></div>';
-                html += '<p><a href="/occupation/' + escapeAttr(code) + '/wages" class="btn">Compare by State</a></p>';
+                html += '<p id="compare-state-link" style="display:none;"><a href="/occupation/' + escapeAttr(code) + '/wages" class="btn">Compare by State</a></p>';
                 html += '<div class="lineage-badge">OEWS ' + escapeHtml(w.source_release_id) + ' | ' + escapeHtml(w.reference_period) + '</div>';
                 document.getElementById("wages-content").innerHTML = html;
+
+                // Only show "Compare by State" if state-level data exists
+                fetchWithTimeout("/api/occupations/" + encodeURIComponent(code) + "/wages?geo_type=state")
+                    .then(function(r) { return r.ok ? r.json() : null; })
+                    .then(function(stateData) {
+                        if (stateData && stateData.wages && stateData.wages.length > 0) {
+                            var link = document.getElementById("compare-state-link");
+                            if (link) link.style.display = "";
+                        }
+                    })
+                    .catch(function() {});
             })
             .catch(function() {
                 setBusy("wages-section", false);
