@@ -142,18 +142,35 @@ def compare_geography(
 def ranked_movers(
     metric: str = Query("employment_count"),
     geo_type: str = Query("national"),
+    year: int | None = Query(None, description="Specific year (latest if omitted)"),
     limit: int = Query(20, ge=1, le=100),
 ) -> dict:
     """Return top gainers and losers by metric change."""
     conn = get_db()
 
     if not _table_exists(conn, "fact_derived_series"):
-        return {"metric": metric, "gainers": [], "losers": []}
+        return {"metric": metric, "year": None, "available_years": [], "gainers": [], "losers": []}
+
+    # Get available years
+    year_rows = conn.execute(
+        """
+        SELECT DISTINCT tp.year
+        FROM fact_derived_series d
+        JOIN dim_time_period tp ON d.period_key = tp.period_key
+        JOIN dim_metric m ON d.metric_key = m.metric_key
+        WHERE m.metric_name = 'yoy_percent_change'
+        ORDER BY tp.year
+    """
+    ).fetchall()
+    available_years = [r[0] for r in year_rows]
+
+    if year is None and available_years:
+        year = max(available_years)
 
     movers_sql = """
         SELECT
             o.soc_code, o.occupation_title,
-            d.derived_value AS pct_change, tp.year,
+            d.derived_value AS pct_change,
             abs.derived_value AS abs_change
         FROM fact_derived_series d
         JOIN dim_metric m ON d.metric_key = m.metric_key
@@ -171,6 +188,7 @@ def ranked_movers(
         WHERE m.metric_name = 'yoy_percent_change'
           AND bm.metric_name = ?
           AND g.geo_type = ?
+          AND tp.year = ?
           AND d.derived_value IS NOT NULL
           AND o.is_current = true
         ORDER BY d.derived_value {direction}
@@ -179,20 +197,22 @@ def ranked_movers(
 
     gainers = conn.execute(
         movers_sql.format(direction="DESC"),
-        [metric, geo_type, limit],
+        [metric, geo_type, year, limit],
     ).fetchall()
 
     losers = conn.execute(
         movers_sql.format(direction="ASC"),
-        [metric, geo_type, limit],
+        [metric, geo_type, year, limit],
     ).fetchall()
 
     def _mover_row(r):
-        return {"soc_code": r[0], "title": r[1], "pct_change": r[2], "year": r[3], "abs_change": r[4]}
+        return {"soc_code": r[0], "title": r[1], "pct_change": r[2], "abs_change": r[3]}
 
     return {
         "metric": metric,
         "geo_type": geo_type,
+        "year": year,
+        "available_years": available_years,
         "gainers": [_mover_row(r) for r in gainers],
         "losers": [_mover_row(r) for r in losers],
     }

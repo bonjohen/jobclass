@@ -68,6 +68,38 @@ window.fetch=function(u){
   if(pts.length===5&&pts[4]==='wages'&&pts[2]==='occupations'){
     return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
   }
+  if(p==='/api/trends/movers'){
+    var yr=sp.get('year');
+    if(yr)return F(b+'/api/trends/movers-'+yr+'.json');
+    return F(b+'/api/trends/movers.json');
+  }
+  if(p==='/api/trends/compare/occupations'){
+    var codes=(sp.get('soc_codes')||'').split(',').filter(Boolean);
+    var met=sp.get('metric')||'employment_count';
+    var gt=sp.get('geo_type')||'national';
+    return Promise.all(codes.map(function(c){
+      var ct=c.trim();
+      var tf=met==='employment_count'?ct+'.json':ct+'-'+met+'.json';
+      return Promise.all([
+        F(b+'/api/trends/'+tf).then(function(r){return r.json()}).catch(function(){return null}),
+        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()}).catch(function(){return null})
+      ]);
+    })).then(function(arr){
+      var occs=[];
+      arr.forEach(function(pair,i){
+        var d=pair[0],info=pair[1];
+        if(!d||!d.series)return;
+        var title=(info&&info.occupation_title)?info.occupation_title:codes[i];
+        occs.push({soc_code:codes[i],title:title,series:d.series.map(function(s){return{year:s.year,value:s.value}})});
+      });
+      return new Response(JSON.stringify({metric:met,geo_type:gt,occupations:occs}),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(pts.length===4&&pts[1]==='api'&&pts[2]==='trends'&&/^\d{2}-\d{4}$/.test(pts[3])){
+    var tm=sp.get('metric');
+    if(tm&&tm!=='employment_count')return F(b+'/api/trends/'+pts[3]+'-'+tm+'.json');
+    return F(b+'/api/trends/'+pts[3]+'.json');
+  }
   if(p==='/api/trends/compare/geography'){
     var sc=sp.get('soc_code');
     if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
@@ -276,11 +308,24 @@ def build_static(base_path: str, output_dir: str) -> None:
         ("/api/methodology/validation", "api/methodology/validation.json"),
         ("/api/occupations/hierarchy", "api/occupations/hierarchy.json"),
         ("/api/trends/metrics", "api/trends/metrics.json"),
-        ("/api/trends/movers", "api/trends/movers.json"),
+        ("/api/trends/movers", "api/trends/movers.json"),  # default (latest year)
     ]
     for url, filepath in global_apis:
         write_json(url, filepath)
     print(f"  {len(global_apis)} global endpoints")
+
+    # Per-year movers files
+    movers_years = db.execute("""
+        SELECT DISTINCT tp.year
+        FROM fact_derived_series d
+        JOIN dim_time_period tp ON d.period_key = tp.period_key
+        JOIN dim_metric m ON d.metric_key = m.metric_key
+        WHERE m.metric_name = 'yoy_percent_change'
+        ORDER BY tp.year
+    """).fetchall()
+    for (yr,) in movers_years:
+        write_json(f"/api/trends/movers?year={yr}", f"api/trends/movers-{yr}.json")
+    print(f"  {len(movers_years)} per-year movers files")
 
     # Search index — built directly from DB since the API rejects empty queries
     search_rows = db.execute("""
@@ -321,6 +366,8 @@ def build_static(base_path: str, output_dir: str) -> None:
             (f"/api/occupations/{soc}/projections", f"api/occupations/{soc}/projections.json"),
             (f"/api/occupations/{soc}/similar", f"api/occupations/{soc}/similar.json"),
             (f"/api/trends/{soc}", f"api/trends/{soc}.json"),
+            (f"/api/trends/{soc}?metric=mean_annual_wage", f"api/trends/{soc}-mean_annual_wage.json"),
+            (f"/api/trends/{soc}?metric=median_annual_wage", f"api/trends/{soc}-median_annual_wage.json"),
             (
                 f"/api/trends/compare/geography?soc_code={soc}",
                 f"api/trends/compare/geography-{soc}.json",
