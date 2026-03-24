@@ -14,6 +14,59 @@ This was used to construct two working documents:
 
 Implementation of the project follows the phased release of both design and test plans.
 
+## Build Commands
+
+```bash
+# Install (editable mode for development)
+pip install -e .
+
+# Create or update the DuckDB schema
+jobclass-pipeline migrate
+
+# Run full pipeline: download all sources and load the warehouse
+jobclass-pipeline run-all
+
+# Check warehouse state (table row counts)
+jobclass-pipeline status
+
+# Start the web server on port 8000
+jobclass-web                        # or: python -m jobclass.web.cli
+jobclass-web --port 9000 --reload   # custom port + auto-reload
+
+# Run all tests
+pytest
+
+# Unit tests only (fixture-based, no database needed)
+pytest tests/unit/
+
+# Web/API tests only (fixture-based, no database needed)
+pytest tests/web/
+
+# Real data validation tests (requires warehouse.duckdb)
+pytest tests/warehouse/
+
+# Linting (configured in pyproject.toml)
+ruff check src/ tests/
+
+# Build static site for GitHub Pages
+MSYS_NO_PATHCONV=1 python scripts/build_static.py --base-path /jobclass
+
+# Deploy static site to gh-pages branch
+python scripts/deploy_pages.py
+```
+
+## Static Site / GitHub Pages
+
+The site is published at **https://bonjohen.github.io/jobclass/**
+
+- `scripts/build_static.py` pre-renders all HTML pages via the FastAPI TestClient and generates all API responses as static JSON files under `_site/`.
+- A fetch shim is injected into each HTML page's `<head>`. It intercepts JavaScript `fetch()` calls to `/api/` and redirects them to the corresponding `.json` files.
+- Search uses a client-side index built from the full occupation list in the database. The shim filters results locally, so no server-side search is needed.
+- Wages endpoints map the `geo_type` query parameter to separate JSON files (e.g., `wages-national.json`, `wages-state.json`).
+- Path rewriting handles the GitHub Pages subpath (`/jobclass`) for all links, assets, and API URLs.
+- `scripts/deploy_pages.py` pushes `_site/` to the `gh-pages` branch via force-push.
+- A `.nojekyll` file is included to prevent GitHub Pages Jekyll processing.
+
 ## Architecture: Four-Layer Warehouse
 
 1. **Landing/Raw** — Immutable capture of downloaded artifacts. No business logic. Required metadata: file name, source URL, download timestamp, checksum, source release label, run ID.
@@ -47,6 +100,15 @@ Implementation of the project follows the phased release of both design and test
 - **Fail-fast on schema drift**: Block warehouse publication until parser is updated or change is approved.
 - **Preserve source nulls**: Never impute suppressed/missing OEWS values.
 
+## Key Technical Notes
+
+- **BLS blocks bare HTTP requests**: BLS.gov rejects requests without `Sec-Fetch-*` browser headers. The downloader (`src/jobclass/extract/download.py`) sends a full set of browser-like headers including `Sec-Fetch-Dest`, `Sec-Fetch-Mode`, `Sec-Fetch-Site`, and `Sec-Fetch-User`.
+- **SOC 2018 XLSX format**: The SOC 2018 XLSX uses short group labels (`"Major"`, `"Minor"`, `"Broad"`, `"Detailed"`) while older CSV formats use full labels (`"Major Group"`, etc.). The SOC parser's `LEVEL_MAP` handles both.
+- **OEWS XLSX columns are UPPERCASE**: BLS XLSX files use column names like `AREA`, `NAICS`, `OCC_CODE`. The OEWS parser normalizes via `_OEWS_COLUMN_ALIASES` to match the internal lowercase key convention.
+- **BLS Projections employment is in thousands**: The XLSX source stores employment as thousands (e.g., 309.4 = 309,400). The projections parser converts to whole numbers.
+- **5 NEM 2024 occupation codes don't map to SOC 2018**: This is an expected gap. The National Employment Matrix uses some codes not present in the SOC 2018 taxonomy. The projections loader performs an inner join against `dim_occupation`, so these rows are silently excluded.
+- **Military occupations (SOC 55-xxxx) have no data**: Military occupations exist in the SOC taxonomy but have no OEWS wages, O*NET descriptors, or BLS projections data in any source.
+
 ## Pipeline Flow
 
 Extract (declarative, manifest-driven) -> Parse (dataset-specific) -> Validate (structural, semantic, temporal, drift) -> Load (idempotent at dataset-version grain)
@@ -55,6 +117,10 @@ Logical pipelines: `taxonomy_refresh`, `oews_refresh`, `onet_refresh`, `projecti
 
 ## Testing Strategy
 
+- **507+ tests** across three test directories:
+  - `tests/unit/` — Fixture-based parser, loader, orchestration, validation, and config tests. No database or network needed.
+  - `tests/web/` — FastAPI TestClient tests for all API endpoints, HTML pages, security headers, accessibility, and end-to-end smoke tests. No database needed (uses in-memory fixtures).
+  - `tests/warehouse/` — Real data validation tests against `warehouse.duckdb`. **Automatically skipped** if the warehouse file is absent. Run `jobclass-pipeline run-all` first to populate it.
 - Parser unit tests on representative source files
 - Schema contract tests (fail on missing/changed columns)
 - Grain uniqueness tests (fail on duplicate business keys)
