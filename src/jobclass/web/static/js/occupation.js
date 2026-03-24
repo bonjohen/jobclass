@@ -84,6 +84,10 @@
             loadWages(socCode);
             // Load skills
             loadSkills(socCode);
+            // Load knowledge
+            loadKnowledge(socCode);
+            // Load abilities
+            loadAbilities(socCode);
             // Load tasks
             loadTasks(socCode);
             // Load projections
@@ -170,6 +174,62 @@
                 setBusy("skills-section", false);
                 document.getElementById("skills-section").style.display = "block";
                 showError("skills-content", "Failed to load skills data.");
+            });
+    }
+
+    function loadKnowledge(code) {
+        fetchWithTimeout("/api/occupations/" + encodeURIComponent(code) + "/knowledge")
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(data) {
+                setBusy("knowledge-section", false);
+                if (!data || !data.knowledge || data.knowledge.length === 0) {
+                    showNoData("knowledge-section", "knowledge-content", "No knowledge data available.");
+                    return;
+                }
+                var section = document.getElementById("knowledge-section");
+                section.style.display = "block";
+                var html = '<table class="data-table"><thead><tr><th>Knowledge Domain</th><th>Importance</th><th>Level</th></tr></thead><tbody>';
+                data.knowledge.forEach(function(k) {
+                    html += '<tr><td>' + escapeHtml(k.element_name) + '</td>';
+                    html += '<td>' + (k.importance != null ? k.importance.toFixed(2) : 'N/A') + '</td>';
+                    html += '<td>' + (k.level != null ? k.level.toFixed(2) : 'N/A') + '</td></tr>';
+                });
+                html += '</tbody></table>';
+                if (data.source_version) html += '<div class="lineage-badge">O*NET ' + escapeHtml(data.source_version) + '</div>';
+                document.getElementById("knowledge-content").innerHTML = html;
+            })
+            .catch(function() {
+                setBusy("knowledge-section", false);
+                document.getElementById("knowledge-section").style.display = "block";
+                showError("knowledge-content", "Failed to load knowledge data.");
+            });
+    }
+
+    function loadAbilities(code) {
+        fetchWithTimeout("/api/occupations/" + encodeURIComponent(code) + "/abilities")
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(data) {
+                setBusy("abilities-section", false);
+                if (!data || !data.abilities || data.abilities.length === 0) {
+                    showNoData("abilities-section", "abilities-content", "No abilities data available.");
+                    return;
+                }
+                var section = document.getElementById("abilities-section");
+                section.style.display = "block";
+                var html = '<table class="data-table"><thead><tr><th>Ability</th><th>Importance</th><th>Level</th></tr></thead><tbody>';
+                data.abilities.forEach(function(a) {
+                    html += '<tr><td>' + escapeHtml(a.element_name) + '</td>';
+                    html += '<td>' + (a.importance != null ? a.importance.toFixed(2) : 'N/A') + '</td>';
+                    html += '<td>' + (a.level != null ? a.level.toFixed(2) : 'N/A') + '</td></tr>';
+                });
+                html += '</tbody></table>';
+                if (data.source_version) html += '<div class="lineage-badge">O*NET ' + escapeHtml(data.source_version) + '</div>';
+                document.getElementById("abilities-content").innerHTML = html;
+            })
+            .catch(function() {
+                setBusy("abilities-section", false);
+                document.getElementById("abilities-section").style.display = "block";
+                showError("abilities-content", "Failed to load abilities data.");
             });
     }
 

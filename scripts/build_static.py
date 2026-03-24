@@ -352,6 +352,8 @@ def build_static(base_path: str, output_dir: str) -> None:
             (f"/api/occupations/{soc}/wages?geo_type=national", f"api/occupations/{soc}/wages-national.json"),
             (f"/api/occupations/{soc}/wages?geo_type=state", f"api/occupations/{soc}/wages-state.json"),
             (f"/api/occupations/{soc}/skills", f"api/occupations/{soc}/skills.json"),
+            (f"/api/occupations/{soc}/knowledge", f"api/occupations/{soc}/knowledge.json"),
+            (f"/api/occupations/{soc}/abilities", f"api/occupations/{soc}/abilities.json"),
             (f"/api/occupations/{soc}/tasks", f"api/occupations/{soc}/tasks.json"),
             (f"/api/occupations/{soc}/projections", f"api/occupations/{soc}/projections.json"),
             (f"/api/occupations/{soc}/similar", f"api/occupations/{soc}/similar.json"),

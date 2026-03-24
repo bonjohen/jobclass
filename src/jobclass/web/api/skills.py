@@ -6,7 +6,13 @@ import re
 
 from fastapi import APIRouter, HTTPException
 
-from jobclass.web.api.models import SimilarResponse, SkillsResponse, TasksResponse
+from jobclass.web.api.models import (
+    AbilitiesResponse,
+    KnowledgeResponse,
+    SimilarResponse,
+    SkillsResponse,
+    TasksResponse,
+)
 from jobclass.web.database import get_db
 
 router = APIRouter(prefix="/api", tags=["skills"])
@@ -57,6 +63,112 @@ def occupation_skills(soc_code: str) -> dict:
         "soc_code": soc_code,
         "source_version": source_version,
         "skills": [
+            {
+                "element_name": r[0],
+                "element_id": r[1],
+                "importance": r[2],
+                "level": r[3],
+            }
+            for r in rows
+        ],
+    }
+
+
+@router.get("/occupations/{soc_code}/knowledge", response_model=KnowledgeResponse)
+def occupation_knowledge(soc_code: str) -> dict:
+    """Return knowledge domain scores for an occupation."""
+    if not _SOC_CODE_RE.match(soc_code):
+        raise HTTPException(status_code=400, detail=f"Invalid SOC code format: {soc_code}")
+    conn = get_db()
+
+    occ = conn.execute(
+        "SELECT occupation_key FROM dim_occupation WHERE soc_code = ? AND is_current = true",
+        [soc_code],
+    ).fetchone()
+    if not occ:
+        raise HTTPException(status_code=404, detail=f"Occupation {soc_code} not found")
+
+    rows = conn.execute(
+        """
+        SELECT
+            k.element_name,
+            k.element_id,
+            MAX(CASE WHEN b.scale_id = 'IM' THEN b.data_value END) AS importance,
+            MAX(CASE WHEN b.scale_id = 'LV' THEN b.data_value END) AS level
+        FROM bridge_occupation_knowledge b
+        JOIN dim_knowledge k ON b.knowledge_key = k.knowledge_key
+        WHERE b.occupation_key = ? AND k.is_current = true
+        GROUP BY k.element_name, k.element_id
+        ORDER BY importance DESC NULLS LAST
+    """,
+        [occ[0]],
+    ).fetchall()
+
+    source_version = None
+    ver_row = conn.execute(
+        "SELECT DISTINCT source_version FROM bridge_occupation_knowledge WHERE occupation_key = ? LIMIT 1",
+        [occ[0]],
+    ).fetchone()
+    if ver_row:
+        source_version = ver_row[0]
+
+    return {
+        "soc_code": soc_code,
+        "source_version": source_version,
+        "knowledge": [
+            {
+                "element_name": r[0],
+                "element_id": r[1],
+                "importance": r[2],
+                "level": r[3],
+            }
+            for r in rows
+        ],
+    }
+
+
+@router.get("/occupations/{soc_code}/abilities", response_model=AbilitiesResponse)
+def occupation_abilities(soc_code: str) -> dict:
+    """Return ability scores for an occupation."""
+    if not _SOC_CODE_RE.match(soc_code):
+        raise HTTPException(status_code=400, detail=f"Invalid SOC code format: {soc_code}")
+    conn = get_db()
+
+    occ = conn.execute(
+        "SELECT occupation_key FROM dim_occupation WHERE soc_code = ? AND is_current = true",
+        [soc_code],
+    ).fetchone()
+    if not occ:
+        raise HTTPException(status_code=404, detail=f"Occupation {soc_code} not found")
+
+    rows = conn.execute(
+        """
+        SELECT
+            a.element_name,
+            a.element_id,
+            MAX(CASE WHEN b.scale_id = 'IM' THEN b.data_value END) AS importance,
+            MAX(CASE WHEN b.scale_id = 'LV' THEN b.data_value END) AS level
+        FROM bridge_occupation_ability b
+        JOIN dim_ability a ON b.ability_key = a.ability_key
+        WHERE b.occupation_key = ? AND a.is_current = true
+        GROUP BY a.element_name, a.element_id
+        ORDER BY importance DESC NULLS LAST
+    """,
+        [occ[0]],
+    ).fetchall()
+
+    source_version = None
+    ver_row = conn.execute(
+        "SELECT DISTINCT source_version FROM bridge_occupation_ability WHERE occupation_key = ? LIMIT 1",
+        [occ[0]],
+    ).fetchone()
+    if ver_row:
+        source_version = ver_row[0]
+
+    return {
+        "soc_code": soc_code,
+        "source_version": source_version,
+        "abilities": [
             {
                 "element_name": r[0],
                 "element_id": r[1],

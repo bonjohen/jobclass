@@ -168,6 +168,35 @@ class SimilarResponse(BaseModel):
     similar: list[SimilarEntry]
 
 
+# --- Knowledge / Abilities ---
+
+
+class KnowledgeEntry(BaseModel):
+    element_name: str
+    element_id: str
+    importance: float | None
+    level: float | None
+
+
+class KnowledgeResponse(BaseModel):
+    soc_code: str
+    source_version: str | None
+    knowledge: list[KnowledgeEntry]
+
+
+class AbilityEntry(BaseModel):
+    element_name: str
+    element_id: str
+    importance: float | None
+    level: float | None
+
+
+class AbilitiesResponse(BaseModel):
+    soc_code: str
+    source_version: str | None
+    abilities: list[AbilityEntry]
+
+
 # --- Projections ---
 
 

@@ -44,12 +44,12 @@ Expose the already-loaded O\*NET knowledge data through the API and website.
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | NDS1-01 | Add `/api/occupations/{soc_code}/knowledge` endpoint in `occupations.py`: query `bridge_occupation_knowledge` joined to `dim_knowledge`, filter `scale_id = 'IM'`, return element name + importance + level, ordered by importance desc | | |
-| `[ ]` | NDS1-02 | Add `loadKnowledge()` function in `occupation.js`: fetch knowledge endpoint, render table with Knowledge Domain / Importance / Level columns, hide section if empty | | |
-| `[ ]` | NDS1-03 | Add "Knowledge" section div to `occupation.html` template (hidden by default, same pattern as skills/tasks) | | |
-| `[ ]` | NDS1-04 | Add knowledge endpoint to per-occupation JSON generation in `build_static.py` | | |
-| `[ ]` | NDS1-05 | Add test: knowledge endpoint returns 200 with expected fields for a known occupation | | |
-| `[ ]` | NDS1-06 | Add test: occupation profile page contains knowledge section markup | | |
+| `[X]` | NDS1-01 | Add `/api/occupations/{soc_code}/knowledge` endpoint in `occupations.py`: query `bridge_occupation_knowledge` joined to `dim_knowledge`, filter `scale_id = 'IM'`, return element name + importance + level, ordered by importance desc | | |
+| `[X]` | NDS1-02 | Add `loadKnowledge()` function in `occupation.js`: fetch knowledge endpoint, render table with Knowledge Domain / Importance / Level columns, hide section if empty | | |
+| `[X]` | NDS1-03 | Add "Knowledge" section div to `occupation.html` template (hidden by default, same pattern as skills/tasks) | | |
+| `[X]` | NDS1-04 | Add knowledge endpoint to per-occupation JSON generation in `build_static.py` | | |
+| `[X]` | NDS1-05 | Add test: knowledge endpoint returns 200 with expected fields for a known occupation | | |
+| `[X]` | NDS1-06 | Add test: occupation profile page contains knowledge section markup | | |
 | `[ ]` | NDS1-07 | Verify on live server: knowledge section renders correctly for an occupation with knowledge data (e.g., 15-1252) | | |
 
 **Code review (CR2-03):** Add Pydantic response models for trends API alongside the new knowledge endpoint, since we are already modifying `models.py`.
@@ -68,12 +68,12 @@ Expose the already-loaded O\*NET abilities data through the API and website.
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | NDS2-01 | Add `/api/occupations/{soc_code}/abilities` endpoint in `occupations.py`: same pattern as knowledge, using `bridge_occupation_ability` and `dim_ability` | | |
-| `[ ]` | NDS2-02 | Add `loadAbilities()` function in `occupation.js`: fetch abilities endpoint, render table, hide section if empty | | |
-| `[ ]` | NDS2-03 | Add "Abilities" section div to `occupation.html` template | | |
-| `[ ]` | NDS2-04 | Add abilities endpoint to per-occupation JSON generation in `build_static.py` | | |
-| `[ ]` | NDS2-05 | Add test: abilities endpoint returns 200 with expected fields | | |
-| `[ ]` | NDS2-06 | Add test: occupation profile page contains abilities section markup | | |
+| `[X]` | NDS2-01 | Add `/api/occupations/{soc_code}/abilities` endpoint in `occupations.py`: same pattern as knowledge, using `bridge_occupation_ability` and `dim_ability` | | |
+| `[X]` | NDS2-02 | Add `loadAbilities()` function in `occupation.js`: fetch abilities endpoint, render table, hide section if empty | | |
+| `[X]` | NDS2-03 | Add "Abilities" section div to `occupation.html` template | | |
+| `[X]` | NDS2-04 | Add abilities endpoint to per-occupation JSON generation in `build_static.py` | | |
+| `[X]` | NDS2-05 | Add test: abilities endpoint returns 200 with expected fields | | |
+| `[X]` | NDS2-06 | Add test: occupation profile page contains abilities section markup | | |
 | `[ ]` | NDS2-07 | Verify on live server: abilities section renders correctly | | |
 
 **Code review (CR2-08):** Add CSS section comments while adding new profile section styles.
