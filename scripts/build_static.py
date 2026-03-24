@@ -35,7 +35,7 @@ sys.path.insert(0, str(_project_root / "src"))
 # Wages endpoints map geo_type param to separate files.
 # ---------------------------------------------------------------------------
 
-STATIC_SHIM = """\
+STATIC_SHIM = r"""\
 <script>
 (function(){
 var F=window.fetch,SC=null;
