@@ -228,9 +228,31 @@ def build_static(base_path: str, output_dir: str) -> None:
         write_json(url, filepath)
     print(f"  {len(global_apis)} global endpoints")
 
-    # Search index (full occupation list for client-side filtering)
-    write_json("/api/occupations/search?q=&limit=10000", "api/occupations/search.json")
-    print("  Search index (all occupations)")
+    # Search index — built directly from DB since the API rejects empty queries
+    search_rows = db.execute("""
+        SELECT soc_code, occupation_title, occupation_level, occupation_level_name
+        FROM dim_occupation
+        WHERE is_current = true
+        ORDER BY soc_code
+    """).fetchall()
+    search_data = {
+        "results": [
+            {
+                "soc_code": r[0],
+                "occupation_title": r[1],
+                "occupation_level": r[2],
+                "occupation_level_name": r[3],
+            }
+            for r in search_rows
+        ],
+        "total": len(search_rows),
+        "limit": len(search_rows),
+        "offset": 0,
+    }
+    search_dest = output / "api" / "occupations" / "search.json"
+    search_dest.parent.mkdir(parents=True, exist_ok=True)
+    search_dest.write_text(json.dumps(search_data), encoding="utf-8")
+    print(f"  Search index ({len(search_rows)} occupations)")
 
     # --- JSON: Per-occupation endpoints ---
     t0 = time.time()

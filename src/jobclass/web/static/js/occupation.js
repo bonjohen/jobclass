@@ -20,6 +20,13 @@
         }
     }
 
+    function showNoData(sectionId, contentId, message) {
+        var section = document.getElementById(sectionId);
+        if (section) section.style.display = "block";
+        var el = document.getElementById(contentId);
+        if (el) el.innerHTML = '<p class="no-data-message">' + escapeHtml(message) + '</p>';
+    }
+
     function setBusy(sectionId, busy) {
         var el = document.getElementById(sectionId);
         if (el) el.setAttribute("aria-busy", busy ? "true" : "false");
@@ -100,7 +107,10 @@
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(data) {
                 setBusy("wages-section", false);
-                if (!data || !data.wages || data.wages.length === 0) return;
+                if (!data || !data.wages || data.wages.length === 0) {
+                    showNoData("wages-section", "wages-content", "No wage data available for this occupation. OEWS does not cover all SOC codes (e.g., military occupations).");
+                    return;
+                }
                 var w = data.wages[0];
                 var section = document.getElementById("wages-section");
                 section.style.display = "block";
@@ -136,7 +146,10 @@
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(data) {
                 setBusy("skills-section", false);
-                if (!data || !data.skills || data.skills.length === 0) return;
+                if (!data || !data.skills || data.skills.length === 0) {
+                    showNoData("skills-section", "skills-content", "No skills data available. O*NET does not cover all SOC codes.");
+                    return;
+                }
                 var section = document.getElementById("skills-section");
                 section.style.display = "block";
                 var html = '<table class="data-table"><thead><tr><th>Skill</th><th>Importance</th><th>Level</th></tr></thead><tbody>';
@@ -161,7 +174,10 @@
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(data) {
                 setBusy("tasks-section", false);
-                if (!data || !data.tasks || data.tasks.length === 0) return;
+                if (!data || !data.tasks || data.tasks.length === 0) {
+                    showNoData("tasks-section", "tasks-content", "No task data available. O*NET does not cover all SOC codes.");
+                    return;
+                }
                 var section = document.getElementById("tasks-section");
                 section.style.display = "block";
                 var html = '<ul class="task-list">';
@@ -186,7 +202,10 @@
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(data) {
                 setBusy("projections-section", false);
-                if (!data || !data.projections) return;
+                if (!data || !data.projections) {
+                    showNoData("projections-section", "projections-content", "No projection data available. BLS projections do not cover all SOC codes.");
+                    return;
+                }
                 var p = data.projections;
                 var section = document.getElementById("projections-section");
                 section.style.display = "block";
@@ -214,7 +233,10 @@
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(data) {
                 setBusy("similar-section", false);
-                if (!data || !data.similar || data.similar.length === 0) return;
+                if (!data || !data.similar || data.similar.length === 0) {
+                    showNoData("similar-section", "similar-content", "No similarity data available for this occupation.");
+                    return;
+                }
                 var section = document.getElementById("similar-section");
                 section.style.display = "block";
                 var html = '<table class="data-table"><thead><tr><th>Occupation</th><th>Similarity</th></tr></thead><tbody>';

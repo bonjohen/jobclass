@@ -295,6 +295,13 @@ footer {
     font-size: 0.95rem;
 }
 
+.no-data-message {
+    color: var(--color-text-muted);
+    font-style: italic;
+    font-size: 0.95rem;
+    padding: var(--space-sm) 0;
+}
+
 /* --- Hierarchy Page --- */
 
 .hierarchy-page h1 {
