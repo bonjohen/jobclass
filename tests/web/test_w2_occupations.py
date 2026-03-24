@@ -1,6 +1,5 @@
 """Phase W2 tests: Occupation search, hierarchy, and profile endpoints and pages."""
 
-import pytest
 
 
 class TestSearchAPI:

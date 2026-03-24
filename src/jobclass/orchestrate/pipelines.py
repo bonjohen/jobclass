@@ -3,24 +3,25 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 
 import duckdb
 
 from jobclass.observe.run_manifest import (
-    create_run_record, generate_run_id, update_run_counts,
+    create_run_record,
+    generate_run_id,
+    update_run_counts,
 )
 from jobclass.validate.framework import (
     FailureClassification,
     ValidationResult,
     check_publication_gate,
-    validate_grain_uniqueness,
     validate_referential_integrity,
     validate_required_columns,
 )
 
 
-class PipelineStatus(str, Enum):
+class PipelineStatus(StrEnum):
     SUCCESS = "success"
     VALIDATION_FAILURE = "validation_failure"
     LOAD_FAILURE = "load_failure"
@@ -65,12 +66,14 @@ def taxonomy_refresh(
     source_release_id: str,
 ) -> PipelineResult:
     """Execute the full SOC taxonomy pipeline: parse → validate → load."""
-    from jobclass.parse.soc import parse_soc_hierarchy, parse_soc_definitions
     from jobclass.load.soc import (
-        load_soc_hierarchy_staging, load_soc_definitions_staging,
-        load_dim_occupation, load_bridge_occupation_hierarchy,
+        load_bridge_occupation_hierarchy,
+        load_dim_occupation,
+        load_soc_definitions_staging,
+        load_soc_hierarchy_staging,
     )
-    from jobclass.validate.soc import validate_soc_structural, validate_soc_hierarchy_completeness
+    from jobclass.parse.soc import parse_soc_definitions, parse_soc_hierarchy
+    from jobclass.validate.soc import validate_soc_hierarchy_completeness, validate_soc_structural
 
     run_id = generate_run_id()
     create_run_record(
@@ -158,11 +161,13 @@ def oews_refresh(
     soc_version: str,
 ) -> PipelineResult:
     """Execute the OEWS pipeline: parse → validate → load."""
-    from jobclass.parse.oews import parse_oews
     from jobclass.load.oews import (
-        load_oews_staging, load_dim_geography, load_dim_industry,
+        load_dim_geography,
+        load_dim_industry,
         load_fact_occupation_employment_wages,
+        load_oews_staging,
     )
+    from jobclass.parse.oews import parse_oews
 
     # Check dependency
     if not check_taxonomy_loaded(conn, soc_version):
@@ -230,12 +235,15 @@ def onet_refresh(
     soc_version: str,
 ) -> PipelineResult:
     """Execute the O*NET pipeline: parse → validate → load."""
-    from jobclass.parse.onet import parse_onet_descriptors, parse_onet_tasks
     from jobclass.load.onet import (
-        load_onet_descriptor_staging, load_onet_task_staging,
-        load_dim_descriptor, load_dim_task,
-        load_bridge_occupation_descriptor, load_bridge_occupation_task,
+        load_bridge_occupation_descriptor,
+        load_bridge_occupation_task,
+        load_dim_descriptor,
+        load_dim_task,
+        load_onet_descriptor_staging,
+        load_onet_task_staging,
     )
+    from jobclass.parse.onet import parse_onet_descriptors, parse_onet_tasks
 
     if not check_taxonomy_loaded(conn, soc_version):
         return PipelineResult(
@@ -367,12 +375,12 @@ def projections_refresh(
     soc_version: str,
 ) -> PipelineResult:
     """Execute the Employment Projections pipeline: parse → validate → load."""
+    from jobclass.load.projections import load_fact_occupation_projections, load_projections_staging
     from jobclass.parse.projections import parse_employment_projections
-    from jobclass.load.projections import load_projections_staging, load_fact_occupation_projections
     from jobclass.validate.projections import (
-        validate_projections_structural,
-        validate_projections_occupation_mapping,
         validate_projections_fact_integrity,
+        validate_projections_occupation_mapping,
+        validate_projections_structural,
     )
 
     if not check_taxonomy_loaded(conn, soc_version):

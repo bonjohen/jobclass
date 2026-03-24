@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import threading
 from pathlib import Path
 
@@ -47,10 +48,8 @@ def reset_db() -> None:
     """Close and reset the connection (for testing)."""
     global _conn
     if _conn is not None:
-        try:
+        with contextlib.suppress(duckdb.Error):
             _conn.close()
-        except duckdb.Error:
-            pass
         _conn = None
 
 

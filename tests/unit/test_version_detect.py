@@ -37,7 +37,10 @@ class TestContentHeaderDetection:
 
 class TestDetectVersionStrategy:
     def test_url_pattern_strategy(self):
-        assert detect_version("https://bls.gov/oes/special-requests/oesm2024_nat.zip", strategy="url_pattern") == "2024.05"
+        assert detect_version(
+            "https://bls.gov/oes/special-requests/oesm2024_nat.zip",
+            strategy="url_pattern",
+        ) == "2024.05"
 
     def test_content_header_strategy_with_content(self):
         result = detect_version(

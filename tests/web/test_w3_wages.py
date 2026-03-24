@@ -1,6 +1,5 @@
 """Phase W3 tests: Employment and wages API and display."""
 
-import pytest
 
 
 class TestWagesAPI:

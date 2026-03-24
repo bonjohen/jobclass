@@ -1,6 +1,5 @@
 """T1-05: Database connection and migration framework execute without error."""
 
-from pathlib import Path
 
 from jobclass.config.database import apply_migrations, get_applied_versions, rollback_migration
 

@@ -1,8 +1,7 @@
 """T9-01 through T9-10: Analyst mart tests."""
 
-import pytest
 
-from jobclass.marts.views import MART_VIEWS, all_marts_exist, mart_row_count
+from jobclass.marts.views import all_marts_exist, mart_row_count
 
 
 class TestOccupationSummary:
@@ -35,7 +34,7 @@ class TestOccupationSummary:
             " FROM occupation_summary WHERE occupation_level = 4"
         ).fetchall()
         assert len(rows) > 0
-        for soc_code, major_group, level_name in rows:
+        for _soc_code, major_group, level_name in rows:
             assert major_group is not None
             assert "detailed" in level_name.lower()
 
@@ -180,7 +179,7 @@ class TestPublishGating:
 
     def test_publish_blocked_on_empty_db(self, migrated_db):
         """With no data loaded, warehouse_publish should be blocked."""
-        from jobclass.orchestrate.pipelines import warehouse_publish, PipelineStatus
+        from jobclass.orchestrate.pipelines import PipelineStatus, warehouse_publish
         result = warehouse_publish(migrated_db, "2018", "2024.05", "29.1")
         assert result.status in (PipelineStatus.PUBLISH_BLOCKED, PipelineStatus.SUCCESS)
 

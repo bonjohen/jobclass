@@ -11,8 +11,8 @@ class TestRunManifestCreation:
         # Apply migration to create table
         mdir = tmp_path / "migrations"
         mdir.mkdir()
-        from pathlib import Path
         import shutil
+        from pathlib import Path
         src_mdir = Path(__file__).parent.parent.parent / "migrations"
         for f in src_mdir.glob("*.sql"):
             shutil.copy(f, mdir / f.name)

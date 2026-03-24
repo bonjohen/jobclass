@@ -1,6 +1,5 @@
 """OEWS-specific validations: structural, semantic, temporal, drift."""
 
-from dataclasses import dataclass
 
 import duckdb
 

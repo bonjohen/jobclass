@@ -1,16 +1,18 @@
 """T7-01 through T7-07: Observability and run reporting tests."""
 
-import pytest
 
-from jobclass.observe.run_manifest import (
-    create_run_record, generate_run_id, update_run_counts, get_run,
-)
 from jobclass.observe.reporters import (
     inspect_run,
     report_reconciliation,
     report_row_count_delta,
     report_schema_drift_from_snapshots,
     report_top_measure_deltas,
+)
+from jobclass.observe.run_manifest import (
+    create_run_record,
+    generate_run_id,
+    get_run,
+    update_run_counts,
 )
 
 

@@ -2,7 +2,6 @@
 
 from jobclass.parse.onet import parse_onet_descriptors, parse_onet_tasks
 
-
 RELEASE = "29.1"
 
 

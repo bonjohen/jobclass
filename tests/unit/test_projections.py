@@ -1,9 +1,7 @@
 """T10-01 through T10-08: Employment Projections pipeline tests."""
 
-import pytest
 
 from jobclass.parse.projections import parse_employment_projections
-
 
 # ============================================================
 # T10-01: Parser tests
@@ -150,8 +148,8 @@ class TestProjectionsIdempotence:
     """T10-07: Rerun produces no duplicates."""
 
     def test_rerun_no_duplicates(self, projections_loaded_db, projections_content):
+        from jobclass.load.projections import load_fact_occupation_projections, load_projections_staging
         from jobclass.parse.projections import parse_employment_projections
-        from jobclass.load.projections import load_projections_staging, load_fact_occupation_projections
 
         before = projections_loaded_db.execute(
             "SELECT COUNT(*) FROM fact_occupation_projections"
@@ -175,8 +173,8 @@ class TestProjectionsRefreshPipeline:
     """T10-08: projections_refresh executes full sequence."""
 
     def test_full_sequence(self, oews_loaded_db, projections_content):
-        from jobclass.orchestrate.pipelines import projections_refresh, PipelineStatus
         from jobclass.observe.run_manifest import get_run
+        from jobclass.orchestrate.pipelines import PipelineStatus, projections_refresh
 
         result = projections_refresh(
             oews_loaded_db, projections_content,
@@ -196,7 +194,7 @@ class TestProjectionsRefreshPipeline:
         assert run["load_status"] == "success"
 
     def test_blocked_without_taxonomy(self, migrated_db, projections_content):
-        from jobclass.orchestrate.pipelines import projections_refresh, PipelineStatus
+        from jobclass.orchestrate.pipelines import PipelineStatus, projections_refresh
 
         result = projections_refresh(
             migrated_db, projections_content,

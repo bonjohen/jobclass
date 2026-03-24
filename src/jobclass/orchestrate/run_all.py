@@ -11,8 +11,8 @@ from pathlib import Path
 
 import duckdb
 
-from jobclass.extract.download import download_artifact, DownloadError
-from jobclass.extract.formats import convert_to_text, extract_xlsx_from_zip, xlsx_to_csv
+from jobclass.extract.download import download_artifact
+from jobclass.extract.formats import convert_to_text
 from jobclass.extract.manifest import ManifestEntry, load_enabled_entries
 from jobclass.extract.storage import store_raw_artifact
 from jobclass.extract.version_detect import detect_version
@@ -73,8 +73,12 @@ def run_all_pipelines(
 ) -> PipelineRunSummary:
     """Execute all pipelines end-to-end: download → convert → parse → load → publish."""
     from jobclass.orchestrate.pipelines import (
-        taxonomy_refresh, oews_refresh, onet_refresh,
-        projections_refresh, warehouse_publish, PipelineStatus,
+        PipelineStatus,
+        oews_refresh,
+        onet_refresh,
+        projections_refresh,
+        taxonomy_refresh,
+        warehouse_publish,
     )
 
     summary = PipelineRunSummary()

@@ -6,9 +6,8 @@ import argparse
 import sys
 from pathlib import Path
 
-from jobclass.config.database import get_connection, apply_migrations
+from jobclass.config.database import apply_migrations, get_connection
 from jobclass.config.settings import DB_PATH
-
 
 _DEFAULT_MANIFEST = Path(__file__).parent.parent.parent / "config" / "source_manifest.yaml"
 
@@ -76,7 +75,7 @@ def main() -> None:
         summary = run_all_pipelines(conn, manifest_path, raw_root)
 
         print(f"\n{'='*50}")
-        print(f"Pipeline run complete:")
+        print("Pipeline run complete:")
         print(f"  Attempted: {summary.pipelines_attempted}")
         print(f"  Succeeded: {summary.pipelines_succeeded}")
         print(f"  Failed:    {summary.pipelines_failed}")

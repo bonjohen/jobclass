@@ -1,6 +1,5 @@
 """Phase W6 tests: Landing page, stats, navigation."""
 
-import pytest
 
 
 class TestStatsAPI:

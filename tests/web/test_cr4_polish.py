@@ -1,6 +1,5 @@
 """Phase CR4 tests: pagination, accessibility, health probes, metrics, constants."""
 
-import pytest
 
 
 class TestSearchPagination:
@@ -66,7 +65,10 @@ class TestAccessibility:
         html = resp.text
         assert 'aria-live="polite"' in html
         assert 'aria-busy="true"' in html
-        for section_id in ["wages-section", "skills-section", "tasks-section", "projections-section", "similar-section"]:
+        for section_id in [
+            "wages-section", "skills-section", "tasks-section",
+            "projections-section", "similar-section",
+        ]:
             assert section_id in html
 
     def test_wages_comparison_has_aria_live(self, client):

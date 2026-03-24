@@ -1,6 +1,5 @@
 """T1-01: Configuration module loads defaults and environment overrides."""
 
-import os
 from pathlib import Path
 
 
@@ -39,7 +38,7 @@ def test_environment_override_db_path(monkeypatch):
     import jobclass.config.settings as settings_mod
 
     importlib.reload(settings_mod)
-    assert settings_mod.DB_PATH == Path("/tmp/override.duckdb")
+    assert Path("/tmp/override.duckdb") == settings_mod.DB_PATH
     # Restore
     monkeypatch.delenv("JOBCLASS_DB_PATH")
     importlib.reload(settings_mod)
@@ -52,7 +51,7 @@ def test_environment_override_raw_root(monkeypatch):
     import jobclass.config.settings as settings_mod
 
     importlib.reload(settings_mod)
-    assert settings_mod.RAW_ROOT == Path("/tmp/raw_override")
+    assert Path("/tmp/raw_override") == settings_mod.RAW_ROOT
     monkeypatch.delenv("JOBCLASS_RAW_ROOT")
     importlib.reload(settings_mod)
 

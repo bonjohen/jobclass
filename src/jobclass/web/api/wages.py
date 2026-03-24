@@ -26,7 +26,10 @@ def occupation_wages(
     if not _SOC_CODE_RE.match(soc_code):
         raise HTTPException(status_code=400, detail=f"Invalid SOC code format: {soc_code}")
     if geo_type not in _VALID_GEO_TYPES:
-        raise HTTPException(status_code=400, detail=f"Invalid geo_type: {geo_type}. Must be one of: {', '.join(sorted(_VALID_GEO_TYPES))}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid geo_type: {geo_type}. Must be one of: {', '.join(sorted(_VALID_GEO_TYPES))}",
+        )
     conn = get_db()
 
     # Verify occupation exists
@@ -82,7 +85,10 @@ def occupation_wages(
             "reference_period": r[13],
         })
 
-    return {"soc_code": soc_code, "geo_type": geo_type, "total": total, "limit": limit, "offset": offset, "wages": results}
+    return {
+        "soc_code": soc_code, "geo_type": geo_type, "total": total,
+        "limit": limit, "offset": offset, "wages": results,
+    }
 
 
 @router.get("/geographies", response_model=GeographiesResponse)

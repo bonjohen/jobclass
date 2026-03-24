@@ -1,17 +1,15 @@
 """T11-01 through T11-09: End-to-end integration and portfolio deliverable tests."""
 
-import pytest
 
+from jobclass.observe.run_manifest import get_run
 from jobclass.orchestrate.pipelines import (
     PipelineStatus,
-    taxonomy_refresh,
     oews_refresh,
     onet_refresh,
     projections_refresh,
+    taxonomy_refresh,
     warehouse_publish,
 )
-from jobclass.observe.run_manifest import get_run
-
 
 # ============================================================
 # T11-01: Full pipeline for Software Developers (15-1252)
@@ -153,7 +151,7 @@ class TestAnalystQueries:
             " WHERE soc_code = '15-1252'"
         ).fetchall()
         assert len(rows) >= 1
-        for name, value in rows:
+        for name, _value in rows:
             assert name is not None
 
     def test_core_tasks(self, onet_loaded_db):

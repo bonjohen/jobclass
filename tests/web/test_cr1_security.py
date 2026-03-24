@@ -1,6 +1,5 @@
 """Phase CR1 tests: XSS prevention, SQL injection prevention, CORS/CSP headers, config consolidation."""
 
-import pytest
 
 
 class TestXSSPrevention:
@@ -176,7 +175,7 @@ class TestConfigConsolidation:
     """CR1-18 through CR1-19: database.py imports paths from settings.py."""
 
     def test_database_module_uses_settings_paths(self):
-        from jobclass.config.database import DEFAULT_DB_PATH, _MIGRATIONS_DIR
+        from jobclass.config.database import _MIGRATIONS_DIR, DEFAULT_DB_PATH
         from jobclass.config.settings import DB_PATH, MIGRATIONS_DIR
         assert DEFAULT_DB_PATH == DB_PATH
         assert _MIGRATIONS_DIR == MIGRATIONS_DIR

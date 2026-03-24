@@ -1,6 +1,5 @@
 """T1-02, T1-03: Path-builder utility tests."""
 
-from pathlib import Path
 
 import pytest
 

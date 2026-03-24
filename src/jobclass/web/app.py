@@ -13,12 +13,13 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
 from jobclass.web.api.health import router as health_router
-from jobclass.web.api.metrics import MetricsMiddleware, router as metrics_router
-from jobclass.web.api.occupations import router as occupations_router
-from jobclass.web.api.wages import router as wages_router
-from jobclass.web.api.skills import router as skills_router
-from jobclass.web.api.projections import router as projections_router
 from jobclass.web.api.methodology import router as methodology_router
+from jobclass.web.api.metrics import MetricsMiddleware
+from jobclass.web.api.metrics import router as metrics_router
+from jobclass.web.api.occupations import router as occupations_router
+from jobclass.web.api.projections import router as projections_router
+from jobclass.web.api.skills import router as skills_router
+from jobclass.web.api.wages import router as wages_router
 
 _WEB_DIR = Path(__file__).parent
 _TEMPLATES_DIR = _WEB_DIR / "templates"

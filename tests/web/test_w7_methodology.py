@@ -1,6 +1,5 @@
 """Phase W7 tests: Methodology, sources, and validation endpoints."""
 
-import pytest
 
 
 class TestSourcesAPI:

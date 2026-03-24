@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 from jobclass.web.api.models import SourcesResponse, ValidationResponse
 from jobclass.web.database import get_db

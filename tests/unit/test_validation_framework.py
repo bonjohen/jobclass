@@ -1,6 +1,5 @@
 """T6-01 through T6-21: Validation framework, failure classification, and failure-mode tests."""
 
-import pytest
 
 from jobclass.validate.framework import (
     FailureClassification,
@@ -12,16 +11,15 @@ from jobclass.validate.framework import (
     detect_measure_deltas,
     detect_row_count_shift,
     detect_schema_drift,
+    validate_append_only,
     validate_column_types,
     validate_grain_uniqueness,
     validate_min_row_count,
     validate_referential_integrity,
     validate_required_columns,
     validate_version_monotonicity,
-    validate_append_only,
 )
 from jobclass.validate.soc import ValidationResult
-
 
 # ============================================================
 # T6-01 through T6-04: Structural Validator

@@ -1,6 +1,5 @@
 """Phase W4 tests: Skills, tasks, and similarity endpoints."""
 
-import pytest
 
 
 class TestSkillsAPI:

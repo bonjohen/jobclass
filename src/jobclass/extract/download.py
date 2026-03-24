@@ -2,8 +2,8 @@
 
 import hashlib
 import time
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from dataclasses import dataclass
+from datetime import UTC, datetime
 
 import httpx
 
@@ -48,7 +48,11 @@ def download_artifact(
     for attempt in range(max_retries + 1):
         try:
             headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/131.0.0.0 Safari/537.36"
+                ),
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                 "Accept-Language": "en-US,en;q=0.9",
                 "Accept-Encoding": "gzip, deflate, br",
@@ -67,7 +71,7 @@ def download_artifact(
                         content=response.content,
                         status_code=response.status_code,
                         headers=dict(response.headers),
-                        downloaded_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        downloaded_at=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
                         url=url,
                     )
                     result.compute_checksum()
@@ -81,11 +85,11 @@ def download_artifact(
                 # Non-retryable or retries exhausted
                 raise DownloadError(url, response.status_code, f"HTTP {response.status_code} from {url}")
 
-        except httpx.TimeoutException:
+        except httpx.TimeoutException as err:
             if attempt < max_retries:
                 time.sleep(backoff_seconds * (2**attempt))
                 continue
-            raise DownloadError(url, None, f"Timeout downloading {url} after {max_retries + 1} attempts")
+            raise DownloadError(url, None, f"Timeout downloading {url} after {max_retries + 1} attempts") from err
 
     raise DownloadError(url, last_status, f"Download failed after {max_retries + 1} attempts: {url}")
 

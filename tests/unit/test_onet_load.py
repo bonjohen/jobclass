@@ -1,16 +1,16 @@
 """T5-07 through T5-32: O*NET staging, dimensions, bridges, validations, idempotence tests."""
 
-import pytest
 
 from jobclass.load.onet import (
-    load_onet_descriptor_staging, load_onet_task_staging,
-    load_dim_descriptor, load_dim_task,
-    load_bridge_occupation_descriptor, load_bridge_occupation_task,
+    load_bridge_occupation_descriptor,
+    load_bridge_occupation_task,
+    load_dim_descriptor,
+    load_dim_task,
 )
-from jobclass.parse.onet import parse_onet_descriptors, parse_onet_tasks
 from jobclass.validate.onet import (
-    validate_onet_structural, validate_onet_occupation_mapping,
+    validate_onet_occupation_mapping,
     validate_onet_soc_alignment,
+    validate_onet_structural,
 )
 
 RELEASE = "29.1"

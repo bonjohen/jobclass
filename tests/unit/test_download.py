@@ -2,8 +2,6 @@
 
 import hashlib
 
-import pytest
-
 from jobclass.extract.download import DownloadError, compute_checksum
 
 

@@ -8,7 +8,6 @@ from pathlib import Path
 
 import duckdb
 
-from jobclass.config.database import apply_migrations
 from jobclass.extract.download import DownloadError, download_artifact
 from jobclass.extract.manifest import ManifestEntry, load_enabled_entries
 from jobclass.extract.storage import store_raw_artifact

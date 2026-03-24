@@ -1,6 +1,5 @@
 """Phase W1 tests: API foundation, health, metadata, page rendering, error handling."""
 
-import pytest
 
 
 class TestHealthEndpoint:

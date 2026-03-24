@@ -2,20 +2,17 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import duckdb
 
 from jobclass.validate.framework import (
+    MeasureDelta,
     SchemaChange,
     detect_measure_deltas,
-    detect_row_count_shift,
     detect_schema_drift,
     get_table_schema,
-    MeasureDelta,
 )
-from jobclass.validate.soc import ValidationResult
-
 
 # ============================================================
 # Row-Count Delta Reporter (P7-02)
@@ -99,7 +96,7 @@ def report_schema_drift(
     current_release: str,
 ) -> SchemaDriftReport:
     """Produce a schema drift report by comparing table schema snapshots."""
-    current_schema = get_table_schema(conn, table_name)
+    _current_schema = get_table_schema(conn, table_name)
     # For now, compare against known schema (the actual table).
     # In production, we'd snapshot schemas per release.
     changes = []  # No drift if comparing same table to itself
@@ -226,7 +223,7 @@ def inspect_run(conn: duckdb.DuckDBPyConnection, run_id: str) -> RunInspection |
     if not result:
         return None
     columns = [desc[0] for desc in conn.description]
-    row = dict(zip(columns, result))
+    row = dict(zip(columns, result, strict=False))
     return RunInspection(
         run_id=row["run_id"],
         pipeline_name=row["pipeline_name"],

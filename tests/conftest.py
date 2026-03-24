@@ -72,12 +72,20 @@ def oews_state_content():
 def oews_loaded_db(migrated_db, soc_hierarchy_content, soc_definitions_content,
                    oews_national_content, oews_state_content):
     """DB with SOC + OEWS staging + warehouse fully loaded."""
-    from jobclass.parse.soc import parse_soc_hierarchy, parse_soc_definitions
-    from jobclass.load.soc import (load_soc_hierarchy_staging, load_soc_definitions_staging,
-                                    load_dim_occupation, load_bridge_occupation_hierarchy)
+    from jobclass.load.oews import (
+        load_dim_geography,
+        load_dim_industry,
+        load_fact_occupation_employment_wages,
+        load_oews_staging,
+    )
+    from jobclass.load.soc import (
+        load_bridge_occupation_hierarchy,
+        load_dim_occupation,
+        load_soc_definitions_staging,
+        load_soc_hierarchy_staging,
+    )
     from jobclass.parse.oews import parse_oews
-    from jobclass.load.oews import (load_oews_staging, load_dim_geography, load_dim_industry,
-                                     load_fact_occupation_employment_wages)
+    from jobclass.parse.soc import parse_soc_definitions, parse_soc_hierarchy
 
     release = "2024.05"
     soc_ver = "2018"
@@ -131,12 +139,15 @@ def onet_tasks_content():
 def onet_loaded_db(oews_loaded_db, onet_skills_content, onet_knowledge_content,
                    onet_abilities_content, onet_tasks_content):
     """DB with SOC + OEWS + O*NET staging + warehouse fully loaded."""
-    from jobclass.parse.onet import parse_onet_descriptors, parse_onet_tasks
     from jobclass.load.onet import (
-        load_onet_descriptor_staging, load_onet_task_staging,
-        load_dim_descriptor, load_dim_task,
-        load_bridge_occupation_descriptor, load_bridge_occupation_task,
+        load_bridge_occupation_descriptor,
+        load_bridge_occupation_task,
+        load_dim_descriptor,
+        load_dim_task,
+        load_onet_descriptor_staging,
+        load_onet_task_staging,
     )
+    from jobclass.parse.onet import parse_onet_descriptors, parse_onet_tasks
 
     release = "29.1"
     soc_ver = "2018"
@@ -187,8 +198,8 @@ def projections_content():
 @pytest.fixture
 def projections_loaded_db(oews_loaded_db, projections_content):
     """DB with SOC + OEWS + projections staging + fact loaded."""
+    from jobclass.load.projections import load_fact_occupation_projections, load_projections_staging
     from jobclass.parse.projections import parse_employment_projections
-    from jobclass.load.projections import load_projections_staging, load_fact_occupation_projections
 
     release = "2024.1"
     soc_ver = "2018"

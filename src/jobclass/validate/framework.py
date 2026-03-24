@@ -4,7 +4,7 @@ temporal, drift detection, failure classification, and publication gating."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 
 import duckdb
 
@@ -24,7 +24,7 @@ MATERIAL_DELTA_THRESHOLD_PCT = 15.0
 # Failure Classification (P6-08)
 # ============================================================
 
-class FailureClassification(str, Enum):
+class FailureClassification(StrEnum):
     DOWNLOAD_FAILURE = "download_failure"
     SOURCE_FORMAT_FAILURE = "source_format_failure"
     SCHEMA_DRIFT_FAILURE = "schema_drift_failure"

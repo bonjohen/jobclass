@@ -1,6 +1,5 @@
 """Phase W9 tests: End-to-end integration, worked example, deployment readiness."""
 
-import pytest
 
 
 class TestWorkedExample:

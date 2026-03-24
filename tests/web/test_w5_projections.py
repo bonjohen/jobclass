@@ -1,6 +1,5 @@
 """Phase W5 tests: Employment projections endpoint."""
 
-import pytest
 
 
 class TestProjectionsAPI:

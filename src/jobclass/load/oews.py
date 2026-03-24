@@ -154,7 +154,7 @@ def load_fact_occupation_employment_wages(
 
     loaded = 0
     for row in staging_rows:
-        s = dict(zip(cols, row))
+        s = dict(zip(cols, row, strict=False))
 
         # Look up dimension keys
         occ_key = conn.execute(

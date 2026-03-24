@@ -33,13 +33,13 @@ def health() -> dict:
     try:
         conn = get_db()
     except Exception as e:
-        raise HTTPException(status_code=503, detail=f"Database unavailable: {e}")
+        raise HTTPException(status_code=503, detail=f"Database unavailable: {e}") from e
 
     try:
         # Connectivity check
         conn.execute("SELECT 1").fetchone()
     except Exception as e:
-        raise HTTPException(status_code=503, detail=f"Database connectivity check failed: {e}")
+        raise HTTPException(status_code=503, detail=f"Database connectivity check failed: {e}") from e
 
     try:
         table_counts = {}
@@ -66,7 +66,7 @@ def health() -> dict:
             "table_counts": table_counts,
         }
     except Exception as e:
-        raise HTTPException(status_code=503, detail=str(e))
+        raise HTTPException(status_code=503, detail=str(e)) from e
 
 
 @router.get("/ready", response_model=ReadyResponse)
@@ -134,7 +134,7 @@ def stats() -> dict:
 
         return result
     except Exception as e:
-        raise HTTPException(status_code=503, detail=str(e))
+        raise HTTPException(status_code=503, detail=str(e)) from e
 
 
 @router.get("/metadata", response_model=MetadataResponse)
@@ -182,4 +182,4 @@ def metadata() -> dict:
 
         return result
     except Exception as e:
-        raise HTTPException(status_code=503, detail=str(e))
+        raise HTTPException(status_code=503, detail=str(e)) from e

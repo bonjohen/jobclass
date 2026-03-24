@@ -1,7 +1,7 @@
 """Run manifest operations — create, update, and query pipeline run records."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import duckdb
 
@@ -45,7 +45,7 @@ def create_run_record(
             parser_name,
             parser_version,
             raw_checksum,
-            datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         ],
     )
     return run_id
@@ -82,7 +82,7 @@ def update_run_counts(
             load_status,
             failure_classification,
             validation_summary,
-            datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
             run_id,
         ],
     )
@@ -94,4 +94,4 @@ def get_run(conn: duckdb.DuckDBPyConnection, run_id: str) -> dict | None:
     if not result:
         return None
     columns = [desc[0] for desc in conn.description]
-    return dict(zip(columns, result))
+    return dict(zip(columns, result, strict=False))

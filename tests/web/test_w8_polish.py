@@ -1,6 +1,5 @@
 """Phase W8 tests: Visual polish, responsive design, accessibility."""
 
-import pytest
 
 
 class TestAccessibility:

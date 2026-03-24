@@ -99,16 +99,20 @@ def _parse_bls_xlsx_format(
     emp_cols = []
     for h in headers:
         h_lower = h.lower()
-        if h_lower.startswith("employment") and "change" not in h_lower and "distribution" not in h_lower:
-            if re.search(r"\d{4}", h):
-                emp_cols.append(h)
+        if (
+            h_lower.startswith("employment")
+            and "change" not in h_lower
+            and "distribution" not in h_lower
+            and re.search(r"\d{4}", h)
+        ):
+            emp_cols.append(h)
     col_emp_base = emp_cols[0] if len(emp_cols) >= 1 else None
     col_emp_proj = emp_cols[1] if len(emp_cols) >= 2 else None
 
     col_change_abs = _find_column(headers, "employment change", "numeric")
     col_change_pct = _find_column(headers, "employment change", "percent")
     col_openings = _find_column(headers, "openings")
-    col_wage = _find_column(headers, "median", "wage")
+    _col_wage = _find_column(headers, "median", "wage")
     col_education = _find_column(headers, "education")
     col_training = _find_column(headers, "training")
     col_experience = _find_column(headers, "work experience")
@@ -191,11 +195,13 @@ def _parse_legacy_format(
             employment_base=parse_int(rec.get("employment_base", rec.get("employment_2022", ""))),
             employment_projected=parse_int(rec.get("employment_projected", rec.get("employment_2032", ""))),
             employment_change_abs=parse_int(rec.get("employment_change_abs", rec.get("employment_change", ""))),
-            employment_change_pct=parse_float(rec.get("employment_change_pct", rec.get("employment_change_percent", ""))),
+            employment_change_pct=parse_float(
+                rec.get("employment_change_pct", rec.get("employment_change_percent", ""))
+            ),
             annual_openings=parse_int(rec.get("annual_openings", rec.get("occupational_openings", ""))),
-            education_category=rec.get("education_category", rec.get("typical_entry_level_education", None)),
-            training_category=rec.get("training_category", rec.get("on_the_job_training", None)),
-            work_experience_category=rec.get("work_experience_category", rec.get("work_experience", None)),
+            education_category=rec.get("education_category", rec.get("typical_entry_level_education")),
+            training_category=rec.get("training_category", rec.get("on_the_job_training")),
+            work_experience_category=rec.get("work_experience_category", rec.get("work_experience")),
             source_release_id=source_release_id,
             parser_version=PARSER_VERSION,
         ))

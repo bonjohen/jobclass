@@ -106,7 +106,7 @@ def load_dim_occupation(
     all_codes = set()
     parent_codes = set()
     for row in hierarchy:
-        h = dict(zip(h_cols, row))
+        h = dict(zip(h_cols, row, strict=False))
         all_codes.add(h["soc_code"])
         if h["parent_soc_code"]:
             parent_codes.add(h["parent_soc_code"])
@@ -114,7 +114,7 @@ def load_dim_occupation(
 
     loaded = 0
     for row in hierarchy:
-        h = dict(zip(h_cols, row))
+        h = dict(zip(h_cols, row, strict=False))
         groups = _derive_group_codes(h["soc_code"], h["occupation_level"])
         is_leaf = h["soc_code"] in leaf_codes
 

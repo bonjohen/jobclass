@@ -7,7 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from jobclass.config.database import apply_migrations
-from jobclass.web.database import set_db, reset_db
+from jobclass.web.database import reset_db, set_db
 
 MIGRATIONS_DIR = Path(__file__).parent.parent.parent / "migrations"
 FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
@@ -21,9 +21,13 @@ def warehouse_db(tmp_path):
     apply_migrations(conn, migrations_dir=MIGRATIONS_DIR)
 
     # Load SOC
-    from jobclass.parse.soc import parse_soc_hierarchy, parse_soc_definitions
-    from jobclass.load.soc import (load_soc_hierarchy_staging, load_soc_definitions_staging,
-                                    load_dim_occupation, load_bridge_occupation_hierarchy)
+    from jobclass.load.soc import (
+        load_bridge_occupation_hierarchy,
+        load_dim_occupation,
+        load_soc_definitions_staging,
+        load_soc_hierarchy_staging,
+    )
+    from jobclass.parse.soc import parse_soc_definitions, parse_soc_hierarchy
 
     soc_ver = "2018"
     release = "2024.05"
@@ -38,9 +42,13 @@ def warehouse_db(tmp_path):
     load_bridge_occupation_hierarchy(conn, soc_ver, soc_ver)
 
     # Load OEWS
+    from jobclass.load.oews import (
+        load_dim_geography,
+        load_dim_industry,
+        load_fact_occupation_employment_wages,
+        load_oews_staging,
+    )
     from jobclass.parse.oews import parse_oews
-    from jobclass.load.oews import (load_oews_staging, load_dim_geography, load_dim_industry,
-                                     load_fact_occupation_employment_wages)
 
     nat_content = (FIXTURES_DIR / "oews_national_sample.csv").read_text(encoding="utf-8")
     st_content = (FIXTURES_DIR / "oews_state_sample.csv").read_text(encoding="utf-8")
@@ -54,17 +62,24 @@ def warehouse_db(tmp_path):
     load_fact_occupation_employment_wages(conn, "oews_state", release, release, soc_ver)
 
     # Load O*NET
-    from jobclass.parse.onet import parse_onet_descriptors, parse_onet_tasks
     from jobclass.load.onet import (
-        load_onet_descriptor_staging, load_onet_task_staging,
-        load_dim_descriptor, load_dim_task,
-        load_bridge_occupation_descriptor, load_bridge_occupation_task,
+        load_bridge_occupation_descriptor,
+        load_bridge_occupation_task,
+        load_dim_descriptor,
+        load_dim_task,
+        load_onet_descriptor_staging,
+        load_onet_task_staging,
     )
+    from jobclass.parse.onet import parse_onet_descriptors, parse_onet_tasks
 
     onet_ver = "29.1"
     skills = parse_onet_descriptors((FIXTURES_DIR / "onet_skills_sample.txt").read_text(encoding="utf-8"), onet_ver)
-    knowledge = parse_onet_descriptors((FIXTURES_DIR / "onet_knowledge_sample.txt").read_text(encoding="utf-8"), onet_ver)
-    abilities = parse_onet_descriptors((FIXTURES_DIR / "onet_abilities_sample.txt").read_text(encoding="utf-8"), onet_ver)
+    knowledge = parse_onet_descriptors(
+        (FIXTURES_DIR / "onet_knowledge_sample.txt").read_text(encoding="utf-8"), onet_ver,
+    )
+    abilities = parse_onet_descriptors(
+        (FIXTURES_DIR / "onet_abilities_sample.txt").read_text(encoding="utf-8"), onet_ver,
+    )
     tasks = parse_onet_tasks((FIXTURES_DIR / "onet_tasks_sample.txt").read_text(encoding="utf-8"), onet_ver)
 
     load_onet_descriptor_staging(conn, skills, "stage__onet__skills", onet_ver)
@@ -86,8 +101,8 @@ def warehouse_db(tmp_path):
     load_bridge_occupation_task(conn, onet_ver, onet_ver, soc_ver)
 
     # Load Projections
+    from jobclass.load.projections import load_fact_occupation_projections, load_projections_staging
     from jobclass.parse.projections import parse_employment_projections
-    from jobclass.load.projections import load_projections_staging, load_fact_occupation_projections
 
     proj_content = (FIXTURES_DIR / "projections_sample.txt").read_text(encoding="utf-8")
     proj_rows = parse_employment_projections(proj_content, "2024.1", "2022-2032")
@@ -96,7 +111,8 @@ def warehouse_db(tmp_path):
 
     # Run manifest entry for metadata endpoint
     conn.execute("""
-        INSERT INTO run_manifest (run_id, pipeline_name, dataset_name, source_name, source_release_id, load_status, completed_at)
+        INSERT INTO run_manifest (run_id, pipeline_name, dataset_name,
+            source_name, source_release_id, load_status, completed_at)
         VALUES ('web-test-run', 'oews_refresh', 'oews_national', 'bls', '2024.05', 'success', CURRENT_TIMESTAMP)
     """)
 

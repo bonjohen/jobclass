@@ -89,9 +89,7 @@ def convert_to_text(data: bytes, expected_format: str, sheet_name: str | None = 
         xlsx_in_zip — extract XLSX from ZIP, then convert to CSV
         xlsx        — convert XLSX to TSV (or CSV depending on parser needs)
     """
-    if expected_format == "csv":
-        return data.decode("utf-8-sig")
-    elif expected_format == "tsv":
+    if expected_format == "csv" or expected_format == "tsv":
         return data.decode("utf-8-sig")
     elif expected_format == "xlsx_in_zip":
         xlsx_bytes = extract_xlsx_from_zip(data)
