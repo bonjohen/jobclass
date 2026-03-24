@@ -41,9 +41,7 @@ def occupation_wages(
         raise HTTPException(status_code=404, detail=f"Occupation {soc_code} not found")
 
     # Use only the latest OEWS release to avoid duplicate rows per geography.
-    latest_row = conn.execute(
-        "SELECT MAX(source_release_id) FROM fact_occupation_employment_wages"
-    ).fetchone()
+    latest_row = conn.execute("SELECT MAX(source_release_id) FROM fact_occupation_employment_wages").fetchone()
     latest_release = latest_row[0] if latest_row else None
 
     count_row = conn.execute(
