@@ -63,6 +63,21 @@ Lessons and issues discovered during the time-series labor intelligence implemen
 - **Fix:** Added a LEFT JOIN to `fact_derived_series` for `yoy_absolute_change` in the movers API query. Updated `ranked_movers.js` to display a "YoY Change" column with dollar formatting for wage metrics and count formatting for employment.
 - **Takeaway:** Percentage changes without absolute context are misleading. Always show both when reporting movers/outliers.
 
+### Static Site Fetch Shim Must Handle Dynamic Comparison Queries
+- **Problem:** The `/trends/compare` page on the static site always showed "Failed to load comparison data." The fetch shim fell through to `F(b+p+'.json')` which tried to load a non-existent `occupations.json`. The compare/occupations API is inherently dynamic — it accepts arbitrary SOC code combinations.
+- **Fix:** Added a shim handler that intercepts `/api/trends/compare/occupations`, fetches individual per-occupation trend JSON files (which are pre-generated), and assembles the comparison response client-side. Also added per-metric trend files (`-mean_annual_wage.json`, `-median_annual_wage.json`) so metric switching works. Added per-year movers files and shim routing for the year parameter.
+- **Takeaway:** When a static site can't pre-generate an endpoint, check if the response can be assembled from existing pre-generated data. Client-side composition of pre-built JSON files can replicate server-side joins.
+
+### Ranked Movers Mixed Years in a Single View
+- **Problem:** The Ranked Movers page displayed all years' movers in one table with a "Year" column. This mixed 2022 and 2023 data together, making it impossible to compare within a single time period. Users needed to mentally filter by year.
+- **Fix:** Added a `year` query parameter to the `/api/trends/movers` endpoint, defaulting to the latest year. The API returns `available_years` and the selected `year` in the response. The UI shows a year dropdown filter and removes the year column from the table since all rows now share the same year.
+- **Takeaway:** When data has a time dimension, expose it as a filter control rather than a table column. Default to the most recent period so users see current data immediately.
+
+### UI Elements Shown for Unavailable Data
+- **Problem:** The occupation profile page displayed a "Compare by State" button for all 1,447 occupations. But 600 occupations (mostly broad groups and minor groups, plus 49 detailed occupations) have no state-level OEWS wage data. Clicking the button led to a dead-end page saying "No state-level wage data available."
+- **Fix:** The "Compare by State" link is now hidden by default. After loading national wages, the JS fires a background check for state wages data and only reveals the link if data exists.
+- **Takeaway:** Don't show navigation links to views that will be empty. Either pre-check data availability or hide-and-reveal after a fast background probe. A dead-end page erodes user trust more than a missing link.
+
 ## CI/CD Issues
 
 ### Ruff Format Must Run Before Push

@@ -183,6 +183,10 @@ def create_app() -> FastAPI:
                 "Multi-Vintage Query Pitfalls",
                 "lessons_multi_vintage_queries.html",
             ),
+            "ui-data-alignment": (
+                "UI-Data Alignment",
+                "lessons_ui_data_alignment.html",
+            ),
         }
         if lesson_slug not in valid_slugs:
             return templates.TemplateResponse(

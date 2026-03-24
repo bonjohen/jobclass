@@ -1,4 +1,4 @@
-"""Tests for the Lessons section: landing page and all 11 lesson pages."""
+"""Tests for the Lessons section: landing page and all 12 lesson pages."""
 
 LESSON_SLUGS = [
     "federal-data",
@@ -12,6 +12,7 @@ LESSON_SLUGS = [
     "similarity-algorithms",
     "thread-safety",
     "multi-vintage-queries",
+    "ui-data-alignment",
 ]
 
 
@@ -33,7 +34,7 @@ class TestLessonsLanding:
 
     def test_landing_has_11_cards(self, client):
         resp = client.get("/lessons")
-        assert resp.text.count("lesson-card-number") == 11
+        assert resp.text.count("lesson-card-number") == 12
 
 
 class TestLessonPages:
@@ -72,7 +73,7 @@ class TestLessonNavigation:
         assert "/lessons/dimensional-modeling" in resp.text
 
     def test_last_lesson_links_to_index(self, client):
-        resp = client.get("/lessons/multi-vintage-queries")
+        resp = client.get("/lessons/ui-data-alignment")
         assert "/lessons" in resp.text
 
     def test_nav_chain_is_complete(self, client):

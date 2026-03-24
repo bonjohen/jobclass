@@ -1,0 +1,186 @@
+<section class="lesson-page">
+    <h1>UI-Data Alignment</h1>
+    <p class="lesson-meta">Lesson 12 &mdash; Making the interface reflect what data actually exists</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/multi-vintage-queries">&larr; Multi-Vintage Query Pitfalls</a>
+        </div>
+        <div style="text-align: right;">
+            <a href="/lessons">All Lessons &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>The Core Problem</h2>
+        <p>
+            A web application that shows buttons, links, or filters for data that doesn't exist
+            creates a worse experience than one that simply omits them. Three bugs in this project
+            shared the same root cause: <strong>the UI assumed uniform data availability</strong>
+            when the underlying data was sparse or partitioned.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Trap 1: Dead-End Links to Empty Pages</h2>
+        <p>
+            The occupation profile page displayed a "Compare by State" button for all 1,447
+            occupations. But 600 occupations &mdash; mostly broad groups and minor groups, plus
+            49 detailed occupations &mdash; have no state-level OEWS wage data. Clicking the
+            button led to a page that said "No state-level wage data available."
+        </p>
+        <pre class="lesson-code"><code># Occupations WITH state data by level:
+detailed_occupation: 818     # Most detailed occupations have state data
+major_group:          22     # A few major groups
+broad_occupation:      7     # Very few broad occupations
+
+# Occupations WITHOUT state data by level:
+broad_occupation:    452     # Most broad occupations lack state data
+minor_group:          98     # All minor groups lack state data
+detailed_occupation:  49     # Some detailed occupations too</code></pre>
+        <p>
+            The fix: hide the link by default and reveal it only after confirming state data exists.
+        </p>
+        <pre class="lesson-code"><code>// Hidden by default
+html += '&lt;p id="compare-state-link" style="display:none;"&gt;' +
+    '&lt;a href="..." class="btn"&gt;Compare by State&lt;/a&gt;&lt;/p&gt;';
+
+// Background check — only show if data exists
+fetchWithTimeout("/api/occupations/" + code + "/wages?geo_type=state")
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(stateData) {
+        if (stateData && stateData.wages && stateData.wages.length > 0) {
+            document.getElementById("compare-state-link").style.display = "";
+        }
+    });</code></pre>
+        <div class="lesson-callout">
+            <p>
+                <strong>Rule:</strong> Don't show navigation to views that will be empty.
+                A dead-end page erodes user trust more than a missing link.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Trap 2: Time as a Column Instead of a Filter</h2>
+        <p>
+            The Ranked Movers page displayed all years' data in one table with a "Year" column.
+            This mixed 2022 and 2023 movers together, making comparison within a single period
+            impossible. Users had to mentally filter by year while scanning the list.
+        </p>
+        <pre class="lesson-code"><code># BEFORE: Mixed years, year as a data column
+| Occupation                  | YoY Change | YoY % | Year |
+| Dancers                     | +5,080     | +132% | 2022 |
+| Subway and Streetcar Ops    | +5,740     | +63%  | 2023 |
+| Model Makers, Wood          | +380       | +112% | 2022 |
+# Users can't tell if 2022 or 2023 movers are "bigger"
+
+# AFTER: Year as a filter, all rows are same year
+Year: [2023 ▼]
+| Occupation                  | YoY Change | YoY % |
+| Subway and Streetcar Ops    | +5,740     | +63%  |
+| Plasterers and Stucco Mason | +2,770     | +39%  |
+# Clean single-period comparison</code></pre>
+        <p>
+            The fix: add a <code>year</code> query parameter to the API endpoint, default to the
+            latest year, and return <code>available_years</code> in the response so the UI can
+            populate a dropdown.
+        </p>
+        <pre class="lesson-code"><code># API response now includes:
+{
+    "year": 2023,
+    "available_years": [2022, 2023],
+    "gainers": [...],
+    "losers": [...]
+}</code></pre>
+        <div class="lesson-callout">
+            <p>
+                <strong>Rule:</strong> When data has a time dimension, expose it as a filter control
+                rather than a table column. Default to the most recent period so users see
+                current data immediately.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Trap 3: Static Site Shim Gaps</h2>
+        <p>
+            The Compare Occupations page worked perfectly on the live server but always showed
+            "Failed to load comparison data" on the GitHub Pages static site. The fetch shim
+            &mdash; which intercepts API calls and redirects them to pre-built JSON files &mdash;
+            had no handler for <code>/api/trends/compare/occupations</code>.
+        </p>
+        <pre class="lesson-code"><code>// The shim's catch-all tried to load a non-existent file:
+//   /api/trends/compare/occupations.json  →  404
+
+// Fix: assemble the comparison client-side from per-occupation files
+if (p === '/api/trends/compare/occupations') {
+    var codes = sp.get('soc_codes').split(',');
+    return Promise.all(codes.map(function(c) {
+        // Fetch each occupation's pre-built trend JSON
+        return fetch(base + '/api/trends/' + c + '.json')
+            .then(function(r) { return r.json(); });
+    })).then(function(arr) {
+        // Assemble the comparison response client-side
+        return new Response(JSON.stringify({
+            metric: metric,
+            occupations: arr.map(...)
+        }));
+    });
+}</code></pre>
+        <p>
+            The same pattern applied to metric-specific trend data: the shim needed to route
+            <code>?metric=mean_annual_wage</code> to a separate pre-built file instead of
+            the default <code>employment_count</code> file.
+        </p>
+        <div class="lesson-callout">
+            <p>
+                <strong>Rule:</strong> When a static site can't pre-generate an endpoint, check if
+                the response can be assembled from existing pre-generated data. Client-side
+                composition of pre-built JSON files can replicate server-side joins.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Decision Guide: UI-Data Alignment Patterns</h2>
+        <table class="data-table">
+            <thead>
+                <tr><th>Scenario</th><th>Pattern</th><th>Example</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Link to a view that may be empty</td>
+                    <td>Hide-and-reveal after background probe</td>
+                    <td>"Compare by State" link</td>
+                </tr>
+                <tr>
+                    <td>Data spans multiple time periods</td>
+                    <td>Filter control, not table column</td>
+                    <td>Year dropdown on Ranked Movers</td>
+                </tr>
+                <tr>
+                    <td>Dynamic query on static site</td>
+                    <td>Client-side composition from pre-built data</td>
+                    <td>Compare Occupations shim</td>
+                </tr>
+                <tr>
+                    <td>Metric with limited data availability</td>
+                    <td>Default to the mode/metric where data exists</td>
+                    <td>Trend Explorer defaulting to "comparable"</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/multi-vintage-queries">&larr; Multi-Vintage Query Pitfalls</a>
+        </div>
+        <div style="text-align: right;">
+            <a href="/lessons">All Lessons &rarr;</a>
+        </div>
+    </nav>
+</section>

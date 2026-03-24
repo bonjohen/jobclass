@@ -268,6 +268,7 @@ def build_static(base_path: str, output_dir: str) -> None:
         "similarity-algorithms",
         "thread-safety",
         "multi-vintage-queries",
+        "ui-data-alignment",
     ]
     write_html("/lessons", "lessons/index.html")
     for slug in lesson_slugs:
