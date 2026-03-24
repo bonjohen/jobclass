@@ -33,6 +33,12 @@ def get_db(db_path: str | Path | None = None) -> duckdb.DuckDBPyConnection:
             cfg = get_config()
             db_path = cfg["db_path"]
 
+        db_file = Path(db_path)
+        if not db_file.exists():
+            raise FileNotFoundError(
+                f"Warehouse database not found at {db_file}. "
+                f"Run 'jobclass-pipeline migrate && jobclass-pipeline run-all' first."
+            )
         _conn = duckdb.connect(str(db_path), read_only=True)
         return _conn
 

@@ -8,10 +8,15 @@ def detect_version_from_url(url: str) -> str | None:
 
     Looks for patterns like: oesm2024, db_29_1, 2018, etc.
     """
-    # OEWS year pattern: oesm{YYYY}
+    # OEWS year pattern: oesm{YYYY} or oesm{YY} (2-digit year)
     match = re.search(r"oesm(\d{4})", url)
     if match:
         return f"{match.group(1)}.05"  # OEWS is May reference period
+    match = re.search(r"oesm(\d{2})", url)
+    if match:
+        year = int(match.group(1))
+        full_year = 2000 + year if year < 90 else 1900 + year
+        return f"{full_year}.05"
 
     # O*NET database version: db_{major}_{minor}
     match = re.search(r"db_(\d+)_(\d+)", url)
@@ -22,6 +27,10 @@ def detect_version_from_url(url: str) -> str | None:
     match = re.search(r"/soc/(\d{4})/", url)
     if match:
         return match.group(1)
+
+    # BLS employment projections path
+    if "/emp/" in url:
+        return "projections_2024"
 
     # Generic year in filename
     match = re.search(r"(\d{4})", url.split("/")[-1])

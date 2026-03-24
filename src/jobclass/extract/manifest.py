@@ -17,6 +17,7 @@ class ManifestEntry:
     parser_name: str
     refresh_cadence: str | None = None
     version_detection_rule: str | None = None
+    sheet_name: str | None = None
     enabled: bool = True
 
 

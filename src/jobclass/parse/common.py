@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 # Union of all suppression markers across BLS OEWS, O*NET, and BLS Projections.
-SUPPRESSION_MARKERS = frozenset({"", "*", "**", "#", "-", "--", "N/A"})
+SUPPRESSION_MARKERS = frozenset({"", "*", "**", "#", "-", "--", "N/A", "\u2014", "\u2013"})
 
 
 def parse_float(value: str | None) -> float | None:

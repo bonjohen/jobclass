@@ -142,7 +142,10 @@ def load_fact_occupation_employment_wages(
 
     _safe_identifier(source_dataset)
     table = f"stage__bls__{source_dataset}"
-    estimate_year = int(reference_period.split(".")[0]) if "." in reference_period else int(reference_period[:4])
+    try:
+        estimate_year = int(reference_period.split(".")[0]) if "." in reference_period else int(reference_period[:4])
+    except (ValueError, TypeError):
+        estimate_year = 0
 
     staging_rows = conn.execute(
         f"SELECT * FROM {table} WHERE source_release_id = ?", [source_release_id]

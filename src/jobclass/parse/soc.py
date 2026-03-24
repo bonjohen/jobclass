@@ -7,12 +7,17 @@ from dataclasses import dataclass
 
 PARSER_VERSION = "1.0.0"
 
-# SOC level mapping
+# SOC level mapping — supports both XLSX format ("Major", "Minor", "Broad", "Detailed")
+# and legacy CSV format ("Major Group", "Minor Group", "Broad Occupation", "Detailed Occupation")
 LEVEL_MAP = {
     "Major Group": ("major_group", 1),
     "Minor Group": ("minor_group", 2),
     "Broad Occupation": ("broad_occupation", 3),
     "Detailed Occupation": ("detailed_occupation", 4),
+    "Major": ("major_group", 1),
+    "Minor": ("minor_group", 2),
+    "Broad": ("broad_occupation", 3),
+    "Detailed": ("detailed_occupation", 4),
 }
 
 
@@ -35,35 +40,87 @@ class SocDefinitionRow:
     parser_version: str = PARSER_VERSION
 
 
-def _derive_parent_code(soc_code: str, level: int) -> str | None:
-    """Derive parent SOC code from child code based on level rules.
+def _assign_parents(entries: list[tuple[str, int]]) -> dict[str, str | None]:
+    """Data-driven parent assignment for SOC codes.
 
-    Major group (XX-0000) has no parent.
-    Minor group (XX-YZ00) parent is major group (XX-0000).
-    Broad occupation (XX-YZW0) parent is minor group (XX-YZ00).
-    Detailed occupation (XX-YZWX) parent is broad occupation (XX-YZW0).
+    Instead of mechanical derivation from code patterns, this builds the
+    parent map by finding the nearest ancestor at the next higher level
+    that actually exists in the data.
+
+    Returns {soc_code: parent_soc_code_or_None}.
     """
-    if level == 1:
-        return None
-    prefix, suffix = soc_code.split("-")
-    if level == 2:
-        return f"{prefix}-0000"
-    elif level == 3:
-        return f"{prefix}-{suffix[:2]}00"
-    elif level == 4:
-        return f"{prefix}-{suffix[:3]}0"
-    return None
+    # Build sets of codes at each level
+    codes_by_level: dict[int, set[str]] = {1: set(), 2: set(), 3: set(), 4: set()}
+    for code, level in entries:
+        codes_by_level[level].add(code)
+
+    parents: dict[str, str | None] = {}
+
+    for code, level in entries:
+        if level == 1:
+            parents[code] = None
+            continue
+
+        prefix, suffix = code.split("-")
+
+        if level == 2:
+            # Minor → Major is always XX-0000
+            parents[code] = f"{prefix}-0000"
+        elif level == 4:
+            # Detailed → Broad: zero out last digit, with fallback.
+            # SOC 2018 has some detailed codes whose mechanical broad parent
+            # doesn't exist (e.g. 29-1221 → 29-1220 missing).
+            mechanical = f"{prefix}-{suffix[:3]}0"
+            if mechanical in codes_by_level[3]:
+                parents[code] = mechanical
+            else:
+                # Find nearest existing broad in same prefix range
+                best = None
+                for broad in sorted(codes_by_level[3]):
+                    if broad.startswith(prefix):
+                        b_suffix = broad.split("-")[1]
+                        if b_suffix <= suffix:
+                            best = broad
+                parents[code] = best or mechanical  # fallback to mechanical if nothing found
+        elif level == 3:
+            # Broad → Minor: find the actual minor group this code belongs to.
+            # Try progressively coarser patterns until we find one that exists.
+            candidates = [
+                f"{prefix}-{suffix[:2]}00",   # try XX-YZ00 first
+                f"{prefix}-{suffix[0]}000",   # then XX-Y000
+            ]
+            parent_code = None
+            for c in candidates:
+                if c in codes_by_level[2]:
+                    parent_code = c
+                    break
+            # Last resort: find the closest minor group with matching prefix
+            if parent_code is None:
+                for minor in sorted(codes_by_level[2]):
+                    if minor.startswith(prefix):
+                        m_suffix = minor.split("-")[1]
+                        if m_suffix <= suffix:
+                            parent_code = minor
+                # If still nothing, fall back to major
+                if parent_code is None:
+                    parent_code = f"{prefix}-0000"
+            parents[code] = parent_code
+
+    return parents
 
 
 def parse_soc_hierarchy(content: str | bytes, source_release_id: str) -> list[SocHierarchyRow]:
     """Parse SOC hierarchy CSV file content into structured rows.
 
     Expected columns: SOC Group, SOC Code, SOC Title
+    Uses data-driven parent assignment since SOC codes don't follow
+    strict positional encoding patterns.
     """
     if isinstance(content, bytes):
         content = content.decode("utf-8-sig")
 
-    rows = []
+    # First pass: collect all entries with their levels
+    entries: list[tuple[str, str, int, str]] = []  # (code, title, level_num, level_name)
     reader = csv.DictReader(io.StringIO(content))
 
     for raw in reader:
@@ -75,14 +132,19 @@ def parse_soc_hierarchy(content: str | bytes, source_release_id: str) -> list[So
             continue
 
         level_name, level_num = LEVEL_MAP[group]
-        parent = _derive_parent_code(code, level_num)
+        entries.append((code, title, level_num, level_name))
 
+    # Compute parents from actual data
+    parent_map = _assign_parents([(code, level) for code, _, level, _ in entries])
+
+    rows = []
+    for code, title, level_num, level_name in entries:
         rows.append(SocHierarchyRow(
             soc_code=code,
             occupation_title=title,
             occupation_level=level_num,
             occupation_level_name=level_name,
-            parent_soc_code=parent,
+            parent_soc_code=parent_map.get(code),
             source_release_id=source_release_id,
         ))
 
