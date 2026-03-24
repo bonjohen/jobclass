@@ -78,9 +78,9 @@ def create_app() -> FastAPI:
     @app.get("/", response_class=HTMLResponse)
     async def landing(request: Request):
         return templates.TemplateResponse(
+            request,
             "base.html",
             {
-                "request": request,
                 "page_title": "JobClass — Labor Market Reporting",
                 "content_template": "landing.html",
             },
@@ -89,9 +89,9 @@ def create_app() -> FastAPI:
     @app.get("/search", response_class=HTMLResponse)
     async def search_page(request: Request):
         return templates.TemplateResponse(
+            request,
             "base.html",
             {
-                "request": request,
                 "page_title": "Search Occupations — JobClass",
                 "content_template": "search.html",
             },
@@ -100,9 +100,9 @@ def create_app() -> FastAPI:
     @app.get("/hierarchy", response_class=HTMLResponse)
     async def hierarchy_page(request: Request):
         return templates.TemplateResponse(
+            request,
             "base.html",
             {
-                "request": request,
                 "page_title": "Occupation Hierarchy — JobClass",
                 "content_template": "hierarchy.html",
             },
@@ -111,9 +111,9 @@ def create_app() -> FastAPI:
     @app.get("/occupation/{soc_code}", response_class=HTMLResponse)
     async def occupation_page(request: Request, soc_code: str):
         return templates.TemplateResponse(
+            request,
             "base.html",
             {
-                "request": request,
                 "page_title": f"{soc_code} — JobClass",
                 "content_template": "occupation.html",
                 "soc_code": soc_code,
@@ -123,9 +123,9 @@ def create_app() -> FastAPI:
     @app.get("/methodology", response_class=HTMLResponse)
     async def methodology_page(request: Request):
         return templates.TemplateResponse(
+            request,
             "base.html",
             {
-                "request": request,
                 "page_title": "Methodology — JobClass",
                 "content_template": "methodology.html",
             },
@@ -134,9 +134,9 @@ def create_app() -> FastAPI:
     @app.get("/occupation/{soc_code}/wages", response_class=HTMLResponse)
     async def wages_comparison_page(request: Request, soc_code: str):
         return templates.TemplateResponse(
+            request,
             "base.html",
             {
-                "request": request,
                 "page_title": f"Wages by State — {soc_code} — JobClass",
                 "content_template": "wages_comparison.html",
                 "soc_code": soc_code,
@@ -146,9 +146,9 @@ def create_app() -> FastAPI:
     @app.get("/lessons", response_class=HTMLResponse)
     async def lessons_landing(request: Request):
         return templates.TemplateResponse(
+            request,
             "base.html",
             {
-                "request": request,
                 "page_title": "Lessons — JobClass",
                 "content_template": "lessons.html",
             },
@@ -171,18 +171,31 @@ def create_app() -> FastAPI:
             "idempotent-pipelines": ("Idempotent Pipeline Design", "lessons_idempotent_pipelines.html"),
             "static-site": ("Static Site Generation", "lessons_static_site.html"),
             "testing-deployment": ("Testing and Deployment", "lessons_testing_deployment.html"),
+            "similarity-algorithms": (
+                "Choosing the Right Similarity Algorithm",
+                "lessons_similarity.html",
+            ),
+            "thread-safety": (
+                "Thread-Safe Database Connections",
+                "lessons_thread_safety.html",
+            ),
+            "multi-vintage-queries": (
+                "Multi-Vintage Query Pitfalls",
+                "lessons_multi_vintage_queries.html",
+            ),
         }
         if lesson_slug not in valid_slugs:
             return templates.TemplateResponse(
+                request,
                 "404.html",
-                {"request": request, "page_title": "Page Not Found"},
+                {"page_title": "Page Not Found"},
                 status_code=404,
             )
         title, template_name = valid_slugs[lesson_slug]
         return templates.TemplateResponse(
+            request,
             "base.html",
             {
-                "request": request,
                 "page_title": f"{title} — Lessons — JobClass",
                 "content_template": template_name,
             },
@@ -191,9 +204,9 @@ def create_app() -> FastAPI:
     @app.get("/trends", response_class=HTMLResponse)
     async def trends_landing(request: Request):
         return templates.TemplateResponse(
+            request,
             "base.html",
             {
-                "request": request,
                 "page_title": "Trends — JobClass",
                 "content_template": "trends.html",
             },
@@ -202,9 +215,9 @@ def create_app() -> FastAPI:
     @app.get("/trends/explorer/{soc_code}", response_class=HTMLResponse)
     async def trend_explorer_page(request: Request, soc_code: str):
         return templates.TemplateResponse(
+            request,
             "base.html",
             {
-                "request": request,
                 "page_title": f"Trend Explorer — {soc_code} — JobClass",
                 "content_template": "trend_explorer.html",
                 "soc_code": soc_code,
@@ -214,9 +227,9 @@ def create_app() -> FastAPI:
     @app.get("/trends/compare", response_class=HTMLResponse)
     async def occupation_comparison_page(request: Request):
         return templates.TemplateResponse(
+            request,
             "base.html",
             {
-                "request": request,
                 "page_title": "Compare Occupations — JobClass",
                 "content_template": "occupation_comparison.html",
             },
@@ -225,9 +238,9 @@ def create_app() -> FastAPI:
     @app.get("/trends/geography/{soc_code}", response_class=HTMLResponse)
     async def geography_comparison_page(request: Request, soc_code: str):
         return templates.TemplateResponse(
+            request,
             "base.html",
             {
-                "request": request,
                 "page_title": f"Geography Comparison — {soc_code} — JobClass",
                 "content_template": "geography_comparison.html",
                 "soc_code": soc_code,
@@ -237,9 +250,9 @@ def create_app() -> FastAPI:
     @app.get("/trends/movers", response_class=HTMLResponse)
     async def ranked_movers_page(request: Request):
         return templates.TemplateResponse(
+            request,
             "base.html",
             {
-                "request": request,
                 "page_title": "Ranked Movers — JobClass",
                 "content_template": "ranked_movers.html",
             },
@@ -255,11 +268,9 @@ def create_app() -> FastAPI:
                 content={"error": "not_found", "message": f"Resource not found: {request.url.path}"},
             )
         return templates.TemplateResponse(
+            request,
             "404.html",
-            {
-                "request": request,
-                "page_title": "Page Not Found",
-            },
+            {"page_title": "Page Not Found"},
             status_code=404,
         )
 
@@ -271,11 +282,9 @@ def create_app() -> FastAPI:
                 content={"error": "internal_error", "message": "An internal error occurred"},
             )
         return templates.TemplateResponse(
+            request,
             "500.html",
-            {
-                "request": request,
-                "page_title": "Server Error",
-            },
+            {"page_title": "Server Error"},
             status_code=500,
         )
 

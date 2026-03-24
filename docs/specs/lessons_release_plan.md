@@ -89,6 +89,22 @@ Update the static site generator, rebuild, and deploy.
 
 ---
 
+## Phase L6: Lesson 9 — Similarity Algorithms
+
+Add Lesson 9 covering the Jaccard vs cosine similarity fix.
+
+| Status | Task ID | Description | Started | Completed |
+|--------|---------|-------------|---------|-----------|
+| `[X]` | L6-01 | Create `lessons_similarity.html` — Lesson 9: Choosing the Right Similarity Algorithm | 2026-03-24 | 2026-03-24 |
+| `[X]` | L6-02 | Add Lesson 9 card to `lessons.html` landing page | 2026-03-24 | 2026-03-24 |
+| `[X]` | L6-03 | Add `similarity-algorithms` slug to `valid_slugs` in `app.py` | 2026-03-24 | 2026-03-24 |
+| `[X]` | L6-04 | Update Lesson 8 next link to point to Lesson 9 | 2026-03-24 | 2026-03-24 |
+| `[X]` | L6-05 | Add slug to `build_static.py` lesson_slugs list | 2026-03-24 | 2026-03-24 |
+| `[X]` | L6-06 | Update `test_lessons.py` LESSON_SLUGS, card count, and last-lesson nav test | 2026-03-24 | 2026-03-24 |
+| `[X]` | L6-07 | All web tests pass (268 passed) | 2026-03-24 | 2026-03-24 |
+
+---
+
 ## Phase Summary
 
 | Phase | Description | Tasks | Status |
@@ -98,4 +114,5 @@ Update the static site generator, rebuild, and deploy.
 | L3 | Engineering Lessons (5–8) | 6 | Complete |
 | L4 | Web Tests | 6 | Complete |
 | L5 | Static Site Integration & Deployment | 6 | Complete |
-| **Total** | | **29** | |
+| L6 | Lesson 9 — Similarity Algorithms | 7 | Complete |
+| **Total** | | **36** | |

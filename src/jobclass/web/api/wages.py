@@ -40,6 +40,12 @@ def occupation_wages(
     if not occ:
         raise HTTPException(status_code=404, detail=f"Occupation {soc_code} not found")
 
+    # Use only the latest OEWS release to avoid duplicate rows per geography.
+    latest_row = conn.execute(
+        "SELECT MAX(source_release_id) FROM fact_occupation_employment_wages"
+    ).fetchone()
+    latest_release = latest_row[0] if latest_row else None
+
     count_row = conn.execute(
         """
         SELECT COUNT(*)
@@ -48,8 +54,9 @@ def occupation_wages(
         JOIN dim_geography g ON f.geography_key = g.geography_key
         WHERE o.soc_code = ? AND o.is_current = true
           AND g.geo_type = ?
+          AND f.source_release_id = ?
     """,
-        [soc_code, geo_type],
+        [soc_code, geo_type, latest_release],
     ).fetchone()
     total = count_row[0] if count_row else 0
 
@@ -66,10 +73,11 @@ def occupation_wages(
         JOIN dim_geography g ON f.geography_key = g.geography_key
         WHERE o.soc_code = ? AND o.is_current = true
           AND g.geo_type = ?
+          AND f.source_release_id = ?
         ORDER BY g.geo_name
         LIMIT ? OFFSET ?
     """,
-        [soc_code, geo_type, limit, offset],
+        [soc_code, geo_type, latest_release, limit, offset],
     ).fetchall()
 
     results = []

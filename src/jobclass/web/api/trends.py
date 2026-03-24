@@ -150,55 +150,51 @@ def ranked_movers(
     if not _table_exists(conn, "fact_derived_series"):
         return {"metric": metric, "gainers": [], "losers": []}
 
-    gainers = conn.execute(
-        """
+    movers_sql = """
         SELECT
             o.soc_code, o.occupation_title,
-            d.derived_value, tp.year
+            d.derived_value AS pct_change, tp.year,
+            abs.derived_value AS abs_change
         FROM fact_derived_series d
         JOIN dim_metric m ON d.metric_key = m.metric_key
         JOIN dim_metric bm ON d.base_metric_key = bm.metric_key
         JOIN dim_occupation o ON d.occupation_key = o.occupation_key
         JOIN dim_geography g ON d.geography_key = g.geography_key
         JOIN dim_time_period tp ON d.period_key = tp.period_key
+        LEFT JOIN fact_derived_series abs
+          ON abs.base_metric_key = d.base_metric_key
+          AND abs.occupation_key = d.occupation_key
+          AND abs.geography_key = d.geography_key
+          AND abs.period_key = d.period_key
+          AND abs.comparability_mode = d.comparability_mode
+          AND abs.derivation_method = 'yoy_absolute_change'
         WHERE m.metric_name = 'yoy_percent_change'
           AND bm.metric_name = ?
           AND g.geo_type = ?
           AND d.derived_value IS NOT NULL
           AND o.is_current = true
-        ORDER BY d.derived_value DESC
+        ORDER BY d.derived_value {direction}
         LIMIT ?
-    """,
+    """
+
+    gainers = conn.execute(
+        movers_sql.format(direction="DESC"),
         [metric, geo_type, limit],
     ).fetchall()
 
     losers = conn.execute(
-        """
-        SELECT
-            o.soc_code, o.occupation_title,
-            d.derived_value, tp.year
-        FROM fact_derived_series d
-        JOIN dim_metric m ON d.metric_key = m.metric_key
-        JOIN dim_metric bm ON d.base_metric_key = bm.metric_key
-        JOIN dim_occupation o ON d.occupation_key = o.occupation_key
-        JOIN dim_geography g ON d.geography_key = g.geography_key
-        JOIN dim_time_period tp ON d.period_key = tp.period_key
-        WHERE m.metric_name = 'yoy_percent_change'
-          AND bm.metric_name = ?
-          AND g.geo_type = ?
-          AND d.derived_value IS NOT NULL
-          AND o.is_current = true
-        ORDER BY d.derived_value ASC
-        LIMIT ?
-    """,
+        movers_sql.format(direction="ASC"),
         [metric, geo_type, limit],
     ).fetchall()
+
+    def _mover_row(r):
+        return {"soc_code": r[0], "title": r[1], "pct_change": r[2], "year": r[3], "abs_change": r[4]}
 
     return {
         "metric": metric,
         "geo_type": geo_type,
-        "gainers": [{"soc_code": r[0], "title": r[1], "pct_change": r[2], "year": r[3]} for r in gainers],
-        "losers": [{"soc_code": r[0], "title": r[1], "pct_change": r[2], "year": r[3]} for r in losers],
+        "gainers": [_mover_row(r) for r in gainers],
+        "losers": [_mover_row(r) for r in losers],
     }
 
 

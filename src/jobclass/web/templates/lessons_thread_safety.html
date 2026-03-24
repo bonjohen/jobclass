@@ -1,0 +1,130 @@
+<section class="lesson-page">
+    <h1>Thread-Safe Database Connections</h1>
+    <p class="lesson-meta">Lesson 10 &mdash; Concurrency &amp; web server architecture</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/similarity-algorithms">&larr; Choosing the Right Similarity Algorithm</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/multi-vintage-queries">Multi-Vintage Query Pitfalls &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>The Symptom: Intermittent Zeros</h2>
+        <p>
+            The landing page showed occupation counts, task counts, and other statistics fetched
+            from the <code>/api/stats</code> endpoint. Most of the time it worked perfectly. But
+            on some page refreshes, one or more stats showed <strong>0</strong> instead of the
+            correct value. The API returned correct data when tested with <code>curl</code>.
+        </p>
+        <div class="lesson-callout">
+            <p>
+                <strong>Key clue:</strong> The bug was intermittent and only appeared in the browser,
+                never in sequential curl requests. This pointed to a concurrency issue.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>How FastAPI Dispatches Sync Endpoints</h2>
+        <p>
+            FastAPI has two kinds of endpoint handlers:
+        </p>
+        <pre class="lesson-code"><code># Async handler — runs on the main event loop thread
+async def stats():
+    ...
+
+# Sync handler — runs in a THREAD POOL (default: 40 workers)
+def stats():
+    ...</code></pre>
+        <p>
+            All the API endpoints in this project used sync handlers (<code>def</code>, not
+            <code>async def</code>). FastAPI dispatches each sync handler to a thread from
+            <code>anyio</code>'s default thread pool. When the landing page fires two fetch
+            requests simultaneously (<code>/api/stats</code> and <code>/api/occupations/15-1252</code>),
+            they run on <strong>different threads</strong>.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>DuckDB Connections Are Not Thread-Safe</h2>
+        <p>
+            The database layer shared a single DuckDB connection across the entire process:
+        </p>
+        <pre class="lesson-code"><code># BROKEN: shared connection, no thread safety
+_conn = None
+
+def get_db():
+    global _conn
+    if _conn is not None:
+        return _conn
+    _conn = duckdb.connect("warehouse.duckdb", read_only=True)
+    return _conn</code></pre>
+        <p>
+            When two threads used this connection simultaneously, DuckDB's internal state could
+            get corrupted &mdash; one thread's query might return empty results, partial results,
+            or the wrong data entirely.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Fix: Per-Thread Connections</h2>
+        <p>
+            Python's <code>threading.local()</code> gives each thread its own storage. Each
+            thread gets its own DuckDB connection that no other thread can interfere with:
+        </p>
+        <pre class="lesson-code"><code># FIXED: per-thread connections
+_local = threading.local()
+_test_conn = None  # global override for tests
+
+def get_db():
+    # Test injection takes priority (visible to all threads)
+    if _test_conn is not None:
+        return _test_conn
+
+    conn = getattr(_local, "conn", None)
+    if conn is not None:
+        return conn
+
+    _local.conn = duckdb.connect(resolved_path, read_only=True)
+    return _local.conn</code></pre>
+        <div class="lesson-callout">
+            <p>
+                <strong>Test complication:</strong> <code>set_db()</code> injects a test fixture
+                connection from the main test thread. But FastAPI's worker threads wouldn't see
+                it in <code>threading.local()</code>. The fix: a global <code>_test_conn</code>
+                that takes priority, visible to all threads.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>When This Applies</h2>
+        <table class="data-table">
+            <thead>
+                <tr><th>Framework</th><th>Sync Handler Dispatch</th><th>Needs Per-Thread DB?</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>FastAPI (sync def)</td><td>Thread pool</td><td>Yes</td></tr>
+                <tr><td>FastAPI (async def)</td><td>Event loop (single thread)</td><td>No</td></tr>
+                <tr><td>Flask (threaded=True)</td><td>Thread per request</td><td>Yes</td></tr>
+                <tr><td>Django (WSGI)</td><td>Thread per request</td><td>Yes</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/similarity-algorithms">&larr; Choosing the Right Similarity Algorithm</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/multi-vintage-queries">Multi-Vintage Query Pitfalls &rarr;</a>
+        </div>
+    </nav>
+</section>

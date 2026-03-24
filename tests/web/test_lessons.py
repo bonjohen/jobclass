@@ -1,4 +1,4 @@
-"""Tests for the Lessons section: landing page and all 8 lesson pages."""
+"""Tests for the Lessons section: landing page and all 11 lesson pages."""
 
 LESSON_SLUGS = [
     "federal-data",
@@ -9,6 +9,9 @@ LESSON_SLUGS = [
     "idempotent-pipelines",
     "static-site",
     "testing-deployment",
+    "similarity-algorithms",
+    "thread-safety",
+    "multi-vintage-queries",
 ]
 
 
@@ -28,9 +31,9 @@ class TestLessonsLanding:
         for slug in LESSON_SLUGS:
             assert f"/lessons/{slug}" in resp.text, f"Missing link to /lessons/{slug}"
 
-    def test_landing_has_8_cards(self, client):
+    def test_landing_has_11_cards(self, client):
         resp = client.get("/lessons")
-        assert resp.text.count("lesson-card-number") == 8
+        assert resp.text.count("lesson-card-number") == 11
 
 
 class TestLessonPages:
@@ -69,7 +72,7 @@ class TestLessonNavigation:
         assert "/lessons/dimensional-modeling" in resp.text
 
     def test_last_lesson_links_to_index(self, client):
-        resp = client.get("/lessons/testing-deployment")
+        resp = client.get("/lessons/multi-vintage-queries")
         assert "/lessons" in resp.text
 
     def test_nav_chain_is_complete(self, client):

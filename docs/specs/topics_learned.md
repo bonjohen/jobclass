@@ -42,6 +42,27 @@ Lessons and issues discovered during the time-series labor intelligence implemen
 - **Decision:** Pre-generate individual SOC trend JSON files and geography comparison files. The comparison page has limited functionality on the static site. The fetch shim handles geography comparison via `soc_code` parameter-to-filename mapping.
 - **Takeaway:** Static site generation is inherently limited for endpoints with combinatorial query parameters. Accept graceful degradation rather than trying to pre-generate everything.
 
+### DuckDB Connections Are Not Thread-Safe
+- **Problem:** The web server shared a single DuckDB connection across all request threads. FastAPI runs sync endpoint handlers (`def`, not `async def`) in a thread pool. When two requests hit simultaneously (e.g., landing page fetching `/api/stats` and `/api/occupations/15-1252` in parallel), one thread's query could return empty results or corrupt data from the other.
+- **Symptom:** Landing page stats intermittently showed 0 for Occupations, Tasks Tracked, etc. on refresh. The API returned correct data when tested sequentially via curl.
+- **Fix:** Changed `database.py` to use `threading.local()` so each thread gets its own DuckDB connection. Added a `_test_conn` global fallback so test fixtures (which inject a connection from the main thread) still work across FastAPI's worker threads.
+- **Takeaway:** DuckDB connections are not thread-safe. Any web framework that dispatches sync handlers to a thread pool (FastAPI, Flask with threaded mode) must use per-thread connections. Use `threading.local()` for production and a global override for test injection.
+
+### Multi-Vintage Wages Endpoint Returned Duplicate Rows Per Geography
+- **Problem:** The `/api/occupations/{soc_code}/wages?geo_type=state` endpoint returned all vintage rows for each state (e.g., 3 rows per state × 50 states = 150 rows instead of 50). The wages comparison page was designed to show the latest snapshot, not historical data.
+- **Fix:** Added a filter on `source_release_id = MAX(source_release_id)` to the wages query in `src/jobclass/web/api/wages.py`, so only the latest OEWS release is returned.
+- **Takeaway:** When multi-vintage data exists in fact tables, every endpoint must decide whether it shows latest-only or all-vintages. Wages comparison = latest only; trends = all vintages. Make the vintage filter explicit in every query.
+
+### Derived Metrics Only Exist in Comparable Mode
+- **Problem:** The Trend Explorer page defaulted to `as_published` comparability mode, but YoY absolute change and YoY percent change are only computed for `comparable` mode in `fact_derived_series`. All YoY columns showed N/A on the default view, making it look like the calculations were broken.
+- **Fix:** Changed the default `<select>` option in `trend_explorer.html` from `as_published` to `comparable`, so users see YoY data immediately.
+- **Takeaway:** When derived metrics depend on a specific comparability mode, the UI must default to that mode. Otherwise users see empty derived columns and assume the feature is broken. The API query was correct — the default just pointed at the wrong data slice.
+
+### Movers Page Missing Absolute Change Context
+- **Problem:** The Ranked Movers page only showed YoY percent change. Without the absolute dollar/count change, users couldn't distinguish meaningful moves from noise. A 200% increase on a $10,000 base is very different from 200% on a $100,000 base.
+- **Fix:** Added a LEFT JOIN to `fact_derived_series` for `yoy_absolute_change` in the movers API query. Updated `ranked_movers.js` to display a "YoY Change" column with dollar formatting for wage metrics and count formatting for employment.
+- **Takeaway:** Percentage changes without absolute context are misleading. Always show both when reporting movers/outliers.
+
 ## CI/CD Issues
 
 ### Ruff Format Must Run Before Push

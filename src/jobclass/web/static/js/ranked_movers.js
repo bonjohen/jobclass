@@ -20,15 +20,29 @@
             return;
         }
 
+        var metric = document.getElementById("movers-metric").value;
+        var absUnits = (metric === "employment_count") ? "count" : "dollars";
+
         var html = '<table class="data-table"><thead><tr>';
-        html += '<th>Occupation</th><th>YoY % Change</th><th>Year</th>';
+        html += '<th>Occupation</th><th>YoY Change</th><th>YoY %</th><th>Year</th>';
         html += '</tr></thead><tbody>';
         items.forEach(function(m) {
             var sign = m.pct_change >= 0 ? "+" : "";
             var cls = m.pct_change >= 0 ? "positive" : "negative";
+            var absSign = m.abs_change != null && m.abs_change >= 0 ? "+" : "";
+            var absVal = "N/A";
+            if (m.abs_change != null) {
+                if (absUnits === "dollars") {
+                    absVal = absSign + formatWage(Math.abs(m.abs_change));
+                    if (m.abs_change < 0) absVal = "-" + formatWage(Math.abs(m.abs_change));
+                } else {
+                    absVal = absSign + formatNumber(m.abs_change);
+                }
+            }
             html += '<tr>';
             html += '<td><a href="/trends/explorer/' + escapeAttr(m.soc_code) + '">' +
                 escapeHtml(m.soc_code) + ' ' + escapeHtml(m.title) + '</a></td>';
+            html += '<td class="' + cls + '">' + absVal + '</td>';
             html += '<td class="' + cls + '">' + sign + (m.pct_change != null ? m.pct_change.toFixed(1) : 'N/A') + '%</td>';
             html += '<td>' + (m.year || 'N/A') + '</td>';
             html += '</tr>';

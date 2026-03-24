@@ -233,6 +233,9 @@ def build_static(base_path: str, output_dir: str) -> None:
         "idempotent-pipelines",
         "static-site",
         "testing-deployment",
+        "similarity-algorithms",
+        "thread-safety",
+        "multi-vintage-queries",
     ]
     write_html("/lessons", "lessons/index.html")
     for slug in lesson_slugs:

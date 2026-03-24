@@ -10,25 +10,26 @@ import duckdb
 
 from jobclass.config.settings import get_config
 
-_conn: duckdb.DuckDBPyConnection | None = None
-_lock = threading.Lock()
+# Thread-local storage for per-thread connections (production).
+_local = threading.local()
+
+# Global connection injected by tests via set_db(). Takes priority over
+# thread-local connections so that TestClient workers see the fixture DB.
+_test_conn: duckdb.DuckDBPyConnection | None = None
+
+_db_path: str | None = None
+_init_lock = threading.Lock()
 
 
-def get_db(db_path: str | Path | None = None) -> duckdb.DuckDBPyConnection:
-    """Return a read-only DuckDB connection to the warehouse.
+def _resolve_db_path(db_path: str | Path | None = None) -> str:
+    """Resolve and cache the database file path."""
+    global _db_path
+    if _db_path is not None:
+        return _db_path
 
-    Reuses a module-level connection for the lifetime of the process.
-    Pass db_path explicitly in tests; otherwise reads from config.
-    Thread-safe: uses a lock around connection initialization.
-    """
-    global _conn
-    if _conn is not None:
-        return _conn
-
-    with _lock:
-        # Double-check after acquiring lock
-        if _conn is not None:
-            return _conn
+    with _init_lock:
+        if _db_path is not None:
+            return _db_path
 
         if db_path is None:
             cfg = get_config()
@@ -40,20 +41,47 @@ def get_db(db_path: str | Path | None = None) -> duckdb.DuckDBPyConnection:
                 f"Warehouse database not found at {db_file}. "
                 f"Run 'jobclass-pipeline migrate && jobclass-pipeline run-all' first."
             )
-        _conn = duckdb.connect(str(db_path), read_only=True)
-        return _conn
+        _db_path = str(db_file)
+        return _db_path
+
+
+def get_db(db_path: str | Path | None = None) -> duckdb.DuckDBPyConnection:
+    """Return a read-only DuckDB connection.
+
+    In tests, returns the globally injected connection (set via set_db).
+    In production, each thread gets its own connection so concurrent sync
+    endpoints (FastAPI runs sync handlers in a thread pool) don't corrupt
+    each other.
+    """
+    # Test-injected connection takes priority.
+    if _test_conn is not None:
+        return _test_conn
+
+    conn = getattr(_local, "conn", None)
+    if conn is not None:
+        return conn
+
+    resolved = _resolve_db_path(db_path)
+    _local.conn = duckdb.connect(resolved, read_only=True)
+    return _local.conn
 
 
 def reset_db() -> None:
-    """Close and reset the connection (for testing)."""
-    global _conn
-    if _conn is not None:
+    """Close and reset all connections (for testing)."""
+    global _test_conn, _db_path
+    conn = getattr(_local, "conn", None)
+    if conn is not None:
         with contextlib.suppress(duckdb.Error):
-            _conn.close()
-        _conn = None
+            conn.close()
+        _local.conn = None
+    _test_conn = None
+    _db_path = None
 
 
 def set_db(conn: duckdb.DuckDBPyConnection) -> None:
-    """Inject a connection directly (for testing)."""
-    global _conn
-    _conn = conn
+    """Inject a connection directly (for testing).
+
+    Uses a global so all threads (including FastAPI worker threads) see it.
+    """
+    global _test_conn
+    _test_conn = conn

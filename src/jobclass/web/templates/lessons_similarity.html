@@ -1,0 +1,199 @@
+<section class="lesson-page">
+    <h1>Choosing the Right Similarity Algorithm</h1>
+    <p class="lesson-meta">Lesson 9 &mdash; Algorithm selection &amp; data structure</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/testing-deployment">&larr; Testing and Deployment</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/thread-safety">Thread-Safe Database Connections &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>The Problem: Dancer = Lawyer?</h2>
+        <p>
+            The occupation similarity feature was designed to answer a simple question: which occupations
+            require similar skills? The initial implementation used <strong>Jaccard similarity</strong>,
+            a classic set-based metric that measures overlap between two sets. It should have worked.
+        </p>
+        <p>
+            But every occupation showed <strong>100% similarity</strong> to every other occupation.
+            Dancers were identical to Pile Driver Operators. Bakers matched Lawyers. The entire
+            similarity matrix was useless.
+        </p>
+        <div class="lesson-callout">
+            <p>
+                <strong>Root cause:</strong> The algorithm was correct &mdash; the data model
+                assumption was wrong. Jaccard similarity measures <em>set overlap</em>, but
+                O*NET doesn't use sets.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Why Jaccard Fails on O*NET Skills</h2>
+        <p>
+            Jaccard similarity computes <code>|A &cap; B| / |A &cup; B|</code> &mdash; the size of the
+            intersection divided by the size of the union. It works when items either belong to a set
+            or don't: a recipe either uses flour or it doesn't.
+        </p>
+        <p>
+            O*NET doesn't work this way. It rates <strong>all 35 skills for every occupation</strong>
+            on importance scales from 1 to 5. Every occupation has every skill &mdash; they differ in
+            how much each skill matters, not in which skills they have.
+        </p>
+        <pre class="lesson-code"><code># What the data actually looks like:
+# Dancer (27-2031)
+  Active Listening    IM = 3.75
+  Mathematics         IM = 1.62
+  Programming         IM = 1.12
+
+# Lawyer (23-1011)
+  Active Listening    IM = 4.25
+  Mathematics         IM = 2.12
+  Programming         IM = 1.25
+
+# Both have ALL 35 skills rated.
+# Jaccard sees: {35 skills} ∩ {35 skills} / {35 skills} ∪ {35 skills}
+#             = 35/35 = 1.0 (100% similar)</code></pre>
+        <p>
+            When every item has every feature, set-based metrics collapse to a constant. The signal
+            is in the <em>scores</em>, not the <em>membership</em>.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Cosine Similarity: Using the Scores</h2>
+        <p>
+            <strong>Cosine similarity</strong> treats each occupation's skill importance scores as a
+            vector in 35-dimensional space. It measures the angle between two vectors &mdash;
+            occupations that emphasize the same skills at similar levels point in the same direction.
+        </p>
+        <pre class="lesson-code"><code>cosine(A, B) = (A · B) / (||A|| × ||B||)
+
+# Dancer vs. Choreographer (high similarity)
+  Both emphasize coordination, social perceptiveness, time management
+  → cosine ≈ 0.98
+
+# Dancer vs. Lawyer (low similarity)
+  Dancer: high coordination, monitoring; low critical thinking, writing
+  Lawyer: high critical thinking, writing; low coordination, monitoring
+  → cosine ≈ 0.82</code></pre>
+        <p>
+            The range is 0 to 1 (since all importance scores are positive). Values above 0.95 indicate
+            genuinely similar skill profiles; values below 0.85 indicate meaningfully different ones.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Hidden Duplicate Problem</h2>
+        <p>
+            Switching to cosine similarity revealed a second bug: some occupations had similarity
+            scores <strong>greater than 1.0</strong>. Cosine similarity is bounded by 1.0, so
+            something was inflating the dot product.
+        </p>
+        <p>
+            The cause: <strong>"All Other" catch-all occupations</strong> (e.g., <code>17-2199
+            Engineers, All Other</code>) had up to 8 duplicate rows per skill in the
+            <code>bridge_occupation_skill</code> table. Each duplicate multiplied the dot product
+            without increasing the norm proportionally.
+        </p>
+        <pre class="lesson-code"><code>-- Before fix: duplicates inflate the dot product
+SELECT occupation_key, element_id, COUNT(*) AS n
+FROM bridge_occupation_skill b
+JOIN dim_skill s ON b.skill_key = s.skill_key
+WHERE b.scale_id = 'IM'
+GROUP BY occupation_key, element_id
+HAVING COUNT(*) > 1;
+-- Returns rows with n = 2, 4, 6, 8 for "All Other" occupations
+
+-- Fix: AVG + GROUP BY deduplicates before computing similarity
+WITH occ_skill_scores AS (
+    SELECT b.occupation_key, s.element_id,
+           AVG(b.data_value) AS importance   -- ← collapses duplicates
+    FROM bridge_occupation_skill b
+    JOIN dim_skill s ON b.skill_key = s.skill_key
+    WHERE b.scale_id = 'IM'
+    GROUP BY b.occupation_key, s.element_id  -- ← one row per skill
+)</code></pre>
+        <div class="lesson-callout">
+            <p>
+                <strong>Lesson:</strong> When your metric exceeds its theoretical bounds,
+                look for data duplication before doubting the formula. The math was right
+                &mdash; it was getting the wrong inputs.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Final Implementation</h2>
+        <p>
+            The corrected view computes cosine similarity in three CTEs:
+        </p>
+        <pre class="lesson-code"><code>-- 1. occ_skill_scores: one importance score per occupation × skill
+--    (AVG deduplicates "All Other" catch-all rows)
+-- 2. norms: L2 norm per occupation (√Σ importance²)
+-- 3. dot_products: pairwise dot products (self-join on element_id)
+
+-- Final SELECT:
+ROUND(dot_product / (norm_a × norm_b), 4) AS similarity_score</code></pre>
+        <p>
+            The view column is still named <code>jaccard_similarity</code> in the SQL to avoid a
+            cascading rename across the codebase. The API exposes it as <code>similarity_score</code>.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Choosing a Similarity Algorithm: Decision Guide</h2>
+        <table class="data-table">
+            <thead>
+                <tr><th>Data Structure</th><th>Algorithm</th><th>Example</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Binary presence/absence</td>
+                    <td>Jaccard similarity</td>
+                    <td>Recipe ingredients, tag sets</td>
+                </tr>
+                <tr>
+                    <td>Continuous scores, same features</td>
+                    <td>Cosine similarity</td>
+                    <td>Skill ratings, TF-IDF vectors</td>
+                </tr>
+                <tr>
+                    <td>Continuous scores, magnitude matters</td>
+                    <td>Euclidean distance</td>
+                    <td>Salary comparisons, physical measurements</td>
+                </tr>
+                <tr>
+                    <td>Rankings or ordinal data</td>
+                    <td>Spearman correlation</td>
+                    <td>Preference rankings, survey responses</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="lesson-callout">
+            <p>
+                <strong>Key takeaway:</strong> Before choosing a similarity algorithm, understand your
+                data's structure. Binary presence/absence metrics are useless when every item has every
+                feature rated. Use score-based similarity (cosine, correlation) when values carry the
+                signal, not membership.
+            </p>
+        </div>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/testing-deployment">&larr; Testing and Deployment</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/thread-safety">Thread-Safe Database Connections &rarr;</a>
+        </div>
+    </nav>
+</section>

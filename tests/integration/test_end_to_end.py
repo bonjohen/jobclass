@@ -269,11 +269,11 @@ class TestDeliverablesPresent:
         root = Path(__file__).parent.parent.parent
 
         # DL-1: Phased release plan
-        assert (root / "docs" / "specs" / "phased_release_plan.md").exists()
+        assert (root / "docs" / "specs" / "archive" / "phased_release_plan.md").exists()
         # DL-2: Source manifest
         assert (root / "config" / "source_manifest.yaml").exists()
         # DL-3: Test plan
-        assert (root / "docs" / "specs" / "test_plan.md").exists()
+        assert (root / "docs" / "specs" / "archive" / "test_plan.md").exists()
         # DL-4/DL-5: Run manifest and validation report (code exists)
         assert (root / "src" / "jobclass" / "observe" / "run_manifest.py").exists()
         assert (root / "src" / "jobclass" / "observe" / "reporters.py").exists()
@@ -282,4 +282,4 @@ class TestDeliverablesPresent:
         # DL-7: Sample queries
         assert (root / "docs" / "sample_queries.sql").exists()
         # DL-8: Design document
-        assert (root / "docs" / "specs" / "base_design_document.md").exists()
+        assert (root / "docs" / "specs" / "archive" / "base_design_document.md").exists()

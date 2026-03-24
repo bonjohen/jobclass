@@ -494,6 +494,22 @@ Add "Lessons" to `base.html` nav after "Methodology":
 
 Reuse `.methodology-page` / `.methodology-section` patterns with a `.lessons-page` class. Code blocks should use a `<pre><code>` pattern with a monospace background.
 
+---
+
+## Lesson 9: Choosing the Right Similarity Algorithm
+
+**Slug:** `similarity-algorithms`
+**Category:** Algorithm selection & data structure
+
+### Concepts Covered
+- **Jaccard similarity**: Set-based overlap metric — works on binary presence/absence
+- **O*NET universal skill ratings**: All 35 skills rated 1–5 for every occupation (no binary sets)
+- **Why Jaccard fails**: When every item has every feature, set overlap = 100% always
+- **Cosine similarity**: Vector-based metric using importance score angles in 35-dimensional space
+- **Bridge table duplication**: "All Other" catch-all occupations had up to 8x duplicate rows per skill, inflating dot products past the theoretical maximum of 1.0
+- **Deduplication fix**: `AVG + GROUP BY` collapses duplicates before computing similarity
+- **Algorithm selection guide**: Jaccard for sets, cosine for scored features, Euclidean for magnitude, Spearman for rankings
+
 ### Landing Page Design
 
 The `/lessons` landing page should display:
