@@ -17,10 +17,15 @@ def extract_xlsx_from_zip(data: bytes) -> bytes:
     """Extract the first .xlsx file from a ZIP archive.
 
     BLS distributes OEWS data as ZIP files containing a single XLSX workbook.
+    Filters out Excel temporary/lock files (prefixed with ~$).
     Returns the raw XLSX bytes.
     """
     with zipfile.ZipFile(io.BytesIO(data)) as zf:
-        xlsx_names = [n for n in zf.namelist() if n.lower().endswith(".xlsx")]
+        xlsx_names = [
+            n for n in zf.namelist()
+            if n.lower().endswith(".xlsx")
+            and not n.split("/")[-1].startswith("~$")
+        ]
         if not xlsx_names:
             raise ValueError(f"No .xlsx file found in ZIP. Contents: {zf.namelist()}")
         return zf.read(xlsx_names[0])

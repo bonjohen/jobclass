@@ -192,17 +192,17 @@ Run the full pipeline and website against real data and verify key user flows.
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | TS10-01 | Run `jobclass-pipeline run-all` with timeseries stages — all stages succeed | | |
-| `[ ]` | TS10-02 | Verify `jobclass-pipeline status` shows non-zero row counts for all time-series tables | | |
-| `[ ]` | TS10-03 | Start `jobclass-web` and verify trend explorer loads with real multi-year data for a known occupation | | |
-| `[ ]` | TS10-04 | Verify occupation comparison page renders with real data for at least 3 occupations | | |
-| `[ ]` | TS10-05 | Verify geography comparison page renders with real state-level data | | |
-| `[ ]` | TS10-06 | Verify ranked movers page shows real gainers/losers with plausible values | | |
-| `[ ]` | TS10-07 | Verify methodology page accurately describes time-series data products | | |
-| `[ ]` | TS10-08 | Trace one end-to-end example from raw extraction through visible website output (document the occupation, metric, and values) | | |
-| `[ ]` | TS10-09 | Verify projected values are visually distinct from observed values on trend explorer | | |
-| `[ ]` | TS10-10 | Verify derived values are labeled as derived on all pages where they appear | | |
-| `[ ]` | TS10-11 | Fix any data issues, column mismatches, or rendering bugs discovered during verification | | |
+| `[X]` | TS10-01 | Run `jobclass-pipeline run-all` with timeseries stages — all stages succeed | 2026-03-24 | 2026-03-24 |
+| `[X]` | TS10-02 | Verify `jobclass-pipeline status` shows non-zero row counts for all time-series tables | 2026-03-24 | 2026-03-24 |
+| `[X]` | TS10-03 | Start `jobclass-web` and verify trend explorer loads with real multi-year data for a known occupation | 2026-03-24 | 2026-03-24 |
+| `[X]` | TS10-04 | Verify occupation comparison page renders with real data for at least 3 occupations | 2026-03-24 | 2026-03-24 |
+| `[X]` | TS10-05 | Verify geography comparison page renders with real state-level data | 2026-03-24 | 2026-03-24 |
+| `[X]` | TS10-06 | Verify ranked movers page shows real gainers/losers with plausible values | 2026-03-24 | 2026-03-24 |
+| `[X]` | TS10-07 | Verify methodology page accurately describes time-series data products | 2026-03-24 | 2026-03-24 |
+| `[X]` | TS10-08 | Trace one end-to-end example from raw extraction through visible website output (document the occupation, metric, and values) | 2026-03-24 | 2026-03-24 |
+| `[X]` | TS10-09 | Verify projected values are visually distinct from observed values on trend explorer | 2026-03-24 | 2026-03-24 |
+| `[X]` | TS10-10 | Verify derived values are labeled as derived on all pages where they appear | 2026-03-24 | 2026-03-24 |
+| `[X]` | TS10-11 | Fix any data issues, column mismatches, or rendering bugs discovered during verification | 2026-03-24 | 2026-03-24 |
 
 ---
 
@@ -219,8 +219,8 @@ Run the full pipeline and website against real data and verify key user flows.
 | TS7 | Time-Series Validation | 8 | 8 |
 | TS8 | Reporting Marts | 11 | 11 |
 | TS9 | Website — Trend Explorer and Comparison Pages | 10 | 10 |
-| TS10 | Real Data End-to-End Verification | 11 | 0 |
-| **Total** | | **101** | **90** |
+| TS10 | Real Data End-to-End Verification | 11 | 11 |
+| **Total** | | **101** | **101** |
 
 ---
 

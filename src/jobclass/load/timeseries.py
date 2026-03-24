@@ -197,13 +197,15 @@ def normalize_oews_observations(
             [metric_key, comparability_mode],
         )
 
-        # Insert from OEWS fact
+        # Insert from OEWS fact (DISTINCT avoids duplicates from broad/detailed
+        # group overlap in BLS OEWS data where the same occupation appears in
+        # multiple occupation_group rows with identical values)
         result = conn.execute(
             f"""INSERT INTO fact_time_series_observation
                 (metric_key, occupation_key, geography_key, period_key,
                  source_release_id, comparability_mode, observed_value,
                  suppression_flag, run_id)
-            SELECT
+            SELECT DISTINCT
                 ?,
                 f.occupation_key,
                 f.geography_key,
