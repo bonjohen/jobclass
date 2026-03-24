@@ -1,0 +1,40 @@
+<section class="trends-page">
+    <h1>Trends &amp; Analysis</h1>
+    <p class="page-intro">Explore occupation metrics over time, compare across occupations and geographies, and identify the largest movers.</p>
+
+    <div class="trends-nav-cards">
+        <div class="trend-card">
+            <h2>Trend Explorer</h2>
+            <p>View time-series charts for a single occupation — employment, wages, and projections over time.</p>
+            <div class="trend-card-search">
+                <label for="trend-search">Search occupation:</label>
+                <input type="text" id="trend-search" placeholder="e.g. Software Developer or 15-1252" autocomplete="off">
+                <div id="trend-search-results" class="search-dropdown" role="listbox" aria-label="Search results"></div>
+            </div>
+        </div>
+
+        <div class="trend-card">
+            <h2>Compare Occupations</h2>
+            <p>Compare the same metric across multiple occupations over the same time range.</p>
+            <a href="/trends/compare" class="btn">Open Comparison</a>
+        </div>
+
+        <div class="trend-card">
+            <h2>Geography Comparison</h2>
+            <p>Compare an occupation's metrics across states for a given year.</p>
+            <div class="trend-card-search">
+                <label for="geo-search">Search occupation:</label>
+                <input type="text" id="geo-search" placeholder="e.g. Registered Nurse or 29-1141" autocomplete="off">
+                <div id="geo-search-results" class="search-dropdown" role="listbox" aria-label="Search results"></div>
+            </div>
+        </div>
+
+        <div class="trend-card">
+            <h2>Ranked Movers</h2>
+            <p>See the top gainers and losers by metric over the most recent period.</p>
+            <a href="/trends/movers" class="btn">View Movers</a>
+        </div>
+    </div>
+</section>
+
+<script src="/static/js/trends.js"></script>

@@ -19,6 +19,7 @@ from jobclass.web.api.metrics import router as metrics_router
 from jobclass.web.api.occupations import router as occupations_router
 from jobclass.web.api.projections import router as projections_router
 from jobclass.web.api.skills import router as skills_router
+from jobclass.web.api.trends import router as trends_router
 from jobclass.web.api.wages import router as wages_router
 
 _WEB_DIR = Path(__file__).parent
@@ -69,6 +70,7 @@ def create_app() -> FastAPI:
     app.include_router(skills_router)
     app.include_router(projections_router)
     app.include_router(methodology_router)
+    app.include_router(trends_router)
 
     # Template engine
     templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
@@ -123,6 +125,48 @@ def create_app() -> FastAPI:
             "page_title": f"Wages by State — {soc_code} — JobClass",
             "content_template": "wages_comparison.html",
             "soc_code": soc_code,
+        })
+
+    @app.get("/trends", response_class=HTMLResponse)
+    async def trends_landing(request: Request):
+        return templates.TemplateResponse("base.html", {
+            "request": request,
+            "page_title": "Trends — JobClass",
+            "content_template": "trends.html",
+        })
+
+    @app.get("/trends/explorer/{soc_code}", response_class=HTMLResponse)
+    async def trend_explorer_page(request: Request, soc_code: str):
+        return templates.TemplateResponse("base.html", {
+            "request": request,
+            "page_title": f"Trend Explorer — {soc_code} — JobClass",
+            "content_template": "trend_explorer.html",
+            "soc_code": soc_code,
+        })
+
+    @app.get("/trends/compare", response_class=HTMLResponse)
+    async def occupation_comparison_page(request: Request):
+        return templates.TemplateResponse("base.html", {
+            "request": request,
+            "page_title": "Compare Occupations — JobClass",
+            "content_template": "occupation_comparison.html",
+        })
+
+    @app.get("/trends/geography/{soc_code}", response_class=HTMLResponse)
+    async def geography_comparison_page(request: Request, soc_code: str):
+        return templates.TemplateResponse("base.html", {
+            "request": request,
+            "page_title": f"Geography Comparison — {soc_code} — JobClass",
+            "content_template": "geography_comparison.html",
+            "soc_code": soc_code,
+        })
+
+    @app.get("/trends/movers", response_class=HTMLResponse)
+    async def ranked_movers_page(request: Request):
+        return templates.TemplateResponse("base.html", {
+            "request": request,
+            "page_title": "Ranked Movers — JobClass",
+            "content_template": "ranked_movers.html",
         })
 
     # --- Error handlers ---

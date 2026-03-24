@@ -1,0 +1,40 @@
+<section class="trend-explorer-page" data-soc-code="{{ soc_code }}">
+    <h1 id="page-title">Trend Explorer</h1>
+    <p><a href="/occupation/{{ soc_code }}">&laquo; Back to profile</a> | <a href="/trends">&laquo; Trends</a></p>
+
+    <div class="trend-controls">
+        <label for="metric-select">Metric:</label>
+        <select id="metric-select">
+            <option value="employment_count">Employment Count</option>
+            <option value="mean_annual_wage">Mean Annual Wage</option>
+            <option value="median_annual_wage">Median Annual Wage</option>
+        </select>
+
+        <label for="geo-select">Geography:</label>
+        <select id="geo-select">
+            <option value="national">National</option>
+        </select>
+
+        <label for="mode-select">Mode:</label>
+        <select id="mode-select">
+            <option value="as_published">As Published</option>
+            <option value="comparable">Comparable History</option>
+        </select>
+    </div>
+
+    <div id="trend-chart-container" class="loading" role="region" aria-live="polite" aria-busy="true">
+        Loading trend data...
+    </div>
+
+    <div id="trend-meta" class="trend-metadata" hidden>
+        <span class="meta-metric" id="meta-metric"></span>
+        <span class="meta-units" id="meta-units"></span>
+        <span class="meta-grain">Annual</span>
+        <span class="meta-mode" id="meta-mode"></span>
+        <span class="meta-lineage" id="meta-lineage"></span>
+    </div>
+
+    <div id="trend-table-container" hidden></div>
+</section>
+
+<script src="/static/js/trend_explorer.js"></script>

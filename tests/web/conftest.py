@@ -109,6 +109,10 @@ def warehouse_db(tmp_path):
     load_projections_staging(conn, proj_rows, "2024.1")
     load_fact_occupation_projections(conn, "2024.1", soc_ver)
 
+    # Run time-series pipeline
+    from jobclass.orchestrate.timeseries_refresh import timeseries_refresh
+    timeseries_refresh(conn)
+
     # Run manifest entry for metadata endpoint
     conn.execute("""
         INSERT INTO run_manifest (run_id, pipeline_name, dataset_name,

@@ -1,0 +1,30 @@
+<section class="occupation-comparison-page">
+    <h1>Compare Occupations</h1>
+    <p><a href="/trends">&laquo; Trends</a></p>
+
+    <div class="comparison-controls">
+        <div class="comparison-input">
+            <label for="compare-search">Add occupation (up to 5):</label>
+            <input type="text" id="compare-search" placeholder="e.g. 15-1252" autocomplete="off">
+            <div id="compare-search-results" class="search-dropdown" role="listbox"></div>
+        </div>
+        <div id="selected-occupations" class="selected-tags"></div>
+
+        <label for="compare-metric">Metric:</label>
+        <select id="compare-metric">
+            <option value="employment_count">Employment Count</option>
+            <option value="mean_annual_wage">Mean Annual Wage</option>
+            <option value="median_annual_wage">Median Annual Wage</option>
+        </select>
+
+        <button id="compare-btn" class="btn" disabled>Compare</button>
+    </div>
+
+    <div id="compare-chart-container" class="loading" role="region" aria-live="polite" aria-busy="true" hidden>
+        Loading comparison data...
+    </div>
+
+    <div id="compare-table-container" hidden></div>
+</section>
+
+<script src="/static/js/occupation_comparison.js"></script>

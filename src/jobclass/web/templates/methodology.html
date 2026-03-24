@@ -60,6 +60,28 @@
             </ul>
         </div>
 
+        <div class="methodology-section">
+            <h2>Time-Series Analysis</h2>
+            <p>The warehouse supports time-indexed analysis of occupation metrics. Key concepts:</p>
+            <ul>
+                <li><strong>Comparability Mode</strong> — Two modes are maintained:
+                    <em>As Published</em> preserves the original values from each source release;
+                    <em>Comparable History</em> includes only observations from vintages sharing the same
+                    SOC taxonomy version, enabling valid trend comparisons.</li>
+                <li><strong>Base vs. Derived Metrics</strong> — Base metrics (employment count, wages) come
+                    directly from source data. Derived metrics (year-over-year change, rolling average,
+                    state-vs-national gap, rank delta) are computed from base observations and always labeled
+                    as derived.</li>
+                <li><strong>Projected Values</strong> — BLS Employment Projections are stored alongside
+                    observed values but are visually distinguished (dashed bars, different color) because
+                    they represent forward-looking estimates with different base years and assumptions.</li>
+                <li><strong>Revisions &amp; Discontinuities</strong> — When BLS revises OEWS data or changes
+                    the SOC taxonomy, previously published values may not be directly comparable to new releases.
+                    The comparable-history mode excludes cross-version comparisons; the as-published mode
+                    preserves the original record.</li>
+            </ul>
+        </div>
+
         <div class="methodology-section" id="versions-section">
             <h2>Current Versions</h2>
             <div id="versions-content"><p class="loading">Loading version info...</p></div>

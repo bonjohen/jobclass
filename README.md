@@ -41,7 +41,7 @@ Four-layer warehouse:
 
 The pipeline is idempotent: re-running the same source version produces no duplicates. Schema drift is detected and blocks publication until resolved.
 
-**Web layer:** FastAPI serves HTML pages (search, occupation profiles, wage comparison, skill/task views, projections) plus JSON APIs. A static site generator produces the GitHub Pages deployment.
+**Web layer:** FastAPI serves HTML pages (search, occupation profiles, wage comparison, skill/task views, projections, trend explorer, occupation comparison, geography comparison, ranked movers) plus JSON APIs. A static site generator produces the GitHub Pages deployment.
 
 ## Project structure
 
@@ -81,7 +81,7 @@ jobclass-pipeline timeseries-refresh
 ## Testing
 
 ```bash
-# Full suite (513+ tests)
+# Full suite (526+ tests)
 pytest
 
 # Warehouse-only tests (real data validation)

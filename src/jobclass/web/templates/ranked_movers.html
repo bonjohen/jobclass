@@ -1,0 +1,26 @@
+<section class="ranked-movers-page">
+    <h1>Ranked Movers</h1>
+    <p><a href="/trends">&laquo; Trends</a></p>
+
+    <div class="movers-controls">
+        <label for="movers-metric">Metric:</label>
+        <select id="movers-metric">
+            <option value="employment_count">Employment Count</option>
+            <option value="mean_annual_wage">Mean Annual Wage</option>
+            <option value="median_annual_wage">Median Annual Wage</option>
+        </select>
+    </div>
+
+    <div class="movers-columns">
+        <div class="movers-column">
+            <h2>Top Gainers</h2>
+            <div id="gainers-container" class="loading" aria-live="polite" aria-busy="true">Loading...</div>
+        </div>
+        <div class="movers-column">
+            <h2>Top Losers</h2>
+            <div id="losers-container" class="loading" aria-live="polite" aria-busy="true">Loading...</div>
+        </div>
+    </div>
+</section>
+
+<script src="/static/js/ranked_movers.js"></script>

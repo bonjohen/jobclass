@@ -173,16 +173,16 @@ Build the user-facing website pages for time-series analysis.
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | TS9-01 | Add top-level "Trends" or "Analysis" navigation area to the site layout | | |
-| `[ ]` | TS9-02 | Build trend explorer page: select one occupation, display metric time-series chart with observed vs. projected distinction | | |
-| `[ ]` | TS9-03 | Trend explorer: show metric name, units, time grain, comparability mode, and lineage context on the page | | |
-| `[ ]` | TS9-04 | Trend explorer: visually distinguish projected values from observed values (dashed line, color, label) | | |
-| `[ ]` | TS9-05 | Trend explorer: label derived values as derived | | |
-| `[ ]` | TS9-06 | Build occupation comparison page: select multiple occupations, compare same metric over same period range | | |
-| `[ ]` | TS9-07 | Build geography comparison page: select one occupation, compare metric across states for a given period | | |
-| `[ ]` | TS9-08 | Build ranked movers page: show top gainers and losers by selected metric over a user-selected period range | | |
-| `[ ]` | TS9-09 | Extend methodology page: explain comparability mode, derived metrics, revision handling, and discontinuities | | |
-| `[ ]` | TS9-10 | Add data queries backing each page: wire pages to the TS8 mart views | | |
+| `[X]` | TS9-01 | Add top-level "Trends" or "Analysis" navigation area to the site layout | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS9-02 | Build trend explorer page: select one occupation, display metric time-series chart with observed vs. projected distinction | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS9-03 | Trend explorer: show metric name, units, time grain, comparability mode, and lineage context on the page | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS9-04 | Trend explorer: visually distinguish projected values from observed values (dashed line, color, label) | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS9-05 | Trend explorer: label derived values as derived | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS9-06 | Build occupation comparison page: select multiple occupations, compare same metric over same period range | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS9-07 | Build geography comparison page: select one occupation, compare metric across states for a given period | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS9-08 | Build ranked movers page: show top gainers and losers by selected metric over a user-selected period range | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS9-09 | Extend methodology page: explain comparability mode, derived metrics, revision handling, and discontinuities | 2026-03-23 | 2026-03-23 |
+| `[X]` | TS9-10 | Add data queries backing each page: wire pages to the TS8 mart views | 2026-03-23 | 2026-03-23 |
 
 ---
 
@@ -218,9 +218,9 @@ Run the full pipeline and website against real data and verify key user flows.
 | TS6 | Time-Series Pipeline Orchestration | 8 | 8 |
 | TS7 | Time-Series Validation | 8 | 8 |
 | TS8 | Reporting Marts | 11 | 11 |
-| TS9 | Website — Trend Explorer and Comparison Pages | 10 | 0 |
+| TS9 | Website — Trend Explorer and Comparison Pages | 10 | 10 |
 | TS10 | Real Data End-to-End Verification | 11 | 0 |
-| **Total** | | **101** | **72** |
+| **Total** | | **101** | **82** |
 
 ---
 
