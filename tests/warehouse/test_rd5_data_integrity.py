@@ -11,12 +11,11 @@ import pytest
 # RD5-01: dim_occupation row count
 # ============================================================
 
+
 class TestDimOccupation:
     def test_has_sufficient_rows(self, warehouse_db):
         """RD5-01: SOC 2018 has ~867 detailed occupations + higher levels."""
-        count = warehouse_db.execute(
-            "SELECT COUNT(*) FROM dim_occupation"
-        ).fetchone()[0]
+        count = warehouse_db.execute("SELECT COUNT(*) FROM dim_occupation").fetchone()[0]
         assert count >= 800, f"Expected >= 800 occupations, got {count}"
 
     def test_has_all_levels(self, warehouse_db):
@@ -41,19 +40,16 @@ class TestDimOccupation:
 # RD5-02: dim_geography row count
 # ============================================================
 
+
 class TestDimGeography:
     def test_has_sufficient_rows(self, warehouse_db):
         """RD5-02: At least 50 states + national + territories."""
-        count = warehouse_db.execute(
-            "SELECT COUNT(*) FROM dim_geography"
-        ).fetchone()[0]
+        count = warehouse_db.execute("SELECT COUNT(*) FROM dim_geography").fetchone()[0]
         assert count >= 50, f"Expected >= 50 geographies, got {count}"
 
     def test_has_national(self, warehouse_db):
         """National geography exists."""
-        count = warehouse_db.execute(
-            "SELECT COUNT(*) FROM dim_geography WHERE geo_type = 'national'"
-        ).fetchone()[0]
+        count = warehouse_db.execute("SELECT COUNT(*) FROM dim_geography WHERE geo_type = 'national'").fetchone()[0]
         assert count >= 1
 
 
@@ -61,12 +57,11 @@ class TestDimGeography:
 # RD5-03: fact_occupation_employment_wages row count
 # ============================================================
 
+
 class TestFactWages:
     def test_has_sufficient_rows(self, warehouse_db):
         """RD5-03: Real OEWS should produce >= 10,000 wage fact rows."""
-        count = warehouse_db.execute(
-            "SELECT COUNT(*) FROM fact_occupation_employment_wages"
-        ).fetchone()[0]
+        count = warehouse_db.execute("SELECT COUNT(*) FROM fact_occupation_employment_wages").fetchone()[0]
         assert count >= 10_000, f"Expected >= 10,000 wage facts, got {count}"
 
     def test_occupation_key_referential_integrity(self, warehouse_db):
@@ -91,9 +86,14 @@ class TestFactWages:
 
     def test_hourly_wage_range(self, warehouse_db):
         """RD5-06: Hourly wages in plausible range ($0–$500/hr)."""
-        for col in ["mean_hourly_wage", "median_hourly_wage",
-                     "p10_hourly_wage", "p25_hourly_wage",
-                     "p75_hourly_wage", "p90_hourly_wage"]:
+        for col in [
+            "mean_hourly_wage",
+            "median_hourly_wage",
+            "p10_hourly_wage",
+            "p25_hourly_wage",
+            "p75_hourly_wage",
+            "p90_hourly_wage",
+        ]:
             result = warehouse_db.execute(f"""
                 SELECT MIN({col}), MAX({col})
                 FROM fact_occupation_employment_wages
@@ -127,12 +127,11 @@ class TestFactWages:
 # RD5-09: Projections
 # ============================================================
 
+
 class TestFactProjections:
     def test_has_rows(self, warehouse_db):
         """Projections fact table is populated."""
-        count = warehouse_db.execute(
-            "SELECT COUNT(*) FROM fact_occupation_projections"
-        ).fetchone()[0]
+        count = warehouse_db.execute("SELECT COUNT(*) FROM fact_occupation_projections").fetchone()[0]
         assert count >= 100, f"Expected >= 100 projection rows, got {count}"
 
     def test_base_year_before_projection_year(self, warehouse_db):
@@ -159,6 +158,7 @@ class TestFactProjections:
 # RD5-10: O*NET skill values
 # ============================================================
 
+
 class TestOnetBridges:
     def test_skill_importance_range(self, warehouse_db):
         """RD5-10: Skill importance values are in [0, 5] range."""
@@ -184,22 +184,19 @@ class TestOnetBridges:
 
     def test_bridge_occupation_skill_populated(self, warehouse_db):
         """Bridge tables have substantial data."""
-        count = warehouse_db.execute(
-            "SELECT COUNT(*) FROM bridge_occupation_skill"
-        ).fetchone()[0]
+        count = warehouse_db.execute("SELECT COUNT(*) FROM bridge_occupation_skill").fetchone()[0]
         assert count >= 1000, f"Expected >= 1000 skill bridge rows, got {count}"
 
     def test_bridge_occupation_task_populated(self, warehouse_db):
         """Task bridge has substantial data."""
-        count = warehouse_db.execute(
-            "SELECT COUNT(*) FROM bridge_occupation_task"
-        ).fetchone()[0]
+        count = warehouse_db.execute("SELECT COUNT(*) FROM bridge_occupation_task").fetchone()[0]
         assert count >= 1000, f"Expected >= 1000 task bridge rows, got {count}"
 
 
 # ============================================================
 # RD5-11: Similarity scores (if populated)
 # ============================================================
+
 
 class TestSimilarity:
     def test_similarity_scores_range(self, warehouse_db):
@@ -220,6 +217,7 @@ class TestSimilarity:
 # ============================================================
 # RD5-12: End-to-end occupation profile completeness
 # ============================================================
+
 
 class TestOccupationCompleteness:
     """Verify that at least one representative occupation has data across all domains."""

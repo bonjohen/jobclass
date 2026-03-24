@@ -86,8 +86,8 @@ def _assign_parents(entries: list[tuple[str, int]]) -> dict[str, str | None]:
             # Broad → Minor: find the actual minor group this code belongs to.
             # Try progressively coarser patterns until we find one that exists.
             candidates = [
-                f"{prefix}-{suffix[:2]}00",   # try XX-YZ00 first
-                f"{prefix}-{suffix[0]}000",   # then XX-Y000
+                f"{prefix}-{suffix[:2]}00",  # try XX-YZ00 first
+                f"{prefix}-{suffix[0]}000",  # then XX-Y000
             ]
             parent_code = None
             for c in candidates:
@@ -139,14 +139,16 @@ def parse_soc_hierarchy(content: str | bytes, source_release_id: str) -> list[So
 
     rows = []
     for code, title, level_num, level_name in entries:
-        rows.append(SocHierarchyRow(
-            soc_code=code,
-            occupation_title=title,
-            occupation_level=level_num,
-            occupation_level_name=level_name,
-            parent_soc_code=parent_map.get(code),
-            source_release_id=source_release_id,
-        ))
+        rows.append(
+            SocHierarchyRow(
+                soc_code=code,
+                occupation_title=title,
+                occupation_level=level_num,
+                occupation_level_name=level_name,
+                parent_soc_code=parent_map.get(code),
+                source_release_id=source_release_id,
+            )
+        )
 
     return rows
 
@@ -169,10 +171,12 @@ def parse_soc_definitions(content: str | bytes, source_release_id: str) -> list[
         if not code or not re.match(r"\d{2}-\d{4}", code):
             continue
 
-        rows.append(SocDefinitionRow(
-            soc_code=code,
-            occupation_definition=definition,
-            source_release_id=source_release_id,
-        ))
+        rows.append(
+            SocDefinitionRow(
+                soc_code=code,
+                occupation_definition=definition,
+                source_release_id=source_release_id,
+            )
+        )
 
     return rows

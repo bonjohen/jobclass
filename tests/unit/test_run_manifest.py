@@ -13,6 +13,7 @@ class TestRunManifestCreation:
         mdir.mkdir()
         import shutil
         from pathlib import Path
+
         src_mdir = Path(__file__).parent.parent.parent / "migrations"
         for f in src_mdir.glob("*.sql"):
             shutil.copy(f, mdir / f.name)

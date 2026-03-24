@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 # --- Health / Stats / Metadata ---
 
+
 class HealthResponse(BaseModel):
     status: str
     warehouse_version: str
@@ -36,6 +37,7 @@ class MetadataResponse(BaseModel):
 
 
 # --- Occupations ---
+
 
 class SearchResult(BaseModel):
     soc_code: str
@@ -90,6 +92,7 @@ class OccupationProfileResponse(BaseModel):
 
 # --- Wages ---
 
+
 class WageEntry(BaseModel):
     geo_type: str
     geo_code: str
@@ -127,6 +130,7 @@ class GeographiesResponse(BaseModel):
 
 
 # --- Skills / Tasks / Similar ---
+
 
 class SkillEntry(BaseModel):
     element_name: str
@@ -166,6 +170,7 @@ class SimilarResponse(BaseModel):
 
 # --- Projections ---
 
+
 class ProjectionData(BaseModel):
     projection_cycle: str
     base_year: int
@@ -187,6 +192,7 @@ class ProjectionsResponse(BaseModel):
 
 
 # --- Methodology ---
+
 
 class SourceEntry(BaseModel):
     name: str

@@ -1,6 +1,5 @@
 """T8-01 through T8-10: Orchestration pipeline tests."""
 
-
 from jobclass.observe.run_manifest import get_run
 from jobclass.orchestrate.pipelines import (
     PipelineStatus,
@@ -17,16 +16,17 @@ class TestTaxonomyRefresh:
 
     def test_full_sequence(self, migrated_db, soc_hierarchy_content, soc_definitions_content):
         result = taxonomy_refresh(
-            migrated_db, soc_hierarchy_content, soc_definitions_content,
-            soc_version="2018", source_release_id="2018",
+            migrated_db,
+            soc_hierarchy_content,
+            soc_definitions_content,
+            soc_version="2018",
+            source_release_id="2018",
         )
         assert result.status == PipelineStatus.SUCCESS
         assert result.run_id is not None
 
         # Verify data loaded
-        dim_count = migrated_db.execute(
-            "SELECT COUNT(*) FROM dim_occupation WHERE soc_version = '2018'"
-        ).fetchone()[0]
+        dim_count = migrated_db.execute("SELECT COUNT(*) FROM dim_occupation WHERE soc_version = '2018'").fetchone()[0]
         assert dim_count > 0
 
         bridge_count = migrated_db.execute(
@@ -43,26 +43,31 @@ class TestTaxonomyRefresh:
 class TestOewsRefresh:
     """T8-02: oews_refresh executes full sequence."""
 
-    def test_full_sequence(self, migrated_db, soc_hierarchy_content, soc_definitions_content,
-                           oews_national_content, oews_state_content):
+    def test_full_sequence(
+        self, migrated_db, soc_hierarchy_content, soc_definitions_content, oews_national_content, oews_state_content
+    ):
         # Need taxonomy first
         taxonomy_refresh(migrated_db, soc_hierarchy_content, soc_definitions_content, "2018", "2018")
 
         result = oews_refresh(
-            migrated_db, oews_national_content, oews_state_content,
-            release_id="2024.05", soc_version="2018",
+            migrated_db,
+            oews_national_content,
+            oews_state_content,
+            release_id="2024.05",
+            soc_version="2018",
         )
         assert result.status == PipelineStatus.SUCCESS
 
-        fact_count = migrated_db.execute(
-            "SELECT COUNT(*) FROM fact_occupation_employment_wages"
-        ).fetchone()[0]
+        fact_count = migrated_db.execute("SELECT COUNT(*) FROM fact_occupation_employment_wages").fetchone()[0]
         assert fact_count > 0
 
     def test_blocked_without_taxonomy(self, migrated_db, oews_national_content, oews_state_content):
         result = oews_refresh(
-            migrated_db, oews_national_content, oews_state_content,
-            release_id="2024.05", soc_version="2018",
+            migrated_db,
+            oews_national_content,
+            oews_state_content,
+            release_id="2024.05",
+            soc_version="2018",
         )
         assert result.status == PipelineStatus.DEPENDENCY_BLOCKED
 
@@ -70,15 +75,27 @@ class TestOewsRefresh:
 class TestOnetRefresh:
     """T8-03: onet_refresh executes full sequence."""
 
-    def test_full_sequence(self, migrated_db, soc_hierarchy_content, soc_definitions_content,
-                           onet_skills_content, onet_knowledge_content,
-                           onet_abilities_content, onet_tasks_content):
+    def test_full_sequence(
+        self,
+        migrated_db,
+        soc_hierarchy_content,
+        soc_definitions_content,
+        onet_skills_content,
+        onet_knowledge_content,
+        onet_abilities_content,
+        onet_tasks_content,
+    ):
         taxonomy_refresh(migrated_db, soc_hierarchy_content, soc_definitions_content, "2018", "2018")
 
         result = onet_refresh(
-            migrated_db, onet_skills_content, onet_knowledge_content,
-            onet_abilities_content, onet_tasks_content,
-            onet_version="29.1", source_release_id="29.1", soc_version="2018",
+            migrated_db,
+            onet_skills_content,
+            onet_knowledge_content,
+            onet_abilities_content,
+            onet_tasks_content,
+            onet_version="29.1",
+            source_release_id="29.1",
+            soc_version="2018",
         )
         assert result.status == PipelineStatus.SUCCESS
 
@@ -114,19 +131,36 @@ class TestDependencyEnforcement:
 class TestIndependentExecution:
     """T8-06: oews_refresh and onet_refresh run independently."""
 
-    def test_both_succeed(self, migrated_db, soc_hierarchy_content, soc_definitions_content,
-                          oews_national_content, oews_state_content,
-                          onet_skills_content, onet_knowledge_content,
-                          onet_abilities_content, onet_tasks_content):
+    def test_both_succeed(
+        self,
+        migrated_db,
+        soc_hierarchy_content,
+        soc_definitions_content,
+        oews_national_content,
+        oews_state_content,
+        onet_skills_content,
+        onet_knowledge_content,
+        onet_abilities_content,
+        onet_tasks_content,
+    ):
         taxonomy_refresh(migrated_db, soc_hierarchy_content, soc_definitions_content, "2018", "2018")
 
         oews_result = oews_refresh(
-            migrated_db, oews_national_content, oews_state_content, "2024.05", "2018",
+            migrated_db,
+            oews_national_content,
+            oews_state_content,
+            "2024.05",
+            "2018",
         )
         onet_result = onet_refresh(
-            migrated_db, onet_skills_content, onet_knowledge_content,
-            onet_abilities_content, onet_tasks_content,
-            "29.1", "29.1", "2018",
+            migrated_db,
+            onet_skills_content,
+            onet_knowledge_content,
+            onet_abilities_content,
+            onet_tasks_content,
+            "29.1",
+            "29.1",
+            "2018",
         )
         assert oews_result.status == PipelineStatus.SUCCESS
         assert onet_result.status == PipelineStatus.SUCCESS
@@ -142,8 +176,9 @@ class TestIdempotence:
         after = migrated_db.execute("SELECT COUNT(*) FROM dim_occupation").fetchone()[0]
         assert after == before
 
-    def test_oews_idempotent(self, migrated_db, soc_hierarchy_content, soc_definitions_content,
-                             oews_national_content, oews_state_content):
+    def test_oews_idempotent(
+        self, migrated_db, soc_hierarchy_content, soc_definitions_content, oews_national_content, oews_state_content
+    ):
         taxonomy_refresh(migrated_db, soc_hierarchy_content, soc_definitions_content, "2018", "2018")
         oews_refresh(migrated_db, oews_national_content, oews_state_content, "2024.05", "2018")
         before = migrated_db.execute("SELECT COUNT(*) FROM fact_occupation_employment_wages").fetchone()[0]
@@ -170,6 +205,10 @@ class TestNoRetryOnValidationFailure:
     def test_no_retry(self, migrated_db, oews_national_content, oews_state_content):
         """When taxonomy not loaded, oews_refresh fails with dependency_blocked, not retry."""
         result = oews_refresh(
-            migrated_db, oews_national_content, oews_state_content, "2024.05", "2018",
+            migrated_db,
+            oews_national_content,
+            oews_state_content,
+            "2024.05",
+            "2018",
         )
         assert result.status == PipelineStatus.DEPENDENCY_BLOCKED

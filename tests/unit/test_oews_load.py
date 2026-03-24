@@ -1,6 +1,5 @@
 """T4-06 through T4-31: OEWS staging, dimensions, fact, validations, idempotence tests."""
 
-
 from jobclass.load.oews import (
     load_dim_geography,
     load_fact_occupation_employment_wages,
@@ -21,17 +20,30 @@ class TestOewsStagingContract:
     """T4-06, T4-07: Staging tables have required columns."""
 
     def test_national_columns(self, oews_loaded_db):
-        cols = {r[0] for r in oews_loaded_db.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__bls__oews_national'"
-        ).fetchall()}
-        for c in ["area_type", "area_code", "occupation_code", "employment_count",
-                   "mean_annual_wage", "source_release_id", "parser_version"]:
+        cols = {
+            r[0]
+            for r in oews_loaded_db.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__bls__oews_national'"
+            ).fetchall()
+        }
+        for c in [
+            "area_type",
+            "area_code",
+            "occupation_code",
+            "employment_count",
+            "mean_annual_wage",
+            "source_release_id",
+            "parser_version",
+        ]:
             assert c in cols
 
     def test_state_columns(self, oews_loaded_db):
-        cols = {r[0] for r in oews_loaded_db.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__bls__oews_state'"
-        ).fetchall()}
+        cols = {
+            r[0]
+            for r in oews_loaded_db.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__bls__oews_state'"
+            ).fetchall()
+        }
         for c in ["area_type", "area_code", "occupation_code", "mean_annual_wage"]:
             assert c in cols
 
@@ -87,9 +99,12 @@ class TestDimGeography:
         assert len(dups) == 0
 
     def test_required_fields(self, oews_loaded_db):
-        cols = {r[0] for r in oews_loaded_db.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_geography'"
-        ).fetchall()}
+        cols = {
+            r[0]
+            for r in oews_loaded_db.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_geography'"
+            ).fetchall()
+        }
         for c in ["geography_key", "geo_type", "geo_code", "geo_name", "is_current", "source_release_id"]:
             assert c in cols
 
@@ -113,9 +128,12 @@ class TestDimIndustry:
         assert len(dups) == 0
 
     def test_required_fields(self, oews_loaded_db):
-        cols = {r[0] for r in oews_loaded_db.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_industry'"
-        ).fetchall()}
+        cols = {
+            r[0]
+            for r in oews_loaded_db.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_industry'"
+            ).fetchall()
+        }
         for c in ["industry_key", "naics_code", "industry_title", "naics_version", "is_current"]:
             assert c in cols
 
@@ -135,11 +153,22 @@ class TestFactTable:
         assert len(dups) == 0
 
     def test_required_fields(self, oews_loaded_db):
-        cols = {r[0] for r in oews_loaded_db.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'fact_occupation_employment_wages'"
-        ).fetchall()}
-        for c in ["fact_id", "reference_period", "geography_key", "occupation_key",
-                   "source_dataset", "source_release_id", "load_timestamp"]:
+        cols = {
+            r[0]
+            for r in oews_loaded_db.execute(
+                "SELECT column_name FROM information_schema.columns"
+                " WHERE table_name = 'fact_occupation_employment_wages'"
+            ).fetchall()
+        }
+        for c in [
+            "fact_id",
+            "reference_period",
+            "geography_key",
+            "occupation_key",
+            "source_dataset",
+            "source_release_id",
+            "load_timestamp",
+        ]:
             assert c in cols
 
     def test_release_time_separate_from_reference(self, oews_loaded_db):

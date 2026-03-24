@@ -1,7 +1,6 @@
 """Phase W9 tests: End-to-end integration, worked example, deployment readiness."""
 
 
-
 class TestWorkedExample:
     """WT9-01, WT9-02: Software Developers (15-1252) complete worked example."""
 

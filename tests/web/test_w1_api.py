@@ -1,7 +1,6 @@
 """Phase W1 tests: API foundation, health, metadata, page rendering, error handling."""
 
 
-
 class TestHealthEndpoint:
     """WT1-02, WT1-06: /api/health returns status, warehouse version, table counts."""
 

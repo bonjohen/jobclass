@@ -1,7 +1,6 @@
 """Phase W3 tests: Employment and wages API and display."""
 
 
-
 class TestWagesAPI:
     """WT3-01 through WT3-05: Wages endpoint tests."""
 
@@ -37,9 +36,16 @@ class TestWagesAPI:
     def test_wages_schema(self, client):
         data = client.get("/api/occupations/15-1252/wages?geo_type=national").json()
         w = data["wages"][0]
-        required = ["employment_count", "mean_annual_wage", "median_annual_wage",
-                     "p10_hourly_wage", "p25_hourly_wage", "p75_hourly_wage", "p90_hourly_wage",
-                     "source_release_id"]
+        required = [
+            "employment_count",
+            "mean_annual_wage",
+            "median_annual_wage",
+            "p10_hourly_wage",
+            "p25_hourly_wage",
+            "p75_hourly_wage",
+            "p90_hourly_wage",
+            "source_release_id",
+        ]
         for f in required:
             assert f in w
 

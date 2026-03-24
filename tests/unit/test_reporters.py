@@ -1,6 +1,5 @@
 """T7-01 through T7-07: Observability and run reporting tests."""
 
-
 from jobclass.observe.reporters import (
     inspect_run,
     report_reconciliation,
@@ -22,13 +21,20 @@ class TestRunManifestCompletion:
     def test_completion_fields_populated(self, migrated_db):
         run_id = generate_run_id()
         create_run_record(
-            migrated_db, run_id=run_id, pipeline_name="oews_refresh",
-            dataset_name="oews_national", source_name="bls",
+            migrated_db,
+            run_id=run_id,
+            pipeline_name="oews_refresh",
+            dataset_name="oews_national",
+            source_name="bls",
         )
         update_run_counts(
-            migrated_db, run_id,
-            row_count_raw=1500, row_count_stage=1400, row_count_loaded=1300,
-            load_status="success", validation_summary="3 checks passed",
+            migrated_db,
+            run_id,
+            row_count_raw=1500,
+            row_count_stage=1400,
+            row_count_loaded=1300,
+            load_status="success",
+            validation_summary="3 checks passed",
         )
         run = get_run(migrated_db, run_id)
         assert run["row_count_raw"] == 1500
@@ -47,16 +53,22 @@ class TestRowCountDeltaReporter:
         # Prior run
         prior_id = generate_run_id()
         create_run_record(
-            migrated_db, run_id=prior_id, pipeline_name="oews_refresh",
-            dataset_name="oews_national", source_name="bls",
+            migrated_db,
+            run_id=prior_id,
+            pipeline_name="oews_refresh",
+            dataset_name="oews_national",
+            source_name="bls",
         )
         update_run_counts(migrated_db, prior_id, row_count_loaded=1000, load_status="success")
 
         # Current run
         current_id = generate_run_id()
         create_run_record(
-            migrated_db, run_id=current_id, pipeline_name="oews_refresh",
-            dataset_name="oews_national", source_name="bls",
+            migrated_db,
+            run_id=current_id,
+            pipeline_name="oews_refresh",
+            dataset_name="oews_national",
+            source_name="bls",
         )
         update_run_counts(migrated_db, current_id, row_count_loaded=1050, load_status="success")
 
@@ -70,8 +82,11 @@ class TestRowCountDeltaReporter:
         """T7-03: First run returns no-prior indicator."""
         run_id = generate_run_id()
         create_run_record(
-            migrated_db, run_id=run_id, pipeline_name="new_pipeline",
-            dataset_name="new_dataset", source_name="new_source",
+            migrated_db,
+            run_id=run_id,
+            pipeline_name="new_pipeline",
+            dataset_name="new_dataset",
+            source_name="new_source",
         )
         update_run_counts(migrated_db, run_id, row_count_loaded=500, load_status="success")
 
@@ -87,7 +102,11 @@ class TestSchemaDriftReporter:
         prior_schema = {"col_a": "INTEGER", "col_b": "TEXT", "col_c": "DOUBLE"}
         current_schema = {"col_a": "INTEGER", "col_b": "TEXT", "col_d": "BOOLEAN"}
         report = report_schema_drift_from_snapshots(
-            "oews_national", "2023.05", "2024.05", prior_schema, current_schema,
+            "oews_national",
+            "2023.05",
+            "2024.05",
+            prior_schema,
+            current_schema,
         )
         assert report.dataset_name == "oews_national"
         assert report.has_drift
@@ -115,14 +134,20 @@ class TestReconciliationReporter:
 
     def test_reports_match(self):
         report = report_reconciliation(
-            "oews_national", "total_employment", 155_000_000, 155_500_000,
+            "oews_national",
+            "total_employment",
+            155_000_000,
+            155_500_000,
         )
         assert report.matches  # within 1% tolerance
         assert abs(report.pct_difference) < 1.0
 
     def test_reports_mismatch(self):
         report = report_reconciliation(
-            "oews_national", "total_employment", 155_000_000, 170_000_000,
+            "oews_national",
+            "total_employment",
+            155_000_000,
+            170_000_000,
         )
         assert not report.matches  # >1% tolerance
 
@@ -133,14 +158,21 @@ class TestRunInspection:
     def test_single_query_complete_picture(self, migrated_db):
         run_id = generate_run_id()
         create_run_record(
-            migrated_db, run_id=run_id, pipeline_name="oews_refresh",
-            dataset_name="oews_national", source_name="bls",
+            migrated_db,
+            run_id=run_id,
+            pipeline_name="oews_refresh",
+            dataset_name="oews_national",
+            source_name="bls",
             source_release_id="2024.05",
         )
         update_run_counts(
-            migrated_db, run_id,
-            row_count_raw=2000, row_count_stage=1800, row_count_loaded=1700,
-            load_status="success", validation_summary="all passed",
+            migrated_db,
+            run_id,
+            row_count_raw=2000,
+            row_count_stage=1800,
+            row_count_loaded=1700,
+            load_status="success",
+            validation_summary="all passed",
         )
 
         inspection = inspect_run(migrated_db, run_id)

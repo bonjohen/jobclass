@@ -21,24 +21,33 @@ def validate_projections_structural(
     results = []
     table = "stage__bls__employment_projections"
 
-    results.append(validate_required_columns(
-        conn, table,
-        ["projection_cycle", "occupation_code", "base_year", "projection_year",
-         "source_release_id"],
-    ))
+    results.append(
+        validate_required_columns(
+            conn,
+            table,
+            ["projection_cycle", "occupation_code", "base_year", "projection_year", "source_release_id"],
+        )
+    )
 
-    results.append(validate_min_row_count(
-        conn, table, min_rows=1,
-        filter_clause="source_release_id = ?",
-        params=[source_release_id],
-    ))
+    results.append(
+        validate_min_row_count(
+            conn,
+            table,
+            min_rows=1,
+            filter_clause="source_release_id = ?",
+            params=[source_release_id],
+        )
+    )
 
-    results.append(validate_grain_uniqueness(
-        conn, table,
-        ["projection_cycle", "occupation_code", "source_release_id"],
-        filter_clause="source_release_id = ?",
-        params=[source_release_id],
-    ))
+    results.append(
+        validate_grain_uniqueness(
+            conn,
+            table,
+            ["projection_cycle", "occupation_code", "source_release_id"],
+            filter_clause="source_release_id = ?",
+            params=[source_release_id],
+        )
+    )
 
     return results
 
@@ -82,6 +91,8 @@ def validate_projections_fact_integrity(
     """Verify all occupation_key in fact_occupation_projections reference dim_occupation."""
     return validate_referential_integrity(
         conn,
-        "fact_occupation_projections", "occupation_key",
-        "dim_occupation", "occupation_key",
+        "fact_occupation_projections",
+        "occupation_key",
+        "dim_occupation",
+        "occupation_key",
     )

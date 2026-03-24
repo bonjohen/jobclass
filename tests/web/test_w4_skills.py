@@ -1,7 +1,6 @@
 """Phase W4 tests: Skills, tasks, and similarity endpoints."""
 
 
-
 class TestSkillsAPI:
     """WT4-01: Skills endpoint tests."""
 

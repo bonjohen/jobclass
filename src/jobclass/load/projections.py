@@ -28,12 +28,21 @@ def load_projections_staging(
                 work_experience_category, source_release_id, parser_version
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             [
-                r.projection_cycle, r.occupation_code, r.occupation_title,
-                r.base_year, r.projection_year,
-                r.employment_base, r.employment_projected,
-                r.employment_change_abs, r.employment_change_pct,
-                r.annual_openings, r.education_category, r.training_category,
-                r.work_experience_category, r.source_release_id, r.parser_version,
+                r.projection_cycle,
+                r.occupation_code,
+                r.occupation_title,
+                r.base_year,
+                r.projection_year,
+                r.employment_base,
+                r.employment_projected,
+                r.employment_change_abs,
+                r.employment_change_pct,
+                r.annual_openings,
+                r.education_category,
+                r.training_category,
+                r.work_experience_category,
+                r.source_release_id,
+                r.parser_version,
             ],
         )
 

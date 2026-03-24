@@ -43,11 +43,19 @@ def main() -> None:
         conn = get_connection(DB_PATH)
         apply_migrations(conn)
         tables = [
-            "dim_occupation", "dim_geography", "dim_industry",
-            "dim_skill", "dim_knowledge", "dim_ability", "dim_task",
-            "fact_occupation_employment_wages", "fact_occupation_projections",
-            "dim_metric", "dim_time_period",
-            "fact_time_series_observation", "fact_derived_series",
+            "dim_occupation",
+            "dim_geography",
+            "dim_industry",
+            "dim_skill",
+            "dim_knowledge",
+            "dim_ability",
+            "dim_task",
+            "fact_occupation_employment_wages",
+            "fact_occupation_projections",
+            "dim_metric",
+            "dim_time_period",
+            "fact_time_series_observation",
+            "fact_derived_series",
         ]
         print("Warehouse status:")
         for t in tables:
@@ -78,7 +86,7 @@ def main() -> None:
 
         summary = run_all_pipelines(conn, manifest_path, raw_root)
 
-        print(f"\n{'='*50}")
+        print(f"\n{'=' * 50}")
         print("Pipeline run complete:")
         print(f"  Attempted: {summary.pipelines_attempted}")
         print(f"  Succeeded: {summary.pipelines_succeeded}")
@@ -103,7 +111,7 @@ def main() -> None:
         ts_results = timeseries_refresh(conn)
         failed_steps = [k for k, v in ts_results.items() if v < 0]
 
-        print(f"\n{'='*50}")
+        print(f"\n{'=' * 50}")
         print("Time-series refresh complete:")
         for step, count in ts_results.items():
             status = "FAILED" if count < 0 else f"{count:,} rows"

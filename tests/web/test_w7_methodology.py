@@ -1,7 +1,6 @@
 """Phase W7 tests: Methodology, sources, and validation endpoints."""
 
 
-
 class TestSourcesAPI:
     """WT7-01: Methodology sources endpoint."""
 

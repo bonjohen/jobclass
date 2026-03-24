@@ -36,17 +36,30 @@ class TestStagingContract:
     """T3-05, T3-06: Staging tables have required columns."""
 
     def test_hierarchy_columns(self, loaded_staging):
-        cols = {r[0] for r in loaded_staging.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__soc__hierarchy'"
-        ).fetchall()}
-        for c in ["soc_code", "occupation_title", "occupation_level", "occupation_level_name",
-                   "parent_soc_code", "source_release_id", "parser_version"]:
+        cols = {
+            r[0]
+            for r in loaded_staging.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__soc__hierarchy'"
+            ).fetchall()
+        }
+        for c in [
+            "soc_code",
+            "occupation_title",
+            "occupation_level",
+            "occupation_level_name",
+            "parent_soc_code",
+            "source_release_id",
+            "parser_version",
+        ]:
             assert c in cols
 
     def test_definitions_columns(self, loaded_staging):
-        cols = {r[0] for r in loaded_staging.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__soc__definitions'"
-        ).fetchall()}
+        cols = {
+            r[0]
+            for r in loaded_staging.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__soc__definitions'"
+            ).fetchall()
+        }
         for c in ["soc_code", "occupation_definition", "source_release_id", "parser_version"]:
             assert c in cols
 
@@ -116,12 +129,24 @@ class TestDimOccupation:
         assert len(dups) == 0
 
     def test_required_fields(self, loaded_warehouse):
-        cols = {r[0] for r in loaded_warehouse.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_occupation'"
-        ).fetchall()}
-        for c in ["occupation_key", "soc_code", "occupation_title", "occupation_level",
-                   "occupation_level_name", "parent_soc_code", "soc_version", "is_leaf",
-                   "is_current", "source_release_id"]:
+        cols = {
+            r[0]
+            for r in loaded_warehouse.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_occupation'"
+            ).fetchall()
+        }
+        for c in [
+            "occupation_key",
+            "soc_code",
+            "occupation_title",
+            "occupation_level",
+            "occupation_level_name",
+            "parent_soc_code",
+            "soc_version",
+            "is_leaf",
+            "is_current",
+            "source_release_id",
+        ]:
             assert c in cols
 
     def test_surrogate_keys_unique_and_nonnull(self, loaded_warehouse):
@@ -130,9 +155,9 @@ class TestDimOccupation:
         ).fetchone()
         total, distinct = result
         assert total == distinct
-        nulls = loaded_warehouse.execute(
-            "SELECT COUNT(*) FROM dim_occupation WHERE occupation_key IS NULL"
-        ).fetchone()[0]
+        nulls = loaded_warehouse.execute("SELECT COUNT(*) FROM dim_occupation WHERE occupation_key IS NULL").fetchone()[
+            0
+        ]
         assert nulls == 0
 
     def test_version_aware_insert(self, loaded_warehouse):
@@ -199,8 +224,11 @@ class TestRunManifestUpdate:
             source_name="soc",
         )
         update_run_counts(
-            loaded_warehouse, run_id,
-            row_count_raw=17, row_count_stage=17, row_count_loaded=17,
+            loaded_warehouse,
+            run_id,
+            row_count_raw=17,
+            row_count_stage=17,
+            row_count_loaded=17,
             load_status="success",
         )
         record = get_run(loaded_warehouse, run_id)

@@ -32,6 +32,7 @@ class PipelineStatus(StrEnum):
 @dataclass
 class PipelineResult:
     """Result of a pipeline execution."""
+
     pipeline_name: str
     status: PipelineStatus
     run_id: str | None = None
@@ -43,12 +44,11 @@ class PipelineResult:
 # Dependency checking
 # ============================================================
 
+
 def check_taxonomy_loaded(conn: duckdb.DuckDBPyConnection, soc_version: str) -> bool:
     """Check if taxonomy (dim_occupation) is loaded for the given SOC version."""
     try:
-        count = conn.execute(
-            "SELECT COUNT(*) FROM dim_occupation WHERE soc_version = ?", [soc_version]
-        ).fetchone()[0]
+        count = conn.execute("SELECT COUNT(*) FROM dim_occupation WHERE soc_version = ?", [soc_version]).fetchone()[0]
         return count > 0
     except Exception:
         return False
@@ -57,6 +57,7 @@ def check_taxonomy_loaded(conn: duckdb.DuckDBPyConnection, soc_version: str) -> 
 # ============================================================
 # taxonomy_refresh (P8-01)
 # ============================================================
+
 
 def taxonomy_refresh(
     conn: duckdb.DuckDBPyConnection,
@@ -77,8 +78,11 @@ def taxonomy_refresh(
 
     run_id = generate_run_id()
     create_run_record(
-        conn, run_id=run_id, pipeline_name="taxonomy_refresh",
-        dataset_name="soc", source_name="soc",
+        conn,
+        run_id=run_id,
+        pipeline_name="taxonomy_refresh",
+        dataset_name="soc",
+        source_name="soc",
         source_release_id=source_release_id,
     )
 
@@ -99,7 +103,9 @@ def taxonomy_refresh(
         failures = [v for v in validations if not v.passed]
         if failures:
             update_run_counts(
-                conn, run_id, load_status="validation_failure",
+                conn,
+                run_id,
+                load_status="validation_failure",
                 failure_classification=FailureClassification.VALIDATION_FAILURE.value,
                 validation_summary=f"{len(failures)} checks failed",
             )
@@ -118,12 +124,13 @@ def taxonomy_refresh(
         stage_count = conn.execute(
             "SELECT COUNT(*) FROM stage__soc__hierarchy WHERE source_release_id = ?", [soc_version]
         ).fetchone()[0]
-        dim_count = conn.execute(
-            "SELECT COUNT(*) FROM dim_occupation WHERE soc_version = ?", [soc_version]
-        ).fetchone()[0]
+        dim_count = conn.execute("SELECT COUNT(*) FROM dim_occupation WHERE soc_version = ?", [soc_version]).fetchone()[
+            0
+        ]
 
         update_run_counts(
-            conn, run_id,
+            conn,
+            run_id,
             row_count_raw=len(hierarchy) + len(definitions),
             row_count_stage=stage_count,
             row_count_loaded=dim_count,
@@ -138,7 +145,9 @@ def taxonomy_refresh(
         )
     except Exception as e:
         update_run_counts(
-            conn, run_id, load_status="load_failure",
+            conn,
+            run_id,
+            load_status="load_failure",
             failure_classification=FailureClassification.LOAD_FAILURE.value,
         )
         return PipelineResult(
@@ -152,6 +161,7 @@ def taxonomy_refresh(
 # ============================================================
 # oews_refresh (P8-02)
 # ============================================================
+
 
 def oews_refresh(
     conn: duckdb.DuckDBPyConnection,
@@ -179,8 +189,11 @@ def oews_refresh(
 
     run_id = generate_run_id()
     create_run_record(
-        conn, run_id=run_id, pipeline_name="oews_refresh",
-        dataset_name="oews", source_name="bls",
+        conn,
+        run_id=run_id,
+        pipeline_name="oews_refresh",
+        dataset_name="oews",
+        source_name="bls",
         source_release_id=release_id,
     )
 
@@ -200,29 +213,37 @@ def oews_refresh(
         ).fetchone()[0]
 
         update_run_counts(
-            conn, run_id,
+            conn,
+            run_id,
             row_count_raw=len(nat) + len(st),
             row_count_stage=len(nat) + len(st),
             row_count_loaded=fact_count,
             load_status="success",
         )
         return PipelineResult(
-            pipeline_name="oews_refresh", status=PipelineStatus.SUCCESS, run_id=run_id,
+            pipeline_name="oews_refresh",
+            status=PipelineStatus.SUCCESS,
+            run_id=run_id,
         )
     except Exception as e:
         update_run_counts(
-            conn, run_id, load_status="load_failure",
+            conn,
+            run_id,
+            load_status="load_failure",
             failure_classification=FailureClassification.LOAD_FAILURE.value,
         )
         return PipelineResult(
-            pipeline_name="oews_refresh", status=PipelineStatus.LOAD_FAILURE,
-            run_id=run_id, message=str(e),
+            pipeline_name="oews_refresh",
+            status=PipelineStatus.LOAD_FAILURE,
+            run_id=run_id,
+            message=str(e),
         )
 
 
 # ============================================================
 # onet_refresh (P8-03)
 # ============================================================
+
 
 def onet_refresh(
     conn: duckdb.DuckDBPyConnection,
@@ -254,8 +275,11 @@ def onet_refresh(
 
     run_id = generate_run_id()
     create_run_record(
-        conn, run_id=run_id, pipeline_name="onet_refresh",
-        dataset_name="onet", source_name="onet",
+        conn,
+        run_id=run_id,
+        pipeline_name="onet_refresh",
+        dataset_name="onet",
+        source_name="onet",
         source_release_id=source_release_id,
     )
 
@@ -276,16 +300,34 @@ def onet_refresh(
         load_dim_task(conn, onet_version)
 
         load_bridge_occupation_descriptor(
-            conn, "bridge_occupation_skill", "dim_skill", "skill_key",
-            "stage__onet__skills", onet_version, source_release_id, soc_version,
+            conn,
+            "bridge_occupation_skill",
+            "dim_skill",
+            "skill_key",
+            "stage__onet__skills",
+            onet_version,
+            source_release_id,
+            soc_version,
         )
         load_bridge_occupation_descriptor(
-            conn, "bridge_occupation_knowledge", "dim_knowledge", "knowledge_key",
-            "stage__onet__knowledge", onet_version, source_release_id, soc_version,
+            conn,
+            "bridge_occupation_knowledge",
+            "dim_knowledge",
+            "knowledge_key",
+            "stage__onet__knowledge",
+            onet_version,
+            source_release_id,
+            soc_version,
         )
         load_bridge_occupation_descriptor(
-            conn, "bridge_occupation_ability", "dim_ability", "ability_key",
-            "stage__onet__abilities", onet_version, source_release_id, soc_version,
+            conn,
+            "bridge_occupation_ability",
+            "dim_ability",
+            "ability_key",
+            "stage__onet__abilities",
+            onet_version,
+            source_release_id,
+            soc_version,
         )
         load_bridge_occupation_task(conn, onet_version, source_release_id, soc_version)
 
@@ -295,29 +337,37 @@ def onet_refresh(
         )
 
         update_run_counts(
-            conn, run_id,
+            conn,
+            run_id,
             row_count_raw=len(skills) + len(knowledge) + len(abilities) + len(tasks),
             row_count_stage=len(skills) + len(knowledge) + len(abilities) + len(tasks),
             row_count_loaded=total_loaded,
             load_status="success",
         )
         return PipelineResult(
-            pipeline_name="onet_refresh", status=PipelineStatus.SUCCESS, run_id=run_id,
+            pipeline_name="onet_refresh",
+            status=PipelineStatus.SUCCESS,
+            run_id=run_id,
         )
     except Exception as e:
         update_run_counts(
-            conn, run_id, load_status="load_failure",
+            conn,
+            run_id,
+            load_status="load_failure",
             failure_classification=FailureClassification.LOAD_FAILURE.value,
         )
         return PipelineResult(
-            pipeline_name="onet_refresh", status=PipelineStatus.LOAD_FAILURE,
-            run_id=run_id, message=str(e),
+            pipeline_name="onet_refresh",
+            status=PipelineStatus.LOAD_FAILURE,
+            run_id=run_id,
+            message=str(e),
         )
 
 
 # ============================================================
 # warehouse_publish (P8-04, P8-07)
 # ============================================================
+
 
 def warehouse_publish(
     conn: duckdb.DuckDBPyConnection,
@@ -337,14 +387,24 @@ def warehouse_publish(
         validations.append(validate_required_columns(conn, table, cols))
 
     # Referential integrity
-    validations.append(validate_referential_integrity(
-        conn, "fact_occupation_employment_wages", "occupation_key",
-        "dim_occupation", "occupation_key",
-    ))
-    validations.append(validate_referential_integrity(
-        conn, "fact_occupation_employment_wages", "geography_key",
-        "dim_geography", "geography_key",
-    ))
+    validations.append(
+        validate_referential_integrity(
+            conn,
+            "fact_occupation_employment_wages",
+            "occupation_key",
+            "dim_occupation",
+            "occupation_key",
+        )
+    )
+    validations.append(
+        validate_referential_integrity(
+            conn,
+            "fact_occupation_employment_wages",
+            "geography_key",
+            "dim_geography",
+            "geography_key",
+        )
+    )
 
     gate = check_publication_gate(validations)
     if not gate.passed:
@@ -366,6 +426,7 @@ def warehouse_publish(
 # ============================================================
 # projections_refresh (P10-09)
 # ============================================================
+
 
 def projections_refresh(
     conn: duckdb.DuckDBPyConnection,
@@ -392,8 +453,11 @@ def projections_refresh(
 
     run_id = generate_run_id()
     create_run_record(
-        conn, run_id=run_id, pipeline_name="projections_refresh",
-        dataset_name="employment_projections", source_name="bls",
+        conn,
+        run_id=run_id,
+        pipeline_name="projections_refresh",
+        dataset_name="employment_projections",
+        source_name="bls",
         source_release_id=source_release_id,
     )
 
@@ -408,7 +472,9 @@ def projections_refresh(
         failures = [v for v in validations if not v.passed]
         if failures:
             update_run_counts(
-                conn, run_id, load_status="validation_failure",
+                conn,
+                run_id,
+                load_status="validation_failure",
                 failure_classification=FailureClassification.VALIDATION_FAILURE.value,
                 validation_summary=f"{len(failures)} checks failed",
             )
@@ -431,7 +497,8 @@ def projections_refresh(
         ).fetchone()[0]
 
         update_run_counts(
-            conn, run_id,
+            conn,
+            run_id,
             row_count_raw=len(rows),
             row_count_stage=len(rows),
             row_count_loaded=fact_count,
@@ -446,7 +513,9 @@ def projections_refresh(
         )
     except Exception as e:
         update_run_counts(
-            conn, run_id, load_status="load_failure",
+            conn,
+            run_id,
+            load_status="load_failure",
             failure_classification=FailureClassification.LOAD_FAILURE.value,
         )
         return PipelineResult(

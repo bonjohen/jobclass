@@ -1,7 +1,6 @@
 """Phase W6 tests: Landing page, stats, navigation."""
 
 
-
 class TestStatsAPI:
     """WT6-01: Stats endpoint tests."""
 

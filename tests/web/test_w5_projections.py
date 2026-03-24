@@ -1,7 +1,6 @@
 """Phase W5 tests: Employment projections endpoint."""
 
 
-
 class TestProjectionsAPI:
     """WT5-01 through WT5-04: Projections endpoint tests."""
 

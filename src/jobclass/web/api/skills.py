@@ -29,7 +29,8 @@ def occupation_skills(soc_code: str) -> dict:
         raise HTTPException(status_code=404, detail=f"Occupation {soc_code} not found")
 
     # Pivot importance (IM) and level (LV) into single rows per skill
-    rows = conn.execute("""
+    rows = conn.execute(
+        """
         SELECT
             s.element_name,
             s.element_id,
@@ -40,7 +41,9 @@ def occupation_skills(soc_code: str) -> dict:
         WHERE b.occupation_key = ? AND s.is_current = true
         GROUP BY s.element_name, s.element_id
         ORDER BY importance DESC NULLS LAST
-    """, [occ[0]]).fetchall()
+    """,
+        [occ[0]],
+    ).fetchall()
 
     source_version = None
     ver_row = conn.execute(
@@ -79,13 +82,16 @@ def occupation_tasks(soc_code: str) -> dict:
     if not occ:
         raise HTTPException(status_code=404, detail=f"Occupation {soc_code} not found")
 
-    rows = conn.execute("""
+    rows = conn.execute(
+        """
         SELECT t.task, b.data_value, t.task_id
         FROM bridge_occupation_task b
         JOIN dim_task t ON b.task_key = t.task_key
         WHERE b.occupation_key = ? AND t.is_current = true
         ORDER BY b.data_value DESC NULLS LAST
-    """, [occ[0]]).fetchall()
+    """,
+        [occ[0]],
+    ).fetchall()
 
     source_version = None
     ver_row = conn.execute(
@@ -125,7 +131,8 @@ def similar_occupations(soc_code: str) -> dict:
 
     occ_key = occ[0]
 
-    rows = conn.execute("""
+    rows = conn.execute(
+        """
         SELECT
             CASE WHEN occupation_key_a = ? THEN soc_code_b ELSE soc_code_a END AS other_code,
             CASE WHEN occupation_key_a = ? THEN title_b ELSE title_a END AS other_title,
@@ -134,7 +141,9 @@ def similar_occupations(soc_code: str) -> dict:
         WHERE occupation_key_a = ? OR occupation_key_b = ?
         ORDER BY jaccard_similarity DESC
         LIMIT 10
-    """, [occ_key, occ_key, occ_key, occ_key]).fetchall()
+    """,
+        [occ_key, occ_key, occ_key, occ_key],
+    ).fetchall()
 
     return {
         "soc_code": soc_code,

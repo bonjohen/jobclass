@@ -73,5 +73,6 @@ class TestStorageImmutability:
 
         # Original content preserved
         from jobclass.utils.paths import build_raw_path
+
         path = build_raw_path(**{k: v for k, v in kwargs.items()})
         assert path.read_bytes() == content

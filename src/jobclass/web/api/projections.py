@@ -28,7 +28,8 @@ def occupation_projections(soc_code: str) -> dict:
     if not occ:
         raise HTTPException(status_code=404, detail=f"Occupation {soc_code} not found")
 
-    row = conn.execute("""
+    row = conn.execute(
+        """
         SELECT
             projection_cycle, base_year, projection_year,
             employment_base, employment_projected,
@@ -40,7 +41,9 @@ def occupation_projections(soc_code: str) -> dict:
         WHERE occupation_key = ?
         ORDER BY projection_cycle DESC
         LIMIT 1
-    """, [occ[0]]).fetchone()
+    """,
+        [occ[0]],
+    ).fetchone()
 
     if not row:
         return {"soc_code": soc_code, "projections": None}

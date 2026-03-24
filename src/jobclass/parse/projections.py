@@ -23,6 +23,7 @@ PARSER_VERSION = "1.1.0"
 @dataclass
 class ProjectionRow:
     """Parsed projection row."""
+
     projection_cycle: str
     occupation_code: str
     occupation_title: str
@@ -142,23 +143,27 @@ def _parse_bls_xlsx_format(
         change_pct = parse_float(record.get(col_change_pct)) if col_change_pct else None
         openings = _thousands_to_int(record.get(col_openings)) if col_openings else None
 
-        rows.append(ProjectionRow(
-            projection_cycle=cycle,
-            occupation_code=occ_code,
-            occupation_title=occ_title,
-            base_year=base_year or 0,
-            projection_year=proj_year or 0,
-            employment_base=emp_base,
-            employment_projected=emp_proj,
-            employment_change_abs=change_abs,
-            employment_change_pct=change_pct,
-            annual_openings=openings,
-            education_category=(record.get(col_education, "") or "").strip() or None if col_education else None,
-            training_category=(record.get(col_training, "") or "").strip() or None if col_training else None,
-            work_experience_category=(record.get(col_experience, "") or "").strip() or None if col_experience else None,
-            source_release_id=source_release_id,
-            parser_version=PARSER_VERSION,
-        ))
+        rows.append(
+            ProjectionRow(
+                projection_cycle=cycle,
+                occupation_code=occ_code,
+                occupation_title=occ_title,
+                base_year=base_year or 0,
+                projection_year=proj_year or 0,
+                employment_base=emp_base,
+                employment_projected=emp_proj,
+                employment_change_abs=change_abs,
+                employment_change_pct=change_pct,
+                annual_openings=openings,
+                education_category=(record.get(col_education, "") or "").strip() or None if col_education else None,
+                training_category=(record.get(col_training, "") or "").strip() or None if col_training else None,
+                work_experience_category=(record.get(col_experience, "") or "").strip() or None
+                if col_experience
+                else None,
+                source_release_id=source_release_id,
+                parser_version=PARSER_VERSION,
+            )
+        )
 
     return rows
 
@@ -172,8 +177,7 @@ def _parse_legacy_format(
     rows: list[ProjectionRow] = []
     for record in reader:
         # Normalize field names to lower/snake
-        rec = {k.strip().lower().replace(" ", "_").replace("-", "_"): v
-               for k, v in record.items()}
+        rec = {k.strip().lower().replace(" ", "_").replace("-", "_"): v for k, v in record.items()}
 
         occ_code = rec.get("occupation_code", rec.get("soc_code", "")).strip()
         occ_title = rec.get("occupation_title", rec.get("title", "")).strip()
@@ -186,25 +190,27 @@ def _parse_legacy_format(
             cycle = f"{base_year}-{proj_year}"
         cycle = cycle or source_release_id
 
-        rows.append(ProjectionRow(
-            projection_cycle=cycle,
-            occupation_code=occ_code,
-            occupation_title=occ_title,
-            base_year=base_year or 0,
-            projection_year=proj_year or 0,
-            employment_base=parse_int(rec.get("employment_base", rec.get("employment_2022", ""))),
-            employment_projected=parse_int(rec.get("employment_projected", rec.get("employment_2032", ""))),
-            employment_change_abs=parse_int(rec.get("employment_change_abs", rec.get("employment_change", ""))),
-            employment_change_pct=parse_float(
-                rec.get("employment_change_pct", rec.get("employment_change_percent", ""))
-            ),
-            annual_openings=parse_int(rec.get("annual_openings", rec.get("occupational_openings", ""))),
-            education_category=rec.get("education_category", rec.get("typical_entry_level_education")),
-            training_category=rec.get("training_category", rec.get("on_the_job_training")),
-            work_experience_category=rec.get("work_experience_category", rec.get("work_experience")),
-            source_release_id=source_release_id,
-            parser_version=PARSER_VERSION,
-        ))
+        rows.append(
+            ProjectionRow(
+                projection_cycle=cycle,
+                occupation_code=occ_code,
+                occupation_title=occ_title,
+                base_year=base_year or 0,
+                projection_year=proj_year or 0,
+                employment_base=parse_int(rec.get("employment_base", rec.get("employment_2022", ""))),
+                employment_projected=parse_int(rec.get("employment_projected", rec.get("employment_2032", ""))),
+                employment_change_abs=parse_int(rec.get("employment_change_abs", rec.get("employment_change", ""))),
+                employment_change_pct=parse_float(
+                    rec.get("employment_change_pct", rec.get("employment_change_percent", ""))
+                ),
+                annual_openings=parse_int(rec.get("annual_openings", rec.get("occupational_openings", ""))),
+                education_category=rec.get("education_category", rec.get("typical_entry_level_education")),
+                training_category=rec.get("training_category", rec.get("on_the_job_training")),
+                work_experience_category=rec.get("work_experience_category", rec.get("work_experience")),
+                source_release_id=source_release_id,
+                parser_version=PARSER_VERSION,
+            )
+        )
 
     return rows
 

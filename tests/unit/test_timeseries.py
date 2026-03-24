@@ -41,11 +41,7 @@ class TestDimMetric:
 
     def test_expected_metric_names(self, migrated_db):
         populate_dim_metric(migrated_db)
-        names = {
-            r[0] for r in migrated_db.execute(
-                "SELECT metric_name FROM dim_metric"
-            ).fetchall()
-        }
+        names = {r[0] for r in migrated_db.execute("SELECT metric_name FROM dim_metric").fetchall()}
         expected = {m["metric_name"] for m in BASE_METRICS}
         assert expected == names
 
@@ -81,16 +77,12 @@ class TestDimTimePeriod:
         populate_dim_time_period(oews_loaded_db)
         # Get years from fact table
         fact_years = {
-            r[0] for r in oews_loaded_db.execute(
-                "SELECT DISTINCT estimate_year FROM fact_occupation_employment_wages "
-                "WHERE estimate_year IS NOT NULL"
+            r[0]
+            for r in oews_loaded_db.execute(
+                "SELECT DISTINCT estimate_year FROM fact_occupation_employment_wages WHERE estimate_year IS NOT NULL"
             ).fetchall()
         }
-        period_years = {
-            r[0] for r in oews_loaded_db.execute(
-                "SELECT year FROM dim_time_period"
-            ).fetchall()
-        }
+        period_years = {r[0] for r in oews_loaded_db.execute("SELECT year FROM dim_time_period").fetchall()}
         assert fact_years <= period_years
 
     def test_period_dates_valid(self, oews_loaded_db):
@@ -129,7 +121,8 @@ class TestObservationNormalization:
     def test_all_comparability_mode_as_published(self, ts_ready_db):
         normalize_oews_observations(ts_ready_db)
         modes = {
-            r[0] for r in ts_ready_db.execute(
+            r[0]
+            for r in ts_ready_db.execute(
                 "SELECT DISTINCT comparability_mode FROM fact_time_series_observation"
             ).fetchall()
         }
@@ -191,9 +184,7 @@ class TestObservationNormalization:
 
     def test_observation_count_crosscheck(self, ts_ready_db):
         normalize_oews_observations(ts_ready_db)
-        obs_count = ts_ready_db.execute(
-            "SELECT COUNT(*) FROM fact_time_series_observation"
-        ).fetchone()[0]
+        obs_count = ts_ready_db.execute("SELECT COUNT(*) FROM fact_time_series_observation").fetchone()[0]
         # Should have rows for 3 metrics × source fact rows (with matching periods)
         fact_count = ts_ready_db.execute(
             "SELECT COUNT(*) FROM fact_occupation_employment_wages WHERE estimate_year IS NOT NULL"
@@ -281,9 +272,9 @@ class TestDerivedMetrics:
         return oews_loaded_db
 
     def test_derived_metrics_registered(self, ts_derived_db):
-        derived = ts_derived_db.execute(
-            "SELECT COUNT(*) FROM dim_metric WHERE derivation_type = 'derived'"
-        ).fetchone()[0]
+        derived = ts_derived_db.execute("SELECT COUNT(*) FROM dim_metric WHERE derivation_type = 'derived'").fetchone()[
+            0
+        ]
         assert derived == len(DERIVED_METRICS)
 
     def test_state_vs_national_gap(self, ts_derived_db):
@@ -311,27 +302,21 @@ class TestTimerseriesOrchestration:
 
     def test_timeseries_refresh_runs(self, oews_loaded_db):
         from jobclass.orchestrate.timeseries_refresh import timeseries_refresh
+
         results = timeseries_refresh(oews_loaded_db)
         assert all(v >= 0 for v in results.values())
 
     def test_timeseries_refresh_idempotent(self, oews_loaded_db):
         from jobclass.orchestrate.timeseries_refresh import timeseries_refresh
+
         timeseries_refresh(oews_loaded_db)
         # Capture DB state after first run
-        obs1 = oews_loaded_db.execute(
-            "SELECT COUNT(*) FROM fact_time_series_observation"
-        ).fetchone()[0]
-        der1 = oews_loaded_db.execute(
-            "SELECT COUNT(*) FROM fact_derived_series"
-        ).fetchone()[0]
+        obs1 = oews_loaded_db.execute("SELECT COUNT(*) FROM fact_time_series_observation").fetchone()[0]
+        der1 = oews_loaded_db.execute("SELECT COUNT(*) FROM fact_derived_series").fetchone()[0]
         # Second run
         timeseries_refresh(oews_loaded_db)
-        obs2 = oews_loaded_db.execute(
-            "SELECT COUNT(*) FROM fact_time_series_observation"
-        ).fetchone()[0]
-        der2 = oews_loaded_db.execute(
-            "SELECT COUNT(*) FROM fact_derived_series"
-        ).fetchone()[0]
+        obs2 = oews_loaded_db.execute("SELECT COUNT(*) FROM fact_time_series_observation").fetchone()[0]
+        der2 = oews_loaded_db.execute("SELECT COUNT(*) FROM fact_derived_series").fetchone()[0]
         assert obs1 == obs2, f"Observation count changed: {obs1} vs {obs2}"
         assert der1 == der2, f"Derived count changed: {der1} vs {der2}"
 
@@ -347,6 +332,7 @@ class TestTimeseriesValidation:
     @pytest.fixture
     def ts_validated_db(self, oews_loaded_db):
         from jobclass.orchestrate.timeseries_refresh import timeseries_refresh
+
         timeseries_refresh(oews_loaded_db)
         return oews_loaded_db
 
@@ -357,21 +343,25 @@ class TestTimeseriesValidation:
 
     def test_period_ordering(self, ts_validated_db):
         from jobclass.validate.timeseries import validate_period_ordering
+
         r = validate_period_ordering(ts_validated_db)
         assert r.passed
 
     def test_no_duplicate_periods(self, ts_validated_db):
         from jobclass.validate.timeseries import validate_no_duplicate_periods
+
         r = validate_no_duplicate_periods(ts_validated_db)
         assert r.passed
 
     def test_observation_derived_separation(self, ts_validated_db):
         from jobclass.validate.timeseries import validate_observation_derived_separation
+
         r = validate_observation_derived_separation(ts_validated_db)
         assert r.passed
 
     def test_comparable_subset(self, ts_validated_db):
         from jobclass.validate.timeseries import validate_comparable_subset
+
         r = validate_comparable_subset(ts_validated_db)
         assert r.passed
 
@@ -387,25 +377,29 @@ class TestTimeseriesMarts:
     @pytest.fixture
     def ts_mart_db(self, oews_loaded_db):
         from jobclass.orchestrate.timeseries_refresh import timeseries_refresh
+
         timeseries_refresh(oews_loaded_db)
         return oews_loaded_db
 
     def test_trend_series_has_rows(self, ts_mart_db):
-        count = ts_mart_db.execute(
-            "SELECT COUNT(*) FROM mart_occupation_trend_series"
-        ).fetchone()[0]
+        count = ts_mart_db.execute("SELECT COUNT(*) FROM mart_occupation_trend_series").fetchone()[0]
         assert count > 0
 
     def test_trend_series_columns(self, ts_mart_db):
         cols = {
-            r[0] for r in ts_mart_db.execute(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name = 'mart_occupation_trend_series'"
+            r[0]
+            for r in ts_mart_db.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'mart_occupation_trend_series'"
             ).fetchall()
         }
         required = {
-            "occupation_key", "soc_code", "occupation_title",
-            "metric_name", "year", "observed_value", "comparability_mode",
+            "occupation_key",
+            "soc_code",
+            "occupation_title",
+            "metric_name",
+            "year",
+            "observed_value",
+            "comparability_mode",
             "source_release_id",
         }
         assert required <= cols
@@ -437,8 +431,7 @@ class TestTimeseriesMarts:
     def test_mart_preserves_lineage(self, ts_mart_db):
         """All mart rows should have source_release_id and comparability_mode."""
         row = ts_mart_db.execute(
-            "SELECT source_release_id, comparability_mode "
-            "FROM mart_occupation_trend_series LIMIT 1"
+            "SELECT source_release_id, comparability_mode FROM mart_occupation_trend_series LIMIT 1"
         ).fetchone()
         if row:
             assert row[0] is not None

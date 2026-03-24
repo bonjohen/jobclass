@@ -26,15 +26,19 @@ def search_occupations(
     if not q:
         return {"query": q, "results": [], "total": 0, "limit": limit, "offset": offset}
 
-    count_row = conn.execute("""
+    count_row = conn.execute(
+        """
         SELECT COUNT(*)
         FROM dim_occupation
         WHERE is_current = true
           AND (soc_code ILIKE ? OR occupation_title ILIKE ?)
-    """, [f"%{q}%", f"%{q}%"]).fetchone()
+    """,
+        [f"%{q}%", f"%{q}%"],
+    ).fetchone()
     total = count_row[0] if count_row else 0
 
-    rows = conn.execute("""
+    rows = conn.execute(
+        """
         SELECT soc_code, occupation_title, occupation_level, occupation_level_name
         FROM dim_occupation
         WHERE is_current = true
@@ -44,7 +48,9 @@ def search_occupations(
           )
         ORDER BY soc_code
         LIMIT ? OFFSET ?
-    """, [f"%{q}%", f"%{q}%", limit, offset]).fetchall()
+    """,
+        [f"%{q}%", f"%{q}%", limit, offset],
+    ).fetchall()
 
     return {
         "query": q,
@@ -104,14 +110,17 @@ def occupation_profile(soc_code: str) -> dict:
         raise HTTPException(status_code=400, detail=f"Invalid SOC code format: {soc_code}")
     conn = get_db()
 
-    row = conn.execute("""
+    row = conn.execute(
+        """
         SELECT soc_code, occupation_title, occupation_level, occupation_level_name,
                parent_soc_code, major_group_code, minor_group_code,
                broad_occupation_code, detailed_occupation_code,
                occupation_definition, soc_version, is_leaf, source_release_id
         FROM dim_occupation
         WHERE soc_code = ? AND is_current = true
-    """, [soc_code]).fetchone()
+    """,
+        [soc_code],
+    ).fetchone()
 
     if not row:
         raise HTTPException(status_code=404, detail=f"Occupation {soc_code} not found")
@@ -122,21 +131,27 @@ def occupation_profile(soc_code: str) -> dict:
     # Sibling occupations (same parent)
     siblings = []
     if row[4]:
-        sib_rows = conn.execute("""
+        sib_rows = conn.execute(
+            """
             SELECT soc_code, occupation_title
             FROM dim_occupation
             WHERE parent_soc_code = ? AND soc_code != ? AND is_current = true
             ORDER BY soc_code
-        """, [row[4], soc_code]).fetchall()
+        """,
+            [row[4], soc_code],
+        ).fetchall()
         siblings = [{"soc_code": s[0], "occupation_title": s[1]} for s in sib_rows]
 
     # Child occupations
-    child_rows = conn.execute("""
+    child_rows = conn.execute(
+        """
         SELECT soc_code, occupation_title
         FROM dim_occupation
         WHERE parent_soc_code = ? AND is_current = true
         ORDER BY soc_code
-    """, [soc_code]).fetchall()
+    """,
+        [soc_code],
+    ).fetchall()
     children = [{"soc_code": c[0], "occupation_title": c[1]} for c in child_rows]
 
     return {
@@ -174,11 +189,14 @@ def _build_breadcrumb(conn, major_code, minor_code, broad_code, current_code):
         return []
 
     placeholders = ", ".join(["?"] * len(unique_codes))
-    rows = conn.execute(f"""
+    rows = conn.execute(
+        f"""
         SELECT soc_code, occupation_title
         FROM dim_occupation
         WHERE soc_code IN ({placeholders}) AND is_current = true
-    """, unique_codes).fetchall()
+    """,
+        unique_codes,
+    ).fetchall()
 
     lookup = {r[0]: r[1] for r in rows}
     return [{"soc_code": c, "occupation_title": lookup.get(c, c)} for c in unique_codes]

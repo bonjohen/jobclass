@@ -9,9 +9,7 @@ from jobclass.validate.soc import ValidationResult
 
 def validate_period_ordering(conn: duckdb.DuckDBPyConnection) -> ValidationResult:
     """Validate that no time period has start_date after end_date."""
-    bad = conn.execute(
-        "SELECT COUNT(*) FROM dim_time_period WHERE period_start_date > period_end_date"
-    ).fetchone()[0]
+    bad = conn.execute("SELECT COUNT(*) FROM dim_time_period WHERE period_start_date > period_end_date").fetchone()[0]
     return ValidationResult(
         passed=bad == 0,
         check_name="ts_period_ordering",
@@ -149,9 +147,9 @@ def validate_observation_derived_separation(conn: duckdb.DuckDBPyConnection) -> 
         passed=total_bad == 0,
         check_name="ts_observation_derived_separation",
         message=(
-            f"{obs_with_derived} obs row(s) with derived metric, "
-            f"{derived_with_base} derived row(s) with base metric"
-            if total_bad else "Clean separation between observations and derived series"
+            f"{obs_with_derived} obs row(s) with derived metric, {derived_with_base} derived row(s) with base metric"
+            if total_bad
+            else "Clean separation between observations and derived series"
         ),
     )
 

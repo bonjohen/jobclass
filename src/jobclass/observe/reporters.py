@@ -18,9 +18,11 @@ from jobclass.validate.framework import (
 # Row-Count Delta Reporter (P7-02)
 # ============================================================
 
+
 @dataclass
 class RowCountDeltaReport:
     """Row count comparison between current and prior run."""
+
     dataset_name: str
     current_run_id: str
     prior_run_id: str | None
@@ -37,9 +39,7 @@ def report_row_count_delta(
 ) -> RowCountDeltaReport:
     """Compare row counts between current and prior successful run for a dataset."""
     # Get current run counts
-    current = conn.execute(
-        "SELECT row_count_loaded FROM run_manifest WHERE run_id = ?", [current_run_id]
-    ).fetchone()
+    current = conn.execute("SELECT row_count_loaded FROM run_manifest WHERE run_id = ?", [current_run_id]).fetchone()
     current_count = current[0] if current and current[0] is not None else 0
 
     # Find prior successful run
@@ -78,9 +78,11 @@ def report_row_count_delta(
 # Schema Drift Report Emitter (P7-03)
 # ============================================================
 
+
 @dataclass
 class SchemaDriftReport:
     """Schema drift report for a dataset between releases."""
+
     dataset_name: str
     prior_release: str
     current_release: str
@@ -131,9 +133,11 @@ def report_schema_drift_from_snapshots(
 # Top Measure Delta Reporter (P7-04)
 # ============================================================
 
+
 @dataclass
 class MeasureDeltaReport:
     """Top measure deltas for a dataset."""
+
     dataset_name: str
     measure_name: str
     deltas: list[MeasureDelta]
@@ -161,9 +165,11 @@ def report_top_measure_deltas(
 # Reconciliation Summary Reporter (P7-05)
 # ============================================================
 
+
 @dataclass
 class ReconciliationReport:
     """Comparison of loaded totals against published reference."""
+
     dataset_name: str
     measure_name: str
     loaded_total: float
@@ -198,9 +204,11 @@ def report_reconciliation(
 # Run Inspection View (P7-06)
 # ============================================================
 
+
 @dataclass
 class RunInspection:
     """Complete inspection of a single pipeline run."""
+
     run_id: str
     pipeline_name: str
     dataset_name: str

@@ -17,6 +17,7 @@ def main() -> None:
     args = parser.parse_args()
 
     import uvicorn
+
     uvicorn.run("jobclass.web.app:app", host=args.host, port=args.port, reload=args.reload)
 
 

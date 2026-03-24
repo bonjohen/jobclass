@@ -34,9 +34,7 @@ class TestManifestValidation:
 
     def test_rejects_missing_fields(self, tmp_path):
         bad_manifest = tmp_path / "bad.yaml"
-        bad_manifest.write_text(yaml.dump({
-            "sources": [{"source_name": "test", "dataset_name": "test"}]
-        }))
+        bad_manifest.write_text(yaml.dump({"sources": [{"source_name": "test", "dataset_name": "test"}]}))
         with pytest.raises(ValueError, match="missing required fields"):
             load_manifest(bad_manifest)
 

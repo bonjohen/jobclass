@@ -27,10 +27,23 @@ def load_onet_descriptor_staging(
                  n, standard_error, lower_ci, upper_ci, recommend_suppress,
                  not_relevant, date, domain_source, source_release_id, parser_version)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            [r.occupation_code, r.element_id, r.element_name, r.scale_id,
-             r.data_value, r.n, r.standard_error, r.lower_ci, r.upper_ci,
-             r.recommend_suppress, r.not_relevant, r.date, r.domain_source,
-             r.source_release_id, r.parser_version],
+            [
+                r.occupation_code,
+                r.element_id,
+                r.element_name,
+                r.scale_id,
+                r.data_value,
+                r.n,
+                r.standard_error,
+                r.lower_ci,
+                r.upper_ci,
+                r.recommend_suppress,
+                r.not_relevant,
+                r.date,
+                r.domain_source,
+                r.source_release_id,
+                r.parser_version,
+            ],
         )
 
 
@@ -50,9 +63,17 @@ def load_onet_task_staging(
                (occupation_code, task_id, task, task_type, incumbents_responding,
                 date, domain_source, source_release_id, parser_version)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            [r.occupation_code, r.task_id, r.task, r.task_type,
-             r.incumbents_responding, r.date, r.domain_source,
-             r.source_release_id, r.parser_version],
+            [
+                r.occupation_code,
+                r.task_id,
+                r.task,
+                r.task_type,
+                r.incumbents_responding,
+                r.date,
+                r.domain_source,
+                r.source_release_id,
+                r.parser_version,
+            ],
         )
 
 

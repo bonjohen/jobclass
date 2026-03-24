@@ -23,9 +23,15 @@ def load_soc_hierarchy_staging(
             (soc_code, occupation_title, occupation_level, occupation_level_name,
              parent_soc_code, source_release_id, parser_version)
             VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            [row.soc_code, row.occupation_title, row.occupation_level,
-             row.occupation_level_name, row.parent_soc_code,
-             row.source_release_id, row.parser_version],
+            [
+                row.soc_code,
+                row.occupation_title,
+                row.occupation_level,
+                row.occupation_level_name,
+                row.parent_soc_code,
+                row.source_release_id,
+                row.parser_version,
+            ],
         )
     return len(rows)
 
@@ -127,12 +133,23 @@ def load_dim_occupation(
              occupation_definition, soc_version, is_leaf,
              is_current, source_release_id)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            [key, h["soc_code"], h["occupation_title"], h["occupation_level"],
-             h["occupation_level_name"], h["parent_soc_code"],
-             groups["major_group_code"], groups["minor_group_code"],
-             groups["broad_occupation_code"], groups["detailed_occupation_code"],
-             definitions.get(h["soc_code"]),
-             soc_version, is_leaf, True, source_release_id],
+            [
+                key,
+                h["soc_code"],
+                h["occupation_title"],
+                h["occupation_level"],
+                h["occupation_level_name"],
+                h["parent_soc_code"],
+                groups["major_group_code"],
+                groups["minor_group_code"],
+                groups["broad_occupation_code"],
+                groups["detailed_occupation_code"],
+                definitions.get(h["soc_code"]),
+                soc_version,
+                is_leaf,
+                True,
+                source_release_id,
+            ],
         )
         loaded += 1
 

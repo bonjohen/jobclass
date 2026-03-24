@@ -19,38 +19,49 @@ def validate_soc_structural(conn: duckdb.DuckDBPyConnection, source_release_id: 
 
     # Required columns check
     for table, required_cols in [
-        ("stage__soc__hierarchy", [
-            "soc_code", "occupation_title", "occupation_level",
-            "occupation_level_name", "parent_soc_code",
-            "source_release_id", "parser_version",
-        ]),
+        (
+            "stage__soc__hierarchy",
+            [
+                "soc_code",
+                "occupation_title",
+                "occupation_level",
+                "occupation_level_name",
+                "parent_soc_code",
+                "source_release_id",
+                "parser_version",
+            ],
+        ),
         ("stage__soc__definitions", ["soc_code", "occupation_definition", "source_release_id", "parser_version"]),
     ]:
         actual_cols = {
-            row[0] for row in conn.execute(
-                "SELECT column_name FROM information_schema.columns"
-                " WHERE table_name = ?",
+            row[0]
+            for row in conn.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = ?",
                 [table],
             ).fetchall()
         }
         missing = set(required_cols) - actual_cols
-        results.append(ValidationResult(
-            passed=len(missing) == 0,
-            check_name=f"{table}_required_columns",
-            message=f"Missing columns: {missing}" if missing else "All required columns present",
-        ))
+        results.append(
+            ValidationResult(
+                passed=len(missing) == 0,
+                check_name=f"{table}_required_columns",
+                message=f"Missing columns: {missing}" if missing else "All required columns present",
+            )
+        )
 
     # Minimum row count
     h_count = conn.execute(
         "SELECT COUNT(*) FROM stage__soc__hierarchy WHERE source_release_id = ?",
         [source_release_id],
     ).fetchone()[0]
-    results.append(ValidationResult(
-        passed=h_count >= 5,
-        check_name="hierarchy_min_row_count",
-        message=f"Row count: {h_count}",
-        details={"row_count": h_count, "minimum": 5},
-    ))
+    results.append(
+        ValidationResult(
+            passed=h_count >= 5,
+            check_name="hierarchy_min_row_count",
+            message=f"Row count: {h_count}",
+            details={"row_count": h_count, "minimum": 5},
+        )
+    )
 
     # Grain uniqueness: soc_code + source_release_id
     dups = conn.execute(
@@ -60,12 +71,14 @@ def validate_soc_structural(conn: duckdb.DuckDBPyConnection, source_release_id: 
            GROUP BY soc_code HAVING cnt > 1""",
         [source_release_id],
     ).fetchall()
-    results.append(ValidationResult(
-        passed=len(dups) == 0,
-        check_name="hierarchy_grain_uniqueness",
-        message=f"{len(dups)} duplicate keys found" if dups else "No duplicate keys",
-        details={"duplicates": [r[0] for r in dups]} if dups else None,
-    ))
+    results.append(
+        ValidationResult(
+            passed=len(dups) == 0,
+            check_name="hierarchy_grain_uniqueness",
+            message=f"{len(dups)} duplicate keys found" if dups else "No duplicate keys",
+            details={"duplicates": [r[0] for r in dups]} if dups else None,
+        )
+    )
 
     return results
 

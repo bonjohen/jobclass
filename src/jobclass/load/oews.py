@@ -18,16 +18,34 @@ _STAGING_COLS = (
 
 def _row_to_tuple(row: OewsRow) -> tuple:
     return (
-        row.area_type, row.area_code, row.area_title, row.naics_code,
-        row.naics_title, row.ownership_code, row.occupation_code,
-        row.occupation_title, row.occupation_group, row.employment_count,
-        row.employment_rse, row.jobs_per_1000, row.location_quotient,
-        row.mean_hourly_wage, row.mean_annual_wage, row.mean_wage_rse,
-        row.median_hourly_wage, row.median_annual_wage,
-        row.p10_hourly_wage, row.p25_hourly_wage, row.p75_hourly_wage,
-        row.p90_hourly_wage, row.p10_annual_wage, row.p25_annual_wage,
-        row.p75_annual_wage, row.p90_annual_wage,
-        row.source_release_id, row.parser_version,
+        row.area_type,
+        row.area_code,
+        row.area_title,
+        row.naics_code,
+        row.naics_title,
+        row.ownership_code,
+        row.occupation_code,
+        row.occupation_title,
+        row.occupation_group,
+        row.employment_count,
+        row.employment_rse,
+        row.jobs_per_1000,
+        row.location_quotient,
+        row.mean_hourly_wage,
+        row.mean_annual_wage,
+        row.mean_wage_rse,
+        row.median_hourly_wage,
+        row.median_annual_wage,
+        row.p10_hourly_wage,
+        row.p25_hourly_wage,
+        row.p75_hourly_wage,
+        row.p90_hourly_wage,
+        row.p10_annual_wage,
+        row.p25_annual_wage,
+        row.p75_annual_wage,
+        row.p90_annual_wage,
+        row.source_release_id,
+        row.parser_version,
     )
 
 
@@ -149,9 +167,7 @@ def load_fact_occupation_employment_wages(
     except (ValueError, TypeError):
         estimate_year = 0
 
-    staging_rows = conn.execute(
-        f"SELECT * FROM {table} WHERE source_release_id = ?", [source_release_id]
-    ).fetchall()
+    staging_rows = conn.execute(f"SELECT * FROM {table} WHERE source_release_id = ?", [source_release_id]).fetchall()
     cols = [d[0] for d in conn.description]
 
     loaded = 0
@@ -193,12 +209,29 @@ def load_fact_occupation_employment_wages(
              median_hourly_wage, median_annual_wage, p10_hourly_wage, p25_hourly_wage,
              p75_hourly_wage, p90_hourly_wage, source_dataset, source_release_id)
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-            [fact_id, reference_period, estimate_year, geo_key, ind_key,
-             s["ownership_code"], occ_key, s["employment_count"], s["employment_rse"],
-             s["jobs_per_1000"], s["location_quotient"], s["mean_hourly_wage"],
-             s["mean_annual_wage"], s["median_hourly_wage"], s["median_annual_wage"],
-             s["p10_hourly_wage"], s["p25_hourly_wage"], s["p75_hourly_wage"],
-             s["p90_hourly_wage"], source_dataset, source_release_id],
+            [
+                fact_id,
+                reference_period,
+                estimate_year,
+                geo_key,
+                ind_key,
+                s["ownership_code"],
+                occ_key,
+                s["employment_count"],
+                s["employment_rse"],
+                s["jobs_per_1000"],
+                s["location_quotient"],
+                s["mean_hourly_wage"],
+                s["mean_annual_wage"],
+                s["median_hourly_wage"],
+                s["median_annual_wage"],
+                s["p10_hourly_wage"],
+                s["p25_hourly_wage"],
+                s["p75_hourly_wage"],
+                s["p90_hourly_wage"],
+                source_dataset,
+                source_release_id,
+            ],
         )
         loaded += 1
 

@@ -1,7 +1,6 @@
 """Phase CR4 tests: pagination, accessibility, health probes, metrics, constants."""
 
 
-
 class TestSearchPagination:
     """CR4-01/04: Search endpoint pagination."""
 
@@ -66,8 +65,11 @@ class TestAccessibility:
         assert 'aria-live="polite"' in html
         assert 'aria-busy="true"' in html
         for section_id in [
-            "wages-section", "skills-section", "tasks-section",
-            "projections-section", "similar-section",
+            "wages-section",
+            "skills-section",
+            "tasks-section",
+            "projections-section",
+            "similar-section",
         ]:
             assert section_id in html
 
@@ -186,6 +188,7 @@ class TestHealthAndReady:
 
     def test_ready_response_schema(self, client):
         from jobclass.web.api.models import ReadyResponse
+
         resp = client.get("/api/ready")
         ReadyResponse(**resp.json())
 
@@ -219,28 +222,36 @@ class TestDriftThresholdConstants:
 
     def test_row_count_shift_uses_constant(self):
         from jobclass.validate.framework import ROW_COUNT_SHIFT_THRESHOLD_PCT
+
         assert ROW_COUNT_SHIFT_THRESHOLD_PCT == 20.0
 
     def test_material_delta_uses_constant(self):
         from jobclass.validate.framework import MATERIAL_DELTA_THRESHOLD_PCT
+
         assert MATERIAL_DELTA_THRESHOLD_PCT == 15.0
 
     def test_detect_row_count_shift_default(self):
         from jobclass.validate.framework import detect_row_count_shift
+
         # 25% shift should fail at 20% threshold
         result = detect_row_count_shift(100, 125)
         assert result.passed is False
 
     def test_classify_material_delta_default(self):
         from jobclass.validate.framework import classify_material_delta
+
         report = classify_material_delta(
-            "test", "v1", "wages",
-            {"key1": 100.0}, {"key1": 120.0},
+            "test",
+            "v1",
+            "wages",
+            {"key1": 100.0},
+            {"key1": 120.0},
         )
         assert report.exceeds_threshold is True
 
     def test_env_example_exists(self):
         from pathlib import Path
+
         env_example = Path(__file__).parent.parent.parent / ".env.example"
         assert env_example.exists()
         content = env_example.read_text()

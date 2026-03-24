@@ -66,9 +66,7 @@ def timeseries_refresh(conn: duckdb.DuckDBPyConnection) -> dict[str, int]:
             count = step_fn()
             elapsed = time.time() - t0
             results[step_name] = count
-            logger.info(
-                "  %s: %d rows (%.1fs)", step_name, count, elapsed
-            )
+            logger.info("  %s: %d rows (%.1fs)", step_name, count, elapsed)
         except Exception as e:
             elapsed = time.time() - t0
             logger.error("  %s: FAILED after %.1fs — %s", step_name, elapsed, e)

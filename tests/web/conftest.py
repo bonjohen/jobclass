@@ -75,10 +75,12 @@ def warehouse_db(tmp_path):
     onet_ver = "29.1"
     skills = parse_onet_descriptors((FIXTURES_DIR / "onet_skills_sample.txt").read_text(encoding="utf-8"), onet_ver)
     knowledge = parse_onet_descriptors(
-        (FIXTURES_DIR / "onet_knowledge_sample.txt").read_text(encoding="utf-8"), onet_ver,
+        (FIXTURES_DIR / "onet_knowledge_sample.txt").read_text(encoding="utf-8"),
+        onet_ver,
     )
     abilities = parse_onet_descriptors(
-        (FIXTURES_DIR / "onet_abilities_sample.txt").read_text(encoding="utf-8"), onet_ver,
+        (FIXTURES_DIR / "onet_abilities_sample.txt").read_text(encoding="utf-8"),
+        onet_ver,
     )
     tasks = parse_onet_tasks((FIXTURES_DIR / "onet_tasks_sample.txt").read_text(encoding="utf-8"), onet_ver)
 
@@ -92,12 +94,29 @@ def warehouse_db(tmp_path):
     load_dim_descriptor(conn, "dim_ability", "ability_key", "stage__onet__abilities", onet_ver)
     load_dim_task(conn, onet_ver)
 
-    load_bridge_occupation_descriptor(conn, "bridge_occupation_skill", "dim_skill", "skill_key",
-                                      "stage__onet__skills", onet_ver, onet_ver, soc_ver)
-    load_bridge_occupation_descriptor(conn, "bridge_occupation_knowledge", "dim_knowledge", "knowledge_key",
-                                      "stage__onet__knowledge", onet_ver, onet_ver, soc_ver)
-    load_bridge_occupation_descriptor(conn, "bridge_occupation_ability", "dim_ability", "ability_key",
-                                      "stage__onet__abilities", onet_ver, onet_ver, soc_ver)
+    load_bridge_occupation_descriptor(
+        conn, "bridge_occupation_skill", "dim_skill", "skill_key", "stage__onet__skills", onet_ver, onet_ver, soc_ver
+    )
+    load_bridge_occupation_descriptor(
+        conn,
+        "bridge_occupation_knowledge",
+        "dim_knowledge",
+        "knowledge_key",
+        "stage__onet__knowledge",
+        onet_ver,
+        onet_ver,
+        soc_ver,
+    )
+    load_bridge_occupation_descriptor(
+        conn,
+        "bridge_occupation_ability",
+        "dim_ability",
+        "ability_key",
+        "stage__onet__abilities",
+        onet_ver,
+        onet_ver,
+        soc_ver,
+    )
     load_bridge_occupation_task(conn, onet_ver, onet_ver, soc_ver)
 
     # Load Projections
@@ -111,6 +130,7 @@ def warehouse_db(tmp_path):
 
     # Run time-series pipeline
     from jobclass.orchestrate.timeseries_refresh import timeseries_refresh
+
     timeseries_refresh(conn)
 
     # Run manifest entry for metadata endpoint
@@ -129,6 +149,7 @@ def client(warehouse_db):
     """Provide a FastAPI TestClient with the warehouse injected."""
     set_db(warehouse_db)
     from jobclass.web.app import create_app
+
     app = create_app()
     with TestClient(app) as c:
         yield c

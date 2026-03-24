@@ -1,6 +1,5 @@
 """T9-01 through T9-10: Analyst mart tests."""
 
-
 from jobclass.marts.views import all_marts_exist, mart_row_count
 
 
@@ -19,12 +18,10 @@ class TestOccupationSummary:
         ).fetchone()[0]
         assert dup_count == 0
 
-        mart_count = onet_loaded_db.execute(
-            "SELECT COUNT(*) FROM occupation_summary"
-        ).fetchone()[0]
-        dim_current = onet_loaded_db.execute(
-            "SELECT COUNT(*) FROM dim_occupation WHERE is_current = true"
-        ).fetchone()[0]
+        mart_count = onet_loaded_db.execute("SELECT COUNT(*) FROM occupation_summary").fetchone()[0]
+        dim_current = onet_loaded_db.execute("SELECT COUNT(*) FROM dim_occupation WHERE is_current = true").fetchone()[
+            0
+        ]
         assert mart_count == dim_current
 
     def test_hierarchy_fields(self, onet_loaded_db):
@@ -56,20 +53,13 @@ class TestOccupationWagesByGeography:
 
     def test_contains_wage_columns(self, onet_loaded_db):
         """T9-03: Mart contains employment and wage fields."""
-        cols = {
-            row[0]
-            for row in onet_loaded_db.execute(
-                "DESCRIBE occupation_wages_by_geography"
-            ).fetchall()
-        }
+        cols = {row[0] for row in onet_loaded_db.execute("DESCRIBE occupation_wages_by_geography").fetchall()}
         for expected in ["employment_count", "mean_annual_wage", "median_annual_wage"]:
             assert expected in cols
 
     def test_join_no_fanout(self, onet_loaded_db):
         """T9-04: Row count matches underlying fact for current occupations."""
-        mart_count = onet_loaded_db.execute(
-            "SELECT COUNT(*) FROM occupation_wages_by_geography"
-        ).fetchone()[0]
+        mart_count = onet_loaded_db.execute("SELECT COUNT(*) FROM occupation_wages_by_geography").fetchone()[0]
         fact_count = onet_loaded_db.execute(
             "SELECT COUNT(*) FROM fact_occupation_employment_wages f"
             " JOIN dim_occupation o ON f.occupation_key = o.occupation_key"
@@ -95,9 +85,7 @@ class TestOccupationSkillProfile:
 
     def test_current_version_only(self, onet_loaded_db):
         """T9-06: All rows use the current O*NET version."""
-        versions = onet_loaded_db.execute(
-            "SELECT DISTINCT source_version FROM occupation_skill_profile"
-        ).fetchall()
+        versions = onet_loaded_db.execute("SELECT DISTINCT source_version FROM occupation_skill_profile").fetchall()
         assert len(versions) >= 1
         # All rows should share the same source_version
         assert len(versions) == 1
@@ -135,16 +123,14 @@ class TestOccupationSimilaritySeeded:
     def test_nontrivial_similarity(self, onet_loaded_db):
         """T9-08: At least some occupation pairs with similarity > 0."""
         count = onet_loaded_db.execute(
-            "SELECT COUNT(*) FROM occupation_similarity_seeded"
-            " WHERE jaccard_similarity > 0"
+            "SELECT COUNT(*) FROM occupation_similarity_seeded WHERE jaccard_similarity > 0"
         ).fetchone()[0]
         assert count > 0
 
     def test_similarity_bounded(self, onet_loaded_db):
         """Similarity values should be between 0 and 1."""
         bad = onet_loaded_db.execute(
-            "SELECT COUNT(*) FROM occupation_similarity_seeded"
-            " WHERE jaccard_similarity < 0 OR jaccard_similarity > 1"
+            "SELECT COUNT(*) FROM occupation_similarity_seeded WHERE jaccard_similarity < 0 OR jaccard_similarity > 1"
         ).fetchone()[0]
         assert bad == 0
 
@@ -180,6 +166,7 @@ class TestPublishGating:
     def test_publish_blocked_on_empty_db(self, migrated_db):
         """With no data loaded, warehouse_publish should be blocked."""
         from jobclass.orchestrate.pipelines import PipelineStatus, warehouse_publish
+
         result = warehouse_publish(migrated_db, "2018", "2024.05", "29.1")
         assert result.status in (PipelineStatus.PUBLISH_BLOCKED, PipelineStatus.SUCCESS)
 

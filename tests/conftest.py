@@ -69,8 +69,9 @@ def oews_state_content():
 
 
 @pytest.fixture
-def oews_loaded_db(migrated_db, soc_hierarchy_content, soc_definitions_content,
-                   oews_national_content, oews_state_content):
+def oews_loaded_db(
+    migrated_db, soc_hierarchy_content, soc_definitions_content, oews_national_content, oews_state_content
+):
     """DB with SOC + OEWS staging + warehouse fully loaded."""
     from jobclass.load.oews import (
         load_dim_geography,
@@ -112,8 +113,9 @@ def oews_loaded_db(migrated_db, soc_hierarchy_content, soc_definitions_content,
 
 
 @pytest.fixture
-def multi_vintage_oews_db(migrated_db, soc_hierarchy_content, soc_definitions_content,
-                          oews_national_content, oews_state_content):
+def multi_vintage_oews_db(
+    migrated_db, soc_hierarchy_content, soc_definitions_content, oews_national_content, oews_state_content
+):
     """DB with SOC + 3 vintages of OEWS loaded (simulating 2021, 2022, 2023).
 
     Uses the same fixture data for all vintages with different release IDs,
@@ -183,8 +185,9 @@ def onet_tasks_content():
 
 
 @pytest.fixture
-def onet_loaded_db(oews_loaded_db, onet_skills_content, onet_knowledge_content,
-                   onet_abilities_content, onet_tasks_content):
+def onet_loaded_db(
+    oews_loaded_db, onet_skills_content, onet_knowledge_content, onet_abilities_content, onet_tasks_content
+):
     """DB with SOC + OEWS + O*NET staging + warehouse fully loaded."""
     from jobclass.load.onet import (
         load_bridge_occupation_descriptor,
@@ -220,16 +223,34 @@ def onet_loaded_db(oews_loaded_db, onet_skills_content, onet_knowledge_content,
 
     # Bridges
     load_bridge_occupation_descriptor(
-        oews_loaded_db, "bridge_occupation_skill", "dim_skill", "skill_key",
-        "stage__onet__skills", onet_ver, release, soc_ver,
+        oews_loaded_db,
+        "bridge_occupation_skill",
+        "dim_skill",
+        "skill_key",
+        "stage__onet__skills",
+        onet_ver,
+        release,
+        soc_ver,
     )
     load_bridge_occupation_descriptor(
-        oews_loaded_db, "bridge_occupation_knowledge", "dim_knowledge", "knowledge_key",
-        "stage__onet__knowledge", onet_ver, release, soc_ver,
+        oews_loaded_db,
+        "bridge_occupation_knowledge",
+        "dim_knowledge",
+        "knowledge_key",
+        "stage__onet__knowledge",
+        onet_ver,
+        release,
+        soc_ver,
     )
     load_bridge_occupation_descriptor(
-        oews_loaded_db, "bridge_occupation_ability", "dim_ability", "ability_key",
-        "stage__onet__abilities", onet_ver, release, soc_ver,
+        oews_loaded_db,
+        "bridge_occupation_ability",
+        "dim_ability",
+        "ability_key",
+        "stage__onet__abilities",
+        onet_ver,
+        release,
+        soc_ver,
     )
     load_bridge_occupation_task(oews_loaded_db, onet_ver, release, soc_ver)
 

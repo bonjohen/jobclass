@@ -25,6 +25,7 @@ logger = get_logger(__name__)
 @dataclass
 class PipelineRunSummary:
     """Summary of a full pipeline run."""
+
     pipelines_attempted: int = 0
     pipelines_succeeded: int = 0
     pipelines_failed: int = 0
@@ -120,8 +121,7 @@ def run_all_pipelines(
         key=lambda e: e.dataset_name,
     )
     oews_st_entries = {
-        e.dataset_name.replace("oews_state", ""): e
-        for e in entries if e.dataset_name.startswith("oews_state")
+        e.dataset_name.replace("oews_state", ""): e for e in entries if e.dataset_name.startswith("oews_state")
     }
     oews_vintages = len(oews_nat_entries)
     oews_release = "unknown"
@@ -171,8 +171,14 @@ def run_all_pipelines(
         tasks_text, _ = _download_and_convert(tasks_entry, raw_root)
 
         result = onet_refresh(
-            conn, skills_text, knowledge_text, abilities_text, tasks_text,
-            onet_version, onet_version, soc_version,
+            conn,
+            skills_text,
+            knowledge_text,
+            abilities_text,
+            tasks_text,
+            onet_version,
+            onet_version,
+            soc_version,
         )
         if result.status == PipelineStatus.SUCCESS:
             print(f"  OK — O*NET loaded (run_id: {result.run_id})")

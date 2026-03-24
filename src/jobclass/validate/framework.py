@@ -24,6 +24,7 @@ MATERIAL_DELTA_THRESHOLD_PCT = 15.0
 # Failure Classification (P6-08)
 # ============================================================
 
+
 class FailureClassification(StrEnum):
     DOWNLOAD_FAILURE = "download_failure"
     SOURCE_FORMAT_FAILURE = "source_format_failure"
@@ -37,6 +38,7 @@ class FailureClassification(StrEnum):
 # Structural Validation (P6-01)
 # ============================================================
 
+
 def validate_required_columns(
     conn: duckdb.DuckDBPyConnection,
     table_name: str,
@@ -44,7 +46,8 @@ def validate_required_columns(
 ) -> ValidationResult:
     """Check that all required columns exist in the table."""
     actual_cols = {
-        r[0] for r in conn.execute(
+        r[0]
+        for r in conn.execute(
             "SELECT column_name FROM information_schema.columns WHERE table_name = ?",
             [table_name],
         ).fetchall()
@@ -65,7 +68,8 @@ def validate_column_types(
 ) -> ValidationResult:
     """Check that columns have expected types."""
     actual_types = {
-        r[0]: r[1] for r in conn.execute(
+        r[0]: r[1]
+        for r in conn.execute(
             "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ?",
             [table_name],
         ).fetchall()
@@ -108,6 +112,7 @@ def validate_min_row_count(
 # Grain Validation (P6-02)
 # ============================================================
 
+
 def validate_grain_uniqueness(
     conn: duckdb.DuckDBPyConnection,
     table_name: str,
@@ -133,6 +138,7 @@ def validate_grain_uniqueness(
 # ============================================================
 # Referential Integrity (P6-03)
 # ============================================================
+
 
 def validate_referential_integrity(
     conn: duckdb.DuckDBPyConnection,
@@ -164,6 +170,7 @@ def validate_referential_integrity(
 # ============================================================
 # Temporal Validation (P6-04, P6-05)
 # ============================================================
+
 
 def validate_version_monotonicity(
     current_version: str,
@@ -219,9 +226,11 @@ def validate_append_only(
 # Drift Detection (P6-06, P6-07)
 # ============================================================
 
+
 @dataclass
 class SchemaChange:
     """Represents a single schema change."""
+
     change_type: str  # "added", "removed", "retyped"
     column_name: str
     old_type: str | None = None
@@ -248,7 +257,8 @@ def detect_schema_drift(
 def get_table_schema(conn: duckdb.DuckDBPyConnection, table_name: str) -> dict[str, str]:
     """Get column name → data type mapping for a table."""
     return {
-        r[0]: r[1] for r in conn.execute(
+        r[0]: r[1]
+        for r in conn.execute(
             "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ?",
             [table_name],
         ).fetchall()
@@ -273,14 +283,19 @@ def detect_row_count_shift(
         passed=pct_change < threshold_pct,
         check_name="row_count_shift",
         message=f"Row count changed {abs_change:+d} / {pct_change:.1f}% ({prior_count} → {current_count})",
-        details={"prior": prior_count, "current": current_count,
-                 "absolute_change": abs_change, "pct_change": pct_change},
+        details={
+            "prior": prior_count,
+            "current": current_count,
+            "absolute_change": abs_change,
+            "pct_change": pct_change,
+        },
     )
 
 
 @dataclass
 class MeasureDelta:
     """A measure that changed between releases."""
+
     group_key: str
     prior_value: float
     current_value: float
@@ -308,6 +323,7 @@ def detect_measure_deltas(
 # Publication Gating (P6-09)
 # ============================================================
 
+
 def check_publication_gate(
     validation_results: list[ValidationResult],
 ) -> ValidationResult:
@@ -331,9 +347,11 @@ def check_publication_gate(
 # Failure Mode Handlers (P6-10, P6-11, P6-12)
 # ============================================================
 
+
 @dataclass
 class PipelineFailure:
     """Captures a pipeline failure with classification and context."""
+
     classification: FailureClassification
     message: str
     details: dict = field(default_factory=dict)
@@ -346,10 +364,12 @@ def classify_schema_drift_failure(changes: list[SchemaChange], table_name: str) 
     return PipelineFailure(
         classification=FailureClassification.SCHEMA_DRIFT_FAILURE,
         message=f"Schema drift detected in {table_name}: {len(changes)} change(s)",
-        details={"table": table_name, "changes": [
-            {"type": c.change_type, "column": c.column_name, "old": c.old_type, "new": c.new_type}
-            for c in changes
-        ]},
+        details={
+            "table": table_name,
+            "changes": [
+                {"type": c.change_type, "column": c.column_name, "old": c.old_type, "new": c.new_type} for c in changes
+            ],
+        },
         raw_preserved=True,
         downstream_blocked=True,
     )
@@ -368,6 +388,7 @@ def classify_partial_source_failure(error_msg: str) -> PipelineFailure:
 @dataclass
 class DeltaReport:
     """Report for material deltas that require review."""
+
     dataset: str
     release_id: str
     measure_name: str

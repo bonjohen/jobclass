@@ -1,6 +1,5 @@
 """T5-07 through T5-32: O*NET staging, dimensions, bridges, validations, idempotence tests."""
 
-
 from jobclass.load.onet import (
     load_bridge_occupation_descriptor,
     load_bridge_occupation_task,
@@ -22,31 +21,50 @@ class TestOnetStagingContract:
     """T5-07 through T5-10: Staging tables have required columns."""
 
     def test_skills_columns(self, onet_loaded_db):
-        cols = {r[0] for r in onet_loaded_db.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__onet__skills'"
-        ).fetchall()}
-        for c in ["occupation_code", "element_id", "element_name", "scale_id",
-                   "data_value", "source_release_id", "parser_version"]:
+        cols = {
+            r[0]
+            for r in onet_loaded_db.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__onet__skills'"
+            ).fetchall()
+        }
+        for c in [
+            "occupation_code",
+            "element_id",
+            "element_name",
+            "scale_id",
+            "data_value",
+            "source_release_id",
+            "parser_version",
+        ]:
             assert c in cols
 
     def test_knowledge_columns(self, onet_loaded_db):
-        cols = {r[0] for r in onet_loaded_db.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__onet__knowledge'"
-        ).fetchall()}
+        cols = {
+            r[0]
+            for r in onet_loaded_db.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__onet__knowledge'"
+            ).fetchall()
+        }
         for c in ["occupation_code", "element_id", "data_value", "source_release_id"]:
             assert c in cols
 
     def test_abilities_columns(self, onet_loaded_db):
-        cols = {r[0] for r in onet_loaded_db.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__onet__abilities'"
-        ).fetchall()}
+        cols = {
+            r[0]
+            for r in onet_loaded_db.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__onet__abilities'"
+            ).fetchall()
+        }
         for c in ["occupation_code", "element_id", "data_value", "source_release_id"]:
             assert c in cols
 
     def test_tasks_columns(self, onet_loaded_db):
-        cols = {r[0] for r in onet_loaded_db.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__onet__tasks'"
-        ).fetchall()}
+        cols = {
+            r[0]
+            for r in onet_loaded_db.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__onet__tasks'"
+            ).fetchall()
+        }
         for c in ["occupation_code", "task_id", "task", "source_release_id", "parser_version"]:
             assert c in cols
 
@@ -127,30 +145,42 @@ class TestDimDescriptors:
         assert len(dups) == 0
 
     def test_dim_skill_required_fields(self, onet_loaded_db):
-        cols = {r[0] for r in onet_loaded_db.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_skill'"
-        ).fetchall()}
+        cols = {
+            r[0]
+            for r in onet_loaded_db.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_skill'"
+            ).fetchall()
+        }
         for c in ["skill_key", "element_id", "element_name", "source_version", "is_current"]:
             assert c in cols
 
     def test_dim_knowledge_required_fields(self, onet_loaded_db):
-        cols = {r[0] for r in onet_loaded_db.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_knowledge'"
-        ).fetchall()}
+        cols = {
+            r[0]
+            for r in onet_loaded_db.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_knowledge'"
+            ).fetchall()
+        }
         for c in ["knowledge_key", "element_id", "element_name", "source_version", "is_current"]:
             assert c in cols
 
     def test_dim_ability_required_fields(self, onet_loaded_db):
-        cols = {r[0] for r in onet_loaded_db.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_ability'"
-        ).fetchall()}
+        cols = {
+            r[0]
+            for r in onet_loaded_db.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_ability'"
+            ).fetchall()
+        }
         for c in ["ability_key", "element_id", "element_name", "source_version", "is_current"]:
             assert c in cols
 
     def test_dim_task_required_fields(self, onet_loaded_db):
-        cols = {r[0] for r in onet_loaded_db.execute(
-            "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_task'"
-        ).fetchall()}
+        cols = {
+            r[0]
+            for r in onet_loaded_db.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_task'"
+            ).fetchall()
+        }
         for c in ["task_key", "task_id", "task", "source_version", "is_current"]:
             assert c in cols
 
@@ -249,15 +279,13 @@ class TestOnetValidations:
     """T5-29, T5-30: Semantic and version alignment validations."""
 
     def test_structural_validations_pass(self, onet_loaded_db):
-        for table in ["stage__onet__skills", "stage__onet__knowledge",
-                       "stage__onet__abilities", "stage__onet__tasks"]:
+        for table in ["stage__onet__skills", "stage__onet__knowledge", "stage__onet__abilities", "stage__onet__tasks"]:
             results = validate_onet_structural(onet_loaded_db, table, RELEASE, min_rows=1)
             for r in results:
                 assert r.passed, f"{r.check_name}: {r.message}"
 
     def test_occupation_mapping(self, onet_loaded_db):
-        for table in ["stage__onet__skills", "stage__onet__knowledge",
-                       "stage__onet__abilities", "stage__onet__tasks"]:
+        for table in ["stage__onet__skills", "stage__onet__knowledge", "stage__onet__abilities", "stage__onet__tasks"]:
             result = validate_onet_occupation_mapping(onet_loaded_db, table, RELEASE, SOC_VER)
             assert result.passed, f"{table}: {result.message}"
 
@@ -274,8 +302,14 @@ class TestOnetIdempotence:
         before_bridge = onet_loaded_db.execute("SELECT COUNT(*) FROM bridge_occupation_skill").fetchone()[0]
         load_dim_descriptor(onet_loaded_db, "dim_skill", "skill_key", "stage__onet__skills", ONET_VER)
         load_bridge_occupation_descriptor(
-            onet_loaded_db, "bridge_occupation_skill", "dim_skill", "skill_key",
-            "stage__onet__skills", ONET_VER, RELEASE, SOC_VER,
+            onet_loaded_db,
+            "bridge_occupation_skill",
+            "dim_skill",
+            "skill_key",
+            "stage__onet__skills",
+            ONET_VER,
+            RELEASE,
+            SOC_VER,
         )
         after_dim = onet_loaded_db.execute("SELECT COUNT(*) FROM dim_skill").fetchone()[0]
         after_bridge = onet_loaded_db.execute("SELECT COUNT(*) FROM bridge_occupation_skill").fetchone()[0]
@@ -284,9 +318,16 @@ class TestOnetIdempotence:
 
     def test_full_rerun_no_duplicates(self, onet_loaded_db):
         counts_before = {}
-        for table in ["dim_skill", "dim_knowledge", "dim_ability", "dim_task",
-                       "bridge_occupation_skill", "bridge_occupation_knowledge",
-                       "bridge_occupation_ability", "bridge_occupation_task"]:
+        for table in [
+            "dim_skill",
+            "dim_knowledge",
+            "dim_ability",
+            "dim_task",
+            "bridge_occupation_skill",
+            "bridge_occupation_knowledge",
+            "bridge_occupation_ability",
+            "bridge_occupation_task",
+        ]:
             counts_before[table] = onet_loaded_db.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
 
         # Rerun all dim loads
@@ -297,16 +338,34 @@ class TestOnetIdempotence:
 
         # Rerun all bridge loads
         load_bridge_occupation_descriptor(
-            onet_loaded_db, "bridge_occupation_skill", "dim_skill", "skill_key",
-            "stage__onet__skills", ONET_VER, RELEASE, SOC_VER,
+            onet_loaded_db,
+            "bridge_occupation_skill",
+            "dim_skill",
+            "skill_key",
+            "stage__onet__skills",
+            ONET_VER,
+            RELEASE,
+            SOC_VER,
         )
         load_bridge_occupation_descriptor(
-            onet_loaded_db, "bridge_occupation_knowledge", "dim_knowledge", "knowledge_key",
-            "stage__onet__knowledge", ONET_VER, RELEASE, SOC_VER,
+            onet_loaded_db,
+            "bridge_occupation_knowledge",
+            "dim_knowledge",
+            "knowledge_key",
+            "stage__onet__knowledge",
+            ONET_VER,
+            RELEASE,
+            SOC_VER,
         )
         load_bridge_occupation_descriptor(
-            onet_loaded_db, "bridge_occupation_ability", "dim_ability", "ability_key",
-            "stage__onet__abilities", ONET_VER, RELEASE, SOC_VER,
+            onet_loaded_db,
+            "bridge_occupation_ability",
+            "dim_ability",
+            "ability_key",
+            "stage__onet__abilities",
+            ONET_VER,
+            RELEASE,
+            SOC_VER,
         )
         load_bridge_occupation_task(onet_loaded_db, ONET_VER, RELEASE, SOC_VER)
 

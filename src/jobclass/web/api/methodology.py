@@ -22,9 +22,7 @@ def data_sources() -> dict:
     # Get current versions from warehouse
     soc_version = None
     try:
-        row = conn.execute(
-            "SELECT DISTINCT soc_version FROM dim_occupation WHERE is_current = true LIMIT 1"
-        ).fetchone()
+        row = conn.execute("SELECT DISTINCT soc_version FROM dim_occupation WHERE is_current = true LIMIT 1").fetchone()
         if row:
             soc_version = row[0]
     except Exception:
@@ -32,9 +30,7 @@ def data_sources() -> dict:
 
     oews_release = None
     try:
-        row = conn.execute(
-            "SELECT DISTINCT source_release_id FROM fact_occupation_employment_wages LIMIT 1"
-        ).fetchone()
+        row = conn.execute("SELECT DISTINCT source_release_id FROM fact_occupation_employment_wages LIMIT 1").fetchone()
         if row:
             oews_release = row[0]
     except Exception:
@@ -42,9 +38,7 @@ def data_sources() -> dict:
 
     onet_version = None
     try:
-        row = conn.execute(
-            "SELECT DISTINCT source_version FROM dim_skill WHERE is_current = true LIMIT 1"
-        ).fetchone()
+        row = conn.execute("SELECT DISTINCT source_version FROM dim_skill WHERE is_current = true LIMIT 1").fetchone()
         if row:
             onet_version = row[0]
     except Exception:
@@ -52,9 +46,7 @@ def data_sources() -> dict:
 
     proj_cycle = None
     try:
-        row = conn.execute(
-            "SELECT DISTINCT projection_cycle FROM fact_occupation_projections LIMIT 1"
-        ).fetchone()
+        row = conn.execute("SELECT DISTINCT projection_cycle FROM fact_occupation_projections LIMIT 1").fetchone()
         if row:
             proj_cycle = row[0]
     except Exception:
@@ -108,38 +100,46 @@ def validation_summary() -> dict:
     # Check dim_occupation has rows
     row = conn.execute("SELECT COUNT(*) FROM dim_occupation WHERE is_current = true").fetchone()
     occ_count = row[0] if row else 0
-    checks.append({
-        "check": "dim_occupation populated",
-        "passed": occ_count > 0,
-        "detail": f"{occ_count} current occupations loaded",
-    })
+    checks.append(
+        {
+            "check": "dim_occupation populated",
+            "passed": occ_count > 0,
+            "detail": f"{occ_count} current occupations loaded",
+        }
+    )
 
     # Check fact table has rows
     row = conn.execute("SELECT COUNT(*) FROM fact_occupation_employment_wages").fetchone()
     fact_count = row[0] if row else 0
-    checks.append({
-        "check": "fact_occupation_employment_wages populated",
-        "passed": fact_count > 0,
-        "detail": f"{fact_count} wage fact rows loaded",
-    })
+    checks.append(
+        {
+            "check": "fact_occupation_employment_wages populated",
+            "passed": fact_count > 0,
+            "detail": f"{fact_count} wage fact rows loaded",
+        }
+    )
 
     # Check skills bridge
     row = conn.execute("SELECT COUNT(*) FROM bridge_occupation_skill").fetchone()
     skill_count = row[0] if row else 0
-    checks.append({
-        "check": "bridge_occupation_skill populated",
-        "passed": skill_count > 0,
-        "detail": f"{skill_count} skill-occupation links loaded",
-    })
+    checks.append(
+        {
+            "check": "bridge_occupation_skill populated",
+            "passed": skill_count > 0,
+            "detail": f"{skill_count} skill-occupation links loaded",
+        }
+    )
 
     # Check tasks bridge
     row = conn.execute("SELECT COUNT(*) FROM bridge_occupation_task").fetchone()
     task_count = row[0] if row else 0
-    checks.append({
-        "check": "bridge_occupation_task populated",
-        "passed": task_count > 0,
-        "detail": f"{task_count} task-occupation links loaded",
-    })
+    checks.append(
+        {
+            "check": "bridge_occupation_task populated",
+            "passed": task_count > 0,
+            "detail": f"{task_count} task-occupation links loaded",
+        }
+    )
 
     # Check projections
     try:
@@ -147,16 +147,20 @@ def validation_summary() -> dict:
         proj_count = row[0] if row else 0
     except Exception:
         proj_count = 0
-    checks.append({
-        "check": "fact_occupation_projections populated",
-        "passed": proj_count > 0,
-        "detail": f"{proj_count} projection fact rows loaded",
-    })
+    checks.append(
+        {
+            "check": "fact_occupation_projections populated",
+            "passed": proj_count > 0,
+            "detail": f"{proj_count} projection fact rows loaded",
+        }
+    )
 
     # Check all marts exist
     mart_views = [
-        "occupation_summary", "occupation_wages_by_geography",
-        "occupation_skill_profile", "occupation_task_profile",
+        "occupation_summary",
+        "occupation_wages_by_geography",
+        "occupation_skill_profile",
+        "occupation_task_profile",
         "occupation_similarity_seeded",
     ]
     for view in mart_views:
@@ -165,17 +169,21 @@ def validation_summary() -> dict:
                 raise ValueError(f"Invalid view name: {view!r}")
             row = conn.execute(f"SELECT COUNT(*) FROM {view}").fetchone()
             count = row[0] if row else 0
-            checks.append({
-                "check": f"mart view '{view}' queryable",
-                "passed": count > 0,
-                "detail": f"{count} rows",
-            })
+            checks.append(
+                {
+                    "check": f"mart view '{view}' queryable",
+                    "passed": count > 0,
+                    "detail": f"{count} rows",
+                }
+            )
         except Exception:
-            checks.append({
-                "check": f"mart view '{view}' queryable",
-                "passed": False,
-                "detail": "View not found or query failed",
-            })
+            checks.append(
+                {
+                    "check": f"mart view '{view}' queryable",
+                    "passed": False,
+                    "detail": "View not found or query failed",
+                }
+            )
 
     passed = sum(1 for c in checks if c["passed"])
     total = len(checks)

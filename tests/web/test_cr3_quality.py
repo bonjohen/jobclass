@@ -145,6 +145,7 @@ class TestParserEdgeCases:
 
     def test_parse_float_suppression_markers(self):
         from jobclass.parse.common import parse_float
+
         assert parse_float(None) is None
         assert parse_float("") is None
         assert parse_float("*") is None
@@ -157,6 +158,7 @@ class TestParserEdgeCases:
 
     def test_parse_float_valid_values(self):
         from jobclass.parse.common import parse_float
+
         assert parse_float("3.14") == 3.14
         assert parse_float("1,234.56") == 1234.56
         assert parse_float("50%") == 50.0
@@ -164,6 +166,7 @@ class TestParserEdgeCases:
 
     def test_parse_int_valid(self):
         from jobclass.parse.common import parse_int
+
         assert parse_int("42") == 42
         assert parse_int("1,234") == 1234
         assert parse_int(None) is None
@@ -171,17 +174,19 @@ class TestParserEdgeCases:
 
     def test_safe_identifier_rejects_injection(self):
         from jobclass.load import _safe_identifier
+
         with pytest.raises(ValueError):
-            _safe_identifier('; DROP TABLE dim_occupation; --')
+            _safe_identifier("; DROP TABLE dim_occupation; --")
         with pytest.raises(ValueError):
-            _safe_identifier('table name')
+            _safe_identifier("table name")
         with pytest.raises(ValueError):
-            _safe_identifier('TABLE_NAME')
+            _safe_identifier("TABLE_NAME")
         with pytest.raises(ValueError):
-            _safe_identifier('')
+            _safe_identifier("")
 
     def test_safe_identifier_accepts_valid(self):
         from jobclass.load import _safe_identifier
+
         assert _safe_identifier("dim_occupation") == "dim_occupation"
         assert _safe_identifier("stage__bls__oews_national") == "stage__bls__oews_national"
 
@@ -191,70 +196,84 @@ class TestResponseModelValidation:
 
     def test_health_response_schema(self, client):
         from jobclass.web.api.models import HealthResponse
+
         resp = client.get("/api/health")
         HealthResponse(**resp.json())
 
     def test_stats_response_schema(self, client):
         from jobclass.web.api.models import StatsResponse
+
         resp = client.get("/api/stats")
         StatsResponse(**resp.json())
 
     def test_metadata_response_schema(self, client):
         from jobclass.web.api.models import MetadataResponse
+
         resp = client.get("/api/metadata")
         MetadataResponse(**resp.json())
 
     def test_search_response_schema(self, client):
         from jobclass.web.api.models import SearchResponse
+
         resp = client.get("/api/occupations/search?q=software")
         SearchResponse(**resp.json())
 
     def test_hierarchy_response_schema(self, client):
         from jobclass.web.api.models import HierarchyResponse
+
         resp = client.get("/api/occupations/hierarchy")
         HierarchyResponse(**resp.json())
 
     def test_profile_response_schema(self, client):
         from jobclass.web.api.models import OccupationProfileResponse
+
         resp = client.get("/api/occupations/15-1252")
         OccupationProfileResponse(**resp.json())
 
     def test_wages_response_schema(self, client):
         from jobclass.web.api.models import WagesResponse
+
         resp = client.get("/api/occupations/15-1252/wages")
         WagesResponse(**resp.json())
 
     def test_skills_response_schema(self, client):
         from jobclass.web.api.models import SkillsResponse
+
         resp = client.get("/api/occupations/15-1252/skills")
         SkillsResponse(**resp.json())
 
     def test_tasks_response_schema(self, client):
         from jobclass.web.api.models import TasksResponse
+
         resp = client.get("/api/occupations/15-1252/tasks")
         TasksResponse(**resp.json())
 
     def test_projections_response_schema(self, client):
         from jobclass.web.api.models import ProjectionsResponse
+
         resp = client.get("/api/occupations/15-1252/projections")
         ProjectionsResponse(**resp.json())
 
     def test_similar_response_schema(self, client):
         from jobclass.web.api.models import SimilarResponse
+
         resp = client.get("/api/occupations/15-1252/similar")
         SimilarResponse(**resp.json())
 
     def test_sources_response_schema(self, client):
         from jobclass.web.api.models import SourcesResponse
+
         resp = client.get("/api/methodology/sources")
         SourcesResponse(**resp.json())
 
     def test_validation_response_schema(self, client):
         from jobclass.web.api.models import ValidationResponse
+
         resp = client.get("/api/methodology/validation")
         ValidationResponse(**resp.json())
 
     def test_geographies_response_schema(self, client):
         from jobclass.web.api.models import GeographiesResponse
+
         resp = client.get("/api/geographies")
         GeographiesResponse(**resp.json())

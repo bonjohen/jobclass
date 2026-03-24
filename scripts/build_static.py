@@ -68,6 +68,10 @@ window.fetch=function(u){
   if(pts.length===5&&pts[4]==='wages'&&pts[2]==='occupations'){
     return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
   }
+  if(p==='/api/trends/compare/geography'){
+    var sc=sp.get('soc_code');
+    if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
+  }
   return F(b+p+'.json');
 };
 })();
@@ -78,6 +82,7 @@ window.fetch=function(u){
 # Path rewriting for GitHub Pages subpath (e.g., /jobclass)
 # ---------------------------------------------------------------------------
 
+
 def rewrite_paths(content: str, base_path: str) -> str:
     """Rewrite absolute URL paths to include the GitHub Pages base path."""
     if not base_path:
@@ -87,11 +92,11 @@ def rewrite_paths(content: str, base_path: str) -> str:
         # JS fetch / template literals
         ('"/api/', f'"{bp}/api/'),
         ("'/api/", f"'{bp}/api/"),
-        ('`/api/', f'`{bp}/api/'),
+        ("`/api/", f"`{bp}/api/"),
         # Occupation page links (in JS-generated HTML and templates)
         ('"/occupation/', f'"{bp}/occupation/'),
         ("'/occupation/", f"'{bp}/occupation/"),
-        ('`/occupation/', f'`{bp}/occupation/'),
+        ("`/occupation/", f"`{bp}/occupation/"),
         # Nav links
         ('"/search"', f'"{bp}/search"'),
         ("'/search'", f"'{bp}/search'"),
@@ -99,6 +104,12 @@ def rewrite_paths(content: str, base_path: str) -> str:
         ("'/hierarchy'", f"'{bp}/hierarchy'"),
         ('"/methodology"', f'"{bp}/methodology"'),
         ("'/methodology'", f"'{bp}/methodology'"),
+        # Trend links
+        ('"/trends"', f'"{bp}/trends"'),
+        ("'/trends'", f"'{bp}/trends'"),
+        ('"/trends/', f'"{bp}/trends/'),
+        ("'/trends/", f"'{bp}/trends/"),
+        ("`/trends/", f"`{bp}/trends/"),
         # Static assets
         ('"/static/', f'"{bp}/static/'),
         ("'/static/", f"'{bp}/static/"),
@@ -114,6 +125,7 @@ def rewrite_paths(content: str, base_path: str) -> str:
 # ---------------------------------------------------------------------------
 # Build
 # ---------------------------------------------------------------------------
+
 
 def build_static(base_path: str, output_dir: str) -> None:
     from starlette.testclient import TestClient
@@ -132,9 +144,7 @@ def build_static(base_path: str, output_dir: str) -> None:
     db = get_db()
     soc_codes = [
         r[0]
-        for r in db.execute(
-            "SELECT soc_code FROM dim_occupation WHERE is_current = true ORDER BY soc_code"
-        ).fetchall()
+        for r in db.execute("SELECT soc_code FROM dim_occupation WHERE is_current = true ORDER BY soc_code").fetchall()
     ]
     print(f"Building static site for {len(soc_codes)} occupations")
 
@@ -190,6 +200,24 @@ def build_static(base_path: str, output_dir: str) -> None:
     write_html("/methodology", "methodology/index.html")
     print("  4 root pages")
 
+    # --- HTML: Trend pages ---
+    write_html("/trends", "trends/index.html")
+    write_html("/trends/compare", "trends/compare/index.html")
+    write_html("/trends/movers", "trends/movers/index.html")
+    trend_page_count = 3
+    t0_trends = time.time()
+    for i, soc in enumerate(soc_codes, 1):
+        write_html(f"/trends/explorer/{soc}", f"trends/explorer/{soc}/index.html")
+        write_html(f"/trends/geography/{soc}", f"trends/geography/{soc}/index.html")
+        if i % 200 == 0:
+            elapsed = time.time() - t0_trends
+            rate = i / elapsed
+            remaining = (len(soc_codes) - i) / rate
+            print(f"  {i}/{len(soc_codes)} trend pages ({rate:.0f}/s, ~{remaining:.0f}s left)")
+    trend_page_count += len(soc_codes) * 2
+    elapsed = time.time() - t0_trends
+    print(f"  {trend_page_count} trend pages ({elapsed:.1f}s)")
+
     # 404 page (GitHub Pages convention)
     resp = client.get("/this-page-does-not-exist-404")
     if resp.status_code == 404:
@@ -223,6 +251,8 @@ def build_static(base_path: str, output_dir: str) -> None:
         ("/api/methodology/sources", "api/methodology/sources.json"),
         ("/api/methodology/validation", "api/methodology/validation.json"),
         ("/api/occupations/hierarchy", "api/occupations/hierarchy.json"),
+        ("/api/trends/metrics", "api/trends/metrics.json"),
+        ("/api/trends/movers", "api/trends/movers.json"),
     ]
     for url, filepath in global_apis:
         write_json(url, filepath)
@@ -266,6 +296,11 @@ def build_static(base_path: str, output_dir: str) -> None:
             (f"/api/occupations/{soc}/tasks", f"api/occupations/{soc}/tasks.json"),
             (f"/api/occupations/{soc}/projections", f"api/occupations/{soc}/projections.json"),
             (f"/api/occupations/{soc}/similar", f"api/occupations/{soc}/similar.json"),
+            (f"/api/trends/{soc}", f"api/trends/{soc}.json"),
+            (
+                f"/api/trends/compare/geography?soc_code={soc}",
+                f"api/trends/compare/geography-{soc}.json",
+            ),
         ]
         for url, filepath in endpoints:
             if write_json(url, filepath):

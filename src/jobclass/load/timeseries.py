@@ -90,9 +90,13 @@ def populate_dim_metric(conn: duckdb.DuckDBPyConnection) -> int:
                 derivation_type, description, requires_comparable_input)
                VALUES (?, ?, ?, ?, ?, ?, ?)""",
             [
-                m["metric_name"], m["units"], m["display_format"],
-                m["comparability_constraint"], m["derivation_type"],
-                m["description"], m["requires_comparable_input"],
+                m["metric_name"],
+                m["units"],
+                m["display_format"],
+                m["comparability_constraint"],
+                m["derivation_type"],
+                m["description"],
+                m["requires_comparable_input"],
             ],
         )
         inserted += 1
@@ -112,8 +116,7 @@ def populate_dim_time_period(conn: duckdb.DuckDBPyConnection) -> int:
     # OEWS estimate years
     try:
         rows = conn.execute(
-            "SELECT DISTINCT estimate_year FROM fact_occupation_employment_wages "
-            "WHERE estimate_year IS NOT NULL"
+            "SELECT DISTINCT estimate_year FROM fact_occupation_employment_wages WHERE estimate_year IS NOT NULL"
         ).fetchall()
         years.update(r[0] for r in rows)
     except Exception:
@@ -154,10 +157,9 @@ def populate_dim_time_period(conn: duckdb.DuckDBPyConnection) -> int:
 # Observation normalization
 # ============================================================
 
+
 def _get_metric_key(conn: duckdb.DuckDBPyConnection, metric_name: str) -> int | None:
-    row = conn.execute(
-        "SELECT metric_key FROM dim_metric WHERE metric_name = ?", [metric_name]
-    ).fetchone()
+    row = conn.execute("SELECT metric_key FROM dim_metric WHERE metric_name = ?", [metric_name]).fetchone()
     return row[0] if row else None
 
 
@@ -245,9 +247,7 @@ def normalize_projection_observations(
     from fact_occupation_projections. Uses a national geography key.
     """
     # Projections are national-level only; find national geography key
-    nat_geo = conn.execute(
-        "SELECT geography_key FROM dim_geography WHERE geo_type = 'national' LIMIT 1"
-    ).fetchone()
+    nat_geo = conn.execute("SELECT geography_key FROM dim_geography WHERE geo_type = 'national' LIMIT 1").fetchone()
     if not nat_geo:
         logger.warning("No national geography found, skipping projection normalization")
         return 0
@@ -310,6 +310,7 @@ def normalize_projection_observations(
 # Comparable history
 # ============================================================
 
+
 def build_comparable_history(conn: duckdb.DuckDBPyConnection) -> int:
     """Build comparable-history observation rows for vintages sharing the same SOC version.
 
@@ -319,9 +320,7 @@ def build_comparable_history(conn: duckdb.DuckDBPyConnection) -> int:
     in the series share the same SOC version.
     """
     # Delete existing comparable rows
-    conn.execute(
-        "DELETE FROM fact_time_series_observation WHERE comparability_mode = 'comparable'"
-    )
+    conn.execute("DELETE FROM fact_time_series_observation WHERE comparability_mode = 'comparable'")
 
     # Insert comparable rows for metrics with same_soc_version constraint
     # Since we currently only have one SOC version (2018), all as_published OEWS rows
@@ -423,9 +422,13 @@ def populate_derived_metrics(conn: duckdb.DuckDBPyConnection) -> int:
                 derivation_type, description, requires_comparable_input)
                VALUES (?, ?, ?, ?, ?, ?, ?)""",
             [
-                m["metric_name"], m["units"], m["display_format"],
-                m["comparability_constraint"], m["derivation_type"],
-                m["description"], m["requires_comparable_input"],
+                m["metric_name"],
+                m["units"],
+                m["display_format"],
+                m["comparability_constraint"],
+                m["derivation_type"],
+                m["description"],
+                m["requires_comparable_input"],
             ],
         )
         inserted += 1
@@ -442,9 +445,7 @@ def compute_yoy_absolute_change(
     if derived_key is None:
         return 0
 
-    conn.execute(
-        "DELETE FROM fact_derived_series WHERE metric_key = ?", [derived_key]
-    )
+    conn.execute("DELETE FROM fact_derived_series WHERE metric_key = ?", [derived_key])
 
     # Get all base metrics that support comparable history
     base_metrics = conn.execute(
@@ -505,9 +506,7 @@ def compute_yoy_percent_change(
     if derived_key is None:
         return 0
 
-    conn.execute(
-        "DELETE FROM fact_derived_series WHERE metric_key = ?", [derived_key]
-    )
+    conn.execute("DELETE FROM fact_derived_series WHERE metric_key = ?", [derived_key])
 
     base_metrics = conn.execute(
         """SELECT metric_key, metric_name FROM dim_metric
@@ -571,9 +570,7 @@ def compute_rolling_avg_3yr(
     if derived_key is None:
         return 0
 
-    conn.execute(
-        "DELETE FROM fact_derived_series WHERE metric_key = ?", [derived_key]
-    )
+    conn.execute("DELETE FROM fact_derived_series WHERE metric_key = ?", [derived_key])
 
     base_metrics = conn.execute(
         """SELECT metric_key FROM dim_metric
@@ -640,9 +637,7 @@ def compute_state_vs_national_gap(
     if derived_key is None:
         return 0
 
-    conn.execute(
-        "DELETE FROM fact_derived_series WHERE metric_key = ?", [derived_key]
-    )
+    conn.execute("DELETE FROM fact_derived_series WHERE metric_key = ?", [derived_key])
 
     base_metrics = conn.execute(
         """SELECT metric_key FROM dim_metric
@@ -702,9 +697,7 @@ def compute_rank_delta(
     if derived_key is None:
         return 0
 
-    conn.execute(
-        "DELETE FROM fact_derived_series WHERE metric_key = ?", [derived_key]
-    )
+    conn.execute("DELETE FROM fact_derived_series WHERE metric_key = ?", [derived_key])
 
     base_metrics = conn.execute(
         """SELECT metric_key FROM dim_metric

@@ -1,6 +1,5 @@
 """T6-01 through T6-21: Validation framework, failure classification, and failure-mode tests."""
 
-
 from jobclass.validate.framework import (
     FailureClassification,
     SchemaChange,
@@ -25,12 +24,13 @@ from jobclass.validate.soc import ValidationResult
 # T6-01 through T6-04: Structural Validator
 # ============================================================
 
-class TestStructuralValidator:
 
+class TestStructuralValidator:
     def test_detects_missing_column(self, migrated_db):
         """T6-01: Detects missing required column."""
         result = validate_required_columns(
-            migrated_db, "dim_occupation",
+            migrated_db,
+            "dim_occupation",
             ["occupation_key", "soc_code", "nonexistent_column"],
         )
         assert not result.passed
@@ -39,7 +39,8 @@ class TestStructuralValidator:
     def test_detects_column_type_change(self, migrated_db):
         """T6-02: Detects column type mismatch."""
         result = validate_column_types(
-            migrated_db, "dim_occupation",
+            migrated_db,
+            "dim_occupation",
             {"soc_code": "INTEGER"},  # actually TEXT
         )
         assert not result.passed
@@ -48,7 +49,8 @@ class TestStructuralValidator:
     def test_passes_valid_schema(self, migrated_db):
         """T6-03: Passes when all columns present with correct types."""
         result = validate_required_columns(
-            migrated_db, "dim_occupation",
+            migrated_db,
+            "dim_occupation",
             ["occupation_key", "soc_code", "occupation_title"],
         )
         assert result.passed
@@ -64,8 +66,8 @@ class TestStructuralValidator:
 # T6-05, T6-06: Grain Validator
 # ============================================================
 
-class TestGrainValidator:
 
+class TestGrainValidator:
     def test_detects_duplicates(self, migrated_db):
         """T6-05: Detects duplicate business keys."""
         # Create a test table with intentional duplicates
@@ -78,7 +80,8 @@ class TestGrainValidator:
     def test_passes_unique_keys(self, oews_loaded_db):
         """T6-06: Passes on unique business keys."""
         result = validate_grain_uniqueness(
-            oews_loaded_db, "dim_occupation",
+            oews_loaded_db,
+            "dim_occupation",
             ["soc_code", "soc_version"],
         )
         assert result.passed
@@ -88,8 +91,8 @@ class TestGrainValidator:
 # T6-07, T6-08: Referential Integrity Validator
 # ============================================================
 
-class TestRefIntegrityValidator:
 
+class TestRefIntegrityValidator:
     def test_detects_orphan_keys(self, migrated_db):
         """T6-07: Detects orphan foreign keys."""
         # Create test tables with orphan reference
@@ -98,7 +101,11 @@ class TestRefIntegrityValidator:
         migrated_db.execute("INSERT INTO test_dim VALUES (1), (2)")
         migrated_db.execute("INSERT INTO test_fact VALUES (1), (2), (99)")
         result = validate_referential_integrity(
-            migrated_db, "test_fact", "fk", "test_dim", "pk",
+            migrated_db,
+            "test_fact",
+            "fk",
+            "test_dim",
+            "pk",
         )
         assert not result.passed
         migrated_db.execute("DROP TABLE test_fact")
@@ -108,8 +115,10 @@ class TestRefIntegrityValidator:
         """T6-08: Passes when all keys resolve."""
         result = validate_referential_integrity(
             oews_loaded_db,
-            "fact_occupation_employment_wages", "occupation_key",
-            "dim_occupation", "occupation_key",
+            "fact_occupation_employment_wages",
+            "occupation_key",
+            "dim_occupation",
+            "occupation_key",
         )
         assert result.passed
 
@@ -118,8 +127,8 @@ class TestRefIntegrityValidator:
 # T6-09, T6-10: Temporal Validator
 # ============================================================
 
-class TestTemporalValidator:
 
+class TestTemporalValidator:
     def test_detects_version_regression(self):
         """T6-09: Detects version regression."""
         result = validate_version_monotonicity("2023.05", "2024.05")
@@ -135,8 +144,8 @@ class TestTemporalValidator:
 # T6-11: Append-Only Validator
 # ============================================================
 
-class TestAppendOnlyValidator:
 
+class TestAppendOnlyValidator:
     def test_append_only_check(self, oews_loaded_db):
         """T6-11: Append-only validation runs without error."""
         result = validate_append_only(
@@ -153,8 +162,8 @@ class TestAppendOnlyValidator:
 # T6-12: Schema Drift Detector
 # ============================================================
 
-class TestSchemaDriftDetector:
 
+class TestSchemaDriftDetector:
     def test_detects_added_removed_retyped(self):
         """T6-12: Reports added, removed, and retyped columns."""
         schema_a = {"col1": "INTEGER", "col2": "TEXT", "col3": "DOUBLE"}
@@ -162,7 +171,7 @@ class TestSchemaDriftDetector:
         changes = detect_schema_drift(schema_a, schema_b)
         change_types = {c.change_type for c in changes}
         assert "removed" in change_types  # col3 removed
-        assert "added" in change_types    # col4 added
+        assert "added" in change_types  # col4 added
         assert "retyped" in change_types  # col2 TEXT→INTEGER
         removed = [c for c in changes if c.change_type == "removed"]
         assert any(c.column_name == "col3" for c in removed)
@@ -174,8 +183,8 @@ class TestSchemaDriftDetector:
 # T6-13, T6-14: Row-Count Shift and Measure Delta
 # ============================================================
 
-class TestRowCountShift:
 
+class TestRowCountShift:
     def test_reports_percentage_and_absolute(self):
         """T6-13: Reports correct percentage and absolute change."""
         result = detect_row_count_shift(1000, 1250, threshold_pct=20.0)
@@ -189,13 +198,24 @@ class TestRowCountShift:
 
 
 class TestMeasureDelta:
-
     def test_identifies_top_n(self):
         """T6-14: Identifies top N measures by change magnitude."""
-        prior = {"occ_a": 50000.0, "occ_b": 60000.0, "occ_c": 70000.0,
-                 "occ_d": 80000.0, "occ_e": 90000.0, "occ_f": 100000.0}
-        current = {"occ_a": 75000.0, "occ_b": 62000.0, "occ_c": 71000.0,
-                   "occ_d": 80500.0, "occ_e": 85000.0, "occ_f": 115000.0}
+        prior = {
+            "occ_a": 50000.0,
+            "occ_b": 60000.0,
+            "occ_c": 70000.0,
+            "occ_d": 80000.0,
+            "occ_e": 90000.0,
+            "occ_f": 100000.0,
+        }
+        current = {
+            "occ_a": 75000.0,
+            "occ_b": 62000.0,
+            "occ_c": 71000.0,
+            "occ_d": 80500.0,
+            "occ_e": 85000.0,
+            "occ_f": 115000.0,
+        }
         deltas = detect_measure_deltas(prior, current, top_n=5)
         assert len(deltas) <= 5
         # occ_a has 50% change — should be first
@@ -207,12 +227,18 @@ class TestMeasureDelta:
 # T6-15: Failure Classification Enum
 # ============================================================
 
-class TestFailureClassification:
 
+class TestFailureClassification:
     def test_all_required_values(self):
         """T6-15: Enum contains all required values."""
-        required = {"download_failure", "source_format_failure", "schema_drift_failure",
-                     "validation_failure", "load_failure", "publish_blocked"}
+        required = {
+            "download_failure",
+            "source_format_failure",
+            "schema_drift_failure",
+            "validation_failure",
+            "load_failure",
+            "publish_blocked",
+        }
         actual = {e.value for e in FailureClassification}
         assert required.issubset(actual)
 
@@ -221,8 +247,8 @@ class TestFailureClassification:
 # T6-16: Publication Gate
 # ============================================================
 
-class TestPublicationGate:
 
+class TestPublicationGate:
     def test_blocks_on_failure(self):
         """T6-16: Publication gate blocks when validation fails."""
         results = [
@@ -246,8 +272,8 @@ class TestPublicationGate:
 # T6-17 through T6-21: Failure Mode Tests
 # ============================================================
 
-class TestSchemaFailureMode:
 
+class TestSchemaFailureMode:
     def test_schema_drift_classified(self):
         """T6-17: Schema drift creates classified failure."""
         changes = [SchemaChange("removed", "mean_annual_wage", old_type="DOUBLE")]
@@ -258,7 +284,6 @@ class TestSchemaFailureMode:
 
 
 class TestPartialSourceFailure:
-
     def test_partial_source_classified(self):
         """T6-18: Partial source creates classified failure."""
         failure = classify_partial_source_failure("Truncated file: expected 1000 rows, got 50")
@@ -268,14 +293,17 @@ class TestPartialSourceFailure:
 
 
 class TestMaterialDeltaFailure:
-
     def test_material_delta_report(self):
         """T6-19: Material delta emits report instead of silent acceptance."""
         prior = {"11-0000": 10000000.0, "15-0000": 5000000.0}
         current = {"11-0000": 13000000.0, "15-0000": 5100000.0}
         report = classify_material_delta(
-            "oews_national", "2025.05", "total_employment",
-            prior, current, threshold_pct=15.0,
+            "oews_national",
+            "2025.05",
+            "total_employment",
+            prior,
+            current,
+            threshold_pct=15.0,
         )
         assert report.exceeds_threshold  # 30% change on 11-0000
         assert len(report.deltas) > 0
@@ -283,10 +311,10 @@ class TestMaterialDeltaFailure:
 
 
 class TestGeographyDefinitionChange:
-
     def test_new_definitions_appended(self, oews_loaded_db):
         """T6-20: Geography definition changes append, not mutate."""
         from jobclass.load.oews import load_dim_geography
+
         before = oews_loaded_db.execute("SELECT COUNT(*) FROM dim_geography").fetchone()[0]
         # Re-load same release — should be idempotent
         load_dim_geography(oews_loaded_db, "2024.05")
@@ -295,7 +323,6 @@ class TestGeographyDefinitionChange:
 
 
 class TestSuppressionPreserved:
-
     def test_suppressed_values_null(self, oews_loaded_db):
         """T6-21: Suppressed OEWS values preserved as null."""
         # CEO (11-1011) has suppressed wages in our fixture

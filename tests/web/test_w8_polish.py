@@ -1,7 +1,6 @@
 """Phase W8 tests: Visual polish, responsive design, accessibility."""
 
 
-
 class TestAccessibility:
     """WT8-03, WT8-04: Semantic HTML and keyboard navigation."""
 
@@ -22,7 +21,7 @@ class TestAccessibility:
 
     def test_search_input_has_aria_label(self, client):
         html = client.get("/search").text
-        assert 'aria-label=' in html
+        assert "aria-label=" in html
 
     def test_hierarchy_tree_has_role(self, client):
         html = client.get("/hierarchy").text
@@ -49,13 +48,13 @@ class TestVisualConsistency:
         pages = ["/", "/search", "/hierarchy", "/methodology"]
         for page in pages:
             html = client.get(page).text
-            assert '/static/css/main.css' in html
+            assert "/static/css/main.css" in html
 
     def test_all_pages_include_js(self, client):
         pages = ["/", "/search", "/hierarchy", "/methodology"]
         for page in pages:
             html = client.get(page).text
-            assert '/static/js/main.js' in html
+            assert "/static/js/main.js" in html
 
     def test_all_pages_have_header_footer(self, client):
         pages = ["/", "/search", "/hierarchy", "/methodology"]
@@ -70,6 +69,7 @@ class TestPerformance:
 
     def test_health_responds_quickly(self, client):
         import time
+
         start = time.time()
         resp = client.get("/api/health")
         elapsed = time.time() - start
@@ -78,6 +78,7 @@ class TestPerformance:
 
     def test_search_responds_quickly(self, client):
         import time
+
         start = time.time()
         resp = client.get("/api/occupations/search?q=Software")
         elapsed = time.time() - start
@@ -86,6 +87,7 @@ class TestPerformance:
 
     def test_profile_responds_quickly(self, client):
         import time
+
         start = time.time()
         resp = client.get("/api/occupations/15-1252")
         elapsed = time.time() - start

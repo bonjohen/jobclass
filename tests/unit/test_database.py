@@ -1,6 +1,5 @@
 """T1-05: Database connection and migration framework execute without error."""
 
-
 from jobclass.config.database import apply_migrations, get_applied_versions, rollback_migration
 
 
@@ -8,9 +7,7 @@ def test_migration_applies_cleanly(db, tmp_path):
     """Migration applies cleanly to empty database."""
     mdir = tmp_path / "migrations"
     mdir.mkdir()
-    (mdir / "001_test.sql").write_text(
-        "CREATE TABLE test_table (id INTEGER PRIMARY KEY, name TEXT);"
-    )
+    (mdir / "001_test.sql").write_text("CREATE TABLE test_table (id INTEGER PRIMARY KEY, name TEXT);")
 
     applied = apply_migrations(db, migrations_dir=mdir)
     assert applied == ["001_test.sql"]

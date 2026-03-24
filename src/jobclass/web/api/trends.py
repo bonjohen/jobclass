@@ -12,8 +12,12 @@ router = APIRouter(prefix="/api", tags=["trends"])
 
 _SOC_CODE_RE = re.compile(r"^\d{2}-\d{4}$")
 _VALID_METRICS = {
-    "employment_count", "mean_annual_wage", "median_annual_wage",
-    "projected_employment", "employment_change", "employment_change_pct",
+    "employment_count",
+    "mean_annual_wage",
+    "median_annual_wage",
+    "projected_employment",
+    "employment_change",
+    "employment_change_pct",
 }
 
 
@@ -46,7 +50,8 @@ def compare_occupations(
     for code in codes:
         if not _SOC_CODE_RE.match(code):
             continue
-        rows = conn.execute("""
+        rows = conn.execute(
+            """
             SELECT tp.year, obs.observed_value, o.occupation_title
             FROM fact_time_series_observation obs
             JOIN dim_occupation o ON obs.occupation_key = o.occupation_key
@@ -57,14 +62,18 @@ def compare_occupations(
               AND m.metric_name = ? AND g.geo_type = ?
               AND obs.comparability_mode = ?
             ORDER BY tp.year
-        """, [code, metric, geo_type, comparability_mode]).fetchall()
+        """,
+            [code, metric, geo_type, comparability_mode],
+        ).fetchall()
 
         title = rows[0][2] if rows else code
-        results.append({
-            "soc_code": code,
-            "title": title,
-            "series": [{"year": r[0], "value": r[1]} for r in rows],
-        })
+        results.append(
+            {
+                "soc_code": code,
+                "title": title,
+                "series": [{"year": r[0], "value": r[1]} for r in rows],
+            }
+        )
 
     return {"metric": metric, "geo_type": geo_type, "occupations": results}
 
@@ -85,7 +94,8 @@ def compare_geography(
         return {"soc_code": soc_code, "metric": metric, "geographies": []}
 
     if year is None:
-        yr = conn.execute("""
+        yr = conn.execute(
+            """
             SELECT MAX(tp.year)
             FROM fact_time_series_observation obs
             JOIN dim_occupation o ON obs.occupation_key = o.occupation_key
@@ -94,13 +104,16 @@ def compare_geography(
             JOIN dim_time_period tp ON obs.period_key = tp.period_key
             WHERE o.soc_code = ? AND m.metric_name = ? AND g.geo_type = 'state'
               AND obs.comparability_mode = 'as_published'
-        """, [soc_code, metric]).fetchone()
+        """,
+            [soc_code, metric],
+        ).fetchone()
         year = yr[0] if yr and yr[0] else None
 
     if year is None:
         return {"soc_code": soc_code, "metric": metric, "year": None, "geographies": []}
 
-    rows = conn.execute("""
+    rows = conn.execute(
+        """
         SELECT g.geo_name, g.geo_code, obs.observed_value, obs.source_release_id
         FROM fact_time_series_observation obs
         JOIN dim_occupation o ON obs.occupation_key = o.occupation_key
@@ -113,14 +126,15 @@ def compare_geography(
           AND tp.year = ?
           AND obs.comparability_mode = 'as_published'
         ORDER BY g.geo_name
-    """, [soc_code, metric, year]).fetchall()
+    """,
+        [soc_code, metric, year],
+    ).fetchall()
 
     return {
-        "soc_code": soc_code, "metric": metric, "year": year,
-        "geographies": [
-            {"geo_name": r[0], "geo_code": r[1], "value": r[2], "source_release_id": r[3]}
-            for r in rows
-        ],
+        "soc_code": soc_code,
+        "metric": metric,
+        "year": year,
+        "geographies": [{"geo_name": r[0], "geo_code": r[1], "value": r[2], "source_release_id": r[3]} for r in rows],
     }
 
 
@@ -136,7 +150,8 @@ def ranked_movers(
     if not _table_exists(conn, "fact_derived_series"):
         return {"metric": metric, "gainers": [], "losers": []}
 
-    gainers = conn.execute("""
+    gainers = conn.execute(
+        """
         SELECT
             o.soc_code, o.occupation_title,
             d.derived_value, tp.year
@@ -153,9 +168,12 @@ def ranked_movers(
           AND o.is_current = true
         ORDER BY d.derived_value DESC
         LIMIT ?
-    """, [metric, geo_type, limit]).fetchall()
+    """,
+        [metric, geo_type, limit],
+    ).fetchall()
 
-    losers = conn.execute("""
+    losers = conn.execute(
+        """
         SELECT
             o.soc_code, o.occupation_title,
             d.derived_value, tp.year
@@ -172,18 +190,15 @@ def ranked_movers(
           AND o.is_current = true
         ORDER BY d.derived_value ASC
         LIMIT ?
-    """, [metric, geo_type, limit]).fetchall()
+    """,
+        [metric, geo_type, limit],
+    ).fetchall()
 
     return {
-        "metric": metric, "geo_type": geo_type,
-        "gainers": [
-            {"soc_code": r[0], "title": r[1], "pct_change": r[2], "year": r[3]}
-            for r in gainers
-        ],
-        "losers": [
-            {"soc_code": r[0], "title": r[1], "pct_change": r[2], "year": r[3]}
-            for r in losers
-        ],
+        "metric": metric,
+        "geo_type": geo_type,
+        "gainers": [{"soc_code": r[0], "title": r[1], "pct_change": r[2], "year": r[3]} for r in gainers],
+        "losers": [{"soc_code": r[0], "title": r[1], "pct_change": r[2], "year": r[3]} for r in losers],
     }
 
 
@@ -205,8 +220,11 @@ def list_metrics() -> dict:
     return {
         "metrics": [
             {
-                "metric_name": r[0], "units": r[1], "display_format": r[2],
-                "derivation_type": r[3], "comparability_constraint": r[4],
+                "metric_name": r[0],
+                "units": r[1],
+                "display_format": r[2],
+                "derivation_type": r[3],
+                "comparability_constraint": r[4],
                 "description": r[5],
             }
             for r in rows
@@ -230,7 +248,8 @@ def occupation_trend(
     if not _table_exists(conn, "fact_time_series_observation"):
         return {"soc_code": soc_code, "metric": metric, "series": []}
 
-    rows = conn.execute("""
+    rows = conn.execute(
+        """
         SELECT
             tp.year,
             obs.observed_value,
@@ -266,21 +285,25 @@ def occupation_trend(
           AND g.geo_type = ?
           AND obs.comparability_mode = ?
         ORDER BY tp.year
-    """, [soc_code, metric, geo_type, comparability_mode]).fetchall()
+    """,
+        [soc_code, metric, geo_type, comparability_mode],
+    ).fetchall()
 
     series = []
     for r in rows:
-        series.append({
-            "year": r[0],
-            "value": r[1],
-            "suppressed": r[2],
-            "source_release_id": r[3],
-            "metric_name": r[4],
-            "units": r[5],
-            "derivation_type": r[6],
-            "geo_name": r[7],
-            "yoy_change": r[8],
-            "yoy_pct_change": r[9],
-        })
+        series.append(
+            {
+                "year": r[0],
+                "value": r[1],
+                "suppressed": r[2],
+                "source_release_id": r[3],
+                "metric_name": r[4],
+                "units": r[5],
+                "derivation_type": r[6],
+                "geo_name": r[7],
+                "yoy_change": r[8],
+                "yoy_pct_change": r[9],
+            }
+        )
 
     return {"soc_code": soc_code, "metric": metric, "geo_type": geo_type, "series": series}

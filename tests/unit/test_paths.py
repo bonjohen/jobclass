@@ -1,6 +1,5 @@
 """T1-02, T1-03: Path-builder utility tests."""
 
-
 import pytest
 
 from jobclass.utils.paths import build_raw_path

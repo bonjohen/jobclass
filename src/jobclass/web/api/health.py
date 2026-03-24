@@ -14,9 +14,15 @@ router = APIRouter(prefix="/api", tags=["system"])
 _IDENTIFIER_RE = re.compile(r"^[a-z_][a-z0-9_]*$")
 
 _CORE_TABLES = [
-    "dim_occupation", "dim_geography", "dim_industry",
-    "dim_skill", "dim_knowledge", "dim_ability", "dim_task",
-    "fact_occupation_employment_wages", "fact_occupation_projections",
+    "dim_occupation",
+    "dim_geography",
+    "dim_industry",
+    "dim_skill",
+    "dim_knowledge",
+    "dim_ability",
+    "dim_task",
+    "fact_occupation_employment_wages",
+    "fact_occupation_projections",
 ]
 
 
@@ -82,7 +88,8 @@ def ready() -> dict:
 
         # Check that core tables exist
         existing = {
-            r[0] for r in conn.execute(
+            r[0]
+            for r in conn.execute(
                 "SELECT table_name FROM information_schema.tables WHERE table_schema = 'main'"
             ).fetchall()
         }
@@ -117,19 +124,13 @@ def stats() -> dict:
         row = conn.execute("SELECT COUNT(DISTINCT source_dataset) FROM fact_occupation_employment_wages").fetchone()
         result["source_count"] = row[0] if row else 0
 
-        row = conn.execute(
-            "SELECT DISTINCT soc_version FROM dim_occupation WHERE is_current = true LIMIT 1"
-        ).fetchone()
+        row = conn.execute("SELECT DISTINCT soc_version FROM dim_occupation WHERE is_current = true LIMIT 1").fetchone()
         result["soc_version"] = row[0] if row else None
 
-        row = conn.execute(
-            "SELECT COUNT(DISTINCT element_id) FROM dim_skill WHERE is_current = true"
-        ).fetchone()
+        row = conn.execute("SELECT COUNT(DISTINCT element_id) FROM dim_skill WHERE is_current = true").fetchone()
         result["skill_count"] = row[0] if row else 0
 
-        row = conn.execute(
-            "SELECT COUNT(DISTINCT task_id) FROM dim_task WHERE is_current = true"
-        ).fetchone()
+        row = conn.execute("SELECT COUNT(DISTINCT task_id) FROM dim_task WHERE is_current = true").fetchone()
         result["task_count"] = row[0] if row else 0
 
         return result
@@ -145,37 +146,27 @@ def metadata() -> dict:
         result: dict = {}
 
         # SOC version
-        row = conn.execute(
-            "SELECT DISTINCT soc_version FROM dim_occupation WHERE is_current = true LIMIT 1"
-        ).fetchone()
+        row = conn.execute("SELECT DISTINCT soc_version FROM dim_occupation WHERE is_current = true LIMIT 1").fetchone()
         result["soc_version"] = row[0] if row else None
 
         # OEWS release
-        row = conn.execute(
-            "SELECT DISTINCT source_release_id FROM fact_occupation_employment_wages LIMIT 1"
-        ).fetchone()
+        row = conn.execute("SELECT DISTINCT source_release_id FROM fact_occupation_employment_wages LIMIT 1").fetchone()
         result["oews_release_id"] = row[0] if row else None
 
         # O*NET version
-        row = conn.execute(
-            "SELECT DISTINCT source_version FROM dim_skill WHERE is_current = true LIMIT 1"
-        ).fetchone()
+        row = conn.execute("SELECT DISTINCT source_version FROM dim_skill WHERE is_current = true LIMIT 1").fetchone()
         result["onet_version"] = row[0] if row else None
 
         # Projections
         try:
-            row = conn.execute(
-                "SELECT DISTINCT projection_cycle FROM fact_occupation_projections LIMIT 1"
-            ).fetchone()
+            row = conn.execute("SELECT DISTINCT projection_cycle FROM fact_occupation_projections LIMIT 1").fetchone()
             result["projections_cycle"] = row[0] if row else None
         except Exception:
             result["projections_cycle"] = None
 
         # Last load timestamp
         try:
-            row = conn.execute(
-                "SELECT MAX(completed_at) FROM run_manifest WHERE load_status = 'success'"
-            ).fetchone()
+            row = conn.execute("SELECT MAX(completed_at) FROM run_manifest WHERE load_status = 'success'").fetchone()
             result["last_load_timestamp"] = str(row[0]) if row and row[0] else None
         except Exception:
             result["last_load_timestamp"] = None

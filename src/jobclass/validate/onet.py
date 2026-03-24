@@ -20,32 +20,42 @@ def validate_onet_structural(
         grain_cols = "occupation_code, task_id, source_release_id"
     else:
         required_cols = [
-            "occupation_code", "element_id", "element_name", "scale_id",
-            "data_value", "source_release_id", "parser_version",
+            "occupation_code",
+            "element_id",
+            "element_name",
+            "scale_id",
+            "data_value",
+            "source_release_id",
+            "parser_version",
         ]
         grain_cols = "occupation_code, element_id, scale_id, source_release_id"
 
     actual_cols = {
-        r[0] for r in conn.execute(
+        r[0]
+        for r in conn.execute(
             "SELECT column_name FROM information_schema.columns WHERE table_name = ?",
             [table_name],
         ).fetchall()
     }
     missing = set(required_cols) - actual_cols
-    results.append(ValidationResult(
-        passed=len(missing) == 0,
-        check_name=f"{table_name}_required_columns",
-        message=f"Missing: {missing}" if missing else "All required columns present",
-    ))
+    results.append(
+        ValidationResult(
+            passed=len(missing) == 0,
+            check_name=f"{table_name}_required_columns",
+            message=f"Missing: {missing}" if missing else "All required columns present",
+        )
+    )
 
     row_count = conn.execute(
         f"SELECT COUNT(*) FROM {table_name} WHERE source_release_id = ?", [source_release_id]
     ).fetchone()[0]
-    results.append(ValidationResult(
-        passed=row_count >= min_rows,
-        check_name=f"{table_name}_min_row_count",
-        message=f"Row count: {row_count} (min: {min_rows})",
-    ))
+    results.append(
+        ValidationResult(
+            passed=row_count >= min_rows,
+            check_name=f"{table_name}_min_row_count",
+            message=f"Row count: {row_count} (min: {min_rows})",
+        )
+    )
 
     # Grain uniqueness
     dups = conn.execute(
@@ -55,11 +65,13 @@ def validate_onet_structural(
             HAVING cnt > 1""",
         [source_release_id],
     ).fetchall()
-    results.append(ValidationResult(
-        passed=len(dups) == 0,
-        check_name=f"{table_name}_grain_uniqueness",
-        message=f"{len(dups)} duplicate keys" if dups else "No duplicate keys",
-    ))
+    results.append(
+        ValidationResult(
+            passed=len(dups) == 0,
+            check_name=f"{table_name}_grain_uniqueness",
+            message=f"{len(dups)} duplicate keys" if dups else "No duplicate keys",
+        )
+    )
 
     return results
 
@@ -94,8 +106,7 @@ def validate_onet_soc_alignment(
 ) -> ValidationResult:
     """Check O*NET–SOC version alignment across all staging tables."""
     total_unmapped = 0
-    for table in ["stage__onet__skills", "stage__onet__knowledge",
-                   "stage__onet__abilities", "stage__onet__tasks"]:
+    for table in ["stage__onet__skills", "stage__onet__knowledge", "stage__onet__abilities", "stage__onet__tasks"]:
         try:
             unmapped = conn.execute(
                 f"""SELECT COUNT(DISTINCT occupation_code)
@@ -113,6 +124,7 @@ def validate_onet_soc_alignment(
     return ValidationResult(
         passed=total_unmapped == 0,
         check_name="onet_soc_alignment",
-        message=f"{total_unmapped} unmapped codes across O*NET tables" if total_unmapped > 0
-                else "All O*NET codes align with SOC",
+        message=f"{total_unmapped} unmapped codes across O*NET tables"
+        if total_unmapped > 0
+        else "All O*NET codes align with SOC",
     )

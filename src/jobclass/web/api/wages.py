@@ -40,17 +40,21 @@ def occupation_wages(
     if not occ:
         raise HTTPException(status_code=404, detail=f"Occupation {soc_code} not found")
 
-    count_row = conn.execute("""
+    count_row = conn.execute(
+        """
         SELECT COUNT(*)
         FROM fact_occupation_employment_wages f
         JOIN dim_occupation o ON f.occupation_key = o.occupation_key
         JOIN dim_geography g ON f.geography_key = g.geography_key
         WHERE o.soc_code = ? AND o.is_current = true
           AND g.geo_type = ?
-    """, [soc_code, geo_type]).fetchone()
+    """,
+        [soc_code, geo_type],
+    ).fetchone()
     total = count_row[0] if count_row else 0
 
-    rows = conn.execute("""
+    rows = conn.execute(
+        """
         SELECT
             g.geo_type, g.geo_code, g.geo_name,
             f.employment_count, f.mean_annual_wage, f.median_annual_wage,
@@ -64,30 +68,38 @@ def occupation_wages(
           AND g.geo_type = ?
         ORDER BY g.geo_name
         LIMIT ? OFFSET ?
-    """, [soc_code, geo_type, limit, offset]).fetchall()
+    """,
+        [soc_code, geo_type, limit, offset],
+    ).fetchall()
 
     results = []
     for r in rows:
-        results.append({
-            "geo_type": r[0],
-            "geo_code": r[1],
-            "geo_name": r[2],
-            "employment_count": r[3],
-            "mean_annual_wage": r[4],
-            "median_annual_wage": r[5],
-            "mean_hourly_wage": r[6],
-            "median_hourly_wage": r[7],
-            "p10_hourly_wage": r[8],
-            "p25_hourly_wage": r[9],
-            "p75_hourly_wage": r[10],
-            "p90_hourly_wage": r[11],
-            "source_release_id": r[12],
-            "reference_period": r[13],
-        })
+        results.append(
+            {
+                "geo_type": r[0],
+                "geo_code": r[1],
+                "geo_name": r[2],
+                "employment_count": r[3],
+                "mean_annual_wage": r[4],
+                "median_annual_wage": r[5],
+                "mean_hourly_wage": r[6],
+                "median_hourly_wage": r[7],
+                "p10_hourly_wage": r[8],
+                "p25_hourly_wage": r[9],
+                "p75_hourly_wage": r[10],
+                "p90_hourly_wage": r[11],
+                "source_release_id": r[12],
+                "reference_period": r[13],
+            }
+        )
 
     return {
-        "soc_code": soc_code, "geo_type": geo_type, "total": total,
-        "limit": limit, "offset": offset, "wages": results,
+        "soc_code": soc_code,
+        "geo_type": geo_type,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "wages": results,
     }
 
 
@@ -102,9 +114,4 @@ def list_geographies() -> dict:
         ORDER BY geo_type, geo_name
     """).fetchall()
 
-    return {
-        "geographies": [
-            {"geo_type": r[0], "geo_code": r[1], "geo_name": r[2]}
-            for r in rows
-        ]
-    }
+    return {"geographies": [{"geo_type": r[0], "geo_code": r[1], "geo_name": r[2]} for r in rows]}

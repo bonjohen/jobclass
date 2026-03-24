@@ -1,7 +1,6 @@
 """Phase W2 tests: Occupation search, hierarchy, and profile endpoints and pages."""
 
 
-
 class TestSearchAPI:
     """WT2-01 through WT2-05: Search endpoint tests."""
 

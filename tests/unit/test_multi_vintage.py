@@ -54,11 +54,14 @@ class TestMultiVintageGeography:
         # Get geography keys used by each vintage
         geo_keys_per_vintage = {}
         for release in ["2021.05", "2022.05", "2023.05"]:
-            keys = multi_vintage_oews_db.execute("""
+            keys = multi_vintage_oews_db.execute(
+                """
                 SELECT DISTINCT geography_key
                 FROM fact_occupation_employment_wages
                 WHERE source_release_id = ? AND source_dataset = 'oews_national'
-            """, [release]).fetchall()
+            """,
+                [release],
+            ).fetchall()
             geo_keys_per_vintage[release] = {r[0] for r in keys}
         # National geography key should be the same across all vintages
         assert geo_keys_per_vintage["2021.05"] == geo_keys_per_vintage["2022.05"]
@@ -71,6 +74,7 @@ class TestMultiVintageTimeSeries:
     def test_multi_year_observations(self, multi_vintage_oews_db):
         """TS3-07: observation table has >= 3 distinct period_keys for employment_count."""
         from jobclass.orchestrate.timeseries_refresh import timeseries_refresh
+
         timeseries_refresh(multi_vintage_oews_db)
 
         distinct_periods = multi_vintage_oews_db.execute("""
@@ -88,6 +92,7 @@ class TestMultiVintageTimeSeries:
     def test_known_occupation_all_vintages(self, multi_vintage_oews_db):
         """TS3-08: a known occupation has observations for all extracted vintages."""
         from jobclass.orchestrate.timeseries_refresh import timeseries_refresh
+
         timeseries_refresh(multi_vintage_oews_db)
 
         # Find a SOC code that exists in the fixture data
@@ -97,7 +102,8 @@ class TestMultiVintageTimeSeries:
         assert soc_code is not None
         soc_code = soc_code[0]
 
-        years = multi_vintage_oews_db.execute("""
+        years = multi_vintage_oews_db.execute(
+            """
             SELECT DISTINCT tp.year
             FROM fact_time_series_observation obs
             JOIN dim_occupation o ON obs.occupation_key = o.occupation_key
@@ -109,7 +115,9 @@ class TestMultiVintageTimeSeries:
               AND g.geo_type = 'national'
               AND obs.comparability_mode = 'as_published'
             ORDER BY tp.year
-        """, [soc_code]).fetchall()
+        """,
+            [soc_code],
+        ).fetchall()
         year_list = [r[0] for r in years]
         assert 2021 in year_list
         assert 2022 in year_list
@@ -118,6 +126,7 @@ class TestMultiVintageTimeSeries:
     def test_comparable_history_with_multi_vintage(self, multi_vintage_oews_db):
         """Comparable history should exist since all 3 vintages use SOC 2018."""
         from jobclass.orchestrate.timeseries_refresh import timeseries_refresh
+
         timeseries_refresh(multi_vintage_oews_db)
 
         comparable_count = multi_vintage_oews_db.execute("""
@@ -130,6 +139,7 @@ class TestMultiVintageTimeSeries:
     def test_yoy_change_exists_with_multi_vintage(self, multi_vintage_oews_db):
         """YoY change should be computed since we have consecutive years."""
         from jobclass.orchestrate.timeseries_refresh import timeseries_refresh
+
         timeseries_refresh(multi_vintage_oews_db)
 
         yoy_count = multi_vintage_oews_db.execute("""
@@ -143,6 +153,7 @@ class TestMultiVintageTimeSeries:
     def test_rolling_avg_exists_with_3_years(self, multi_vintage_oews_db):
         """3-year rolling average should be computed with 3 consecutive years."""
         from jobclass.orchestrate.timeseries_refresh import timeseries_refresh
+
         timeseries_refresh(multi_vintage_oews_db)
 
         avg_count = multi_vintage_oews_db.execute("""
@@ -156,6 +167,7 @@ class TestMultiVintageTimeSeries:
     def test_state_vs_national_gap_multi_vintage(self, multi_vintage_oews_db):
         """State vs national gap should work across vintages with shared geography keys."""
         from jobclass.orchestrate.timeseries_refresh import timeseries_refresh
+
         timeseries_refresh(multi_vintage_oews_db)
 
         gap_count = multi_vintage_oews_db.execute("""
@@ -211,15 +223,18 @@ class TestMultiVintageVersionDetection:
 
     def test_version_detection_2021(self):
         from jobclass.extract.version_detect import detect_version_from_url
+
         v = detect_version_from_url("https://www.bls.gov/oes/special-requests/oesm21nat.zip")
         assert v == "2021.05"
 
     def test_version_detection_2022(self):
         from jobclass.extract.version_detect import detect_version_from_url
+
         v = detect_version_from_url("https://www.bls.gov/oes/special-requests/oesm22nat.zip")
         assert v == "2022.05"
 
     def test_version_detection_2023(self):
         from jobclass.extract.version_detect import detect_version_from_url
+
         v = detect_version_from_url("https://www.bls.gov/oes/special-requests/oesm23nat.zip")
         assert v == "2023.05"

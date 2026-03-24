@@ -47,9 +47,7 @@ def create_app() -> FastAPI:
         async def dispatch(self, request: Request, call_next) -> Response:
             response = await call_next(request)
             response.headers["Content-Security-Policy"] = (
-                "default-src 'self'; "
-                "script-src 'self'; "
-                "style-src 'self' 'unsafe-inline'"
+                "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
             )
             response.headers["X-Content-Type-Options"] = "nosniff"
             response.headers["X-Frame-Options"] = "DENY"
@@ -79,95 +77,128 @@ def create_app() -> FastAPI:
 
     @app.get("/", response_class=HTMLResponse)
     async def landing(request: Request):
-        return templates.TemplateResponse("base.html", {
-            "request": request,
-            "page_title": "JobClass — Labor Market Reporting",
-            "content_template": "landing.html",
-        })
+        return templates.TemplateResponse(
+            "base.html",
+            {
+                "request": request,
+                "page_title": "JobClass — Labor Market Reporting",
+                "content_template": "landing.html",
+            },
+        )
 
     @app.get("/search", response_class=HTMLResponse)
     async def search_page(request: Request):
-        return templates.TemplateResponse("base.html", {
-            "request": request,
-            "page_title": "Search Occupations — JobClass",
-            "content_template": "search.html",
-        })
+        return templates.TemplateResponse(
+            "base.html",
+            {
+                "request": request,
+                "page_title": "Search Occupations — JobClass",
+                "content_template": "search.html",
+            },
+        )
 
     @app.get("/hierarchy", response_class=HTMLResponse)
     async def hierarchy_page(request: Request):
-        return templates.TemplateResponse("base.html", {
-            "request": request,
-            "page_title": "Occupation Hierarchy — JobClass",
-            "content_template": "hierarchy.html",
-        })
+        return templates.TemplateResponse(
+            "base.html",
+            {
+                "request": request,
+                "page_title": "Occupation Hierarchy — JobClass",
+                "content_template": "hierarchy.html",
+            },
+        )
 
     @app.get("/occupation/{soc_code}", response_class=HTMLResponse)
     async def occupation_page(request: Request, soc_code: str):
-        return templates.TemplateResponse("base.html", {
-            "request": request,
-            "page_title": f"{soc_code} — JobClass",
-            "content_template": "occupation.html",
-            "soc_code": soc_code,
-        })
+        return templates.TemplateResponse(
+            "base.html",
+            {
+                "request": request,
+                "page_title": f"{soc_code} — JobClass",
+                "content_template": "occupation.html",
+                "soc_code": soc_code,
+            },
+        )
 
     @app.get("/methodology", response_class=HTMLResponse)
     async def methodology_page(request: Request):
-        return templates.TemplateResponse("base.html", {
-            "request": request,
-            "page_title": "Methodology — JobClass",
-            "content_template": "methodology.html",
-        })
+        return templates.TemplateResponse(
+            "base.html",
+            {
+                "request": request,
+                "page_title": "Methodology — JobClass",
+                "content_template": "methodology.html",
+            },
+        )
 
     @app.get("/occupation/{soc_code}/wages", response_class=HTMLResponse)
     async def wages_comparison_page(request: Request, soc_code: str):
-        return templates.TemplateResponse("base.html", {
-            "request": request,
-            "page_title": f"Wages by State — {soc_code} — JobClass",
-            "content_template": "wages_comparison.html",
-            "soc_code": soc_code,
-        })
+        return templates.TemplateResponse(
+            "base.html",
+            {
+                "request": request,
+                "page_title": f"Wages by State — {soc_code} — JobClass",
+                "content_template": "wages_comparison.html",
+                "soc_code": soc_code,
+            },
+        )
 
     @app.get("/trends", response_class=HTMLResponse)
     async def trends_landing(request: Request):
-        return templates.TemplateResponse("base.html", {
-            "request": request,
-            "page_title": "Trends — JobClass",
-            "content_template": "trends.html",
-        })
+        return templates.TemplateResponse(
+            "base.html",
+            {
+                "request": request,
+                "page_title": "Trends — JobClass",
+                "content_template": "trends.html",
+            },
+        )
 
     @app.get("/trends/explorer/{soc_code}", response_class=HTMLResponse)
     async def trend_explorer_page(request: Request, soc_code: str):
-        return templates.TemplateResponse("base.html", {
-            "request": request,
-            "page_title": f"Trend Explorer — {soc_code} — JobClass",
-            "content_template": "trend_explorer.html",
-            "soc_code": soc_code,
-        })
+        return templates.TemplateResponse(
+            "base.html",
+            {
+                "request": request,
+                "page_title": f"Trend Explorer — {soc_code} — JobClass",
+                "content_template": "trend_explorer.html",
+                "soc_code": soc_code,
+            },
+        )
 
     @app.get("/trends/compare", response_class=HTMLResponse)
     async def occupation_comparison_page(request: Request):
-        return templates.TemplateResponse("base.html", {
-            "request": request,
-            "page_title": "Compare Occupations — JobClass",
-            "content_template": "occupation_comparison.html",
-        })
+        return templates.TemplateResponse(
+            "base.html",
+            {
+                "request": request,
+                "page_title": "Compare Occupations — JobClass",
+                "content_template": "occupation_comparison.html",
+            },
+        )
 
     @app.get("/trends/geography/{soc_code}", response_class=HTMLResponse)
     async def geography_comparison_page(request: Request, soc_code: str):
-        return templates.TemplateResponse("base.html", {
-            "request": request,
-            "page_title": f"Geography Comparison — {soc_code} — JobClass",
-            "content_template": "geography_comparison.html",
-            "soc_code": soc_code,
-        })
+        return templates.TemplateResponse(
+            "base.html",
+            {
+                "request": request,
+                "page_title": f"Geography Comparison — {soc_code} — JobClass",
+                "content_template": "geography_comparison.html",
+                "soc_code": soc_code,
+            },
+        )
 
     @app.get("/trends/movers", response_class=HTMLResponse)
     async def ranked_movers_page(request: Request):
-        return templates.TemplateResponse("base.html", {
-            "request": request,
-            "page_title": "Ranked Movers — JobClass",
-            "content_template": "ranked_movers.html",
-        })
+        return templates.TemplateResponse(
+            "base.html",
+            {
+                "request": request,
+                "page_title": "Ranked Movers — JobClass",
+                "content_template": "ranked_movers.html",
+            },
+        )
 
     # --- Error handlers ---
 
@@ -178,10 +209,14 @@ def create_app() -> FastAPI:
                 status_code=404,
                 content={"error": "not_found", "message": f"Resource not found: {request.url.path}"},
             )
-        return templates.TemplateResponse("404.html", {
-            "request": request,
-            "page_title": "Page Not Found",
-        }, status_code=404)
+        return templates.TemplateResponse(
+            "404.html",
+            {
+                "request": request,
+                "page_title": "Page Not Found",
+            },
+            status_code=404,
+        )
 
     @app.exception_handler(500)
     async def server_error_handler(request: Request, exc):
@@ -190,10 +225,14 @@ def create_app() -> FastAPI:
                 status_code=500,
                 content={"error": "internal_error", "message": "An internal error occurred"},
             )
-        return templates.TemplateResponse("500.html", {
-            "request": request,
-            "page_title": "Server Error",
-        }, status_code=500)
+        return templates.TemplateResponse(
+            "500.html",
+            {
+                "request": request,
+                "page_title": "Server Error",
+            },
+            status_code=500,
+        )
 
     return app
 
