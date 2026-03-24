@@ -1,0 +1,91 @@
+<section class="lesson-page">
+    <h1>Testing and Deployment</h1>
+    <p class="lesson-meta">Lesson 8 &mdash; Testing strategy &amp; CI/CD</p>
+
+    <div class="lesson-section">
+        <h2>Three Test Directories</h2>
+        <table class="data-table">
+            <thead>
+                <tr><th>Directory</th><th>What It Tests</th><th>Requirements</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>tests/unit/</code></td>
+                    <td>Parsers, loaders, orchestration, validation, config</td>
+                    <td>Fixtures only &mdash; no database, no network</td>
+                </tr>
+                <tr>
+                    <td><code>tests/web/</code></td>
+                    <td>API endpoints, HTML pages, security headers, accessibility</td>
+                    <td>In-memory fixtures via TestClient</td>
+                </tr>
+                <tr>
+                    <td><code>tests/warehouse/</code></td>
+                    <td>Real data validation against <code>warehouse.duckdb</code></td>
+                    <td>Populated warehouse (auto-skipped if absent)</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            Unit and web tests run in CI on every push and PR. Warehouse tests run only locally after
+            <code>jobclass-pipeline run-all</code>.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>What the Tests Verify</h2>
+        <ul>
+            <li><strong>Schema contracts</strong> &mdash; Required columns exist on every table</li>
+            <li><strong>Grain uniqueness</strong> &mdash; No duplicate business keys in any dimension or fact</li>
+            <li><strong>Referential integrity</strong> &mdash; Every fact row's dimension keys point to existing dimension rows</li>
+            <li><strong>Idempotence</strong> &mdash; Re-running a load produces the same row count</li>
+            <li><strong>Validation framework</strong> &mdash; Structural, temporal, and drift checks all pass</li>
+            <li><strong>API correctness</strong> &mdash; Every endpoint returns expected status codes and response shapes</li>
+            <li><strong>Security</strong> &mdash; CSP headers, no PII exposure, CORS configuration</li>
+        </ul>
+    </div>
+
+    <div class="lesson-section">
+        <h2>CI Configuration</h2>
+        <p>GitHub Actions runs on every push to <code>main</code> and every PR:</p>
+        <pre class="lesson-code"><code>lint:
+  python-version: "3.14"
+  steps: ruff check + ruff format --check
+
+test:
+  matrix: [3.12, 3.14]
+  steps: pip install -e ".[dev]" → pytest --cov</code></pre>
+        <div class="lesson-callout">
+            <p>
+                <strong>Key lesson:</strong> Run <code>ruff format --check src/ tests/</code> locally
+                before pushing. CI will reject unformatted code even if it's functionally correct.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Full Deployment Pipeline</h2>
+        <pre class="lesson-code"><code>1. ruff check src/ tests/              # Lint passes
+2. ruff format --check src/ tests/     # Formatting matches
+3. pytest tests/unit/ tests/web/ -q    # All tests pass
+4. git push                            # CI passes on GitHub
+5. python scripts/build_static.py \
+     --base-path /jobclass             # Rebuild static site
+6. python scripts/deploy_pages.py      # Deploy to GitHub Pages</code></pre>
+        <p>
+            Steps 1&ndash;4 ensure code quality. Step 5 regenerates every HTML page and JSON file
+            (takes several minutes for ~870 occupations). Step 6 force-pushes <code>_site/</code>
+            to the <code>gh-pages</code> branch.
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/static-site">&larr; Static Site Generation</a>
+        </div>
+        <div style="text-align: right;">
+            <a href="/lessons">All Lessons &rarr;</a>
+        </div>
+    </nav>
+</section>

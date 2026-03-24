@@ -1,0 +1,91 @@
+<section class="lesson-page">
+    <h1>Dimensional Modeling for Labor Data</h1>
+    <p class="lesson-meta">Lesson 2 &mdash; Architecture &amp; data modeling</p>
+
+    <div class="lesson-section">
+        <h2>The Four-Layer Architecture</h2>
+        <pre class="lesson-code"><code>Raw/Landing → Staging → Core Warehouse → Analyst Marts</code></pre>
+        <p>Each layer has a specific job:</p>
+        <ol>
+            <li>
+                <strong>Raw/Landing</strong> &mdash; Store the downloaded file exactly as received. Never modify it.
+                Record the URL, download time, checksum, and source release label. If something goes wrong
+                downstream, you can always reprocess from raw.
+            </li>
+            <li>
+                <strong>Staging</strong> &mdash; Parse the raw file into relational tables. Standardize column names
+                (everything becomes <code>snake_case</code>). Apply explicit typing. Do not interpret, aggregate,
+                or transform business meaning. Example: <code>stage__bls__oews_national</code>.
+            </li>
+            <li>
+                <strong>Core Warehouse</strong> &mdash; Conform the staged data into shared dimensions and facts.
+                This is where business meaning gets assigned. Dimensions (<code>dim_occupation</code>,
+                <code>dim_geography</code>, <code>dim_industry</code>) provide context; facts
+                (<code>fact_occupation_employment_wages</code>) record measurements; bridges
+                (<code>bridge_occupation_skill</code>) link many-to-many relationships.
+            </li>
+            <li>
+                <strong>Analyst Marts</strong> &mdash; Pre-joined, denormalized views optimized for specific questions.
+                No new business logic &mdash; only reshaping what the core warehouse already established. Example:
+                <code>occupation_summary</code> joins occupation + wages + skills into one queryable view.
+            </li>
+        </ol>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Why Dimensions Matter</h2>
+        <p>
+            A dimension table like <code>dim_geography</code> stores the descriptive attributes of a geographic
+            area: its code (<code>37</code>), type (<code>state</code>), name (<code>North Carolina</code>),
+            and whether it's the current version. The fact table stores only the surrogate key
+            (<code>geography_key = 14</code>), not the full description.
+        </p>
+        <p>This separation means:</p>
+        <ul>
+            <li>Geographic names can change without rewriting fact history</li>
+            <li>Multiple facts can reference the same geography without storing redundant strings</li>
+            <li>Queries filter on dimension attributes and join to facts via integer keys (fast)</li>
+        </ul>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Grain Rule</h2>
+        <p>
+            Every fact table has a "grain" &mdash; the combination of dimensions that uniquely identifies a row.
+            For <code>fact_occupation_employment_wages</code>, the grain is:
+        </p>
+        <pre class="lesson-code"><code>(reference_period, geography_key, industry_key, ownership_code, occupation_key, source_dataset)</code></pre>
+        <div class="lesson-callout">
+            <p>
+                <strong>Rule:</strong> If you insert a row that duplicates this grain, something has gone wrong.
+                The loader enforces this with delete-before-insert at the
+                <code>(source_dataset, source_release_id)</code> level.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Bridge Tables for Many-to-Many</h2>
+        <p>
+            An occupation has many skills. A skill applies to many occupations. The
+            <code>bridge_occupation_skill</code> table resolves this with three columns:
+            <code>occupation_key</code>, <code>element_id</code>, and a score.
+        </p>
+        <p>
+            This is deliberately separate from a generic EAV table &mdash; each O*NET domain (skills,
+            knowledge, abilities, tasks) gets its own bridge table for clarity. More tables is acceptable
+            when it makes the schema self-documenting.
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/federal-data">&larr; Federal Data Landscape</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/multi-vintage">Multi-Vintage Challenge &rarr;</a>
+        </div>
+    </nav>
+</section>

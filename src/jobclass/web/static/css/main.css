@@ -880,3 +880,196 @@ input:focus-visible {
 
 td.positive { color: var(--color-success); font-weight: 600; }
 td.negative { color: #e53e3e; font-weight: 600; }
+
+/* ============================================================
+   Lessons pages
+   ============================================================ */
+
+.lessons-page h1 {
+    font-size: 1.75rem;
+    color: var(--color-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.lessons-intro {
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+    margin-bottom: var(--space-2xl);
+    max-width: 700px;
+}
+
+.lesson-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--space-lg);
+}
+
+.lesson-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: var(--space-lg);
+    text-decoration: none;
+    color: var(--color-text);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.lesson-card:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.lesson-card-number {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-xs);
+}
+
+.lesson-card h2 {
+    font-size: 1.1rem;
+    color: var(--color-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.lesson-card p {
+    color: var(--color-text-muted);
+    font-size: 0.92rem;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.lesson-card-meta {
+    margin-top: var(--space-md);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+/* Individual lesson page */
+
+.lesson-page h1 {
+    font-size: 1.75rem;
+    color: var(--color-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.lesson-meta {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-bottom: var(--space-2xl);
+}
+
+.lesson-section {
+    margin-bottom: var(--space-2xl);
+}
+
+.lesson-section h2 {
+    font-size: 1.25rem;
+    color: var(--color-primary);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-xs);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.lesson-section h3 {
+    font-size: 1.05rem;
+    color: var(--color-text);
+    margin-top: var(--space-lg);
+    margin-bottom: var(--space-sm);
+}
+
+.lesson-section p {
+    line-height: 1.7;
+    margin-bottom: var(--space-md);
+    max-width: 760px;
+}
+
+.lesson-section ul, .lesson-section ol {
+    padding-left: var(--space-lg);
+    margin-bottom: var(--space-md);
+    line-height: 1.7;
+    max-width: 760px;
+}
+
+.lesson-section li {
+    margin-bottom: var(--space-sm);
+}
+
+.lesson-code {
+    background: #1a202c;
+    color: #e2e8f0;
+    padding: var(--space-md) var(--space-lg);
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+    max-width: 760px;
+}
+
+.lesson-code code {
+    background: none;
+    padding: 0;
+    font-size: inherit;
+}
+
+.lesson-section code {
+    background: #edf2f7;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+}
+
+.lesson-callout {
+    background: #ebf8ff;
+    border-left: 4px solid var(--color-accent);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: 0 6px 6px 0;
+    margin-bottom: var(--space-md);
+    max-width: 760px;
+}
+
+.lesson-callout p {
+    margin-bottom: 0;
+}
+
+.lesson-callout strong {
+    color: var(--color-primary);
+}
+
+.lesson-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--space-xl);
+    margin-top: var(--space-2xl);
+    border-top: 1px solid var(--color-border);
+}
+
+.lesson-nav a {
+    color: var(--color-accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.lesson-nav a:hover {
+    text-decoration: underline;
+}
+
+.lesson-nav-label {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .lesson-cards {
+        grid-template-columns: 1fr;
+    }
+}

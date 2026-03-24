@@ -143,6 +143,51 @@ def create_app() -> FastAPI:
             },
         )
 
+    @app.get("/lessons", response_class=HTMLResponse)
+    async def lessons_landing(request: Request):
+        return templates.TemplateResponse(
+            "base.html",
+            {
+                "request": request,
+                "page_title": "Lessons — JobClass",
+                "content_template": "lessons.html",
+            },
+        )
+
+    @app.get("/lessons/{lesson_slug}", response_class=HTMLResponse)
+    async def lesson_page(request: Request, lesson_slug: str):
+        valid_slugs = {
+            "federal-data": ("The Federal Labor Data Landscape", "lessons_federal_data.html"),
+            "dimensional-modeling": (
+                "Dimensional Modeling for Labor Data",
+                "lessons_dimensional_modeling.html",
+            ),
+            "multi-vintage": ("The Multi-Vintage Challenge", "lessons_multi_vintage.html"),
+            "data-quality": (
+                "Data Quality Traps in Government Sources",
+                "lessons_data_quality.html",
+            ),
+            "time-series": ("Time-Series Normalization", "lessons_time_series.html"),
+            "idempotent-pipelines": ("Idempotent Pipeline Design", "lessons_idempotent_pipelines.html"),
+            "static-site": ("Static Site Generation", "lessons_static_site.html"),
+            "testing-deployment": ("Testing and Deployment", "lessons_testing_deployment.html"),
+        }
+        if lesson_slug not in valid_slugs:
+            return templates.TemplateResponse(
+                "404.html",
+                {"request": request, "page_title": "Page Not Found"},
+                status_code=404,
+            )
+        title, template_name = valid_slugs[lesson_slug]
+        return templates.TemplateResponse(
+            "base.html",
+            {
+                "request": request,
+                "page_title": f"{title} — Lessons — JobClass",
+                "content_template": template_name,
+            },
+        )
+
     @app.get("/trends", response_class=HTMLResponse)
     async def trends_landing(request: Request):
         return templates.TemplateResponse(

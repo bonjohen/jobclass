@@ -1,0 +1,65 @@
+<section class="lessons-page">
+    <h1>Lessons</h1>
+    <p class="lessons-intro">
+        Practical lessons from building a labor market data warehouse. Each lesson covers a concept
+        encountered during development, with concrete examples from this codebase.
+    </p>
+
+    <div class="lesson-cards">
+        <a href="/lessons/federal-data" class="lesson-card">
+            <span class="lesson-card-number">Lesson 1</span>
+            <h2>The Federal Labor Data Landscape</h2>
+            <p>Four federal data products, one occupation code. How SOC, OEWS, O*NET, and Employment Projections connect through the Standard Occupational Classification.</p>
+            <span class="lesson-card-meta">Data sources &amp; relationships</span>
+        </a>
+
+        <a href="/lessons/dimensional-modeling" class="lesson-card">
+            <span class="lesson-card-number">Lesson 2</span>
+            <h2>Dimensional Modeling for Labor Data</h2>
+            <p>Facts, dimensions, bridges, and the four-layer architecture. Why separating measurements from context makes everything easier to query.</p>
+            <span class="lesson-card-meta">Architecture &amp; data modeling</span>
+        </a>
+
+        <a href="/lessons/multi-vintage" class="lesson-card">
+            <span class="lesson-card-number">Lesson 3</span>
+            <h2>The Multi-Vintage Challenge</h2>
+            <p>What breaks when you load multiple years of the same dataset, and how shared dimensions make cross-vintage time-series analysis possible.</p>
+            <span class="lesson-card-meta">Multi-year data integration</span>
+        </a>
+
+        <a href="/lessons/data-quality" class="lesson-card">
+            <span class="lesson-card-number">Lesson 4</span>
+            <h2>Data Quality Traps in Government Sources</h2>
+            <p>ZIP files with garbage inside, column names that change between releases, overlapping occupation groups, and suppressed values that aren't zeros.</p>
+            <span class="lesson-card-meta">Data quality &amp; defensive parsing</span>
+        </a>
+
+        <a href="/lessons/time-series" class="lesson-card">
+            <span class="lesson-card-number">Lesson 5</span>
+            <h2>Time-Series Normalization</h2>
+            <p>Transforming point-in-time snapshots into proper time-series data. As-published vs. comparable history, and how derived metrics are computed.</p>
+            <span class="lesson-card-meta">Time-series design &amp; analysis</span>
+        </a>
+
+        <a href="/lessons/idempotent-pipelines" class="lesson-card">
+            <span class="lesson-card-number">Lesson 6</span>
+            <h2>Idempotent Pipeline Design</h2>
+            <p>Why every load operation must be safely re-runnable. Delete-before-insert, check-before-insert, and grain uniqueness as the final safety net.</p>
+            <span class="lesson-card-meta">Pipeline reliability patterns</span>
+        </a>
+
+        <a href="/lessons/static-site" class="lesson-card">
+            <span class="lesson-card-number">Lesson 7</span>
+            <h2>Static Site Generation</h2>
+            <p>Converting a dynamic FastAPI application into static files for GitHub Pages. Fetch shims, path rewriting, and the limits of pre-rendering.</p>
+            <span class="lesson-card-meta">Deployment &amp; static generation</span>
+        </a>
+
+        <a href="/lessons/testing-deployment" class="lesson-card">
+            <span class="lesson-card-number">Lesson 8</span>
+            <h2>Testing and Deployment</h2>
+            <p>Three test directories, schema contracts, grain uniqueness, idempotence verification, CI configuration, and the full deployment checklist.</p>
+            <span class="lesson-card-meta">Testing strategy &amp; CI/CD</span>
+        </a>
+    </div>
+</section>

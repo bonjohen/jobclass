@@ -1,0 +1,105 @@
+<section class="lesson-page">
+    <h1>Time-Series Normalization</h1>
+    <p class="lesson-meta">Lesson 5 &mdash; Time-series design &amp; analysis</p>
+
+    <div class="lesson-section">
+        <h2>Facts Are Snapshots, Not Series</h2>
+        <p>
+            The <code>fact_occupation_employment_wages</code> table stores one row per (occupation,
+            geography, period, release). It records "in OEWS release 2023.05, occupation 11-1011 in
+            the national scope had employment of 200,480." This is a snapshot &mdash; a single
+            measurement at a single point in time.
+        </p>
+        <p>
+            To answer "how has employment for Chief Executives changed from 2021 to 2023?", you need
+            to pull three snapshots and align them by time period. That's what time-series normalization does.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Time-Series Schema</h2>
+        <pre class="lesson-code"><code>dim_time_period              — (period_key, year, period_type)
+dim_metric                   — (metric_key, metric_name, display_name, unit)
+fact_time_series_observation — (occupation_key, geography_key, period_key, metric_key, value, ...)
+fact_derived_series          — (occupation_key, geography_key, period_key, metric_key, value, ...)</code></pre>
+        <p>
+            Base observations come from the fact table. Derived series (YoY change, rolling averages,
+            state-vs-national gap) are computed from base observations. The two are stored separately
+            because derived values should never be treated as source data.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Two Modes: As Published vs. Comparable</h2>
+        <p>
+            <strong>As Published</strong> preserves every observation exactly as it appeared in its
+            source release. If BLS published employment = 200,480 in OEWS 2023.05, that value goes
+            into the time series regardless of whether the SOC taxonomy changed between releases.
+        </p>
+        <p>
+            <strong>Comparable History</strong> only includes observations from vintages that share
+            the same SOC taxonomy version. If OEWS 2021, 2022, and 2023 all use SOC 2018, all three
+            are comparable. But if a future release uses SOC 2028 with different occupation definitions,
+            comparing its employment count to a SOC 2018 count would be misleading.
+        </p>
+        <div class="lesson-callout">
+            <p>
+                <strong>Design decision:</strong> Both modes are always computed. The UI lets the user
+                choose which view they want. This avoids forcing an opinion about comparability into
+                the data layer.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Derived Metrics</h2>
+        <p>From base observations, the pipeline computes:</p>
+        <table class="data-table">
+            <thead>
+                <tr><th>Metric</th><th>Formula</th><th>Minimum Data Required</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Year-over-year absolute change</td>
+                    <td><code>value(year) - value(year-1)</code></td>
+                    <td>2 consecutive years</td>
+                </tr>
+                <tr>
+                    <td>Year-over-year percent change</td>
+                    <td><code>(value(year) - value(year-1)) / value(year-1) &times; 100</code></td>
+                    <td>2 consecutive years</td>
+                </tr>
+                <tr>
+                    <td>3-year rolling average</td>
+                    <td><code>avg(value) over 3-year window</code></td>
+                    <td>3 consecutive years</td>
+                </tr>
+                <tr>
+                    <td>State vs. national gap</td>
+                    <td><code>state_value - national_value</code></td>
+                    <td>State + national data</td>
+                </tr>
+                <tr>
+                    <td>Rank delta</td>
+                    <td><code>rank(year-1) - rank(year)</code></td>
+                    <td>2 consecutive years</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            These derived values are labeled as such in the database and the UI. They are never mixed
+            with source observations.
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/data-quality">&larr; Data Quality Traps</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/idempotent-pipelines">Idempotent Pipelines &rarr;</a>
+        </div>
+    </nav>
+</section>

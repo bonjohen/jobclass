@@ -1,0 +1,76 @@
+<section class="lesson-page">
+    <h1>Idempotent Pipeline Design</h1>
+    <p class="lesson-meta">Lesson 6 &mdash; Pipeline reliability patterns</p>
+
+    <div class="lesson-section">
+        <h2>Why Idempotency Matters</h2>
+        <p>
+            Data pipelines fail. Downloads timeout, parsers hit unexpected formats, database connections
+            drop. When you restart the pipeline, it must not create duplicate rows for data that was
+            already loaded.
+        </p>
+        <div class="lesson-callout">
+            <p>
+                <strong>Definition:</strong> Idempotency means running the same operation twice produces
+                the same result as running it once.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Pattern: Delete-Before-Insert at Release Grain</h2>
+        <p>The OEWS loader uses this pattern:</p>
+        <pre class="lesson-code"><code>-- 1. Delete any existing rows for this release
+DELETE FROM stage__bls__oews_national WHERE source_release_id = ?
+
+-- 2. Insert the new rows
+INSERT INTO stage__bls__oews_national (...) VALUES (...)</code></pre>
+        <p>
+            If the pipeline crashes after step 1 but before step 2, the next run will delete nothing
+            (already gone) and insert fresh. If it crashes after both steps, the next run will delete
+            the partial data and re-insert complete. Either way, no duplicates.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Pattern: Check-Before-Insert for Dimensions</h2>
+        <p>Dimension tables use existence checks:</p>
+        <pre class="lesson-code"><code>-- Only insert if this business key doesn't already exist
+INSERT INTO dim_geography (geo_type, geo_code, geo_name, ...)
+SELECT ?, ?, ?, ...
+WHERE NOT EXISTS (
+    SELECT 1 FROM dim_geography WHERE geo_type = ? AND geo_code = ?
+)</code></pre>
+        <p>
+            This means the dimension grows over time (new geographies get added) but existing rows are
+            never duplicated or modified.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Pattern: Fact Table Grain Uniqueness</h2>
+        <p>
+            The fact table's unique constraint on its grain columns is the final safety net. Even if
+            the loader logic has a bug, the database will reject duplicate facts:
+        </p>
+        <pre class="lesson-code"><code>UNIQUE (reference_period, geography_key, industry_key, ownership_code,
+        occupation_key, source_dataset)</code></pre>
+        <div class="lesson-callout">
+            <p>
+                <strong>Testing pattern:</strong> Every test suite includes idempotence tests &mdash;
+                load data, record the row count, load again, verify the count hasn't changed.
+            </p>
+        </div>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/time-series">&larr; Time-Series Normalization</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/static-site">Static Site Generation &rarr;</a>
+        </div>
+    </nav>
+</section>

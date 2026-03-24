@@ -1,0 +1,89 @@
+<section class="lesson-page">
+    <h1>The Federal Labor Data Landscape</h1>
+    <p class="lesson-meta">Lesson 1 &mdash; Data sources &amp; relationships</p>
+
+    <div class="lesson-section">
+        <h2>The Occupation Code Is Everything</h2>
+        <p>
+            Every data product in this system revolves around the Standard Occupational Classification (SOC)
+            code. A SOC code like <code>11-1011</code> identifies "Chief Executives" &mdash; the <code>11</code>
+            is the major group (Management), <code>1011</code> narrows to the specific occupation. There are
+            roughly 870 detailed occupations in SOC 2018.
+        </p>
+        <p>
+            The SOC taxonomy is published by BLS and updated roughly every 10 years. The current version is
+            SOC 2018. This matters because when the taxonomy changes, occupation codes can split, merge, or
+            disappear &mdash; breaking any naive time-series comparison.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Four Data Products, One Key</h2>
+        <table class="data-table">
+            <thead>
+                <tr><th>Source</th><th>Publisher</th><th>What It Contains</th><th>Update Frequency</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>SOC</strong></td>
+                    <td>BLS</td>
+                    <td>Occupation hierarchy: major &rarr; minor &rarr; broad &rarr; detailed</td>
+                    <td>~10 years</td>
+                </tr>
+                <tr>
+                    <td><strong>OEWS</strong></td>
+                    <td>BLS</td>
+                    <td>Employment counts and wage statistics by occupation, geography, and industry</td>
+                    <td>Annual (May reference period)</td>
+                </tr>
+                <tr>
+                    <td><strong>O*NET</strong></td>
+                    <td>DOL / O*NET Center</td>
+                    <td>Skills, knowledge, abilities, and tasks for each occupation</td>
+                    <td>Continuous (versioned releases)</td>
+                </tr>
+                <tr>
+                    <td><strong>Employment Projections</strong></td>
+                    <td>BLS</td>
+                    <td>10-year employment outlook with growth rates</td>
+                    <td>Every 2 years</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="lesson-section">
+        <h2>How They Connect</h2>
+        <pre class="lesson-code"><code>SOC (taxonomy backbone)
+ ├── OEWS links via occupation_code → how many people, how much they earn
+ ├── O*NET links via SOC code → what skills and tasks the job requires
+ └── Projections link via SOC code → where employment is heading</code></pre>
+        <p>
+            The SOC taxonomy must load first. Every other data product joins to <code>dim_occupation</code>
+            through the SOC code. If a source uses a code that doesn't exist in the loaded SOC version,
+            that row is excluded (this is expected for ~5 NEM 2024 codes that don't map to SOC 2018).
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Why This Matters</h2>
+        <div class="lesson-callout">
+            <p>
+                <strong>Key insight:</strong> You cannot treat these as four independent datasets. They are four
+                views of the same occupational reality, and the SOC code is the thread that connects them.
+                Designing the warehouse around this fact &mdash; occupation as the stable external key &mdash;
+                is the single most important architectural decision in this project.
+            </p>
+        </div>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <a href="/lessons">&larr; All Lessons</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/dimensional-modeling">Dimensional Modeling &rarr;</a>
+        </div>
+    </nav>
+</section>

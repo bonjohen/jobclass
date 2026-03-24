@@ -1,0 +1,79 @@
+<section class="lesson-page">
+    <h1>The Multi-Vintage Challenge</h1>
+    <p class="lesson-meta">Lesson 3 &mdash; Multi-year data integration</p>
+
+    <div class="lesson-section">
+        <h2>What Is a "Vintage"?</h2>
+        <p>
+            A vintage is one release of a dataset. OEWS publishes annually with a May reference period, so
+            <code>2021.05</code>, <code>2022.05</code>, and <code>2023.05</code> are three vintages of the
+            same dataset. Each vintage is a complete snapshot &mdash; not a diff.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Naive Approach (and Why It Breaks)</h2>
+        <p>
+            The simplest approach: load each vintage independently. Each vintage creates its own dimension rows.
+            OEWS 2021 creates geography key 1 for "National", OEWS 2022 creates geography key 2 for "National",
+            OEWS 2023 creates geography key 3 for "National".
+        </p>
+        <p>
+            Now try to compute year-over-year change in employment for a national-level occupation. You need to
+            join facts from 2021 and 2023 on geography &mdash; but they have different geography keys for the
+            same physical area. The join produces zero rows.
+        </p>
+        <div class="lesson-callout">
+            <p>
+                <strong>The problem:</strong> Per-vintage dimension keys make cross-vintage analysis impossible
+                because the same real-world entity gets different surrogate keys in each vintage.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Fix: Deduplicate on Business Key</h2>
+        <p>
+            Geography doesn't change between vintages. North Carolina is still North Carolina. So the geography
+            dimension should check for existing rows using only the business key (<code>geo_type + geo_code</code>),
+            not the source release. If a matching row exists, reuse its surrogate key.
+        </p>
+        <h3>Before (broken)</h3>
+        <pre class="lesson-code"><code>WHERE geo_type = ? AND geo_code = ? AND source_release_id = ?</code></pre>
+        <h3>After (correct)</h3>
+        <pre class="lesson-code"><code>WHERE geo_type = ? AND geo_code = ?</code></pre>
+        <p>
+            This single change &mdash; removing <code>source_release_id</code> from the geography lookup &mdash;
+            is what makes cross-vintage time-series analysis possible.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Manifest-Based Vintage Management</h2>
+        <p>
+            The source manifest (<code>config/source_manifest.yaml</code>) uses suffix-based naming for vintages:
+        </p>
+        <pre class="lesson-code"><code>- dataset_name: oews_national_2021
+  dataset_url: https://www.bls.gov/oes/special-requests/oesm21nat.zip
+- dataset_name: oews_national_2022
+  dataset_url: https://www.bls.gov/oes/special-requests/oesm22nat.zip
+- dataset_name: oews_national_2023
+  dataset_url: https://www.bls.gov/oes/special-requests/oesm23nat.zip</code></pre>
+        <p>
+            The orchestrator pairs national + state entries by matching their suffix:
+            <code>oews_national_2021</code> pairs with <code>oews_state_2021</code>. This convention is
+            simple, extensible, and easy to debug.
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/dimensional-modeling">&larr; Dimensional Modeling</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/data-quality">Data Quality Traps &rarr;</a>
+        </div>
+    </nav>
+</section>
