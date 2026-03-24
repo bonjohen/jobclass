@@ -20,5 +20,8 @@ raw/
 .DS_Store
 Thumbs.db
 
+# Static site build output
+_site/
+
 # Environment
 .env
