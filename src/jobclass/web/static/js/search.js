@@ -2,17 +2,16 @@
 "use strict";
 
 (function() {
-    var FETCH_TIMEOUT_MS = 10000;
     var input = document.getElementById("search-input");
     var resultsDiv = document.getElementById("search-results");
     var debounceTimer = null;
-    var abortController = null;
+    var currentAbort = null;
 
     input.addEventListener("input", function() {
         clearTimeout(debounceTimer);
         var q = input.value.trim();
         if (q.length < 2) {
-            if (abortController) abortController.abort();
+            if (currentAbort) { currentAbort.abort(); currentAbort = null; }
             resultsDiv.innerHTML = '<p class="search-hint">Type at least 2 characters to search.</p>';
             return;
         }
@@ -20,14 +19,14 @@
     });
 
     function doSearch(q) {
-        if (abortController) abortController.abort();
-        abortController = new AbortController();
-        var timeoutId = setTimeout(function() { abortController.abort(); }, FETCH_TIMEOUT_MS);
+        if (currentAbort) { currentAbort.abort(); currentAbort = null; }
+        var controller = new AbortController();
+        currentAbort = controller;
 
-        fetch("/api/occupations/search?q=" + encodeURIComponent(q), { signal: abortController.signal })
+        fetchWithTimeout("/api/occupations/search?q=" + encodeURIComponent(q))
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                clearTimeout(timeoutId);
+                if (controller.signal.aborted) return;
                 if (!data.results || data.results.length === 0) {
                     resultsDiv.innerHTML = '<p class="search-hint">No occupations found.</p>';
                     return;
@@ -42,7 +41,6 @@
                 resultsDiv.innerHTML = html;
             })
             .catch(function(err) {
-                clearTimeout(timeoutId);
                 if (err.name === 'AbortError') return;
                 resultsDiv.innerHTML = '<p class="error-message">Search failed. Please try again.</p>';
             });

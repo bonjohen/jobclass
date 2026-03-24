@@ -92,7 +92,8 @@ window.fetch=function(u){
         var title=(info&&info.occupation_title)?info.occupation_title:codes[i];
         occs.push({soc_code:codes[i],title:title,series:d.series.map(function(s){return{year:s.year,value:s.value}})});
       });
-      return new Response(JSON.stringify({metric:met,geo_type:gt,occupations:occs}),{headers:{'Content-Type':'application/json'}});
+      var body=JSON.stringify({metric:met,geo_type:gt,occupations:occs});
+      return new Response(body,{headers:{'Content-Type':'application/json'}});
     });
   }
   if(pts.length===4&&pts[1]==='api'&&pts[2]==='trends'&&/^\d{2}-\d{4}$/.test(pts[3])){
@@ -256,24 +257,12 @@ def build_static(base_path: str, output_dir: str) -> None:
     print(f"  {trend_page_count} trend pages ({elapsed:.1f}s)")
 
     # --- HTML: Lesson pages ---
-    lesson_slugs = [
-        "federal-data",
-        "dimensional-modeling",
-        "multi-vintage",
-        "data-quality",
-        "time-series",
-        "idempotent-pipelines",
-        "static-site",
-        "testing-deployment",
-        "similarity-algorithms",
-        "thread-safety",
-        "multi-vintage-queries",
-        "ui-data-alignment",
-    ]
+    from jobclass.web.lessons import LESSON_SLUGS
+
     write_html("/lessons", "lessons/index.html")
-    for slug in lesson_slugs:
+    for slug in LESSON_SLUGS:
         write_html(f"/lessons/{slug}", f"lessons/{slug}/index.html")
-    print(f"  {1 + len(lesson_slugs)} lesson pages")
+    print(f"  {1 + len(LESSON_SLUGS)} lesson pages")
 
     # 404 page (GitHub Pages convention)
     resp = client.get("/this-page-does-not-exist-404")

@@ -21,6 +21,12 @@ def main():
         print("Error: _site/ not found. Run build_static.py first.")
         sys.exit(1)
 
+    # Sanity checks: ensure critical output files exist
+    for required in ["index.html", "static", "api"]:
+        if not (site_dir / required).exists():
+            print(f"Error: _site/{required} missing — build may be incomplete.")
+            sys.exit(1)
+
     # Get remote URL
     result = subprocess.run(
         ["git", "remote", "get-url", "origin"],
@@ -55,10 +61,7 @@ def main():
     )
 
     # Clean up .git in _site (may fail on Windows due to file locks)
-    try:
-        shutil.rmtree(site_dir / ".git", ignore_errors=True)
-    except Exception:
-        pass
+    shutil.rmtree(site_dir / ".git", ignore_errors=True)
 
     print("\nDeployed successfully!")
     print("\nIf this is the first deploy, enable GitHub Pages:")

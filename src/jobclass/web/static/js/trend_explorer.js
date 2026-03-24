@@ -2,17 +2,10 @@
 "use strict";
 
 (function() {
-    var FETCH_TIMEOUT_MS = 10000;
     var socCode = document.querySelector(".trend-explorer-page").dataset.socCode;
     var chartContainer = document.getElementById("trend-chart-container");
     var tableContainer = document.getElementById("trend-table-container");
     var metaDiv = document.getElementById("trend-meta");
-
-    function fetchWithTimeout(url) {
-        var controller = new AbortController();
-        var timer = setTimeout(function() { controller.abort(); }, FETCH_TIMEOUT_MS);
-        return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
-    }
 
     function loadTrend() {
         var metric = document.getElementById("metric-select").value;

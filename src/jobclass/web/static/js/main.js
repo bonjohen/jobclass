@@ -2,6 +2,20 @@
 
 "use strict";
 
+/** Default timeout for API fetch calls (milliseconds). */
+var FETCH_TIMEOUT_MS = 10000;
+
+/**
+ * Fetch with an automatic abort timeout.
+ * Returns a Promise that rejects with AbortError if the timeout elapses.
+ */
+function fetchWithTimeout(url, timeoutMs) {
+    var ms = timeoutMs || FETCH_TIMEOUT_MS;
+    var controller = new AbortController();
+    var timer = setTimeout(function() { controller.abort(); }, ms);
+    return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
+}
+
 /**
  * Format a number with thousand separators.
  * Returns "N/A" for null/undefined values.

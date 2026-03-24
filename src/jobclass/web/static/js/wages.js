@@ -2,15 +2,8 @@
 "use strict";
 
 (function() {
-    var FETCH_TIMEOUT_MS = 10000;
     var socCode = document.querySelector(".wages-comparison-page").dataset.socCode;
     var container = document.getElementById("wages-table-container");
-
-    function fetchWithTimeout(url) {
-        var controller = new AbortController();
-        var timer = setTimeout(function() { controller.abort(); }, FETCH_TIMEOUT_MS);
-        return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
-    }
 
     fetchWithTimeout("/api/occupations/" + encodeURIComponent(socCode) + "/wages?geo_type=state")
         .then(function(r) { return r.json(); })

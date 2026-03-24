@@ -2,16 +2,9 @@
 "use strict";
 
 (function() {
-    var FETCH_TIMEOUT_MS = 10000;
     var socCode = document.getElementById("occupation-page").dataset.socCode;
     var loading = document.getElementById("profile-loading");
     var content = document.getElementById("profile-content");
-
-    function fetchWithTimeout(url) {
-        var controller = new AbortController();
-        var timer = setTimeout(function() { controller.abort(); }, FETCH_TIMEOUT_MS);
-        return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
-    }
 
     function showError(elementId, message) {
         var el = document.getElementById(elementId);

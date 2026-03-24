@@ -2,6 +2,8 @@
 
 This document tracks the work required to integrate seven new data sources into the JobClass warehouse, following the requirements in `new_data_source_design.md`.
 
+**Code review integration:** This plan incorporates relevant findings from `phased_code_review_release_plan_v2.md`. Code review tasks are prefixed with `CR2-` and placed in the NDS phase where they are most practical to implement. Remaining code review tasks not merged here are tracked in the CR2 plan and will be executed after all NDS phases.
+
 ## Status Key
 
 | Symbol | Meaning |
@@ -12,6 +14,27 @@ This document tracks the work required to integrate seven new data sources into 
 | `[!]` | Paused — started but blocked or deferred |
 
 **Columns**: Status, Task ID, Description, Started, Completed
+
+---
+
+## Phase NDS0: Code Quality Prep (CR2 items)
+
+Before adding new API endpoints and JS sections, clean up duplicated utilities and centralize registries. This prevents the new code from inheriting existing duplication.
+
+| Status | Task ID | Description | Started | Completed |
+|--------|---------|-------------|---------|-----------|
+| `[X]` | CR2-01a | Add `fetchWithTimeout(url, timeoutMs)` and `FETCH_TIMEOUT_MS = 10000` to `main.js` | | |
+| `[X]` | CR2-01b | Remove local `fetchWithTimeout` + `FETCH_TIMEOUT_MS` from all 10 JS files (geography_comparison, hierarchy, landing, methodology, occupation, occupation_comparison, ranked_movers, trend_explorer, trends, wages) | | |
+| `[X]` | CR2-01c | Refactor `search.js` to use shared `fetchWithTimeout`; fix AbortController reuse (CR2-06) | | |
+| `[X]` | CR2-01d | Update cache-busting version in `base.html` (`?v=NDS0`) | | |
+| `[X]` | CR2-02a | Create `src/jobclass/web/lessons.py` with canonical `LESSONS` registry | | |
+| `[X]` | CR2-02b | Update `app.py`, `test_lessons.py`, `build_static.py` to import from `lessons.py` | | |
+| `[X]` | CR2-02c | Add test: verify every registry entry has a corresponding template file | | |
+| `[X]` | CR2-04a | Fix `_table_exists()` in `trends.py`: catch `CatalogException` instead of bare `Exception`; add identifier validation | | |
+| `[X]` | CR2-09a | Move drift threshold magic numbers in `validate/framework.py` to named constants with rationale comments | | |
+| `[X]` | CR2-18a | Remove redundant `try/except` around `shutil.rmtree(..., ignore_errors=True)` in `deploy_pages.py` | | |
+| `[X]` | CR2-17a | Add pre-push sanity checks to `deploy_pages.py`: verify `_site/index.html`, `_site/static/`, `_site/api/` exist | | |
+| `[X]` | NDS0-01 | Run all tests — verify no regressions from prep work | | |
 
 ---
 
@@ -29,6 +52,14 @@ Expose the already-loaded O\*NET knowledge data through the API and website.
 | `[ ]` | NDS1-06 | Add test: occupation profile page contains knowledge section markup | | |
 | `[ ]` | NDS1-07 | Verify on live server: knowledge section renders correctly for an occupation with knowledge data (e.g., 15-1252) | | |
 
+**Code review (CR2-03):** Add Pydantic response models for trends API alongside the new knowledge endpoint, since we are already modifying `models.py`.
+
+| Status | Task ID | Description | Started | Completed |
+|--------|---------|-------------|---------|-----------|
+| `[ ]` | CR2-03a | Define `TrendSeriesResponse`, `TrendCompareResponse`, `TrendGeographyResponse`, `TrendMoversResponse` in `models.py` | | |
+| `[ ]` | CR2-03b | Apply `response_model=` to all 7 endpoints in `trends.py` | | |
+| `[ ]` | CR2-03c | Run all trends tests — verify responses conform to models | | |
+
 ---
 
 ## Phase NDS2: Surface O\*NET Abilities (DS-02)
@@ -44,6 +75,13 @@ Expose the already-loaded O\*NET abilities data through the API and website.
 | `[ ]` | NDS2-05 | Add test: abilities endpoint returns 200 with expected fields | | |
 | `[ ]` | NDS2-06 | Add test: occupation profile page contains abilities section markup | | |
 | `[ ]` | NDS2-07 | Verify on live server: abilities section renders correctly | | |
+
+**Code review (CR2-08):** Add CSS section comments while adding new profile section styles.
+
+| Status | Task ID | Description | Started | Completed |
+|--------|---------|-------------|---------|-----------|
+| `[ ]` | CR2-08a | Add section comment headers to `main.css` for each major section (variables, layout, nav, cards, search, hierarchy, trends, occupation, wages, lessons, responsive) | | |
+| `[ ]` | CR2-08b | Audit repeated magic numbers (border-radius, spacing) — replace 3+ occurrences with CSS variables | | |
 
 ---
 
@@ -65,6 +103,14 @@ Add a new O\*NET domain for generalized work activities.
 | `[ ]` | NDS3-10 | Add unit tests: parser returns expected rows from sample TSV, loader is idempotent | | |
 | `[ ]` | NDS3-11 | Add web tests: endpoint returns 200, profile page has activities section | | |
 | `[ ]` | NDS3-12 | Run `jobclass-pipeline run-all` and verify work activities load with real data | | |
+
+**Code review (CR2-05):** Fix shim error handling while adding new endpoints to `build_static.py`.
+
+| Status | Task ID | Description | Started | Completed |
+|--------|---------|-------------|---------|-----------|
+| `[ ]` | CR2-05a | In STATIC_SHIM occupation comparison handler, filter null results from assembled occupations array | | |
+| `[ ]` | CR2-05b | Add `console.warn()` in shim catch blocks for failed occupation fetches | | |
+| `[ ]` | CR2-05c | In `occupation_comparison.js`, add null-check before iterating occupation series data | | |
 
 ---
 
@@ -170,7 +216,7 @@ Add the crosswalk and extend comparable history with pre-2018 OEWS vintages.
 
 ## Phase NDS8: Integration Testing & Deployment
 
-Final verification across all new sources.
+Final verification across all new sources. Includes remaining code review test coverage items.
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
@@ -187,26 +233,39 @@ Final verification across all new sources.
 | `[ ]` | NDS8-11 | Verify GitHub Pages site renders new profile sections and real wage trends correctly | | |
 | `[ ]` | NDS8-12 | Update `CLAUDE.md` with new source descriptions, test counts, and any new CLI commands | | |
 
+**Code review test coverage (CR2-10 through CR2-14):** Add static site build tests and close test coverage gaps for trends features.
+
+| Status | Task ID | Description | Started | Completed |
+|--------|---------|-------------|---------|-----------|
+| `[ ]` | CR2-10a | Create `tests/test_build_static.py`: test shim injection, URL rewriting, per-year movers JSON, per-metric trend JSON, search index, lesson pages, `.nojekyll`, static assets copied | | |
+| `[ ]` | CR2-11a | Add tests for ranked movers year filter: explicit year, `available_years` field, nonexistent year, year+metric combo | | |
+| `[ ]` | CR2-12a | Add tests for trends comparison endpoints: >10 codes rejected, invalid SOC format, geography year/metric params, missing data graceful handling | | |
+| `[ ]` | CR2-13a | Add CI step in `.github/workflows/ci.yml` that runs `python scripts/build_static.py --base-path /jobclass` and verifies `_site/index.html` exists | | |
+| `[ ]` | CR2-14a | Add contract tests: parse each trends endpoint response through Pydantic model, assert no validation errors | | |
+| `[ ]` | CR2-16a | Expand Static Site section in CLAUDE.md with any new URL pattern → JSON file mappings added during NDS phases | | |
+
 ---
 
 ## Phase Summary
 
-| Phase | Description | Task Count | Status |
-|-------|-------------|------------|--------|
-| NDS1 | Surface O\*NET Knowledge (DS-01) | 7 | Not Started |
-| NDS2 | Surface O\*NET Abilities (DS-02) | 7 | Not Started |
-| NDS3 | O\*NET Work Activities (DS-03) | 12 | Not Started |
-| NDS4 | O\*NET Education & Training (DS-04) | 14 | Not Started |
-| NDS5 | O\*NET Technology Skills (DS-05) | 14 | Not Started |
-| NDS6 | BLS CPI-U Inflation Adjustment (DS-06) | 17 | Not Started |
-| NDS7 | SOC 2010↔2018 Crosswalk (DS-07) | 19 | Not Started |
-| NDS8 | Integration Testing & Deployment | 12 | Not Started |
-| **Total** | | **102** | |
+| Phase | Description | Task Count | CR2 Tasks | Status |
+|-------|-------------|------------|-----------|--------|
+| NDS0 | Code Quality Prep (CR2 items) | 12 | 12 | Not Started |
+| NDS1 | Surface O\*NET Knowledge (DS-01) | 7 | +3 (CR2-03) | Not Started |
+| NDS2 | Surface O\*NET Abilities (DS-02) | 7 | +2 (CR2-08) | Not Started |
+| NDS3 | O\*NET Work Activities (DS-03) | 12 | +3 (CR2-05) | Not Started |
+| NDS4 | O\*NET Education & Training (DS-04) | 14 | — | Not Started |
+| NDS5 | O\*NET Technology Skills (DS-05) | 14 | — | Not Started |
+| NDS6 | BLS CPI-U Inflation Adjustment (DS-06) | 17 | — | Not Started |
+| NDS7 | SOC 2010↔2018 Crosswalk (DS-07) | 19 | — | Not Started |
+| NDS8 | Integration Testing & Deployment | 12 | +6 (CR2-10–16) | Not Started |
+| **Total** | | **114** | **26** | |
 
 ---
 
 ## Notes
 
+- **NDS0 (Code Quality Prep) must be done first.** Extracting `fetchWithTimeout` to `main.js` and centralizing lesson slugs prevents new NDS code from inheriting existing duplication.
 - **NDS1 and NDS2 have zero dependencies** and require no new downloads. They should be implemented first as quick wins.
 - **NDS3 through NDS5 are independent** of each other. They all require O\*NET downloads but use separate files. They can be developed in parallel.
 - **NDS6 (CPI) is independent** of all O\*NET work. It can start at any time.
@@ -215,3 +274,26 @@ Final verification across all new sources.
 - **Incremental deployment is encouraged.** Each phase can be committed, pushed, and deployed independently. The static site should be rebuilt after each phase that adds new API endpoints.
 - **OEWS vintage expansion (NDS7)** adds 12 new manifest entries (6 years × 2 files). This significantly increases pipeline run time. Consider adding a `--vintage` CLI flag to run specific vintages rather than all.
 - **O\*NET version updates** (e.g., 29.1 → 30.0) may change file URLs. The manifest entries should use the version number in comments so they can be updated when a new O\*NET release drops.
+- **Code review items not merged here** (CR2-15 cache-busting docs) are already addressed in the CLAUDE.md update.
+
+## Code Review Cross-Reference
+
+| CR2 Finding | Merged Into | Rationale |
+|-------------|-------------|-----------|
+| CR2-01 (fetchWithTimeout) | NDS0 | Must be done before adding new JS functions |
+| CR2-02 (lesson slugs) | NDS0 | Must be done before any lesson changes |
+| CR2-03 (trends Pydantic models) | NDS1 | Natural fit while modifying `models.py` for new endpoints |
+| CR2-04 (_table_exists) | NDS0 | Quick fix, no dependencies |
+| CR2-05 (shim error handling) | NDS3 | Natural fit while updating `build_static.py` |
+| CR2-06 (search.js) | NDS0 | Merged with CR2-01 refactor |
+| CR2-08 (CSS sections) | NDS2 | Natural fit while adding new profile section styles |
+| CR2-09 (drift thresholds) | NDS0 | Quick fix, no dependencies |
+| CR2-10 (static site tests) | NDS8 | Comprehensive testing phase |
+| CR2-11 (movers year tests) | NDS8 | Testing phase |
+| CR2-12 (comparison tests) | NDS8 | Testing phase |
+| CR2-13 (CI static build) | NDS8 | Deployment phase |
+| CR2-14 (contract tests) | NDS8 | Testing phase |
+| CR2-16 (static site docs) | NDS8 | Final documentation update |
+| CR2-17 (deploy sanity) | NDS0 | Quick fix, no dependencies |
+| CR2-18 (redundant except) | NDS0 | Quick fix, no dependencies |
+| CR2-15 (cache-bust docs) | Done | Already addressed in CLAUDE.md update |

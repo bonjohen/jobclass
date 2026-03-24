@@ -2,14 +2,6 @@
 "use strict";
 
 (function() {
-    var FETCH_TIMEOUT_MS = 10000;
-
-    function fetchWithTimeout(url) {
-        var controller = new AbortController();
-        var timer = setTimeout(function() { controller.abort(); }, FETCH_TIMEOUT_MS);
-        return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
-    }
-
     function setupSearch(inputId, resultsId, urlPrefix) {
         var input = document.getElementById(inputId);
         var results = document.getElementById(resultsId);

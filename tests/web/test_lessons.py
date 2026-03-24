@@ -1,19 +1,8 @@
-"""Tests for the Lessons section: landing page and all 12 lesson pages."""
+"""Tests for the Lessons section: landing page and all lesson pages."""
 
-LESSON_SLUGS = [
-    "federal-data",
-    "dimensional-modeling",
-    "multi-vintage",
-    "data-quality",
-    "time-series",
-    "idempotent-pipelines",
-    "static-site",
-    "testing-deployment",
-    "similarity-algorithms",
-    "thread-safety",
-    "multi-vintage-queries",
-    "ui-data-alignment",
-]
+from pathlib import Path
+
+from jobclass.web.lessons import LESSON_SLUGS, LESSONS
 
 
 class TestLessonsLanding:
@@ -96,3 +85,16 @@ class TestLessonsNavBar:
     def test_lessons_link_on_methodology_page(self, client):
         resp = client.get("/methodology")
         assert "/lessons" in resp.text
+
+
+class TestLessonRegistry:
+    """Verify lesson registry integrity."""
+
+    def test_every_lesson_has_template_file(self):
+        templates_dir = Path(__file__).resolve().parent.parent.parent / "src" / "jobclass" / "web" / "templates"
+        for _slug, _title, template_name in LESSONS:
+            assert (templates_dir / template_name).exists(), f"Missing template: {template_name}"
+
+    def test_card_count_matches_registry(self, client):
+        resp = client.get("/lessons")
+        assert resp.text.count("lesson-card-number") == len(LESSONS)

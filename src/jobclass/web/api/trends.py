@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 
+from duckdb import CatalogException
 from fastapi import APIRouter, HTTPException, Query
 
 from jobclass.web.database import get_db
@@ -20,12 +21,16 @@ _VALID_METRICS = {
     "employment_change_pct",
 }
 
+_VALID_TABLE_RE = re.compile(r"^[a-z_]+$")
+
 
 def _table_exists(conn, table_name: str) -> bool:
+    if not _VALID_TABLE_RE.match(table_name):
+        return False
     try:
         conn.execute(f"SELECT 1 FROM {table_name} LIMIT 0")
         return True
-    except Exception:
+    except CatalogException:
         return False
 
 

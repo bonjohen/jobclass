@@ -2,17 +2,10 @@
 "use strict";
 
 (function() {
-    var FETCH_TIMEOUT_MS = 10000;
     var gainersContainer = document.getElementById("gainers-container");
     var losersContainer = document.getElementById("losers-container");
     var yearSelect = document.getElementById("movers-year");
     var yearsLoaded = false;
-
-    function fetchWithTimeout(url) {
-        var controller = new AbortController();
-        var timer = setTimeout(function() { controller.abort(); }, FETCH_TIMEOUT_MS);
-        return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
-    }
 
     function renderMovers(items, container, isGainer) {
         container.setAttribute("aria-busy", "false");

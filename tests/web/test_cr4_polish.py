@@ -98,43 +98,39 @@ class TestAccessibility:
 
 
 class TestFetchTimeouts:
-    """CR4-10/11/12: Fetch timeouts and error UI."""
+    """CR4-10/11/12: Fetch timeouts and error UI (centralized in main.js)."""
 
-    def test_occupation_js_has_timeout(self, client):
+    def test_main_js_has_fetch_with_timeout(self, client):
+        resp = client.get("/static/js/main.js")
+        text = resp.text
+        assert "FETCH_TIMEOUT_MS" in text
+        assert "fetchWithTimeout" in text
+        assert "AbortController" in text
+        assert "10000" in text
+
+    def test_occupation_js_uses_timeout(self, client):
         resp = client.get("/static/js/occupation.js")
-        text = resp.text
-        assert "FETCH_TIMEOUT_MS" in text
-        assert "AbortController" in text
-        assert "10000" in text
+        assert "fetchWithTimeout" in resp.text
 
-    def test_search_js_has_timeout(self, client):
+    def test_search_js_uses_timeout(self, client):
         resp = client.get("/static/js/search.js")
-        text = resp.text
-        assert "FETCH_TIMEOUT_MS" in text
-        assert "10000" in text
+        assert "fetchWithTimeout" in resp.text
 
-    def test_wages_js_has_timeout(self, client):
+    def test_wages_js_uses_timeout(self, client):
         resp = client.get("/static/js/wages.js")
-        text = resp.text
-        assert "FETCH_TIMEOUT_MS" in text
-        assert "AbortController" in text
+        assert "fetchWithTimeout" in resp.text
 
-    def test_hierarchy_js_has_timeout(self, client):
+    def test_hierarchy_js_uses_timeout(self, client):
         resp = client.get("/static/js/hierarchy.js")
-        text = resp.text
-        assert "FETCH_TIMEOUT_MS" in text
-        assert "fetchWithTimeout" in text
+        assert "fetchWithTimeout" in resp.text
 
-    def test_landing_js_has_timeout(self, client):
+    def test_landing_js_uses_timeout(self, client):
         resp = client.get("/static/js/landing.js")
-        text = resp.text
-        assert "FETCH_TIMEOUT_MS" in text
-        assert "fetchWithTimeout" in text
+        assert "fetchWithTimeout" in resp.text
 
-    def test_methodology_js_has_timeout(self, client):
+    def test_methodology_js_uses_timeout(self, client):
         resp = client.get("/static/js/methodology.js")
-        text = resp.text
-        assert "FETCH_TIMEOUT_MS" in text
+        assert "fetchWithTimeout" in resp.text
 
     def test_occupation_js_has_error_ui(self, client):
         resp = client.get("/static/js/occupation.js")

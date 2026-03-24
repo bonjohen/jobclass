@@ -7,12 +7,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Labor market occupation data pipeline that ingests federal data products (SOC, OEWS, O*NET, Employment Projections) into a layered analytical warehouse. The core design principle: **occupation is the stable external key**; job titles, roles, and internal classifications map onto it, not the other way around.
 
 The full design specification lives in `docs\specs\base_design_document.md`.
-This was consolidated into 'docs\specs\project_detail_design.md'
+This was consolidated into `docs\specs\project_detail_design.md`.
 This was used to construct two working documents:
-* docs\specs\phased_release_plan.md
-* docs\specs\test_plan.md
+* `docs\specs\phased_release_plan.md` — **Complete** (all tasks done)
+* `docs\specs\test_plan.md`
 
-Implementation of the project follows the phased release of both design and test plans.
+Subsequent release plans (all complete):
+* `docs\specs\time_series_labor_plan.md` — Time-series intelligence pipeline (101/101 tasks)
+* `docs\specs\lessons_release_plan.md` — Lessons section with 12 educational pages (36/36 tasks)
+
+Active release plans:
+* `docs\specs\new_data_source_plan.md` — 7 new data sources, 102 tasks across 8 phases (NDS1–NDS8), with integrated code review fixes from `docs\specs\phased_code_review_release_plan_v2.md`
+* `docs\specs\phased_code_review_release_plan_v2.md` — 18 findings, 62 tasks across 4 phases (CR2-P1–P4)
+
+Design documents:
+* `docs\specs\new_data_source_design.md` — Detailed design for all 7 new data sources
+* `docs\specs\code_review_plan_v2.md` — Full V2 code review findings and remediation plan
+* `docs\specs\code_review_agent_v2.md` — V2 review prompt
 
 ## Build Commands
 
@@ -62,10 +73,35 @@ The site is published at **https://bonjohen.github.io/jobclass/**
 - `scripts/build_static.py` pre-renders all HTML pages via the FastAPI TestClient and generates all API responses as static JSON files under `_site/`.
 - A fetch shim is injected into each HTML page's `<head>`. It intercepts JavaScript `fetch()` calls to `/api/` and redirects them to the corresponding `.json` files.
 - Search uses a client-side index built from the full occupation list in the database. The shim filters results locally, so no server-side search is needed.
-- Wages endpoints map the `geo_type` query parameter to separate JSON files (e.g., `wages-national.json`, `wages-state.json`).
 - Path rewriting handles the GitHub Pages subpath (`/jobclass`) for all links, assets, and API URLs.
 - `scripts/deploy_pages.py` pushes `_site/` to the `gh-pages` branch via force-push.
 - A `.nojekyll` file is included to prevent GitHub Pages Jekyll processing.
+
+### Shim URL Pattern → JSON File Mapping
+
+| API URL Pattern | Static JSON File | Notes |
+|----------------|-----------------|-------|
+| `/api/occupations/search?q=...` | `/api/occupations/search.json` | Client-side filtering from full index |
+| `/api/occupations/{soc}/wages?geo_type=X` | `/api/occupations/{soc}/wages-X.json` | Separate file per geo_type |
+| `/api/trends/movers?year=Y` | `/api/trends/movers-Y.json` | Per-year file; default loads `movers.json` |
+| `/api/trends/{soc}?metric=M` | `/api/trends/{soc}-M.json` | Per-metric file; default loads `{soc}.json` |
+| `/api/trends/compare/occupations?codes=...` | Client-side composition | Fetches per-occupation trend + detail JSONs |
+| `/api/trends/compare/geography?soc_code=X` | `/api/trends/compare/geography-X.json` | Per-occupation file |
+
+### Cache-Busting Convention
+
+Static assets in `base.html` use a version query parameter: `main.css?v=CR4`, `main.js?v=CR4`. **Bump the `?v=` value whenever CSS or JS files change.** Use a short tag (e.g., `NDS1`, `CR5`) referencing the change that triggered the update.
+
+### Local Testing
+
+```bash
+# Build the static site
+MSYS_NO_PATHCONV=1 python scripts/build_static.py --base-path /jobclass
+
+# Serve locally (Python built-in server)
+cd _site && python -m http.server 8080
+# Open http://localhost:8080/jobclass/
+```
 
 ## Architecture: Four-Layer Warehouse
 
@@ -113,14 +149,15 @@ The site is published at **https://bonjohen.github.io/jobclass/**
 
 Extract (declarative, manifest-driven) -> Parse (dataset-specific) -> Validate (structural, semantic, temporal, drift) -> Load (idempotent at dataset-version grain)
 
-Logical pipelines: `taxonomy_refresh`, `oews_refresh`, `onet_refresh`, `projections_refresh`, `warehouse_publish`. SOC must complete before occupation conformance; OEWS and O*NET may run independently.
+Logical pipelines: `taxonomy_refresh`, `oews_refresh`, `onet_refresh`, `projections_refresh`, `warehouse_publish`, `timeseries_refresh`. SOC must complete before occupation conformance; OEWS and O*NET may run independently. Time-series refresh runs after warehouse_publish.
 
 ## Testing Strategy
 
-- **507+ tests** across three test directories:
+- **585+ tests** across four test directories:
   - `tests/unit/` — Fixture-based parser, loader, orchestration, validation, and config tests. No database or network needed.
   - `tests/web/` — FastAPI TestClient tests for all API endpoints, HTML pages, security headers, accessibility, and end-to-end smoke tests. No database needed (uses in-memory fixtures).
   - `tests/warehouse/` — Real data validation tests against `warehouse.duckdb`. **Automatically skipped** if the warehouse file is absent. Run `jobclass-pipeline run-all` first to populate it.
+  - `tests/integration/` — End-to-end smoke tests and cross-layer integration tests.
 - Parser unit tests on representative source files
 - Schema contract tests (fail on missing/changed columns)
 - Grain uniqueness tests (fail on duplicate business keys)
@@ -128,8 +165,16 @@ Logical pipelines: `taxonomy_refresh`, `oews_refresh`, `onet_refresh`, `projecti
 - Historical regression tests against known published totals
 - Idempotent rerun tests (no duplicate output on re-run)
 
-## Release 1 Scope
+## Completed Releases
 
-In scope: SOC hierarchy, OEWS national + state, O*NET core descriptors, warehouse schema with lineage/version tracking, repeatable orchestration, validation, and five initial marts (`occupation_summary`, `occupation_wages_by_geography`, `occupation_skill_profile`, `occupation_task_profile`, `occupation_similarity_seeded`).
+**Release 1** — SOC hierarchy, OEWS national + state, O*NET core descriptors (skills, knowledge, abilities, tasks), warehouse schema with lineage/version tracking, repeatable orchestration, validation, five initial marts, web UI with occupation profiles, search, hierarchy browser, wage comparison, methodology page.
+
+**Time-Series Release** — Multi-vintage OEWS (2021–2023), conformed metric catalog, time-period dimension, observation + derived-series facts, 5 time-series marts, trend explorer, occupation comparison, geography comparison, ranked movers, comparable history framework.
+
+**Lessons Release** — 12 educational lesson pages covering federal data, dimensional modeling, multi-vintage challenges, data quality, time-series normalization, idempotent pipelines, static site generation, testing/deployment, similarity algorithms, thread safety, multi-vintage queries, and UI-data alignment.
+
+## Current Release: New Data Sources
+
+See `docs\specs\new_data_source_plan.md` for the active work plan. Seven new data sources across four tiers: surface existing O*NET knowledge/abilities, add work activities/education/technology, BLS CPI for inflation-adjusted wages, SOC crosswalk for historical depth.
 
 Not in scope: HR job architecture, title normalization, international harmonization, real-time APIs.

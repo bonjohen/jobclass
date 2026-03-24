@@ -21,6 +21,7 @@ from jobclass.web.api.projections import router as projections_router
 from jobclass.web.api.skills import router as skills_router
 from jobclass.web.api.trends import router as trends_router
 from jobclass.web.api.wages import router as wages_router
+from jobclass.web.lessons import LESSON_MAP
 
 _WEB_DIR = Path(__file__).parent
 _TEMPLATES_DIR = _WEB_DIR / "templates"
@@ -156,46 +157,14 @@ def create_app() -> FastAPI:
 
     @app.get("/lessons/{lesson_slug}", response_class=HTMLResponse)
     async def lesson_page(request: Request, lesson_slug: str):
-        valid_slugs = {
-            "federal-data": ("The Federal Labor Data Landscape", "lessons_federal_data.html"),
-            "dimensional-modeling": (
-                "Dimensional Modeling for Labor Data",
-                "lessons_dimensional_modeling.html",
-            ),
-            "multi-vintage": ("The Multi-Vintage Challenge", "lessons_multi_vintage.html"),
-            "data-quality": (
-                "Data Quality Traps in Government Sources",
-                "lessons_data_quality.html",
-            ),
-            "time-series": ("Time-Series Normalization", "lessons_time_series.html"),
-            "idempotent-pipelines": ("Idempotent Pipeline Design", "lessons_idempotent_pipelines.html"),
-            "static-site": ("Static Site Generation", "lessons_static_site.html"),
-            "testing-deployment": ("Testing and Deployment", "lessons_testing_deployment.html"),
-            "similarity-algorithms": (
-                "Choosing the Right Similarity Algorithm",
-                "lessons_similarity.html",
-            ),
-            "thread-safety": (
-                "Thread-Safe Database Connections",
-                "lessons_thread_safety.html",
-            ),
-            "multi-vintage-queries": (
-                "Multi-Vintage Query Pitfalls",
-                "lessons_multi_vintage_queries.html",
-            ),
-            "ui-data-alignment": (
-                "UI-Data Alignment",
-                "lessons_ui_data_alignment.html",
-            ),
-        }
-        if lesson_slug not in valid_slugs:
+        if lesson_slug not in LESSON_MAP:
             return templates.TemplateResponse(
                 request,
                 "404.html",
                 {"page_title": "Page Not Found"},
                 status_code=404,
             )
-        title, template_name = valid_slugs[lesson_slug]
+        title, template_name = LESSON_MAP[lesson_slug]
         return templates.TemplateResponse(
             request,
             "base.html",

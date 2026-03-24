@@ -2,14 +2,7 @@
 "use strict";
 
 (function() {
-    var FETCH_TIMEOUT_MS = 10000;
     var treeDiv = document.getElementById("hierarchy-tree");
-
-    function fetchWithTimeout(url) {
-        var controller = new AbortController();
-        var timer = setTimeout(function() { controller.abort(); }, FETCH_TIMEOUT_MS);
-        return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
-    }
 
     fetchWithTimeout("/api/occupations/hierarchy")
         .then(function(r) { return r.json(); })

@@ -2,7 +2,6 @@
 "use strict";
 
 (function() {
-    var FETCH_TIMEOUT_MS = 10000;
     var selectedCodes = [];
     var tagsContainer = document.getElementById("selected-occupations");
     var searchInput = document.getElementById("compare-search");
@@ -10,12 +9,6 @@
     var compareBtn = document.getElementById("compare-btn");
     var chartContainer = document.getElementById("compare-chart-container");
     var tableContainer = document.getElementById("compare-table-container");
-
-    function fetchWithTimeout(url) {
-        var controller = new AbortController();
-        var timer = setTimeout(function() { controller.abort(); }, FETCH_TIMEOUT_MS);
-        return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
-    }
 
     function updateTags() {
         var html = "";

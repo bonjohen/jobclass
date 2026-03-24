@@ -2,16 +2,9 @@
 "use strict";
 
 (function() {
-    var FETCH_TIMEOUT_MS = 10000;
     var socCode = document.querySelector(".geography-comparison-page").dataset.socCode;
     var chartContainer = document.getElementById("geo-chart-container");
     var tableContainer = document.getElementById("geo-table-container");
-
-    function fetchWithTimeout(url) {
-        var controller = new AbortController();
-        var timer = setTimeout(function() { controller.abort(); }, FETCH_TIMEOUT_MS);
-        return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
-    }
 
     function loadGeoComparison() {
         var metric = document.getElementById("geo-metric").value;
