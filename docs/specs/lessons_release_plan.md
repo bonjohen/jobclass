@@ -83,8 +83,8 @@ Update the static site generator, rebuild, and deploy.
 | `[X]` | L5-01 | Add `/lessons` path rewriting entries to `build_static.py` `rewrite_paths()` | 2026-03-24 | 2026-03-24 |
 | `[X]` | L5-02 | Add lesson HTML page generation to `build_static.py` (landing + 8 lesson pages) | 2026-03-24 | 2026-03-24 |
 | `[X]` | L5-03 | Run `ruff format` and `ruff check` on all changed files | 2026-03-24 | 2026-03-24 |
-| `[>]` | L5-04 | Commit all lessons work | 2026-03-24 | |
-| `[ ]` | L5-05 | Push to GitHub and verify CI passes | | |
+| `[X]` | L5-04 | Commit all lessons work | 2026-03-24 | 2026-03-24 |
+| `[X]` | L5-05 | Push to GitHub and verify CI passes | 2026-03-24 | 2026-03-24 |
 | `[X]` | L5-06 | Update `README.md` with lessons section info and updated test count | 2026-03-24 | 2026-03-24 |
 
 ---
@@ -97,5 +97,5 @@ Update the static site generator, rebuild, and deploy.
 | L2 | Data Foundation Lessons (1–4) | 6 | Complete |
 | L3 | Engineering Lessons (5–8) | 6 | Complete |
 | L4 | Web Tests | 6 | Complete |
-| L5 | Static Site Integration & Deployment | 6 | In progress |
+| L5 | Static Site Integration & Deployment | 6 | Complete |
 | **Total** | | **29** | |
