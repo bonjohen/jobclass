@@ -26,6 +26,8 @@ def main() -> None:
     run_all.add_argument("--manifest", default=str(_DEFAULT_MANIFEST), help="Path to source manifest YAML")
     run_all.add_argument("--raw-dir", default="raw", help="Directory for immutable raw artifact storage")
 
+    sub.add_parser("timeseries-refresh", help="Run time-series pipeline (dimensions, observations, derived metrics)")
+
     args = parser.parse_args()
 
     if args.command == "migrate":
@@ -44,6 +46,8 @@ def main() -> None:
             "dim_occupation", "dim_geography", "dim_industry",
             "dim_skill", "dim_knowledge", "dim_ability", "dim_task",
             "fact_occupation_employment_wages", "fact_occupation_projections",
+            "dim_metric", "dim_time_period",
+            "fact_time_series_observation", "fact_derived_series",
         ]
         print("Warehouse status:")
         for t in tables:
@@ -86,6 +90,27 @@ def main() -> None:
 
         conn.close()
         sys.exit(0 if summary.pipelines_failed == 0 else 1)
+
+    elif args.command == "timeseries-refresh":
+        from jobclass.orchestrate.timeseries_refresh import timeseries_refresh
+
+        conn = get_connection(DB_PATH)
+        apply_migrations(conn)
+
+        print("Running time-series refresh pipeline...")
+        print(f"Database: {DB_PATH}")
+
+        ts_results = timeseries_refresh(conn)
+        failed_steps = [k for k, v in ts_results.items() if v < 0]
+
+        print(f"\n{'='*50}")
+        print("Time-series refresh complete:")
+        for step, count in ts_results.items():
+            status = "FAILED" if count < 0 else f"{count:,} rows"
+            print(f"  {step}: {status}")
+
+        conn.close()
+        sys.exit(0 if not failed_steps else 1)
 
     else:
         parser.print_help()

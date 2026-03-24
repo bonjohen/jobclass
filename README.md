@@ -62,10 +62,26 @@ config/          Source manifest (YAML)
 scripts/         Static site build and deploy
 ```
 
+## Time-series labor intelligence
+
+The warehouse extends point-in-time occupation reporting with time-series analysis:
+
+- **Conformed metric catalog** (`dim_metric`) — 6 base metrics + 5 derived metrics with units, display format, comparability constraints
+- **Time-period dimension** (`dim_time_period`) — annual periods auto-populated from warehouse fact years
+- **Observation fact** (`fact_time_series_observation`) — normalized from OEWS and projections at the grain of metric + occupation + geography + period + source release + comparability mode
+- **Derived-series fact** (`fact_derived_series`) — year-over-year change, percent change, 3-year rolling average, state-vs-national gap, rank delta
+- **Comparable history** — as-published vs. comparable-history modes; projection metrics excluded from comparable series
+- **5 time-series marts** — trend series, geography gap, rank change, projection context, similarity trend overlay
+
+```bash
+# Run time-series pipeline standalone
+jobclass-pipeline timeseries-refresh
+```
+
 ## Testing
 
 ```bash
-# Full suite (484+ tests)
+# Full suite (513+ tests)
 pytest
 
 # Warehouse-only tests (real data validation)
@@ -85,9 +101,10 @@ python scripts/deploy_pages.py
 
 ```bash
 # Pipeline
-jobclass-pipeline migrate       # Run database migrations
-jobclass-pipeline status        # Check migration and database status
-jobclass-pipeline run-all       # Run all pipelines
+jobclass-pipeline migrate              # Run database migrations
+jobclass-pipeline status               # Check migration and database status
+jobclass-pipeline run-all              # Run all pipelines
+jobclass-pipeline timeseries-refresh   # Run time-series pipeline only
 
 # Web server
 jobclass-web                            # Default: http://127.0.0.1:8000

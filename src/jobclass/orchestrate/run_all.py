@@ -196,7 +196,7 @@ def run_all_pipelines(
         summary.errors.append(msg)
 
     # --- 5. Warehouse Publish ---
-    print("\n[5/5] Warehouse Publish (validation gate)")
+    print("\n[5/6] Warehouse Publish (validation gate)")
     summary.pipelines_attempted += 1
     try:
         result = warehouse_publish(conn, soc_version, oews_release, onet_version)
@@ -210,6 +210,29 @@ def run_all_pipelines(
             summary.errors.append(msg)
     except Exception as e:
         msg = f"  ERROR — Publish: {e}"
+        print(msg)
+        summary.pipelines_failed += 1
+        summary.errors.append(msg)
+
+    # --- 6. Time-Series Refresh ---
+    print("\n[6/6] Time-Series Refresh")
+    summary.pipelines_attempted += 1
+    try:
+        from jobclass.orchestrate.timeseries_refresh import timeseries_refresh
+
+        ts_results = timeseries_refresh(conn)
+        failed_steps = [k for k, v in ts_results.items() if v < 0]
+        if failed_steps:
+            msg = f"  PARTIAL — {len(failed_steps)} step(s) failed: {', '.join(failed_steps)}"
+            print(msg)
+            summary.pipelines_failed += 1
+            summary.errors.append(msg)
+        else:
+            total_rows = sum(ts_results.values())
+            print(f"  OK — time-series refresh complete ({total_rows:,} total rows)")
+            summary.pipelines_succeeded += 1
+    except Exception as e:
+        msg = f"  ERROR — Time-Series: {e}"
         print(msg)
         summary.pipelines_failed += 1
         summary.errors.append(msg)

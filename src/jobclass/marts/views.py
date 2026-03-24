@@ -12,6 +12,14 @@ MART_VIEWS = [
     "occupation_similarity_seeded",
 ]
 
+TIMESERIES_MART_VIEWS = [
+    "mart_occupation_trend_series",
+    "mart_occupation_geography_gap_series",
+    "mart_occupation_rank_change",
+    "mart_occupation_projection_context",
+    "mart_occupation_similarity_trend_overlay",
+]
+
 
 def mart_exists(conn: duckdb.DuckDBPyConnection, view_name: str) -> bool:
     """Check whether a mart view exists in the database."""
