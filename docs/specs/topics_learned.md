@@ -19,6 +19,12 @@ Lessons and issues discovered during the time-series labor intelligence implemen
 - **Fix:** Extended `_OEWS_COLUMN_ALIASES` in `src/jobclass/parse/oews.py` to normalize all known variations.
 - **Takeaway:** When adding historical vintages, always check column headers against the parser's alias map.
 
+### Occupation Similarity Was Broken by O\*NET's Universal Skill Ratings
+- **Problem:** The `occupation_similarity_seeded` view used Jaccard similarity on binary skill presence/absence. But O\*NET rates all 35 skills for every occupation — they differ in importance scores, not presence. Jaccard produced 1.0 (100% similar) for every pair, making Dancer "similar" to Bakers, Lawyers, and Pile Driver Operators.
+- **Secondary issue:** "All Other" catch-all occupations (e.g., `17-2199 Engineers, All Other`) had up to 8x duplicate rows per skill in `bridge_occupation_skill`, further corrupting the computation.
+- **Fix:** Replaced Jaccard with cosine similarity on the importance (IM) score vectors. Added `AVG + GROUP BY` to deduplicate bridge rows before computing dot products. The view column is still named `jaccard_similarity` to avoid a cascading rename — the API exposes it as `similarity_score`.
+- **Takeaway:** Before choosing a similarity algorithm, understand the data's structure. Binary presence/absence metrics are useless when every item has every feature rated. Use score-based similarity (cosine, correlation) when values carry the signal, not membership.
+
 ## Architecture Decisions
 
 ### Geography Dimension Must Be Shared Across Vintages
