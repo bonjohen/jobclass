@@ -1,0 +1,11 @@
+O*NET-SOC Code	Element ID	Element Name	Scale ID	Data Value	N	Standard Error	Lower CI Bound	Upper CI Bound	Recommend Suppress	Not Relevant	Date	Domain Source
+15-1252.00	4.A.1.a.1	Getting Information	IM	4.56	29	0.1559	4.2369	4.8756	N	N	08/2023	Incumbent
+15-1252.00	4.A.1.a.1	Getting Information	LV	4.89	30	0.1727	4.5393	5.2458	N	N	08/2023	Incumbent
+15-1252.00	4.A.2.a.4	Analyzing Data or Information	IM	4.62	29	0.1430	4.3257	4.9118	N	N	08/2023	Incumbent
+15-1252.00	4.A.2.a.4	Analyzing Data or Information	LV	5.13	30	0.1580	4.8086	5.4514	N	N	08/2023	Incumbent
+15-1252.00	4.A.3.a.3	Making Decisions and Solving Problems	IM	4.44	29	0.1480	4.1365	4.7435	N	N	08/2023	Incumbent
+15-1252.00	4.A.3.a.3	Making Decisions and Solving Problems	LV	4.75	30	0.1650	4.4144	5.0856	N	N	08/2023	Incumbent
+11-1021.00	4.A.1.a.1	Getting Information	IM	4.38	25	0.1700	4.0310	4.7190	N	N	08/2023	Incumbent
+11-1021.00	4.A.1.a.1	Getting Information	LV	4.63	25	0.1800	4.2620	4.9980	N	N	08/2023	Incumbent
+11-1021.00	4.A.4.a.1	Communicating with Supervisors, Peers, or Subordinates	IM	4.75	25	0.1200	4.5040	4.9960	N	N	08/2023	Incumbent
+11-1021.00	4.A.4.a.1	Communicating with Supervisors, Peers, or Subordinates	LV	4.88	25	0.1300	4.6140	5.1460	N	N	08/2023	Incumbent

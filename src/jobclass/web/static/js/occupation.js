@@ -88,6 +88,12 @@
             loadKnowledge(socCode);
             // Load abilities
             loadAbilities(socCode);
+            // Load work activities
+            loadActivities(socCode);
+            // Load technology
+            loadTechnology(socCode);
+            // Load education
+            loadEducation(socCode);
             // Load tasks
             loadTasks(socCode);
             // Load projections
@@ -230,6 +236,102 @@
                 setBusy("abilities-section", false);
                 document.getElementById("abilities-section").style.display = "block";
                 showError("abilities-content", "Failed to load abilities data.");
+            });
+    }
+
+    function loadActivities(code) {
+        fetchWithTimeout("/api/occupations/" + encodeURIComponent(code) + "/activities")
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(data) {
+                setBusy("activities-section", false);
+                if (!data || !data.activities || data.activities.length === 0) {
+                    showNoData("activities-section", "activities-content", "No work activities data available.");
+                    return;
+                }
+                var section = document.getElementById("activities-section");
+                section.style.display = "block";
+                var html = '<table class="data-table"><thead><tr><th>Work Activity</th><th>Importance</th><th>Level</th></tr></thead><tbody>';
+                data.activities.forEach(function(a) {
+                    html += '<tr><td>' + escapeHtml(a.element_name) + '</td>';
+                    html += '<td>' + (a.importance != null ? a.importance.toFixed(2) : 'N/A') + '</td>';
+                    html += '<td>' + (a.level != null ? a.level.toFixed(2) : 'N/A') + '</td></tr>';
+                });
+                html += '</tbody></table>';
+                if (data.source_version) html += '<div class="lineage-badge">O*NET ' + escapeHtml(data.source_version) + '</div>';
+                document.getElementById("activities-content").innerHTML = html;
+            })
+            .catch(function() {
+                setBusy("activities-section", false);
+                document.getElementById("activities-section").style.display = "block";
+                showError("activities-content", "Failed to load work activities data.");
+            });
+    }
+
+    function loadTechnology(code) {
+        fetchWithTimeout("/api/occupations/" + encodeURIComponent(code) + "/technology")
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(data) {
+                setBusy("technology-section", false);
+                if (!data || !data.groups || data.groups.length === 0) {
+                    showNoData("technology-section", "technology-content", "No tools & technology data available.");
+                    return;
+                }
+                var section = document.getElementById("technology-section");
+                section.style.display = "block";
+                var html = '';
+                data.groups.forEach(function(group) {
+                    html += '<h3>' + escapeHtml(group.t2_type) + '</h3><ul class="task-list">';
+                    group.items.forEach(function(item) {
+                        html += '<li>' + escapeHtml(item.example_name);
+                        if (item.hot_technology) html += ' <span class="lineage-badge">Hot</span>';
+                        html += '</li>';
+                    });
+                    html += '</ul>';
+                });
+                if (data.source_version) html += '<div class="lineage-badge">O*NET ' + escapeHtml(data.source_version) + '</div>';
+                document.getElementById("technology-content").innerHTML = html;
+            })
+            .catch(function() {
+                setBusy("technology-section", false);
+                document.getElementById("technology-section").style.display = "block";
+                showError("technology-content", "Failed to load technology data.");
+            });
+    }
+
+    function loadEducation(code) {
+        fetchWithTimeout("/api/occupations/" + encodeURIComponent(code) + "/education")
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(data) {
+                setBusy("education-section", false);
+                if (!data || !data.elements || data.elements.length === 0) {
+                    showNoData("education-section", "education-content", "No education data available.");
+                    return;
+                }
+                var section = document.getElementById("education-section");
+                section.style.display = "block";
+                var html = '';
+                if (data.summary) {
+                    html += '<p><strong>' + escapeHtml(data.summary) + '</strong></p>';
+                }
+                data.elements.forEach(function(elem) {
+                    html += '<h3>' + escapeHtml(elem.element_name) + '</h3>';
+                    html += '<table class="data-table"><thead><tr><th>Category</th><th>Percentage</th></tr></thead><tbody>';
+                    elem.categories.forEach(function(cat) {
+                        if (cat.percentage != null && cat.percentage > 0) {
+                            var label = cat.category_label || ('Category ' + cat.category);
+                            html += '<tr><td>' + escapeHtml(label) + '</td>';
+                            html += '<td>' + cat.percentage.toFixed(0) + '%</td></tr>';
+                        }
+                    });
+                    html += '</tbody></table>';
+                });
+                if (data.source_version) html += '<div class="lineage-badge">O*NET ' + escapeHtml(data.source_version) + '</div>';
+                document.getElementById("education-content").innerHTML = html;
+            })
+            .catch(function() {
+                setBusy("education-section", false);
+                document.getElementById("education-section").style.display = "block";
+                showError("education-content", "Failed to load education data.");
             });
     }
 

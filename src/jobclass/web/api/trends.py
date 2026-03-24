@@ -7,6 +7,13 @@ import re
 from duckdb import CatalogException
 from fastapi import APIRouter, HTTPException, Query
 
+from jobclass.web.api.models import (
+    MetricsListResponse,
+    TrendCompareResponse,
+    TrendGeographyResponse,
+    TrendMoversResponse,
+    TrendSeriesResponse,
+)
 from jobclass.web.database import get_db
 
 router = APIRouter(prefix="/api", tags=["trends"])
@@ -34,7 +41,7 @@ def _table_exists(conn, table_name: str) -> bool:
         return False
 
 
-@router.get("/trends/compare/occupations")
+@router.get("/trends/compare/occupations", response_model=TrendCompareResponse)
 def compare_occupations(
     soc_codes: str = Query(..., description="Comma-separated SOC codes"),
     metric: str = Query("employment_count"),
@@ -83,7 +90,7 @@ def compare_occupations(
     return {"metric": metric, "geo_type": geo_type, "occupations": results}
 
 
-@router.get("/trends/compare/geography")
+@router.get("/trends/compare/geography", response_model=TrendGeographyResponse)
 def compare_geography(
     soc_code: str = Query(..., description="SOC code"),
     metric: str = Query("mean_annual_wage"),
@@ -143,7 +150,7 @@ def compare_geography(
     }
 
 
-@router.get("/trends/movers")
+@router.get("/trends/movers", response_model=TrendMoversResponse)
 def ranked_movers(
     metric: str = Query("employment_count"),
     geo_type: str = Query("national"),
@@ -223,7 +230,7 @@ def ranked_movers(
     }
 
 
-@router.get("/trends/metrics")
+@router.get("/trends/metrics", response_model=MetricsListResponse)
 def list_metrics() -> dict:
     """Return available metrics for trend analysis."""
     conn = get_db()
@@ -253,7 +260,7 @@ def list_metrics() -> dict:
     }
 
 
-@router.get("/trends/{soc_code}")
+@router.get("/trends/{soc_code}", response_model=TrendSeriesResponse)
 def occupation_trend(
     soc_code: str,
     metric: str = Query("employment_count", description="Metric name"),

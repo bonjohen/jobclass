@@ -64,13 +64,24 @@ def warehouse_db(tmp_path):
     # Load O*NET
     from jobclass.load.onet import (
         load_bridge_occupation_descriptor,
+        load_bridge_occupation_education,
         load_bridge_occupation_task,
+        load_bridge_occupation_technology,
         load_dim_descriptor,
+        load_dim_education_requirement,
         load_dim_task,
+        load_dim_technology,
         load_onet_descriptor_staging,
+        load_onet_education_staging,
         load_onet_task_staging,
+        load_onet_technology_staging,
     )
-    from jobclass.parse.onet import parse_onet_descriptors, parse_onet_tasks
+    from jobclass.parse.onet import (
+        parse_onet_descriptors,
+        parse_onet_education,
+        parse_onet_tasks,
+        parse_onet_technology,
+    )
 
     onet_ver = "29.1"
     skills = parse_onet_descriptors((FIXTURES_DIR / "onet_skills_sample.txt").read_text(encoding="utf-8"), onet_ver)
@@ -87,11 +98,29 @@ def warehouse_db(tmp_path):
     load_onet_descriptor_staging(conn, skills, "stage__onet__skills", onet_ver)
     load_onet_descriptor_staging(conn, knowledge, "stage__onet__knowledge", onet_ver)
     load_onet_descriptor_staging(conn, abilities, "stage__onet__abilities", onet_ver)
+    work_activities = parse_onet_descriptors(
+        (FIXTURES_DIR / "onet_work_activities_sample.txt").read_text(encoding="utf-8"),
+        onet_ver,
+    )
+    load_onet_descriptor_staging(conn, work_activities, "stage__onet__work_activities", onet_ver)
+    education = parse_onet_education(
+        (FIXTURES_DIR / "onet_education_sample.txt").read_text(encoding="utf-8"),
+        onet_ver,
+    )
+    load_onet_education_staging(conn, education, onet_ver)
+    technology = parse_onet_technology(
+        (FIXTURES_DIR / "onet_technology_skills_sample.txt").read_text(encoding="utf-8"),
+        onet_ver,
+    )
+    load_onet_technology_staging(conn, technology, onet_ver)
     load_onet_task_staging(conn, tasks, onet_ver)
 
     load_dim_descriptor(conn, "dim_skill", "skill_key", "stage__onet__skills", onet_ver)
     load_dim_descriptor(conn, "dim_knowledge", "knowledge_key", "stage__onet__knowledge", onet_ver)
     load_dim_descriptor(conn, "dim_ability", "ability_key", "stage__onet__abilities", onet_ver)
+    load_dim_descriptor(conn, "dim_work_activity", "work_activity_key", "stage__onet__work_activities", onet_ver)
+    load_dim_education_requirement(conn, onet_ver)
+    load_dim_technology(conn, onet_ver)
     load_dim_task(conn, onet_ver)
 
     load_bridge_occupation_descriptor(
@@ -117,6 +146,18 @@ def warehouse_db(tmp_path):
         onet_ver,
         soc_ver,
     )
+    load_bridge_occupation_descriptor(
+        conn,
+        "bridge_occupation_work_activity",
+        "dim_work_activity",
+        "work_activity_key",
+        "stage__onet__work_activities",
+        onet_ver,
+        onet_ver,
+        soc_ver,
+    )
+    load_bridge_occupation_education(conn, onet_ver, onet_ver, soc_ver)
+    load_bridge_occupation_technology(conn, onet_ver, onet_ver, soc_ver)
     load_bridge_occupation_task(conn, onet_ver, onet_ver, soc_ver)
 
     # Load Projections

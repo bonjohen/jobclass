@@ -81,8 +81,10 @@ window.fetch=function(u){
       var ct=c.trim();
       var tf=met==='employment_count'?ct+'.json':ct+'-'+met+'.json';
       return Promise.all([
-        F(b+'/api/trends/'+tf).then(function(r){return r.json()}).catch(function(){return null}),
-        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()}).catch(function(){return null})
+        F(b+'/api/trends/'+tf).then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:trend',ct,e);return null}),
+        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:occ',ct,e);return null})
       ]);
     })).then(function(arr){
       var occs=[];
@@ -354,6 +356,9 @@ def build_static(base_path: str, output_dir: str) -> None:
             (f"/api/occupations/{soc}/skills", f"api/occupations/{soc}/skills.json"),
             (f"/api/occupations/{soc}/knowledge", f"api/occupations/{soc}/knowledge.json"),
             (f"/api/occupations/{soc}/abilities", f"api/occupations/{soc}/abilities.json"),
+            (f"/api/occupations/{soc}/activities", f"api/occupations/{soc}/activities.json"),
+            (f"/api/occupations/{soc}/education", f"api/occupations/{soc}/education.json"),
+            (f"/api/occupations/{soc}/technology", f"api/occupations/{soc}/technology.json"),
             (f"/api/occupations/{soc}/tasks", f"api/occupations/{soc}/tasks.json"),
             (f"/api/occupations/{soc}/projections", f"api/occupations/{soc}/projections.json"),
             (f"/api/occupations/{soc}/similar", f"api/occupations/{soc}/similar.json"),

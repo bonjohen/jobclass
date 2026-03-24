@@ -8,10 +8,13 @@ from fastapi import APIRouter, HTTPException
 
 from jobclass.web.api.models import (
     AbilitiesResponse,
+    ActivitiesResponse,
+    EducationResponse,
     KnowledgeResponse,
     SimilarResponse,
     SkillsResponse,
     TasksResponse,
+    TechnologyResponse,
 )
 from jobclass.web.database import get_db
 
@@ -177,6 +180,201 @@ def occupation_abilities(soc_code: str) -> dict:
             }
             for r in rows
         ],
+    }
+
+
+@router.get("/occupations/{soc_code}/activities", response_model=ActivitiesResponse)
+def occupation_activities(soc_code: str) -> dict:
+    """Return work activity scores for an occupation."""
+    if not _SOC_CODE_RE.match(soc_code):
+        raise HTTPException(status_code=400, detail=f"Invalid SOC code format: {soc_code}")
+    conn = get_db()
+
+    occ = conn.execute(
+        "SELECT occupation_key FROM dim_occupation WHERE soc_code = ? AND is_current = true",
+        [soc_code],
+    ).fetchone()
+    if not occ:
+        raise HTTPException(status_code=404, detail=f"Occupation {soc_code} not found")
+
+    rows = conn.execute(
+        """
+        SELECT
+            w.element_name,
+            w.element_id,
+            MAX(CASE WHEN b.scale_id = 'IM' THEN b.data_value END) AS importance,
+            MAX(CASE WHEN b.scale_id = 'LV' THEN b.data_value END) AS level
+        FROM bridge_occupation_work_activity b
+        JOIN dim_work_activity w ON b.work_activity_key = w.work_activity_key
+        WHERE b.occupation_key = ? AND w.is_current = true
+        GROUP BY w.element_name, w.element_id
+        ORDER BY importance DESC NULLS LAST
+    """,
+        [occ[0]],
+    ).fetchall()
+
+    source_version = None
+    ver_row = conn.execute(
+        "SELECT DISTINCT source_version FROM bridge_occupation_work_activity WHERE occupation_key = ? LIMIT 1",
+        [occ[0]],
+    ).fetchone()
+    if ver_row:
+        source_version = ver_row[0]
+
+    return {
+        "soc_code": soc_code,
+        "source_version": source_version,
+        "activities": [
+            {
+                "element_name": r[0],
+                "element_id": r[1],
+                "importance": r[2],
+                "level": r[3],
+            }
+            for r in rows
+        ],
+    }
+
+
+@router.get("/occupations/{soc_code}/education", response_model=EducationResponse)
+def occupation_education(soc_code: str) -> dict:
+    """Return education and training requirements for an occupation."""
+    if not _SOC_CODE_RE.match(soc_code):
+        raise HTTPException(status_code=400, detail=f"Invalid SOC code format: {soc_code}")
+    conn = get_db()
+
+    occ = conn.execute(
+        "SELECT occupation_key FROM dim_occupation WHERE soc_code = ? AND is_current = true",
+        [soc_code],
+    ).fetchone()
+    if not occ:
+        raise HTTPException(status_code=404, detail=f"Occupation {soc_code} not found")
+
+    rows = conn.execute(
+        """
+        SELECT
+            d.element_id,
+            d.element_name,
+            d.scale_id,
+            d.category,
+            d.category_label,
+            b.data_value
+        FROM bridge_occupation_education b
+        JOIN dim_education_requirement d ON b.education_key = d.education_key
+        WHERE b.occupation_key = ? AND d.is_current = true
+        ORDER BY d.element_id, d.category
+    """,
+        [occ[0]],
+    ).fetchall()
+
+    source_version = None
+    ver_row = conn.execute(
+        "SELECT DISTINCT source_version FROM bridge_occupation_education WHERE occupation_key = ? LIMIT 1",
+        [occ[0]],
+    ).fetchone()
+    if ver_row:
+        source_version = ver_row[0]
+
+    # Group by element
+    elements: dict[str, dict] = {}
+    for r in rows:
+        eid = r[0]
+        if eid not in elements:
+            elements[eid] = {
+                "element_id": eid,
+                "element_name": r[1],
+                "scale_id": r[2],
+                "categories": [],
+            }
+        elements[eid]["categories"].append({
+            "category": r[3],
+            "category_label": r[4],
+            "percentage": r[5],
+        })
+
+    # Build summary from Required Level of Education (highest percentage category)
+    summary = None
+    education_labels = {
+        1: "Less than high school",
+        2: "High school diploma or equivalent",
+        3: "Some college, no degree",
+        4: "Postsecondary non-degree award",
+        5: "Associate's degree",
+        6: "Bachelor's degree",
+        7: "Master's degree",
+        8: "Doctoral or professional degree",
+    }
+    for elem in elements.values():
+        if elem["scale_id"] == "RL":
+            best = max(elem["categories"], key=lambda c: c["percentage"] or 0, default=None)
+            if best and best["percentage"]:
+                label = education_labels.get(best["category"], f"Category {best['category']}")
+                summary = f"Typical: {label} ({best['percentage']:.0f}%)"
+            break
+
+    return {
+        "soc_code": soc_code,
+        "source_version": source_version,
+        "summary": summary,
+        "elements": list(elements.values()),
+    }
+
+
+@router.get("/occupations/{soc_code}/technology", response_model=TechnologyResponse)
+def occupation_technology(soc_code: str) -> dict:
+    """Return tools and technology used by an occupation."""
+    if not _SOC_CODE_RE.match(soc_code):
+        raise HTTPException(status_code=400, detail=f"Invalid SOC code format: {soc_code}")
+    conn = get_db()
+
+    occ = conn.execute(
+        "SELECT occupation_key FROM dim_occupation WHERE soc_code = ? AND is_current = true",
+        [soc_code],
+    ).fetchone()
+    if not occ:
+        raise HTTPException(status_code=404, detail=f"Occupation {soc_code} not found")
+
+    rows = conn.execute(
+        """
+        SELECT
+            t.t2_type,
+            t.example_name,
+            t.commodity_code,
+            t.commodity_title,
+            b.hot_technology
+        FROM bridge_occupation_technology b
+        JOIN dim_technology t ON b.technology_key = t.technology_key
+        WHERE b.occupation_key = ? AND t.is_current = true
+        ORDER BY t.t2_type, t.example_name
+    """,
+        [occ[0]],
+    ).fetchall()
+
+    source_version = None
+    ver_row = conn.execute(
+        "SELECT DISTINCT source_version FROM bridge_occupation_technology WHERE occupation_key = ? LIMIT 1",
+        [occ[0]],
+    ).fetchone()
+    if ver_row:
+        source_version = ver_row[0]
+
+    # Group by t2_type
+    groups: dict[str, list] = {}
+    for r in rows:
+        t2_type = r[0]
+        if t2_type not in groups:
+            groups[t2_type] = []
+        groups[t2_type].append({
+            "example_name": r[1],
+            "commodity_code": r[2],
+            "commodity_title": r[3],
+            "hot_technology": r[4],
+        })
+
+    return {
+        "soc_code": soc_code,
+        "source_version": source_version,
+        "groups": [{"t2_type": k, "items": v} for k, v in groups.items()],
     }
 
 

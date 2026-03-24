@@ -110,6 +110,33 @@ sources:
     enabled: true
 
   - source_name: onet
+    dataset_name: onet_work_activities
+    dataset_url: https://www.onetcenter.org/dl_files/database/db_29_1_text/Work%20Activities.txt
+    expected_format: tsv
+    parser_name: onet_work_activities_parser
+    refresh_cadence: semi_annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  - source_name: onet
+    dataset_name: onet_technology_skills
+    dataset_url: https://www.onetcenter.org/dl_files/database/db_29_1_text/Technology%20Skills.txt
+    expected_format: tsv
+    parser_name: onet_technology_parser
+    refresh_cadence: semi_annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  - source_name: onet
+    dataset_name: onet_education
+    dataset_url: https://www.onetcenter.org/dl_files/database/db_29_1_text/Education%2C%20Training%2C%20and%20Experience.txt
+    expected_format: tsv
+    parser_name: onet_education_parser
+    refresh_cadence: semi_annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  - source_name: onet
     dataset_name: onet_tasks
     dataset_url: https://www.onetcenter.org/dl_files/database/db_29_1_text/Task%20Statements.txt
     expected_format: tsv

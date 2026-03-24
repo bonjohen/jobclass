@@ -90,6 +90,7 @@
                 // Build table
                 var allYears = [];
                 data.occupations.forEach(function(occ) {
+                    if (!occ.series) return;
                     occ.series.forEach(function(d) {
                         if (allYears.indexOf(d.year) === -1) allYears.push(d.year);
                     });
@@ -101,6 +102,7 @@
                 html += '</tr></thead><tbody>';
 
                 data.occupations.forEach(function(occ) {
+                    if (!occ.series) return;
                     var byYear = {};
                     occ.series.forEach(function(d) { byYear[d.year] = d.value; });
                     html += '<tr><td><a href="/trends/explorer/' + escapeAttr(occ.soc_code) + '">' +

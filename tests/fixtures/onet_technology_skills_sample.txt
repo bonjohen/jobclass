@@ -1,0 +1,9 @@
+O*NET-SOC Code	T2 Type	T2 Example	Commodity Code	Commodity Title	Hot Technology	Date	Domain Source
+15-1252.00	Tools	Integrated development environment IDE software	43232305	Integrated development environment IDE software	Y	08/2023	Incumbent
+15-1252.00	Tools	Object oriented programming software	43232306	Object or component oriented development software	Y	08/2023	Incumbent
+15-1252.00	Tools	Web platform development software	43232307	Web platform development software	Y	08/2023	Incumbent
+15-1252.00	Technology	Desktop computers	43211507	Desktop computers	N	08/2023	Incumbent
+15-1252.00	Technology	Laptop computers	43211503	Notebook computers	N	08/2023	Incumbent
+11-1021.00	Tools	Enterprise resource planning ERP software	43231601	Enterprise resource planning ERP software	Y	08/2023	Incumbent
+11-1021.00	Tools	Presentation software	43231513	Presentation software	N	08/2023	Incumbent
+11-1021.00	Technology	Desktop computers	43211507	Desktop computers	N	08/2023	Incumbent

@@ -5,7 +5,7 @@ from __future__ import annotations
 import duckdb
 
 from jobclass.load import _safe_identifier
-from jobclass.parse.onet import OnetDescriptorRow, OnetTaskRow
+from jobclass.parse.onet import OnetDescriptorRow, OnetEducationRow, OnetTaskRow, OnetTechnologyRow
 
 
 def load_onet_descriptor_staging(
@@ -181,5 +181,187 @@ def load_bridge_occupation_task(
            JOIN dim_occupation o ON o.soc_code = s.occupation_code AND o.soc_version = ?
            JOIN dim_task d ON d.task_id = s.task_id AND d.source_version = ?
            WHERE s.source_release_id = ?""",
+        [source_version, source_release_id, soc_version, source_version, source_release_id],
+    )
+
+
+def load_onet_education_staging(
+    conn: duckdb.DuckDBPyConnection,
+    rows: list[OnetEducationRow],
+    source_release_id: str,
+) -> None:
+    """Load parsed O*NET education rows into staging.
+
+    Idempotent: deletes existing rows for this release before inserting.
+    """
+    conn.execute("DELETE FROM stage__onet__education WHERE source_release_id = ?", [source_release_id])
+    for r in rows:
+        conn.execute(
+            """INSERT INTO stage__onet__education
+                (occupation_code, element_id, element_name, scale_id, category,
+                 data_value, n, standard_error, lower_ci, upper_ci,
+                 recommend_suppress, not_relevant, date, domain_source,
+                 source_release_id, parser_version)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [
+                r.occupation_code,
+                r.element_id,
+                r.element_name,
+                r.scale_id,
+                r.category,
+                r.data_value,
+                r.n,
+                r.standard_error,
+                r.lower_ci,
+                r.upper_ci,
+                r.recommend_suppress,
+                r.not_relevant,
+                r.date,
+                r.domain_source,
+                r.source_release_id,
+                r.parser_version,
+            ],
+        )
+
+
+def load_dim_education_requirement(
+    conn: duckdb.DuckDBPyConnection,
+    source_version: str,
+) -> None:
+    """Load dim_education_requirement from staging.
+
+    Inserts distinct (element_id, scale_id, category) triples not already present.
+    """
+    conn.execute(
+        """INSERT INTO dim_education_requirement
+            (element_id, element_name, scale_id, category, category_label, source_version)
+            SELECT DISTINCT s.element_id, s.element_name, s.scale_id, s.category, NULL, ?
+            FROM stage__onet__education s
+            WHERE NOT EXISTS (
+                SELECT 1 FROM dim_education_requirement d
+                WHERE d.element_id = s.element_id
+                  AND d.scale_id = s.scale_id
+                  AND d.category = s.category
+                  AND d.source_version = ?
+            )""",
+        [source_version, source_version],
+    )
+
+
+def load_bridge_occupation_education(
+    conn: duckdb.DuckDBPyConnection,
+    source_version: str,
+    source_release_id: str,
+    soc_version: str,
+) -> None:
+    """Load bridge_occupation_education from staging.
+
+    Idempotent: skips if rows already exist for this source_version + source_release_id.
+    """
+    existing = conn.execute(
+        "SELECT COUNT(*) FROM bridge_occupation_education WHERE source_version = ? AND source_release_id = ?",
+        [source_version, source_release_id],
+    ).fetchone()[0]
+    if existing > 0:
+        return
+
+    conn.execute(
+        """INSERT INTO bridge_occupation_education
+            (occupation_key, education_key, data_value, n, source_version, source_release_id)
+            SELECT o.occupation_key, d.education_key, s.data_value, s.n, ?, ?
+            FROM stage__onet__education s
+            JOIN dim_occupation o ON o.soc_code = s.occupation_code AND o.soc_version = ?
+            JOIN dim_education_requirement d
+              ON d.element_id = s.element_id
+              AND d.scale_id = s.scale_id
+              AND d.category = s.category
+              AND d.source_version = ?
+            WHERE s.source_release_id = ?""",
+        [source_version, source_release_id, soc_version, source_version, source_release_id],
+    )
+
+
+def load_onet_technology_staging(
+    conn: duckdb.DuckDBPyConnection,
+    rows: list[OnetTechnologyRow],
+    source_release_id: str,
+) -> None:
+    """Load parsed O*NET technology skills rows into staging.
+
+    Idempotent: deletes existing rows for this release before inserting.
+    """
+    conn.execute("DELETE FROM stage__onet__technology_skills WHERE source_release_id = ?", [source_release_id])
+    for r in rows:
+        conn.execute(
+            """INSERT INTO stage__onet__technology_skills
+                (occupation_code, t2_type, example_name, commodity_code, commodity_title,
+                 hot_technology, date, domain_source, source_release_id, parser_version)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [
+                r.occupation_code,
+                r.t2_type,
+                r.example_name,
+                r.commodity_code,
+                r.commodity_title,
+                r.hot_technology,
+                r.date,
+                r.domain_source,
+                r.source_release_id,
+                r.parser_version,
+            ],
+        )
+
+
+def load_dim_technology(
+    conn: duckdb.DuckDBPyConnection,
+    source_version: str,
+) -> None:
+    """Load dim_technology from staging.
+
+    Inserts distinct (commodity_code, example_name) pairs not already present.
+    """
+    conn.execute(
+        """INSERT INTO dim_technology
+            (commodity_code, commodity_title, t2_type, example_name, source_version)
+            SELECT DISTINCT s.commodity_code, s.commodity_title, s.t2_type, s.example_name, ?
+            FROM stage__onet__technology_skills s
+            WHERE NOT EXISTS (
+                SELECT 1 FROM dim_technology d
+                WHERE COALESCE(d.commodity_code, '') = COALESCE(s.commodity_code, '')
+                  AND d.example_name = s.example_name
+                  AND d.source_version = ?
+            )""",
+        [source_version, source_version],
+    )
+
+
+def load_bridge_occupation_technology(
+    conn: duckdb.DuckDBPyConnection,
+    source_version: str,
+    source_release_id: str,
+    soc_version: str,
+) -> None:
+    """Load bridge_occupation_technology from staging.
+
+    Idempotent: skips if rows already exist for this source_version + source_release_id.
+    """
+    existing = conn.execute(
+        "SELECT COUNT(*) FROM bridge_occupation_technology WHERE source_version = ? AND source_release_id = ?",
+        [source_version, source_release_id],
+    ).fetchone()[0]
+    if existing > 0:
+        return
+
+    conn.execute(
+        """INSERT INTO bridge_occupation_technology
+            (occupation_key, technology_key, hot_technology, source_version, source_release_id)
+            SELECT o.occupation_key, d.technology_key, s.hot_technology, ?, ?
+            FROM stage__onet__technology_skills s
+            JOIN dim_occupation o ON o.soc_code = s.occupation_code AND o.soc_version = ?
+            JOIN dim_technology d
+              ON COALESCE(d.commodity_code, '') = COALESCE(s.commodity_code, '')
+              AND d.example_name = s.example_name
+              AND d.source_version = ?
+            WHERE s.source_release_id = ?""",
         [source_version, source_release_id, soc_version, source_version, source_release_id],
     )

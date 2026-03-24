@@ -254,17 +254,31 @@ def onet_refresh(
     onet_version: str,
     source_release_id: str,
     soc_version: str,
+    work_activities_content: str | None = None,
+    education_content: str | None = None,
+    technology_content: str | None = None,
 ) -> PipelineResult:
     """Execute the O*NET pipeline: parse → validate → load."""
     from jobclass.load.onet import (
         load_bridge_occupation_descriptor,
+        load_bridge_occupation_education,
         load_bridge_occupation_task,
+        load_bridge_occupation_technology,
         load_dim_descriptor,
+        load_dim_education_requirement,
         load_dim_task,
+        load_dim_technology,
         load_onet_descriptor_staging,
+        load_onet_education_staging,
         load_onet_task_staging,
+        load_onet_technology_staging,
     )
-    from jobclass.parse.onet import parse_onet_descriptors, parse_onet_tasks
+    from jobclass.parse.onet import (
+        parse_onet_descriptors,
+        parse_onet_education,
+        parse_onet_tasks,
+        parse_onet_technology,
+    )
 
     if not check_taxonomy_loaded(conn, soc_version):
         return PipelineResult(
@@ -292,11 +306,28 @@ def onet_refresh(
         load_onet_descriptor_staging(conn, skills, "stage__onet__skills", source_release_id)
         load_onet_descriptor_staging(conn, knowledge, "stage__onet__knowledge", source_release_id)
         load_onet_descriptor_staging(conn, abilities, "stage__onet__abilities", source_release_id)
+        if work_activities_content:
+            work_activities = parse_onet_descriptors(work_activities_content, source_release_id)
+            load_onet_descriptor_staging(conn, work_activities, "stage__onet__work_activities", source_release_id)
+        if education_content:
+            education = parse_onet_education(education_content, source_release_id)
+            load_onet_education_staging(conn, education, source_release_id)
+        if technology_content:
+            technology = parse_onet_technology(technology_content, source_release_id)
+            load_onet_technology_staging(conn, technology, source_release_id)
         load_onet_task_staging(conn, tasks, source_release_id)
 
         load_dim_descriptor(conn, "dim_skill", "skill_key", "stage__onet__skills", onet_version)
         load_dim_descriptor(conn, "dim_knowledge", "knowledge_key", "stage__onet__knowledge", onet_version)
         load_dim_descriptor(conn, "dim_ability", "ability_key", "stage__onet__abilities", onet_version)
+        if work_activities_content:
+            load_dim_descriptor(
+                conn, "dim_work_activity", "work_activity_key", "stage__onet__work_activities", onet_version
+            )
+        if education_content:
+            load_dim_education_requirement(conn, onet_version)
+        if technology_content:
+            load_dim_technology(conn, onet_version)
         load_dim_task(conn, onet_version)
 
         load_bridge_occupation_descriptor(
@@ -329,11 +360,33 @@ def onet_refresh(
             source_release_id,
             soc_version,
         )
+        if work_activities_content:
+            load_bridge_occupation_descriptor(
+                conn,
+                "bridge_occupation_work_activity",
+                "dim_work_activity",
+                "work_activity_key",
+                "stage__onet__work_activities",
+                onet_version,
+                source_release_id,
+                soc_version,
+            )
+        if education_content:
+            load_bridge_occupation_education(conn, onet_version, source_release_id, soc_version)
+        if technology_content:
+            load_bridge_occupation_technology(conn, onet_version, source_release_id, soc_version)
         load_bridge_occupation_task(conn, onet_version, source_release_id, soc_version)
 
+        dim_tables = ["dim_skill", "dim_knowledge", "dim_ability", "dim_task"]
+        if work_activities_content:
+            dim_tables.append("dim_work_activity")
+        if education_content:
+            dim_tables.append("dim_education_requirement")
+        if technology_content:
+            dim_tables.append("dim_technology")
         total_loaded = sum(
             conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
-            for t in ["dim_skill", "dim_knowledge", "dim_ability", "dim_task"]
+            for t in dim_tables
         )
 
         update_run_counts(

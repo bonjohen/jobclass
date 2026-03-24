@@ -1,0 +1,16 @@
+O*NET-SOC Code	Element ID	Element Name	Scale ID	Category	Data Value	N	Standard Error	Lower CI Bound	Upper CI Bound	Recommend Suppress	Not Relevant	Date	Domain Source
+15-1252.00	2.D.1	Required Level of Education	RL	1	0	30	0.00	0.00	0.00	N	N	08/2023	Incumbent
+15-1252.00	2.D.1	Required Level of Education	RL	2	2	30	2.58	0.00	7.31	N	N	08/2023	Incumbent
+15-1252.00	2.D.1	Required Level of Education	RL	3	7	30	4.65	0.00	16.53	N	N	08/2023	Incumbent
+15-1252.00	2.D.1	Required Level of Education	RL	4	0	30	0.00	0.00	0.00	N	N	08/2023	Incumbent
+15-1252.00	2.D.1	Required Level of Education	RL	5	55	30	9.12	36.30	73.70	N	N	08/2023	Incumbent
+15-1252.00	2.D.1	Required Level of Education	RL	6	30	30	8.40	12.77	47.23	N	N	08/2023	Incumbent
+15-1252.00	2.D.1	Required Level of Education	RL	7	6	30	4.35	0.00	14.90	N	N	08/2023	Incumbent
+15-1252.00	2.D.1	Required Level of Education	RL	8	0	30	0.00	0.00	0.00	N	N	08/2023	Incumbent
+11-1021.00	2.D.1	Required Level of Education	RL	1	0	25	0.00	0.00	0.00	N	N	08/2023	Incumbent
+11-1021.00	2.D.1	Required Level of Education	RL	5	35	25	9.50	15.56	54.44	N	N	08/2023	Incumbent
+11-1021.00	2.D.1	Required Level of Education	RL	6	45	25	9.90	24.72	65.28	N	N	08/2023	Incumbent
+11-1021.00	2.D.1	Required Level of Education	RL	7	20	25	8.00	3.61	36.39	N	N	08/2023	Incumbent
+15-1252.00	2.D.2	Related Work Experience	RW	1	5	30	3.98	0.00	13.16	N	N	08/2023	Incumbent
+15-1252.00	2.D.2	Related Work Experience	RW	2	25	30	7.91	8.78	41.22	N	N	08/2023	Incumbent
+15-1252.00	2.D.2	Related Work Experience	RW	3	70	30	8.39	52.79	87.21	N	N	08/2023	Incumbent

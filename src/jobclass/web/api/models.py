@@ -197,6 +197,57 @@ class AbilitiesResponse(BaseModel):
     abilities: list[AbilityEntry]
 
 
+class ActivityEntry(BaseModel):
+    element_name: str
+    element_id: str
+    importance: float | None
+    level: float | None
+
+
+class ActivitiesResponse(BaseModel):
+    soc_code: str
+    source_version: str | None
+    activities: list[ActivityEntry]
+
+
+class EducationCategory(BaseModel):
+    category: int
+    category_label: str | None
+    percentage: float | None
+
+
+class EducationElement(BaseModel):
+    element_id: str
+    element_name: str
+    scale_id: str
+    categories: list[EducationCategory]
+
+
+class EducationResponse(BaseModel):
+    soc_code: str
+    source_version: str | None
+    summary: str | None
+    elements: list[EducationElement]
+
+
+class TechnologyItem(BaseModel):
+    example_name: str
+    commodity_code: str | None
+    commodity_title: str | None
+    hot_technology: bool | None
+
+
+class TechnologyGroup(BaseModel):
+    t2_type: str
+    items: list[TechnologyItem]
+
+
+class TechnologyResponse(BaseModel):
+    soc_code: str
+    source_version: str | None
+    groups: list[TechnologyGroup]
+
+
 # --- Projections ---
 
 
@@ -218,6 +269,88 @@ class ProjectionData(BaseModel):
 class ProjectionsResponse(BaseModel):
     soc_code: str
     projections: ProjectionData | None
+
+
+# --- Trends ---
+
+
+class TrendPoint(BaseModel):
+    year: int
+    value: float | None
+    suppressed: bool | str | None = None
+    suppression_flag: str | None = None
+    source_release_id: str | None = None
+    metric_name: str | None = None
+    units: str | None = None
+    derivation_type: str | None = None
+    geo_name: str | None = None
+    yoy_change: float | None = None
+    yoy_pct_change: float | None = None
+
+
+class TrendSeriesResponse(BaseModel):
+    soc_code: str
+    title: str | None = None
+    metric: str
+    geo_type: str | None = None
+    comparability_mode: str | None = None
+    series: list[TrendPoint]
+    years: list[int] | None = None
+
+
+class CompareOccupationEntry(BaseModel):
+    soc_code: str
+    title: str
+    series: list[TrendPoint]
+
+
+class TrendCompareResponse(BaseModel):
+    metric: str
+    geo_type: str
+    occupations: list[CompareOccupationEntry]
+
+
+class GeographyTrendEntry(BaseModel):
+    geo_name: str
+    geo_code: str
+    value: float | None
+    source_release_id: str | None = None
+
+
+class TrendGeographyResponse(BaseModel):
+    soc_code: str
+    metric: str
+    year: int | None
+    geographies: list[GeographyTrendEntry]
+
+
+class MoverEntry(BaseModel):
+    soc_code: str
+    title: str
+    pct_change: float | None
+    abs_change: float | None
+
+
+class TrendMoversResponse(BaseModel):
+    metric: str
+    geo_type: str
+    year: int | None
+    available_years: list[int]
+    gainers: list[MoverEntry]
+    losers: list[MoverEntry]
+
+
+class MetricEntry(BaseModel):
+    metric_name: str
+    units: str | None
+    display_format: str | None
+    derivation_type: str | None
+    comparability_constraint: str | None
+    description: str | None
+
+
+class MetricsListResponse(BaseModel):
+    metrics: list[MetricEntry]
 
 
 # --- Methodology ---
