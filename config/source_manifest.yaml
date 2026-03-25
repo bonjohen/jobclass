@@ -165,11 +165,73 @@ sources:
     enabled: true
 
   # --- CPI-U (Consumer Price Index) ---
+  # Original single-series deflator (CPI-U All Items annual averages)
   - source_name: bls
     dataset_name: bls_cpi
     dataset_url: https://download.bls.gov/pub/time.series/cu/cu.data.1.AllItems
     expected_format: text
     parser_name: cpi_parser
+    refresh_cadence: annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  # --- CPI Domain Expansion ---
+  # Item codes, names, display levels, and hierarchy structure
+  - source_name: bls
+    dataset_name: bls_cpi_item
+    dataset_url: https://download.bls.gov/pub/time.series/cu/cu.item
+    expected_format: text
+    parser_name: cpi_item_hierarchy_parser
+    refresh_cadence: annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  # Area codes, names, types, and display structure
+  - source_name: bls
+    dataset_name: bls_cpi_area
+    dataset_url: https://download.bls.gov/pub/time.series/cu/cu.area
+    expected_format: text
+    parser_name: cpi_area_parser
+    refresh_cadence: annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  # Series metadata: decomposed series IDs with family, adjustment, area, item
+  - source_name: bls
+    dataset_name: bls_cpi_series
+    dataset_url: https://download.bls.gov/pub/time.series/cu/cu.series
+    expected_format: text
+    parser_name: cpi_series_parser
+    refresh_cadence: annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  # CPI observation data — current period, all items and series
+  - source_name: bls
+    dataset_name: bls_cpi_data_current
+    dataset_url: https://download.bls.gov/pub/time.series/cu/cu.data.0.Current
+    expected_format: text
+    parser_name: cpi_data_parser
+    refresh_cadence: annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  # CPI relative importance (expenditure shares) — annual table
+  - source_name: bls
+    dataset_name: bls_cpi_relative_importance
+    dataset_url: https://www.bls.gov/cpi/tables/relative-importance/2024.xlsx
+    expected_format: xlsx
+    parser_name: cpi_relative_importance_parser
+    refresh_cadence: annual
+    version_detection_rule: url_pattern
+    enabled: true
+
+  # CPI average prices — food, utility, and motor fuel items
+  - source_name: bls
+    dataset_name: bls_cpi_average_price
+    dataset_url: https://download.bls.gov/pub/time.series/ap/ap.data.0.Current
+    expected_format: text
+    parser_name: cpi_average_price_parser
     refresh_cadence: annual
     version_detection_rule: url_pattern
     enabled: true

@@ -17,6 +17,7 @@ Prerequisites:
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import shutil
 import sys
@@ -107,6 +108,17 @@ window.fetch=function(u){
     var sc=sp.get('soc_code');
     if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
   }
+  if(p==='/api/cpi/search'){
+    return F(b+'/api/cpi/search.json').then(function(r){return r.json()}).then(function(d){
+      var q2=(sp.get('q')||'').toLowerCase(),lm2=+(sp.get('limit')||50),
+          rs2=d.results||[];
+      if(q2)rs2=rs2.filter(function(x){
+        return x.member_code.toLowerCase().indexOf(q2)>=0||x.title.toLowerCase().indexOf(q2)>=0;
+      });
+      return new Response(JSON.stringify({query:sp.get('q')||'',total:rs2.length,results:rs2.slice(0,lm2)}),
+        {headers:{'Content-Type':'application/json'}});
+    });
+  }
   return F(b+p+'.json');
 };
 })();
@@ -139,6 +151,11 @@ def rewrite_paths(content: str, base_path: str) -> str:
         ("'/hierarchy'", f"'{bp}/hierarchy'"),
         ('"/methodology"', f'"{bp}/methodology"'),
         ("'/methodology'", f"'{bp}/methodology'"),
+        # CPI links
+        ('"/cpi"', f'"{bp}/cpi"'),
+        ("'/cpi'", f"'{bp}/cpi'"),
+        ('"/cpi/', f'"{bp}/cpi/'),
+        ("'/cpi/", f"'{bp}/cpi/"),
         # Trend links
         ('"/trends"', f'"{bp}/trends"'),
         ("'/trends'", f"'{bp}/trends'"),
@@ -168,10 +185,11 @@ def rewrite_paths(content: str, base_path: str) -> str:
 
 
 def build_static(base_path: str, output_dir: str) -> None:
+    import duckdb
     from starlette.testclient import TestClient
 
     from jobclass.web.app import create_app
-    from jobclass.web.database import get_db
+    from jobclass.web.database import get_db, reset_db, set_db
 
     output = Path(output_dir)
     if output.exists():
@@ -181,7 +199,16 @@ def build_static(base_path: str, output_dir: str) -> None:
     bp = base_path.rstrip("/") if base_path != "/" else ""
 
     # --- Get occupation list ---
+    # Use a single shared connection to avoid DuckDB file-lock deadlocks
+    # on Windows when the TestClient thread pool opens multiple connections.
     db = get_db()
+    db_path = db.execute("PRAGMA database_list").fetchone()[2]
+    db.close()
+    reset_db()
+    shared_conn = duckdb.connect(db_path, read_only=True)
+    set_db(shared_conn)
+    db = shared_conn
+
     soc_codes = [
         r[0]
         for r in db.execute("SELECT soc_code FROM dim_occupation WHERE is_current = true ORDER BY soc_code").fetchall()
@@ -238,7 +265,27 @@ def build_static(base_path: str, output_dir: str) -> None:
     write_html("/search", "search/index.html")
     write_html("/hierarchy", "hierarchy/index.html")
     write_html("/methodology", "methodology/index.html")
-    print("  4 root pages")
+    write_html("/cpi", "cpi/index.html")
+    print("  5 root pages")
+
+    # --- HTML: CPI member pages ---
+    cpi_member_codes = []
+    with contextlib.suppress(Exception):
+        cpi_member_codes = [
+            r[0]
+            for r in db.execute("SELECT member_code FROM dim_cpi_member ORDER BY member_code").fetchall()
+        ]
+    if cpi_member_codes:
+        t0_cpi = time.time()
+        for i, mc in enumerate(cpi_member_codes, 1):
+            write_html(f"/cpi/member/{mc}", f"cpi/member/{mc}/index.html")
+            if i % 100 == 0:
+                elapsed = time.time() - t0_cpi
+                rate = i / elapsed
+                remaining = (len(cpi_member_codes) - i) / rate
+                print(f"  {i}/{len(cpi_member_codes)} CPI member pages ({rate:.0f}/s, ~{remaining:.0f}s left)")
+        elapsed = time.time() - t0_cpi
+        print(f"  {len(cpi_member_codes)} CPI member pages ({elapsed:.1f}s)")
 
     # --- HTML: Trend pages ---
     write_html("/trends", "trends/index.html")
@@ -396,6 +443,47 @@ def build_static(base_path: str, output_dir: str) -> None:
     elapsed = time.time() - t0
     print(f"  {json_count} JSON files for {len(soc_codes)} occupations ({elapsed:.1f}s)")
 
+    # --- JSON: CPI API endpoints ---
+    if cpi_member_codes:
+        t0_cpi = time.time()
+        cpi_json_count = 0
+        for i, mc in enumerate(cpi_member_codes, 1):
+            cpi_endpoints = [
+                (f"/api/cpi/members/{mc}", f"api/cpi/members/{mc}.json"),
+                (f"/api/cpi/members/{mc}/children", f"api/cpi/members/{mc}/children.json"),
+                (f"/api/cpi/members/{mc}/relations", f"api/cpi/members/{mc}/relations.json"),
+                (f"/api/cpi/members/{mc}/siblings", f"api/cpi/members/{mc}/siblings.json"),
+                (f"/api/cpi/members/{mc}/variants", f"api/cpi/members/{mc}/variants.json"),
+                (f"/api/cpi/members/{mc}/series", f"api/cpi/members/{mc}/series.json"),
+            ]
+            for url, filepath in cpi_endpoints:
+                if write_json(url, filepath):
+                    cpi_json_count += 1
+            if i % 100 == 0:
+                elapsed = time.time() - t0_cpi
+                rate = i / elapsed
+                remaining = (len(cpi_member_codes) - i) / rate
+                print(f"  {i}/{len(cpi_member_codes)} CPI members ({rate:.0f}/s, ~{remaining:.0f}s left)")
+        # CPI search index
+        cpi_search = db.execute("""
+            SELECT member_code, title, hierarchy_level, semantic_role
+            FROM dim_cpi_member ORDER BY member_code
+        """).fetchall()
+        cpi_search_data = {
+            "query": "",
+            "total": len(cpi_search),
+            "results": [
+                {"member_code": r[0], "title": r[1], "hierarchy_level": r[2], "semantic_role": r[3]}
+                for r in cpi_search
+            ],
+        }
+        cpi_search_dest = output / "api" / "cpi" / "search.json"
+        cpi_search_dest.parent.mkdir(parents=True, exist_ok=True)
+        cpi_search_dest.write_text(json.dumps(cpi_search_data), encoding="utf-8")
+        cpi_json_count += 1
+        elapsed = time.time() - t0_cpi
+        print(f"  {cpi_json_count} CPI JSON files ({elapsed:.1f}s)")
+
     # --- .nojekyll (prevent GitHub Pages Jekyll processing) ---
     (output / ".nojekyll").touch()
 
@@ -406,6 +494,10 @@ def build_static(base_path: str, output_dir: str) -> None:
     print(f"  {total_files:,} files, {total_size_mb:.1f} MB")
     if bp:
         print(f"  Base path: {bp}")
+
+    # Clean up shared connection
+    reset_db()
+    shared_conn.close()
 
 
 def main():

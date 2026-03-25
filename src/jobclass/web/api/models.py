@@ -381,3 +381,93 @@ class ValidationResponse(BaseModel):
     failed: int
     all_passed: bool
     checks: list[ValidationCheck]
+
+
+# ============================================================
+# CPI domain models
+# ============================================================
+
+
+class CpiMemberSummary(BaseModel):
+    member_code: str
+    title: str
+    hierarchy_level: str | None = None
+    semantic_role: str
+
+
+class CpiSearchResponse(BaseModel):
+    query: str
+    total: int
+    results: list[CpiMemberSummary]
+
+
+class CpiMemberDetail(BaseModel):
+    member_code: str
+    title: str
+    hierarchy_level: str | None = None
+    semantic_role: str
+    is_cross_cutting: bool
+    has_average_price: bool
+    has_relative_importance: bool
+    variant_count: int = 0
+    children_count: int = 0
+    ancestors: list[CpiMemberSummary] = []
+
+
+class CpiChildEntry(BaseModel):
+    member_code: str
+    title: str
+    hierarchy_level: str | None = None
+    semantic_role: str
+
+
+class CpiChildrenResponse(BaseModel):
+    member_code: str
+    children: list[CpiChildEntry]
+
+
+class CpiRelationEntry(BaseModel):
+    member_code: str
+    title: str
+    relation_type: str
+    description: str | None = None
+
+
+class CpiRelationsResponse(BaseModel):
+    member_code: str
+    relations: list[CpiRelationEntry]
+
+
+class CpiSeriesPoint(BaseModel):
+    year: int
+    period: str
+    value: float
+
+
+class CpiSeriesResponse(BaseModel):
+    member_code: str
+    title: str
+    area_code: str = "0000"
+    index_family: str = "CPI-U"
+    seasonal_adjustment: str = "S"
+    series: list[CpiSeriesPoint] = []
+
+
+class CpiAreaSummary(BaseModel):
+    area_code: str
+    area_title: str
+    area_type: str
+    publication_frequency: str
+
+
+class CpiAreaDetail(BaseModel):
+    area_code: str
+    area_title: str
+    area_type: str
+    publication_frequency: str
+    member_count: int = 0
+
+
+class CpiAreaMembersResponse(BaseModel):
+    area_code: str
+    members: list[CpiMemberSummary]

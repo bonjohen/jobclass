@@ -680,3 +680,97 @@ def projections_refresh(
             run_id=run_id,
             message=str(e),
         )
+
+
+def cpi_domain_refresh(
+    conn: duckdb.DuckDBPyConnection,
+    item_content: str,
+    area_content: str,
+    series_content: str,
+    data_content: str,
+    source_release_id: str,
+) -> PipelineResult:
+    """Execute the CPI domain pipeline: parse → load dimensions/bridges → load facts."""
+    from jobclass.load.cpi_domain import (
+        load_bridge_cpi_area_hierarchy,
+        load_bridge_cpi_member_hierarchy,
+        load_bridge_cpi_member_relation,
+        load_cpi_item_hierarchy_staging,
+        load_cpi_series_staging,
+        load_dim_cpi_area,
+        load_dim_cpi_member,
+        load_dim_cpi_series_variant,
+        load_fact_cpi_observation,
+    )
+    from jobclass.parse.cpi_domain import (
+        parse_cpi_area,
+        parse_cpi_item_hierarchy,
+        parse_cpi_observations,
+        parse_cpi_series,
+    )
+
+    run_id = generate_run_id()
+    create_run_record(
+        conn,
+        run_id=run_id,
+        pipeline_name="cpi_domain_refresh",
+        dataset_name="bls_cpi_domain",
+        source_name="bls",
+        source_release_id=source_release_id,
+    )
+
+    try:
+        # Parse
+        items = parse_cpi_item_hierarchy(item_content, source_release_id)
+        areas = parse_cpi_area(area_content, source_release_id)
+        series = parse_cpi_series(series_content, source_release_id)
+        observations = parse_cpi_observations(data_content, source_release_id)
+
+        # Staging
+        load_cpi_item_hierarchy_staging(conn, items, source_release_id)
+        load_cpi_series_staging(conn, series, source_release_id)
+
+        # Dimensions
+        member_count = load_dim_cpi_member(conn, items, source_release_id)
+        area_count = load_dim_cpi_area(conn, areas, source_release_id)
+        variant_count = load_dim_cpi_series_variant(conn, series, source_release_id)
+
+        # Bridges
+        load_bridge_cpi_member_hierarchy(conn, items, source_release_id)
+        load_bridge_cpi_member_relation(conn, items, source_release_id)
+        load_bridge_cpi_area_hierarchy(conn, areas, source_release_id)
+
+        # Facts
+        obs_count = load_fact_cpi_observation(
+            conn, observations, source_release_id, source_release_id,
+        )
+
+        total_loaded = member_count + area_count + variant_count + obs_count
+        raw_count = len(items) + len(areas) + len(series) + len(observations)
+
+        update_run_counts(
+            conn,
+            run_id,
+            row_count_raw=raw_count,
+            row_count_stage=len(items) + len(series),
+            row_count_loaded=total_loaded,
+            load_status="success",
+        )
+        return PipelineResult(
+            pipeline_name="cpi_domain_refresh",
+            status=PipelineStatus.SUCCESS,
+            run_id=run_id,
+        )
+    except Exception as e:
+        update_run_counts(
+            conn,
+            run_id,
+            load_status="load_failure",
+            failure_classification=FailureClassification.LOAD_FAILURE.value,
+        )
+        return PipelineResult(
+            pipeline_name="cpi_domain_refresh",
+            status=PipelineStatus.LOAD_FAILURE,
+            run_id=run_id,
+            message=str(e),
+        )

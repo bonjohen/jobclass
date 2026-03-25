@@ -13,6 +13,10 @@ The CPI domain parallels the existing occupation domain: browsable members, a fo
 | `[X]` | Complete — finished and verified |
 | `[!]` | Paused — started but blocked or deferred |
 
+## How To Use This Document.
+
+Use this document as a work queue, managing the Status of each item according to the status key.
+
 **Columns**: Status, Task ID, Description, Started, Completed
 
 ---
@@ -23,18 +27,18 @@ Create all dimension, bridge, fact, and staging tables for the CPI domain. This 
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | CPI0-01 | Create migration: `dim_cpi_member` table (member_key, member_code, title, hierarchy_level, semantic_role [hierarchy_node / special_aggregate / average_price_item / purchasing_power / external_overlay], is_cross_cutting, has_average_price, has_relative_importance, publication_depth, source_version), sequence `seq_cpi_member_key`, unique index on (member_code, source_version) | | |
-| `[ ]` | CPI0-02 | Create migration: `bridge_cpi_member_hierarchy` table (parent_member_key, child_member_key, hierarchy_depth, source_version), foreign keys to `dim_cpi_member` | | |
-| `[ ]` | CPI0-03 | Create migration: `bridge_cpi_member_relation` table (member_key_a, member_key_b, relation_type [core_aggregate / energy / commodities / services / purchasing_power / average_price_companion / cleveland_fed_overlay / fred_mirror], description, source_version), foreign keys to `dim_cpi_member` | | |
-| `[ ]` | CPI0-04 | Create migration: `dim_cpi_area` table (area_key, area_code, area_title, area_type [national / region / division / size_class / cross_classification / metro], publication_frequency [monthly / bimonthly], source_version), sequence `seq_cpi_area_key`, unique index on (area_code, source_version) | | |
-| `[ ]` | CPI0-05 | Create migration: `bridge_cpi_area_hierarchy` table (parent_area_key, child_area_key, source_version), foreign keys to `dim_cpi_area` | | |
-| `[ ]` | CPI0-06 | Create migration: `dim_cpi_series_variant` table (variant_key, series_id, index_family [CPI-U / CPI-W / C-CPI-U], seasonal_adjustment [S / U], periodicity [R / S], area_code, item_code, member_key, area_key, source_version), sequence `seq_cpi_variant_key`, unique index on (series_id, source_version) | | |
-| `[ ]` | CPI0-07 | Create migration: `fact_cpi_observation` table (member_key, area_key, variant_key, time_period_key, index_value, percent_change_month, percent_change_year, source_release_id, load_timestamp), grain: variant × period | | |
-| `[ ]` | CPI0-08 | Create migration: `fact_cpi_relative_importance` table (member_key, area_key, reference_period, relative_importance_value, source_release_id, load_timestamp), grain: member × area × reference_period | | |
-| `[ ]` | CPI0-09 | Create migration: `fact_cpi_average_price` table (member_key, area_key, time_period_key, average_price, unit_description, source_release_id, load_timestamp), grain: member × area × period | | |
-| `[ ]` | CPI0-10 | Create migration: `fact_cpi_revision_vintage` table (member_key, area_key, time_period_key, vintage_label, index_value, is_preliminary, revision_date, source_release_id, load_timestamp), grain: member × area × period × vintage | | |
-| `[ ]` | CPI0-11 | Create staging tables: `stage__bls__cpi_series`, `stage__bls__cpi_item_hierarchy`, `stage__bls__cpi_publication_level` | | |
-| `[ ]` | CPI0-12 | Create staging tables: `stage__bls__cpi_relative_importance`, `stage__bls__cpi_average_price` | | |
+| `[X]` | CPI0-01 | Create migration: `dim_cpi_member` table (member_key, member_code, title, hierarchy_level, semantic_role [hierarchy_node / special_aggregate / average_price_item / purchasing_power / external_overlay], is_cross_cutting, has_average_price, has_relative_importance, publication_depth, source_version), sequence `seq_cpi_member_key`, unique index on (member_code, source_version) | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI0-02 | Create migration: `bridge_cpi_member_hierarchy` table (parent_member_key, child_member_key, hierarchy_depth, source_version), foreign keys to `dim_cpi_member` | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI0-03 | Create migration: `bridge_cpi_member_relation` table (member_key_a, member_key_b, relation_type [core_aggregate / energy / commodities / services / purchasing_power / average_price_companion / cleveland_fed_overlay / fred_mirror], description, source_version), foreign keys to `dim_cpi_member` | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI0-04 | Create migration: `dim_cpi_area` table (area_key, area_code, area_title, area_type [national / region / division / size_class / cross_classification / metro], publication_frequency [monthly / bimonthly], source_version), sequence `seq_cpi_area_key`, unique index on (area_code, source_version) | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI0-05 | Create migration: `bridge_cpi_area_hierarchy` table (parent_area_key, child_area_key, source_version), foreign keys to `dim_cpi_area` | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI0-06 | Create migration: `dim_cpi_series_variant` table (variant_key, series_id, index_family [CPI-U / CPI-W / C-CPI-U], seasonal_adjustment [S / U], periodicity [R / S], area_code, item_code, member_key, area_key, source_version), sequence `seq_cpi_variant_key`, unique index on (series_id, source_version) | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI0-07 | Create migration: `fact_cpi_observation` table (member_key, area_key, variant_key, time_period_key, index_value, percent_change_month, percent_change_year, source_release_id, load_timestamp), grain: variant × period | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI0-08 | Create migration: `fact_cpi_relative_importance` table (member_key, area_key, reference_period, relative_importance_value, source_release_id, load_timestamp), grain: member × area × reference_period | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI0-09 | Create migration: `fact_cpi_average_price` table (member_key, area_key, time_period_key, average_price, unit_description, source_release_id, load_timestamp), grain: member × area × period | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI0-10 | Create migration: `fact_cpi_revision_vintage` table (member_key, area_key, time_period_key, vintage_label, index_value, is_preliminary, revision_date, source_release_id, load_timestamp), grain: member × area × period × vintage | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI0-11 | Create staging tables: `stage__bls__cpi_series`, `stage__bls__cpi_item_hierarchy`, `stage__bls__cpi_publication_level` | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI0-12 | Create staging tables: `stage__bls__cpi_relative_importance`, `stage__bls__cpi_average_price` | 2026-03-25 | 2026-03-25 |
 
 ---
 
@@ -44,14 +48,14 @@ Add source manifest entries for all CPI data products and verify raw artifact ca
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | CPI1-01 | Add manifest entry for CPI-U series data (BLS bulk download or API series pulls) in `source_manifest.yaml` | | |
-| `[ ]` | CPI1-02 | Add manifest entry for CPI item aggregation tree file (BLS item structure/hierarchy) | | |
-| `[ ]` | CPI1-03 | Add manifest entry for CPI publication-level appendix (Appendix 7 — items by publication level) | | |
-| `[ ]` | CPI1-04 | Add manifest entry for CPI relative importance tables (annual and monthly) | | |
-| `[ ]` | CPI1-05 | Add manifest entry for CPI average price tables (food, utility, motor fuel items) | | |
-| `[ ]` | CPI1-06 | Add manifest entry for CPI area definitions (area codes, types, hierarchy, publication frequency) | | |
-| `[ ]` | CPI1-07 | Ensure BLS browser-header download support works for CPI endpoints (reuse existing `Sec-Fetch-*` headers from download.py) | | |
-| `[ ]` | CPI1-08 | Verify raw capture: run extract for all CPI manifest entries, confirm immutable artifacts stored with file name, source URL, download timestamp, and checksum | | |
+| `[X]` | CPI1-01 | Add manifest entry for CPI-U series data (BLS bulk download or API series pulls) in `source_manifest.yaml` | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI1-02 | Add manifest entry for CPI item aggregation tree file (BLS item structure/hierarchy) | 2026-03-25 | 2026-03-25 |
+| `[!]` | CPI1-03 | Add manifest entry for CPI publication-level appendix (Appendix 7 — items by publication level). *Deferred: publication frequency is derived from area code patterns in the area parser instead of ingesting Appendix 7 as a separate data product.* | 2026-03-25 | |
+| `[X]` | CPI1-04 | Add manifest entry for CPI relative importance tables (annual and monthly) | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI1-05 | Add manifest entry for CPI average price tables (food, utility, motor fuel items) | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI1-06 | Add manifest entry for CPI area definitions (area codes, types, hierarchy, publication frequency) | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI1-07 | Ensure BLS browser-header download support works for CPI endpoints (reuse existing `Sec-Fetch-*` headers from download.py) | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI1-08 | Verify raw capture: run extract for all CPI manifest entries, confirm immutable artifacts stored with file name, source URL, download timestamp, and checksum | 2026-03-25 | 2026-03-25 |
 
 ---
 
@@ -61,16 +65,16 @@ Implement dataset-specific parsers for each CPI data product. Each parser transf
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | CPI2-01 | Implement CPI item hierarchy parser: parse BLS aggregation tree into member rows + parent-child hierarchy edges, classify hierarchy_level (All items / Major group / Intermediate aggregate / Expenditure class / Item stratum / ELI) | | |
-| `[ ]` | CPI2-02 | Implement CPI series metadata parser: decompose BLS series IDs into index_family, seasonal_adjustment, periodicity, area_code, item_code; validate each component against known member/area codes | | |
-| `[ ]` | CPI2-03 | Implement CPI publication-level parser: parse Appendix 7 into member × area_type availability matrix | | |
-| `[ ]` | CPI2-04 | Implement CPI area parser: parse area codes, titles, types (national, region, division, size class, cross-classification, metro), and publication frequency (monthly vs bimonthly) | | |
-| `[ ]` | CPI2-05 | Implement CPI series data parser: parse monthly index values into observation rows with period, value, and optional percent-change fields | | |
-| `[ ]` | CPI2-06 | Implement CPI relative importance parser: parse annual/monthly relative importance tables into member × area × period rows | | |
-| `[ ]` | CPI2-07 | Implement CPI average price parser: parse average price tables into member × area × period rows with unit descriptions | | |
-| `[ ]` | CPI2-08 | Implement series ID decomposition validator: verify that encoded components in each series ID match known member codes and area codes; flag unresolved codes | | |
-| `[ ]` | CPI2-09 | Add parser unit tests with representative BLS source files for each parser (hierarchy, series, publication level, area, observations, importance, average prices) | | |
-| `[ ]` | CPI2-10 | Add schema contract tests for all CPI staging tables: verify expected columns, types, and non-null constraints | | |
+| `[X]` | CPI2-01 | Implement CPI item hierarchy parser: parse BLS aggregation tree into member rows + parent-child hierarchy edges, classify hierarchy_level (All items / Major group / Intermediate aggregate / Expenditure class / Item stratum / ELI) | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI2-02 | Implement CPI series metadata parser: decompose BLS series IDs into index_family, seasonal_adjustment, periodicity, area_code, item_code; validate each component against known member/area codes | 2026-03-25 | 2026-03-25 |
+| `[!]` | CPI2-03 | Implement CPI publication-level parser: parse Appendix 7 into member × area_type availability matrix. *Deferred: publication frequency is classified by `_classify_publication_frequency()` in the area parser using area code patterns, not by parsing Appendix 7.* | 2026-03-25 | |
+| `[X]` | CPI2-04 | Implement CPI area parser: parse area codes, titles, types (national, region, division, size class, cross-classification, metro), and publication frequency (monthly vs bimonthly) | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI2-05 | Implement CPI series data parser: parse monthly index values into observation rows with period, value, and optional percent-change fields | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI2-06 | Implement CPI relative importance parser: parse annual/monthly relative importance tables into member × area × period rows | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI2-07 | Implement CPI average price parser: parse average price tables into member × area × period rows with unit descriptions | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI2-08 | Implement series ID decomposition validator: verify that encoded components in each series ID match known member codes and area codes; flag unresolved codes | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI2-09 | Add parser unit tests with representative BLS source files for each parser (hierarchy, series, publication level, area, observations, importance, average prices) | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI2-10 | Add schema contract tests for all CPI staging tables: verify expected columns, types, and non-null constraints | 2026-03-25 | 2026-03-25 |
 
 ---
 
@@ -80,16 +84,16 @@ Load parsed CPI data into warehouse dimensions, bridges, and facts. Wire CPI int
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | CPI3-01 | Implement `load_dim_cpi_member()`: load member dimension from parsed item hierarchy, classify semantic_role for each member, set is_cross_cutting flag for special aggregates | | |
-| `[ ]` | CPI3-02 | Implement `load_bridge_cpi_member_hierarchy()`: load formal tree edges from parsed hierarchy, validate tree consistency (no cycles, single root) | | |
-| `[ ]` | CPI3-03 | Implement `load_bridge_cpi_member_relation()`: load cross-cutting relationships (core CPI, energy, commodities, services, purchasing power) with explicit relation_type classification | | |
-| `[ ]` | CPI3-04 | Implement `load_dim_cpi_area()`: load area dimension from parsed area definitions, set publication_frequency per area | | |
-| `[ ]` | CPI3-05 | Implement `load_bridge_cpi_area_hierarchy()`: load area tree edges (national → region → division → metro) | | |
-| `[ ]` | CPI3-06 | Implement `load_dim_cpi_series_variant()`: load series variant dimension, link each variant to member_key and area_key via foreign key lookups | | |
-| `[ ]` | CPI3-07 | Implement `load_fact_cpi_observation()`: load base index observations, join against dim_cpi_series_variant for variant_key resolution | | |
-| `[ ]` | CPI3-08 | Create `cpi_refresh()` pipeline function in `pipelines.py`: orchestrate CPI extract → parse → validate → load sequence | | |
-| `[ ]` | CPI3-09 | Add CPI to `run-all` orchestration: CPI is independent of OEWS/O\*NET, can run in parallel after taxonomy_refresh | | |
-| `[ ]` | CPI3-10 | Add idempotent rerun test: run CPI pipeline twice, verify no duplicate rows in any CPI table | | |
+| `[X]` | CPI3-01 | Implement `load_dim_cpi_member()`: load member dimension from parsed item hierarchy, classify semantic_role for each member, set is_cross_cutting flag for special aggregates | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI3-02 | Implement `load_bridge_cpi_member_hierarchy()`: load formal tree edges from parsed hierarchy, validate tree consistency (no cycles, single root) | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI3-03 | Implement `load_bridge_cpi_member_relation()`: load cross-cutting relationships (core CPI, energy, commodities, services, purchasing power) with explicit relation_type classification | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI3-04 | Implement `load_dim_cpi_area()`: load area dimension from parsed area definitions, set publication_frequency per area | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI3-05 | Implement `load_bridge_cpi_area_hierarchy()`: load area tree edges (national → region → division → metro) | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI3-06 | Implement `load_dim_cpi_series_variant()`: load series variant dimension, link each variant to member_key and area_key via foreign key lookups | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI3-07 | Implement `load_fact_cpi_observation()`: load base index observations, join against dim_cpi_series_variant for variant_key resolution | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI3-08 | Create `cpi_refresh()` pipeline function in `pipelines.py`: orchestrate CPI extract → parse → validate → load sequence | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI3-09 | Add CPI to `run-all` orchestration: CPI is independent of OEWS/O\*NET, can run in parallel after taxonomy_refresh | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI3-10 | Add idempotent rerun test: run CPI pipeline twice, verify no duplicate rows in any CPI table | 2026-03-25 | 2026-03-25 |
 
 ---
 
@@ -99,16 +103,16 @@ Add resource-oriented API endpoints for CPI search, member detail, hierarchy nav
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | CPI4-01 | Create `src/jobclass/web/cpi.py` API router with `/api/cpi/` prefix | | |
-| `[ ]` | CPI4-02 | Add `/api/cpi/search` endpoint: search members by name or code, return matching members with title, code, hierarchy_level, and semantic_role | | |
-| `[ ]` | CPI4-03 | Add `/api/cpi/members/{member_code}` endpoint: member detail with title, code, hierarchy position, semantic_role, available series variant count, ancestor chain, direct children count | | |
-| `[ ]` | CPI4-04 | Add `/api/cpi/members/{member_code}/children` endpoint: list direct child members in hierarchy order | | |
-| `[ ]` | CPI4-05 | Add `/api/cpi/members/{member_code}/relations` endpoint: list cross-cutting relationships with relation_type and related member details | | |
-| `[ ]` | CPI4-06 | Add `/api/cpi/members/{member_code}/series` endpoint: time-series index values for the member, filterable by area_code, index_family, and seasonal_adjustment | | |
-| `[ ]` | CPI4-07 | Add `/api/cpi/areas/{area_code}` endpoint: area detail with title, type, publication_frequency, published member count, area hierarchy position | | |
-| `[ ]` | CPI4-08 | Add `/api/cpi/areas/{area_code}/members` endpoint: list members published in this area | | |
-| `[ ]` | CPI4-09 | Define Pydantic response models for all CPI endpoints in `models.py` | | |
-| `[ ]` | CPI4-10 | Add API unit tests: all CPI endpoints return 200 with expected fields for known members/areas | | |
+| `[X]` | CPI4-01 | Create `src/jobclass/web/cpi.py` API router with `/api/cpi/` prefix | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI4-02 | Add `/api/cpi/search` endpoint: search members by name or code, return matching members with title, code, hierarchy_level, and semantic_role | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI4-03 | Add `/api/cpi/members/{member_code}` endpoint: member detail with title, code, hierarchy position, semantic_role, available series variant count, ancestor chain, direct children count | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI4-04 | Add `/api/cpi/members/{member_code}/children` endpoint: list direct child members in hierarchy order | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI4-05 | Add `/api/cpi/members/{member_code}/relations` endpoint: list cross-cutting relationships with relation_type and related member details | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI4-06 | Add `/api/cpi/members/{member_code}/series` endpoint: time-series index values for the member, filterable by area_code, index_family, and seasonal_adjustment | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI4-07 | Add `/api/cpi/areas/{area_code}` endpoint: area detail with title, type, publication_frequency, published member count, area hierarchy position | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI4-08 | Add `/api/cpi/areas/{area_code}/members` endpoint: list members published in this area | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI4-09 | Define Pydantic response models for all CPI endpoints in `models.py` | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI4-10 | Add API unit tests: all CPI endpoints return 200 with expected fields for known members/areas | 2026-03-25 | 2026-03-25 |
 
 ---
 
@@ -118,14 +122,14 @@ Add top-level CPI navigation, the landing page with headline series and member e
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | CPI5-01 | Add "CPI" nav link to `base.html` (placement: after Trends, alongside Pipeline/Methodology) | | |
-| `[ ]` | CPI5-02 | Add `/cpi` route to `app.py` returning `cpi.html` via `base.html` wrapper | | |
-| `[ ]` | CPI5-03 | Create `cpi.html` landing page template: headline inflation series summary, member explorer entry cards, and short "How CPI is structured" explanation section | | |
-| `[ ]` | CPI5-04 | Create `src/jobclass/web/static/js/cpi.js` with page initialization: load headline series, render summary cards | | |
-| `[ ]` | CPI5-05 | Add CPI section CSS to `main.css`: member cards, hierarchy breadcrumbs, area badges, series charts | | |
-| `[ ]` | CPI5-06 | Bump cache-busting version in `base.html` (`?v=CPI5`) | | |
-| `[ ]` | CPI5-07 | Add `/cpi` to `build_static.py` HTML page generation | | |
-| `[ ]` | CPI5-08 | Verify: CPI landing page loads with real headline data and working navigation | | |
+| `[X]` | CPI5-01 | Add "CPI" nav link to `base.html` (placement: after Trends, alongside Pipeline/Methodology) | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI5-02 | Add `/cpi` route to `app.py` returning `cpi.html` via `base.html` wrapper | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI5-03 | Create `cpi.html` landing page template: headline inflation series summary, member explorer entry cards, and short "How CPI is structured" explanation section | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI5-04 | Create `src/jobclass/web/static/js/cpi.js` with page initialization: load headline series, render summary cards | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI5-05 | Add CPI section CSS to `main.css`: member cards, hierarchy breadcrumbs, area badges, series charts | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI5-06 | Bump cache-busting version in `base.html` (`?v=CPI5`) | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI5-07 | Add `/cpi` to `build_static.py` HTML page generation | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI5-08 | Verify: CPI landing page loads with real headline data and working navigation | 2026-03-25 | 2026-03-25 |
 
 ---
 
@@ -135,17 +139,17 @@ Create the member detail page — the CPI equivalent of the occupation profile p
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | CPI6-01 | Add `/cpi/member/{member_code}` route to `app.py` with 404 handling for unknown codes | | |
-| `[ ]` | CPI6-02 | Create `cpi_member.html` template: title, member code, hierarchy level, semantic role, latest index value | | |
-| `[ ]` | CPI6-03 | Implement ancestor chain display: breadcrumb-like hierarchy path from All Items → Major Group → ... → current member | | |
-| `[ ]` | CPI6-04 | Implement descendant member list: direct children with their latest index values and relative importance (if available) | | |
-| `[ ]` | CPI6-05 | Implement sibling comparison panel: all members at the same hierarchy level under the same parent | | |
-| `[ ]` | CPI6-06 | Implement related special aggregates panel: cross-cutting relationships from `bridge_cpi_member_relation` with relation_type labels | | |
-| `[ ]` | CPI6-07 | Implement time-series chart for member: monthly index values with year-over-year change overlay | | |
-| `[ ]` | CPI6-08 | Implement series variant selector: list available variants (CPI-U, CPI-W, C-CPI-U, seasonally adjusted/not) and switch between them | | |
-| `[ ]` | CPI6-09 | Implement area availability display: which areas publish this member, with publication frequency noted | | |
-| `[ ]` | CPI6-10 | Add member pages to `build_static.py` per-member HTML and JSON generation | | |
-| `[ ]` | CPI6-11 | Verify: member page renders correctly for a hierarchy node (e.g., Housing) and a cross-cutting aggregate (e.g., All items less food and energy) | | |
+| `[X]` | CPI6-01 | Add `/cpi/member/{member_code}` route to `app.py` with 404 handling for unknown codes | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI6-02 | Create `cpi_member.html` template: title, member code, hierarchy level, semantic role, latest index value | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI6-03 | Implement ancestor chain display: breadcrumb-like hierarchy path from All Items → Major Group → ... → current member | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI6-04 | Implement descendant member list: direct children with their latest index values and relative importance (if available) | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI6-05 | Implement sibling comparison panel: all members at the same hierarchy level under the same parent | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI6-06 | Implement related special aggregates panel: cross-cutting relationships from `bridge_cpi_member_relation` with relation_type labels | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI6-07 | Implement time-series chart for member: monthly index values with year-over-year change overlay | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI6-08 | Implement series variant selector: list available variants (CPI-U, CPI-W, C-CPI-U, seasonally adjusted/not) and switch between them | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI6-09 | Implement area availability display: which areas publish this member, with publication frequency noted | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI6-10 | Add member pages to `build_static.py` per-member HTML and JSON generation | 2026-03-25 | 2026-03-25 |
+| `[X]` | CPI6-11 | Verify: member page renders correctly for a hierarchy node (e.g., Housing) and a cross-cutting aggregate (e.g., All items less food and energy) | 2026-03-25 | 2026-03-25 |
 
 ---
 
@@ -262,13 +266,13 @@ Add automated tests for all CPI pages and endpoints, finalize static site integr
 
 | Phase | Description | Tasks | Status |
 |-------|-------------|-------|--------|
-| CPI0 | Schema & Migrations | 12 | Not started |
-| CPI1 | Manifest & Raw Capture | 8 | Not started |
-| CPI2 | Parsers | 10 | Not started |
-| CPI3 | Loaders & Pipeline Wiring | 10 | Not started |
-| CPI4 | Core API Endpoints | 10 | Not started |
-| CPI5 | CPI Landing Page & Navigation | 8 | Not started |
-| CPI6 | CPI Member Page | 11 | Not started |
+| CPI0 | Schema & Migrations | 12 | **Complete** |
+| CPI1 | Manifest & Raw Capture | 8 | 7/8 (1 deferred) |
+| CPI2 | Parsers | 10 | 9/10 (1 deferred) |
+| CPI3 | Loaders & Pipeline Wiring | 10 | **Complete** |
+| CPI4 | Core API Endpoints | 10 | **Complete** |
+| CPI5 | CPI Landing Page & Navigation | 8 | **Complete** |
+| CPI6 | CPI Member Page | 11 | **Complete** |
 | CPI7 | Relative Importance & Weighted Visualization | 11 | Not started |
 | CPI8 | Average Prices & Area Pages | 10 | Not started |
 | CPI9 | C-CPI-U Revision Vintage | 6 | Not started |

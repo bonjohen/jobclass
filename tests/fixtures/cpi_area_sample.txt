@@ -1,0 +1,12 @@
+area_code	area_name	display_level	selectable	sort_sequence
+0000	U.S. city average	0	T	1
+0100	Northeast	0	T	2
+0110	New England	1	T	3
+0120	Middle Atlantic	1	T	4
+0200	Midwest	0	T	5
+0300	South	0	T	6
+0400	West	0	T	7
+A104	Northeast - Size Class B/C	0	T	20
+S12A	Boston-Cambridge-Newton, MA-NH	1	T	30
+S35A	Washington-Arlington-Alexandria, DC-VA-MD-WV	1	T	40
+S49E	Phoenix-Mesa-Chandler, AZ	1	T	50

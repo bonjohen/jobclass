@@ -12,6 +12,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
+from jobclass.web.api.cpi import router as cpi_router
 from jobclass.web.api.health import router as health_router
 from jobclass.web.api.methodology import router as methodology_router
 from jobclass.web.api.metrics import MetricsMiddleware
@@ -70,6 +71,7 @@ def create_app() -> FastAPI:
     app.include_router(projections_router)
     app.include_router(methodology_router)
     app.include_router(trends_router)
+    app.include_router(cpi_router)
 
     # Template engine
     templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
@@ -171,6 +173,29 @@ def create_app() -> FastAPI:
             {
                 "page_title": f"{title} — Lessons — JobClass",
                 "content_template": template_name,
+            },
+        )
+
+    @app.get("/cpi", response_class=HTMLResponse)
+    async def cpi_landing(request: Request):
+        return templates.TemplateResponse(
+            request,
+            "base.html",
+            {
+                "page_title": "Consumer Price Index — JobClass",
+                "content_template": "cpi.html",
+            },
+        )
+
+    @app.get("/cpi/member/{member_code}", response_class=HTMLResponse)
+    async def cpi_member_page(request: Request, member_code: str):
+        return templates.TemplateResponse(
+            request,
+            "base.html",
+            {
+                "page_title": f"CPI — {member_code.upper()} — JobClass",
+                "content_template": "cpi_member.html",
+                "member_code": member_code.upper(),
             },
         )
 

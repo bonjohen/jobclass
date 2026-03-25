@@ -75,6 +75,7 @@ def run_all_pipelines(
     """Execute all pipelines end-to-end: download → convert → parse → load → publish."""
     from jobclass.orchestrate.pipelines import (
         PipelineStatus,
+        cpi_domain_refresh,
         cpi_refresh,
         crosswalk_refresh,
         oews_refresh,
@@ -273,6 +274,44 @@ def run_all_pipelines(
             summary.errors.append(msg)
     except Exception as e:
         msg = f"  ERROR — CPI: {e}"
+        print(msg)
+        summary.pipelines_failed += 1
+        summary.errors.append(msg)
+
+    # --- 5b. CPI Domain Expansion ---
+    print("\n[5b/8] CPI Domain Expansion Pipeline")
+    summary.pipelines_attempted += 1
+    try:
+        cpi_item_entry = by_name["bls_cpi_item"]
+        cpi_area_entry = by_name["bls_cpi_area"]
+        cpi_series_entry = by_name["bls_cpi_series"]
+        cpi_data_entry = by_name["bls_cpi_data_current"]
+
+        cpi_item_raw, cpi_item_ver = _download_entry(cpi_item_entry, raw_root)
+        cpi_area_raw, cpi_area_ver = _download_entry(cpi_area_entry, raw_root)
+        cpi_series_raw, cpi_series_ver = _download_entry(cpi_series_entry, raw_root)
+        cpi_data_raw, cpi_data_ver = _download_entry(cpi_data_entry, raw_root)
+
+        result = cpi_domain_refresh(
+            conn,
+            item_content=cpi_item_raw.decode("utf-8-sig"),
+            area_content=cpi_area_raw.decode("utf-8-sig"),
+            series_content=cpi_series_raw.decode("utf-8-sig"),
+            data_content=cpi_data_raw.decode("utf-8-sig"),
+            source_release_id=cpi_item_ver,
+        )
+        if result.status == PipelineStatus.SUCCESS:
+            print(f"  OK — CPI domain loaded (run_id: {result.run_id})")
+            summary.pipelines_succeeded += 1
+        else:
+            msg = f"  FAILED — {result.status.value}: {result.message}"
+            print(msg)
+            summary.pipelines_failed += 1
+            summary.errors.append(msg)
+    except KeyError:
+        print("  SKIP — CPI domain manifest entries not found (optional)")
+    except Exception as e:
+        msg = f"  ERROR — CPI Domain: {e}"
         print(msg)
         summary.pipelines_failed += 1
         summary.errors.append(msg)

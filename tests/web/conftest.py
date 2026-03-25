@@ -160,7 +160,7 @@ def warehouse_db(tmp_path):
     load_bridge_occupation_technology(conn, onet_ver, onet_ver, soc_ver)
     load_bridge_occupation_task(conn, onet_ver, onet_ver, soc_ver)
 
-    # Load CPI
+    # Load CPI (deflator)
     from jobclass.load.cpi import load_cpi_staging, load_dim_price_index, load_fact_price_index_observation
     from jobclass.parse.cpi import parse_cpi
 
@@ -168,6 +168,37 @@ def warehouse_db(tmp_path):
     cpi_rows = parse_cpi(cpi_content, release)
     load_cpi_staging(conn, cpi_rows, release)
     load_dim_price_index(conn, release)
+
+    # Load CPI domain expansion
+    from jobclass.load.cpi_domain import (
+        load_bridge_cpi_area_hierarchy,
+        load_bridge_cpi_member_hierarchy,
+        load_bridge_cpi_member_relation,
+        load_cpi_item_hierarchy_staging,
+        load_cpi_series_staging,
+        load_dim_cpi_area,
+        load_dim_cpi_member,
+        load_dim_cpi_series_variant,
+    )
+    from jobclass.parse.cpi_domain import parse_cpi_area, parse_cpi_item_hierarchy, parse_cpi_series
+
+    cpi_items = parse_cpi_item_hierarchy(
+        (FIXTURES_DIR / "cpi_item_sample.txt").read_text(encoding="utf-8"), release,
+    )
+    cpi_areas = parse_cpi_area(
+        (FIXTURES_DIR / "cpi_area_sample.txt").read_text(encoding="utf-8"), release,
+    )
+    cpi_series = parse_cpi_series(
+        (FIXTURES_DIR / "cpi_series_sample.txt").read_text(encoding="utf-8"), release,
+    )
+    load_cpi_item_hierarchy_staging(conn, cpi_items, release)
+    load_cpi_series_staging(conn, cpi_series, release)
+    load_dim_cpi_member(conn, cpi_items, release)
+    load_dim_cpi_area(conn, cpi_areas, release)
+    load_dim_cpi_series_variant(conn, cpi_series, release)
+    load_bridge_cpi_member_hierarchy(conn, cpi_items, release)
+    load_bridge_cpi_member_relation(conn, cpi_items, release)
+    load_bridge_cpi_area_hierarchy(conn, cpi_areas, release)
 
     # Load Projections
     from jobclass.load.projections import load_fact_occupation_projections, load_projections_staging

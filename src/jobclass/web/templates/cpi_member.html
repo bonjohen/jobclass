@@ -1,0 +1,80 @@
+<section class="cpi-member-page" id="cpi-member-page" data-member-code="{{ member_code }}">
+    <div class="loading" id="member-loading">Loading CPI member data...</div>
+    <div id="member-content" style="display:none;">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb" id="cpi-breadcrumb" aria-label="CPI hierarchy breadcrumb">
+            <a href="/cpi">CPI</a>
+        </nav>
+
+        <!-- Header -->
+        <div class="cpi-member-header">
+            <h1 id="member-title"></h1>
+            <div class="cpi-member-meta">
+                <span class="lineage-badge" id="member-code-badge"></span>
+                <span class="lineage-badge" id="member-level-badge"></span>
+                <span class="lineage-badge" id="member-role-badge"></span>
+            </div>
+        </div>
+
+        <!-- Variant selector + time-series chart -->
+        <div class="cpi-member-section" id="series-section">
+            <h2>Index Series</h2>
+            <div class="cpi-variant-controls">
+                <label for="variant-family">Index family:</label>
+                <select id="variant-family">
+                    <option value="CPI-U">CPI-U</option>
+                    <option value="CPI-W">CPI-W</option>
+                    <option value="C-CPI-U">C-CPI-U</option>
+                </select>
+                <label for="variant-sa">Adjustment:</label>
+                <select id="variant-sa">
+                    <option value="S">Seasonally adjusted</option>
+                    <option value="U">Not adjusted</option>
+                </select>
+            </div>
+            <div id="series-chart" class="cpi-chart-container">
+                <p class="loading">Loading series data&hellip;</p>
+            </div>
+        </div>
+
+        <!-- Children -->
+        <div class="cpi-member-section" id="children-section" style="display:none;">
+            <h2>Child Members</h2>
+            <ul id="children-list" class="cpi-member-list"></ul>
+        </div>
+
+        <!-- Siblings -->
+        <div class="cpi-member-section" id="siblings-section" style="display:none;">
+            <h2>Sibling Members</h2>
+            <p class="section-note">Other members at the same hierarchy level under the same parent.</p>
+            <ul id="siblings-list" class="cpi-member-list"></ul>
+        </div>
+
+        <!-- Related aggregates -->
+        <div class="cpi-member-section" id="relations-section" style="display:none;">
+            <h2>Related Aggregates</h2>
+            <p class="section-note">Cross-cutting analytical relationships.</p>
+            <div id="relations-list"></div>
+        </div>
+
+        <!-- Area availability -->
+        <div class="cpi-member-section" id="areas-section" style="display:none;">
+            <h2>Area Availability</h2>
+            <p class="section-note">Geographic areas that publish this member.</p>
+            <table class="data-table" id="areas-table">
+                <thead>
+                    <tr>
+                        <th>Area Code</th>
+                        <th>Area</th>
+                        <th>Family</th>
+                        <th>Adjustment</th>
+                        <th>Frequency</th>
+                    </tr>
+                </thead>
+                <tbody id="areas-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<script src="/static/js/cpi_member.js"></script>

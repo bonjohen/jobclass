@@ -1,0 +1,17 @@
+item_code	item_name	display_level	selectable	sort_sequence
+SA0	All items	0	T	1
+SAF	Food and beverages	0	T	3
+SAF1	Food	1	T	4
+SAF11	Food at home	2	T	5
+SAF111	Cereals and bakery products	3	T	6
+SAF1111	Flour and prepared flour mixes	4	T	7
+SAH	Housing	0	T	100
+SAH1	Shelter	1	T	101
+SEHA	Rent of primary residence	2	T	102
+SEHB	Lodging away from home	2	T	110
+SAE	Energy	0	T	200
+SETB	Gasoline (all types)	1	T	201
+SS47014	Gasoline, unleaded regular	2	T	202
+SA0L1	All items less food	0	T	350
+SA0L1E	All items less food and energy	0	T	351
+SA0R	Purchasing power of the consumer dollar	0	T	400

@@ -1,0 +1,56 @@
+<section class="cpi-page">
+    <h1>Consumer Price Index</h1>
+    <p class="page-intro">Explore the BLS Consumer Price Index structure &mdash; item hierarchy, geographic areas, series variants, and cross-cutting analytical relationships.</p>
+
+    <div class="cpi-headline-stats" id="cpi-stats">
+        <div class="stat-card">
+            <div class="stat-label">Members</div>
+            <div class="stat-value" id="cpi-member-count">&mdash;</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Areas</div>
+            <div class="stat-value" id="cpi-area-count">&mdash;</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Series Variants</div>
+            <div class="stat-value" id="cpi-series-count">&mdash;</div>
+        </div>
+    </div>
+
+    <div class="cpi-nav-cards">
+        <div class="cpi-card">
+            <h2>Member Search</h2>
+            <p>Search CPI item members by name or code &mdash; food, energy, shelter, apparel, and more.</p>
+            <div class="cpi-card-search">
+                <label for="cpi-member-search">Search members:</label>
+                <input type="text" id="cpi-member-search" placeholder="e.g. Food or SA0" autocomplete="off">
+                <div id="cpi-member-results" class="search-dropdown" role="listbox" aria-label="Search results"></div>
+            </div>
+        </div>
+
+        <div class="cpi-card">
+            <h2>Item Hierarchy</h2>
+            <p>Browse the CPI item structure from "All items" down through major groups, expenditure classes, and item strata.</p>
+            <div id="cpi-hierarchy-tree" class="cpi-tree-container">
+                <p class="loading">Loading hierarchy&hellip;</p>
+            </div>
+        </div>
+
+        <div class="cpi-card">
+            <h2>Geographic Areas</h2>
+            <p>View CPI publication areas &mdash; national, regional, and metropolitan.</p>
+            <a href="#" class="btn" id="cpi-area-btn" onclick="return false;">Browse Areas</a>
+            <div id="cpi-area-list" class="cpi-area-list" style="display:none;"></div>
+        </div>
+
+        <div class="cpi-card">
+            <h2>Cross-Cutting Aggregates</h2>
+            <p>Special analytical groupings like "Energy", "All items less food and energy", "Commodities", and "Services".</p>
+            <div id="cpi-cross-cutting" class="cpi-cross-list">
+                <p class="loading">Loading&hellip;</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="/static/js/cpi.js"></script>
