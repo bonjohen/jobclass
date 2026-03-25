@@ -221,9 +221,15 @@ def load_crosswalk_staging(
                 mapping_type, source_release_id, parser_version)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             [
-                r.source_soc_code, r.source_soc_title, r.source_soc_version,
-                r.target_soc_code, r.target_soc_title, r.target_soc_version,
-                r.mapping_type, r.source_release_id, r.parser_version,
+                r.source_soc_code,
+                r.source_soc_title,
+                r.source_soc_version,
+                r.target_soc_code,
+                r.target_soc_title,
+                r.target_soc_version,
+                r.mapping_type,
+                r.source_release_id,
+                r.parser_version,
             ],
         )
     return len(rows)

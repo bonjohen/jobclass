@@ -257,6 +257,23 @@ footer {
     background: var(--color-bg);
 }
 
+/* --- Sortable Table Headers --- */
+.sortable-th {
+    cursor: pointer;
+    user-select: none;
+}
+.sortable-th:hover {
+    color: var(--color-accent);
+}
+.sort-arrow {
+    font-size: 0.7rem;
+    opacity: 0.4;
+}
+.sort-arrow.sort-active {
+    opacity: 1;
+    color: var(--color-accent);
+}
+
 /* --- Search Page --- */
 
 .search-page h1 {

@@ -1,0 +1,164 @@
+<section class="lesson-page">
+    <h1>Schema Drift Detection</h1>
+    <p class="lesson-meta">Lesson 13 &mdash; Defensive data validation</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/ui-data-alignment">&larr; UI-Data Alignment</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/inflation-adjustment">Inflation Adjustment with CPI &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>Why Schema Drift Matters</h2>
+        <p>
+            Government data sources change column names, add or remove columns, and retype
+            columns between releases &mdash; often without notice. If your pipeline assumes a
+            fixed schema, it silently breaks or loads garbage. A renamed column becomes all NULLs;
+            a retyped column truncates values or throws cast errors deep in the warehouse layer
+            where the root cause is hard to trace.
+        </p>
+        <p>
+            The pipeline uses <strong>proactive drift detection</strong> to catch these changes
+            before they reach the warehouse. Every dataset load compares the incoming schema
+            against the last known-good schema and flags any differences. This turns silent
+            corruption into a loud, actionable failure at the earliest possible point.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Detecting Column Changes</h2>
+        <p>
+            The core detection function compares two schema snapshots &mdash; each a
+            <code>dict[str, str]</code> mapping column name to data type &mdash; and returns
+            a list of <code>SchemaChange</code> objects classified as "added", "removed",
+            or "retyped".
+        </p>
+        <pre class="lesson-code"><code>def detect_schema_drift(schema_a, schema_b):
+    """Compare two schema snapshots and return a list of changes."""
+    changes = []
+    all_cols = set(schema_a.keys()) | set(schema_b.keys())
+    for col in sorted(all_cols):
+        if col in schema_a and col not in schema_b:
+            changes.append(SchemaChange("removed", col))
+        elif col not in schema_a and col in schema_b:
+            changes.append(SchemaChange("added", col))
+        elif schema_a[col].upper() != schema_b[col].upper():
+            changes.append(SchemaChange("retyped", col))
+    return changes</code></pre>
+        <p>
+            The comparison is case-insensitive on type names because some sources report
+            <code>VARCHAR</code> while the staging layer normalizes to <code>varchar</code>.
+            An empty change list means the schema is stable &mdash; the most common outcome
+            within a single source release cycle.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Row Count Shift Detection</h2>
+        <p>
+            Schema drift catches structural changes, but a source can also change in volume
+            without altering its schema. A 20% threshold on row count shift catches major
+            structural changes &mdash; such as BLS adding a new geography level or dropping
+            an occupation group &mdash; while ignoring normal year-to-year variation.
+        </p>
+        <pre class="lesson-code"><code>ROW_COUNT_SHIFT_THRESHOLD_PCT = 20.0
+
+def detect_row_count_shift(prior_count, current_count, threshold_pct=20.0):
+    """Flag row count changes that exceed the threshold percentage."""
+    pct_change = abs(current_count - prior_count) / prior_count * 100
+    return ValidationResult(
+        passed=pct_change &lt; threshold_pct,
+        message=f"Row count changed {pct_change:.1f}%"
+    )</code></pre>
+        <p>
+            For example, OEWS national data has roughly 830 occupations per year. If a new
+            release suddenly reports 1,000 rows, the 20% threshold fires. This could mean
+            BLS added a new occupation classification level &mdash; something the parser
+            needs to handle explicitly rather than silently ingesting.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Measure Delta Detection</h2>
+        <p>
+            Beyond row counts, the pipeline checks for large relative changes in key measures.
+            This catches wage corrections, employment revisions, and other data-level changes
+            that don't affect the schema or row count but would produce misleading trend analysis
+            if ingested without review.
+        </p>
+        <table class="data-table">
+            <thead>
+                <tr><th>Check</th><th>Threshold</th><th>Catches</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Row count shift</td>
+                    <td>20%</td>
+                    <td>New geography levels, dropped occupation groups</td>
+                </tr>
+                <tr>
+                    <td>Measure delta</td>
+                    <td>15%</td>
+                    <td>Wage corrections, employment revisions</td>
+                </tr>
+                <tr>
+                    <td>Schema drift</td>
+                    <td>Any change</td>
+                    <td>Column renames, type changes, removed fields</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            The measure delta check identifies the top-N measures with the largest relative
+            change between releases. A 15% swing in mean annual wage for a major occupation
+            group almost certainly indicates a methodology change or data error rather than
+            a real labor market shift.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Publication Gates</h2>
+        <p>
+            All validation checks feed into a single publication gate that decides whether
+            data flows from staging into the warehouse. The gate is deliberately simple:
+            pass everything or block everything.
+        </p>
+        <pre class="lesson-code"><code>def check_publication_gate(validation_results):
+    """Binary gate: all validations must pass for data to flow."""
+    failures = [r for r in validation_results if not r.passed]
+    if failures:
+        return f"BLOCKED: {len(failures)} validation(s) failed"
+    return "ALLOWED: All validations passed"</code></pre>
+        <div class="lesson-callout">
+            <p>
+                <strong>Key principle:</strong> The gate is binary &mdash; either all validations
+                pass and data flows to the warehouse, or any failure blocks publication. Raw data
+                is always preserved regardless &mdash; you can fix the parser and re-run without
+                re-downloading.
+            </p>
+        </div>
+        <p>
+            This fail-fast approach means schema drift never silently corrupts the warehouse.
+            When a validation fails, the pipeline logs exactly which check failed and why,
+            giving the developer a clear starting point for investigation. The raw data remains
+            in the landing layer, so once the parser is updated to handle the new schema,
+            a simple re-run loads everything correctly.
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/ui-data-alignment">&larr; UI-Data Alignment</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/inflation-adjustment">Inflation Adjustment with CPI &rarr;</a>
+        </div>
+    </nav>
+</section>

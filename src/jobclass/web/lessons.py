@@ -16,6 +16,14 @@ LESSONS: list[tuple[str, str, str]] = [
     ("thread-safety", "Thread-Safe Database Connections", "lessons_thread_safety.html"),
     ("multi-vintage-queries", "Multi-Vintage Query Pitfalls", "lessons_multi_vintage_queries.html"),
     ("ui-data-alignment", "UI-Data Alignment", "lessons_ui_data_alignment.html"),
+    ("schema-drift", "Schema Drift Detection", "lessons_schema_drift.html"),
+    ("inflation-adjustment", "Inflation Adjustment with CPI", "lessons_inflation_adjustment.html"),
+    ("taxonomy-evolution", "Crosswalk & Taxonomy Evolution", "lessons_taxonomy_evolution.html"),
+    ("government-apis", "Extract Patterns for Government APIs", "lessons_government_apis.html"),
+    ("derived-metrics", "Derived Metrics from Base Observations", "lessons_derived_metrics.html"),
+    ("outlier-interpretation", "Ranked Movers & Outlier Interpretation", "lessons_outlier_interpretation.html"),
+    ("geography-pitfalls", "Geography Comparison Pitfalls", "lessons_geography_pitfalls.html"),
+    ("fetch-shim", "Fetch Shim Architecture", "lessons_fetch_shim.html"),
 ]
 
 # Derived lookup: slug → (title, template_name)

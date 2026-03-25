@@ -21,9 +21,9 @@ class TestLessonsLanding:
         for slug in LESSON_SLUGS:
             assert f"/lessons/{slug}" in resp.text, f"Missing link to /lessons/{slug}"
 
-    def test_landing_has_11_cards(self, client):
+    def test_landing_has_20_cards(self, client):
         resp = client.get("/lessons")
-        assert resp.text.count("lesson-card-number") == 12
+        assert resp.text.count("lesson-card-number") == 20
 
 
 class TestLessonPages:

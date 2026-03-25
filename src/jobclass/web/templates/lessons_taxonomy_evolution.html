@@ -1,0 +1,218 @@
+<section class="lesson-page">
+    <h1>Crosswalk &amp; Taxonomy Evolution</h1>
+    <p class="lesson-meta">Lesson 15 &mdash; Occupation code versioning</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/inflation-adjustment">&larr; Inflation Adjustment with CPI</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/government-apis">Extract Patterns for Government APIs &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>The Illusion of Stable Codes</h2>
+        <p>
+            SOC code <code>15-1131</code> meant "Computer Programmers" in SOC 2010. In SOC 2018,
+            it was renumbered to <code>15-1251</code> ("Software Developers"). The definition also
+            changed. Naively comparing wages for "15-1131" across vintages mixes two different
+            occupation definitions. Same code does not mean same occupation.
+        </p>
+        <p>
+            This is not an edge case. The SOC 2010-to-2018 revision restructured entire occupation
+            groups. Some codes were split into multiple new codes. Others were merged. A few shifted
+            to different major groups entirely. Any time-series analysis that treats SOC codes as
+            stable identifiers across revisions will produce misleading results.
+        </p>
+        <p>
+            The solution is a <strong>crosswalk</strong> &mdash; an explicit mapping from every old
+            code to every new code, with metadata about the type of change. The BLS publishes this
+            mapping as a downloadable CSV. The pipeline parses it, classifies each pair, and stores
+            the result in a bridge table that downstream queries can join against.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Crosswalk Structure</h2>
+        <p>
+            The parser produces one <code>CrosswalkRow</code> per (source, target) pair. Each row
+            captures both the old and new code, plus metadata about the mapping relationship.
+        </p>
+        <pre class="lesson-code"><code>@dataclass
+class CrosswalkRow:
+    source_soc_code: str        # SOC 2010 code
+    source_soc_title: str
+    source_soc_version: str     # "2010"
+    target_soc_code: str        # SOC 2018 code
+    target_soc_title: str
+    target_soc_version: str     # "2018"
+    mapping_type: str           # "1:1", "split", "merge", "complex"
+    source_release_id: str
+    parser_version: str</code></pre>
+        <p>
+            Each row maps one 2010 code to one 2018 code. The <code>mapping_type</code> field is
+            not present in the source data &mdash; it is computed by analyzing cardinality across
+            all pairs. A 2010 code that maps to exactly one 2018 code (and vice versa) is
+            <code>1:1</code>. A 2010 code that maps to multiple 2018 codes is a <code>split</code>.
+            The classification depends on the full set of pairs, not any single row in isolation.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Cardinality-Based Classification</h2>
+        <p>
+            The mapping type is derived from two counts: how many targets each source maps to
+            (fan-out), and how many sources each target receives (fan-in). The algorithm builds
+            these dictionaries in a first pass, then classifies each pair in a second pass.
+        </p>
+        <pre class="lesson-code"><code># Count fan-out and fan-in
+source_targets = {}  # 2010 code &rarr; set of 2018 codes
+target_sources = {}  # 2018 code &rarr; set of 2010 codes
+
+for pair in all_pairs:
+    source_targets[pair.source].add(pair.target)
+    target_sources[pair.target].add(pair.source)
+
+# Classify each pair
+for pair in all_pairs:
+    src_fan = len(source_targets[pair.source])
+    tgt_fan = len(target_sources[pair.target])
+    if src_fan == 1 and tgt_fan == 1:
+        pair.mapping_type = "1:1"      # Unchanged
+    elif src_fan &gt; 1 and tgt_fan == 1:
+        pair.mapping_type = "split"    # One old &rarr; many new
+    elif src_fan == 1 and tgt_fan &gt; 1:
+        pair.mapping_type = "merge"    # Many old &rarr; one new
+    else:
+        pair.mapping_type = "complex"  # Many-to-many</code></pre>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Fan-out</th>
+                    <th>Fan-in</th>
+                    <th>Safe for wage comparison?</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1:1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>Yes &mdash; same occupation, different code</td>
+                </tr>
+                <tr>
+                    <td>split</td>
+                    <td>&gt;1</td>
+                    <td>1</td>
+                    <td>No &mdash; wages can't be disaggregated</td>
+                </tr>
+                <tr>
+                    <td>merge</td>
+                    <td>1</td>
+                    <td>&gt;1</td>
+                    <td>No &mdash; wages can't be averaged meaningfully</td>
+                </tr>
+                <tr>
+                    <td>complex</td>
+                    <td>&gt;1</td>
+                    <td>&gt;1</td>
+                    <td>No &mdash; requires manual analysis</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            The four types cover every possible relationship. In the SOC 2010&rarr;2018 crosswalk,
+            the majority of codes are 1:1 mappings. Splits and merges are less common but affect
+            some of the most analytically interesting occupations (technology roles, healthcare
+            specialties). Complex mappings are rare and typically involve major group restructuring.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Why This Matters for Time Series</h2>
+        <div class="lesson-callout">
+            <p>
+                <strong>Key principle:</strong> Only 1:1 mappings are safe for direct wage comparison
+                across SOC versions. Splits can aggregate employment counts (addition) but not wages
+                (you can't split a mean). Merges lose granularity. The crosswalk bridge table stores
+                all mapping types, but the comparable-history pipeline only uses 1:1 pairs.
+            </p>
+        </div>
+        <p>
+            Consider a split: SOC 2010 code <code>15-1100</code> (Computer Occupations) splits into
+            three SOC 2018 codes. The 2010 vintage reports a single mean wage for the combined group.
+            You cannot divide that mean wage into three parts because the component occupations have
+            different wage distributions. However, you <em>can</em> sum the 2018 employment counts
+            back to the 2010 group level, because employment is additive.
+        </p>
+        <p>
+            Merges have the opposite problem: two SOC 2010 codes collapse into one SOC 2018 code.
+            You could average the 2010 wages, but an unweighted average misrepresents the combined
+            group. A weighted average requires employment counts, which introduces circular
+            dependencies when both wages and employment are the quantities you're trying to compare.
+        </p>
+        <p>
+            The pipeline sidesteps these problems by restricting comparable history to 1:1 mappings.
+            This sacrifices coverage (some occupations can't be tracked across versions) in exchange
+            for correctness (every comparison that is made is statistically valid).
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Parse Pipeline</h2>
+        <p>
+            The crosswalk parser uses a two-pass approach. The first pass collects all (source, target)
+            pairs from the CSV. The second pass classifies each pair using the cardinality dictionaries
+            built during the first pass.
+        </p>
+        <pre class="lesson-code"><code># Pass 1: Collect all pairs and build cardinality maps
+pairs = []
+source_targets = defaultdict(set)
+target_sources = defaultdict(set)
+
+for row in csv_reader:
+    src = normalize_code(row[source_col])
+    tgt = normalize_code(row[target_col])
+    pairs.append((src, tgt, row))
+    source_targets[src].add(tgt)
+    target_sources[tgt].add(src)
+
+# Pass 2: Classify and emit CrosswalkRow objects
+for src, tgt, row in pairs:
+    mapping_type = classify(src, tgt, source_targets, target_sources)
+    yield CrosswalkRow(
+        source_soc_code=src,
+        target_soc_code=tgt,
+        mapping_type=mapping_type,
+        ...
+    )</code></pre>
+        <p>
+            Column aliases handle both possible header formats in the BLS CSV &mdash;
+            <code>"2010 SOC Code"</code> vs. <code>"Old SOC Code"</code>. The parser tries each
+            alias in order and uses the first match. Regex validation ensures all codes match the
+            <code>XX-XXXX</code> pattern before processing, catching malformed rows early.
+        </p>
+        <p>
+            The two-pass design is necessary because classification requires global knowledge.
+            You cannot determine whether a pair is 1:1 or part of a split until you've seen
+            every pair involving that source code. Streaming single-pass processing would require
+            deferred classification with a flush step &mdash; more complex for no real benefit
+            given the small size of the crosswalk file (under 2,000 rows).
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/inflation-adjustment">&larr; Inflation Adjustment with CPI</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/government-apis">Extract Patterns for Government APIs &rarr;</a>
+        </div>
+    </nav>
+</section>

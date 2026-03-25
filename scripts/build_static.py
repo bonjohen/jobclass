@@ -35,8 +35,7 @@ sys.path.insert(0, str(_project_root / "src"))
 # Wages endpoints map geo_type param to separate files.
 # ---------------------------------------------------------------------------
 
-STATIC_SHIM = r"""\
-<script>
+STATIC_SHIM = r"""<script>
 (function(){
 var F=window.fetch,SC=null;
 function LS(b){
@@ -69,9 +68,10 @@ window.fetch=function(u){
     return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
   }
   if(p==='/api/trends/movers'){
-    var yr=sp.get('year');
-    if(yr)return F(b+'/api/trends/movers-'+yr+'.json');
-    return F(b+'/api/trends/movers.json');
+    var yr=sp.get('year'),mt=sp.get('metric')||'employment_count';
+    var mf=mt==='employment_count'?'':'_'+mt;
+    if(yr)return F(b+'/api/trends/movers-'+yr+mf+'.json');
+    return F(b+'/api/trends/movers'+mf+'.json');
   }
   if(p==='/api/trends/compare/occupations'){
     var codes=(sp.get('soc_codes')||'').split(',').filter(Boolean);
@@ -306,7 +306,14 @@ def build_static(base_path: str, output_dir: str) -> None:
         write_json(url, filepath)
     print(f"  {len(global_apis)} global endpoints")
 
-    # Per-year movers files
+    # Per-year and per-metric movers files
+    movers_metrics = [
+        "employment_count",
+        "mean_annual_wage",
+        "median_annual_wage",
+        "real_mean_annual_wage",
+        "real_median_annual_wage",
+    ]
     movers_years = db.execute("""
         SELECT DISTINCT tp.year
         FROM fact_derived_series d
@@ -315,9 +322,15 @@ def build_static(base_path: str, output_dir: str) -> None:
         WHERE m.metric_name = 'yoy_percent_change'
         ORDER BY tp.year
     """).fetchall()
-    for (yr,) in movers_years:
-        write_json(f"/api/trends/movers?year={yr}", f"api/trends/movers-{yr}.json")
-    print(f"  {len(movers_years)} per-year movers files")
+    movers_count = 0
+    for met in movers_metrics:
+        suffix = "" if met == "employment_count" else f"_{met}"
+        write_json(f"/api/trends/movers?metric={met}", f"api/trends/movers{suffix}.json")
+        movers_count += 1
+        for (yr,) in movers_years:
+            write_json(f"/api/trends/movers?year={yr}&metric={met}", f"api/trends/movers-{yr}{suffix}.json")
+            movers_count += 1
+    print(f"  {movers_count} movers files ({len(movers_metrics)} metrics x {len(movers_years)} years + defaults)")
 
     # Search index — built directly from DB since the API rejects empty queries
     search_rows = db.execute("""

@@ -384,10 +384,7 @@ def onet_refresh(
             dim_tables.append("dim_education_requirement")
         if technology_content:
             dim_tables.append("dim_technology")
-        total_loaded = sum(
-            conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
-            for t in dim_tables
-        )
+        total_loaded = sum(conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0] for t in dim_tables)
 
         update_run_counts(
             conn,

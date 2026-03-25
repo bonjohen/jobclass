@@ -286,11 +286,13 @@ def occupation_education(soc_code: str) -> dict:
                 "scale_id": r[2],
                 "categories": [],
             }
-        elements[eid]["categories"].append({
-            "category": r[3],
-            "category_label": r[4],
-            "percentage": r[5],
-        })
+        elements[eid]["categories"].append(
+            {
+                "category": r[3],
+                "category_label": r[4],
+                "percentage": r[5],
+            }
+        )
 
     # Build summary from Required Level of Education (highest percentage category)
     summary = None
@@ -364,12 +366,14 @@ def occupation_technology(soc_code: str) -> dict:
         t2_type = r[0]
         if t2_type not in groups:
             groups[t2_type] = []
-        groups[t2_type].append({
-            "example_name": r[1],
-            "commodity_code": r[2],
-            "commodity_title": r[3],
-            "hot_technology": r[4],
-        })
+        groups[t2_type].append(
+            {
+                "example_name": r[1],
+                "commodity_code": r[2],
+                "commodity_title": r[3],
+                "hot_technology": r[4],
+            }
+        )
 
     return {
         "soc_code": soc_code,

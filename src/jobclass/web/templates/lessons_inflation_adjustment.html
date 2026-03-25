@@ -1,0 +1,156 @@
+<section class="lesson-page">
+    <h1>Inflation Adjustment with CPI</h1>
+    <p class="lesson-meta">Lesson 14 &mdash; Real wages &amp; CPI deflation</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/schema-drift">&larr; Schema Drift Detection</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/taxonomy-evolution">Crosswalk &amp; Taxonomy Evolution &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>Nominal vs. Real Wages</h2>
+        <p>
+            Comparing $50,000 in 2021 to $52,000 in 2023 looks like a 4% raise. But if
+            inflation was 10% over that period, the worker's purchasing power actually fell.
+            <strong>Nominal wages</strong> are dollar amounts as published by the source;
+            <strong>real wages</strong> adjust for inflation to enable meaningful comparison
+            across time periods.
+        </p>
+        <p>
+            Without inflation adjustment, a multi-vintage wage trend chart is misleading.
+            Every occupation appears to have rising wages simply because the dollar is worth
+            less each year. Real wages separate genuine labor market shifts from background
+            price-level changes.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The CPI-U Deflation Formula</h2>
+        <p>
+            The Bureau of Labor Statistics publishes the Consumer Price Index for All Urban
+            Consumers (CPI-U), which measures average price changes over time. The pipeline
+            uses CPI-U annual averages to convert nominal wages into constant dollars.
+        </p>
+        <pre class="lesson-code"><code>real_wage = nominal_wage &times; (CPI_base_year / CPI_observation_year)
+
+Example:
+  Nominal wage 2021:     $50,000
+  CPI-U 2021:            270.970
+  CPI-U 2023 (base):     304.702
+  Real wage (2023$):     $50,000 &times; (304.702 / 270.970) = $56,226</code></pre>
+        <p>
+            <code>CPI_BASE_YEAR = 2023</code> in the project. All real wages are expressed
+            in 2023 dollars. The formula scales older wages <strong>up</strong> (since prices
+            were lower in earlier years) and leaves the base year unchanged. A 2023 nominal
+            wage equals its real wage because the ratio is 1.0.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The SQL Pattern</h2>
+        <p>
+            The <code>compute_real_wages</code> function writes inflation-adjusted values
+            into <code>fact_derived_series</code> using a single INSERT&hellip;SELECT that
+            joins wage observations with their corresponding CPI values through the time
+            dimension.
+        </p>
+        <pre class="lesson-code"><code>INSERT INTO fact_derived_series (...)
+SELECT
+    real_metric_key,
+    nominal_metric_key,
+    obs.occupation_key,
+    obs.geography_key,
+    obs.period_key,
+    obs.comparability_mode,
+    ROUND(obs.observed_value * (base_cpi / fpi.index_value), 0),
+    'cpi_deflation',
+    run_id
+FROM fact_time_series_observation obs
+JOIN dim_time_period tp ON obs.period_key = tp.period_key
+JOIN fact_price_index_observation fpi
+    ON fpi.period_key = obs.period_key
+WHERE obs.metric_key = nominal_metric_key
+  AND obs.observed_value IS NOT NULL
+  AND fpi.index_value &gt; 0</code></pre>
+        <p>
+            The join through <code>dim_time_period</code> aligns each wage observation with
+            its corresponding CPI value for the same year. The <code>WHERE</code> clause
+            guards against division by zero (<code>fpi.index_value &gt; 0</code>) and NULL
+            propagation (<code>obs.observed_value IS NOT NULL</code>). The result is rounded
+            to whole dollars since sub-dollar precision in annual wages is spurious.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Base Year Selection</h2>
+        <p>
+            The project uses 2023 as the base year because it is the latest complete year
+            with published CPI-U data. All real wage values are denominated in "2023 dollars,"
+            which makes them directly comparable to the most recent nominal wages users see
+            in current BLS publications.
+        </p>
+        <div class="lesson-callout">
+            <p>
+                <strong>Important:</strong> Changing the base year shifts all real values
+                proportionally but doesn't change the relative ordering or growth rates.
+                A $56,226 real wage in 2023 dollars becomes roughly $52,000 in 2021 dollars
+                &mdash; same purchasing power, different unit.
+            </p>
+        </div>
+        <p>
+            If the project later ingests 2024 CPI data, the base year constant can be updated
+            and all derived series recomputed. Because <code>fact_derived_series</code> is
+            fully regenerated on each time-series refresh, there is no migration &mdash; just
+            change the constant and re-run.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Two Derived Wage Metrics</h2>
+        <p>
+            The pipeline produces two inflation-adjusted metrics, each paired with its
+            nominal counterpart:
+        </p>
+        <table class="data-table">
+            <thead>
+                <tr><th>Metric</th><th>Base Metric</th><th>Formula</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>real_mean_annual_wage</td>
+                    <td>mean_annual_wage</td>
+                    <td>nominal &times; (CPI_2023 / CPI_year)</td>
+                </tr>
+                <tr>
+                    <td>real_median_annual_wage</td>
+                    <td>median_annual_wage</td>
+                    <td>nominal &times; (CPI_2023 / CPI_year)</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            Both are stored in <code>fact_derived_series</code> with
+            <code>derivation_method = 'cpi_deflation'</code>. They are never mixed with
+            base observations in <code>fact_time_series_observation</code> &mdash; the
+            separation ensures that downstream queries always know whether they are working
+            with nominal or real values based on which table they read from.
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/schema-drift">&larr; Schema Drift Detection</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/taxonomy-evolution">Crosswalk &amp; Taxonomy Evolution &rarr;</a>
+        </div>
+    </nav>
+</section>

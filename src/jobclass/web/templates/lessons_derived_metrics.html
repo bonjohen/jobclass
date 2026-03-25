@@ -1,0 +1,215 @@
+<section class="lesson-page">
+    <h1>Derived Metrics from Base Observations</h1>
+    <p class="lesson-meta">Lesson 17 &mdash; Computing metrics from base observations</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/government-apis">&larr; Extract Patterns for Government APIs</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/outlier-interpretation">Ranked Movers &amp; Outlier Interpretation &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>Why Derived Metrics Need Their Own Table</h2>
+        <p>
+            Base observations are source truth from BLS and O*NET. Derived values &mdash;
+            year-over-year change, rolling averages, real wages &mdash; are computed artifacts.
+            Mixing them in the same table creates ambiguity: is this value a measurement or a
+            calculation? A consumer querying wage data shouldn't have to guess whether a number
+            came directly from BLS or was produced by the pipeline.
+        </p>
+        <p>
+            The pipeline stores base observations in <code>fact_time_series_observation</code>
+            and all derived values in <code>fact_derived_series</code>. Each derived row carries
+            a <code>derivation_method</code> label (e.g., <code>'yoy_absolute_change'</code>,
+            <code>'cpi_deflation'</code>) and a <code>base_metric_key</code> pointing back to
+            the metric it was computed from. This separation means downstream queries always
+            know exactly what kind of value they are working with based on which table they
+            read from.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Self-Join Pattern for Year-over-Year</h2>
+        <p>
+            Computing year-over-year change requires connecting each observation to its
+            prior-year counterpart. The core pattern is a self-join on
+            <code>fact_time_series_observation</code> through the time dimension.
+        </p>
+        <pre class="lesson-code"><code>-- Year-over-year absolute change
+INSERT INTO fact_derived_series (...)
+SELECT
+    derived_key, base_key,
+    curr.occupation_key, curr.geography_key,
+    curr.period_key, curr.comparability_mode,
+    curr.observed_value - prev.observed_value,
+    'yoy_absolute_change', run_id
+FROM fact_time_series_observation curr
+JOIN dim_time_period tp_curr ON curr.period_key = tp_curr.period_key
+JOIN dim_time_period tp_prev
+  ON tp_prev.year = tp_curr.year - 1
+JOIN fact_time_series_observation prev
+  ON prev.metric_key = curr.metric_key
+  AND prev.occupation_key = curr.occupation_key
+  AND prev.geography_key = curr.geography_key
+  AND prev.period_key = tp_prev.period_key
+WHERE curr.observed_value IS NOT NULL
+  AND prev.observed_value IS NOT NULL</code></pre>
+        <p>
+            The self-join connects each observation to its prior-year counterpart through
+            <code>dim_time_period</code>. The <code>tp_prev.year = tp_curr.year - 1</code>
+            condition finds the matching period, and the subsequent join on
+            <code>metric_key</code>, <code>occupation_key</code>, <code>geography_key</code>,
+            and <code>period_key</code> ensures we compare the exact same measure for the
+            exact same occupation in the exact same geography. If either year is missing or
+            NULL, no derived value is produced &mdash; the pipeline never imputes.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Rolling Averages via Triple-Join</h2>
+        <p>
+            A 3-year rolling average smooths out single-year volatility and reveals underlying
+            trends. The SQL pattern extends the self-join approach by connecting three
+            consecutive years.
+        </p>
+        <pre class="lesson-code"><code>-- 3-year rolling average requires three consecutive years
+JOIN dim_time_period tp_1 ON tp_1.year = tp_curr.year - 1
+JOIN dim_time_period tp_2 ON tp_2.year = tp_curr.year - 2
+JOIN fact_time_series_observation p1
+  ON p1.period_key = tp_1.period_key
+  AND p1.metric_key = curr.metric_key
+  AND p1.occupation_key = curr.occupation_key
+  AND p1.geography_key = curr.geography_key
+JOIN fact_time_series_observation p2
+  ON p2.period_key = tp_2.period_key
+  AND p2.metric_key = curr.metric_key
+  AND p2.occupation_key = curr.occupation_key
+  AND p2.geography_key = curr.geography_key
+...
+ROUND((p2.observed_value + p1.observed_value + curr.observed_value) / 3.0, 2)</code></pre>
+        <p>
+            The triple-join naturally handles the "3 consecutive years required" constraint
+            &mdash; if any year is missing, the JOIN produces no rows. No explicit gap detection
+            is needed. This is a general pattern: require N consecutive values by adding N-1
+            self-joins through the time dimension. The database engine handles the absence check
+            for free through inner join semantics.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Idempotent Delete-Before-Insert</h2>
+        <p>
+            Every derived metric computation follows the same two-step pattern: delete all
+            existing rows for that metric, then insert the freshly computed values.
+        </p>
+        <pre class="lesson-code"><code># Every compute function follows this pattern:
+derived_key = get_metric_key(conn, "yoy_absolute_change")
+conn.execute(
+    "DELETE FROM fact_derived_series WHERE metric_key = ?",
+    [derived_key]
+)
+conn.execute(
+    "INSERT INTO fact_derived_series (...) SELECT ..."
+)</code></pre>
+        <div class="lesson-callout">
+            <p>
+                <strong>Key principle:</strong> Delete-before-insert is safe for derived metrics
+                because every value is fully reproducible from base observations. Unlike base data
+                (which could be lost), derived data can always be recomputed. This pattern makes
+                the pipeline idempotent: running it twice produces the same result.
+            </p>
+        </div>
+        <p>
+            The delete is scoped to a single <code>metric_key</code>, so recomputing
+            year-over-year change doesn't touch rolling averages or real wages. Each derived
+            metric is an independent computation that can be re-run in isolation without
+            affecting any other metric in the table.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Derived Metrics Registry</h2>
+        <p>
+            The pipeline computes seven derived metrics, each with a specific derivation method
+            and minimum data requirement. All are stored in <code>fact_derived_series</code>
+            with a <code>base_metric_key</code> linking back to the source observation metric.
+        </p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Units</th>
+                    <th>Method</th>
+                    <th>Min Data Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>yoy_absolute_change</td>
+                    <td>varies</td>
+                    <td>Self-join on year-1</td>
+                    <td>2 consecutive years</td>
+                </tr>
+                <tr>
+                    <td>yoy_percent_change</td>
+                    <td>percent</td>
+                    <td>(curr - prev) / prev &times; 100</td>
+                    <td>2 consecutive years</td>
+                </tr>
+                <tr>
+                    <td>rolling_avg_3yr</td>
+                    <td>varies</td>
+                    <td>Average of 3 consecutive years</td>
+                    <td>3 consecutive years</td>
+                </tr>
+                <tr>
+                    <td>state_vs_national_gap</td>
+                    <td>varies</td>
+                    <td>state_value - national_value</td>
+                    <td>State + national data</td>
+                </tr>
+                <tr>
+                    <td>rank_delta</td>
+                    <td>rank_change</td>
+                    <td>rank(year-1) - rank(year)</td>
+                    <td>2 consecutive years</td>
+                </tr>
+                <tr>
+                    <td>real_mean_annual_wage</td>
+                    <td>dollars</td>
+                    <td>CPI deflation</td>
+                    <td>CPI data for year</td>
+                </tr>
+                <tr>
+                    <td>real_median_annual_wage</td>
+                    <td>dollars</td>
+                    <td>CPI deflation</td>
+                    <td>CPI data for year</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            Each metric is registered in <code>dim_metric</code> with its units and description.
+            The <code>derivation_method</code> column in <code>fact_derived_series</code> makes
+            it possible to trace exactly how any value was produced, and the
+            <code>base_metric_key</code> connects each derived row to the source observation
+            metric it was computed from.
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/government-apis">&larr; Extract Patterns for Government APIs</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/outlier-interpretation">Ranked Movers &amp; Outlier Interpretation &rarr;</a>
+        </div>
+    </nav>
+</section>

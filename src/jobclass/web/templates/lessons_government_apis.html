@@ -1,0 +1,237 @@
+<section class="lesson-page">
+    <h1>Extract Patterns for Government APIs</h1>
+    <p class="lesson-meta">Lesson 16 &mdash; Extracting data from federal sources</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/taxonomy-evolution">&larr; Crosswalk &amp; Taxonomy Evolution</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/derived-metrics">Derived Metrics from Base Observations &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>Government Sites Block Bare Requests</h2>
+        <p>
+            BLS.gov rejects HTTP requests that don't include browser-like headers. A plain
+            <code>requests.get(url)</code> returns <code>403 Forbidden</code>. The server checks
+            for specific headers that browsers send automatically but HTTP libraries do not.
+        </p>
+        <pre class="lesson-code"><code>headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; ...) Chrome/131.0.0.0",
+    "Accept": "text/html,application/xhtml+xml,...",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+}</code></pre>
+        <p>
+            The <code>Sec-Fetch-*</code> headers are the key &mdash; they tell the server this
+            is a top-level browser navigation, not a script. Without them, BLS returns
+            <code>403 Forbidden</code>. The <code>User-Agent</code> alone is not sufficient;
+            the server specifically checks for the <code>Sec-Fetch-Dest: document</code> and
+            <code>Sec-Fetch-Mode: navigate</code> combination that indicates a real browser
+            page load.
+        </p>
+        <p>
+            This is not unique to BLS. Many federal data sites (Census, EPA, USDA) apply similar
+            filtering to reduce automated scraping. The pipeline uses a single set of browser-like
+            headers for all government sources, avoiding the need for per-source configuration.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Retry with Exponential Backoff</h2>
+        <p>
+            Government servers experience periodic outages, especially around major data releases
+            when traffic spikes. The pipeline retries transient failures but immediately fails on
+            permanent errors.
+        </p>
+        <pre class="lesson-code"><code>for attempt in range(max_retries + 1):
+    try:
+        response = client.get(url)
+        if 200 &lt;= response.status_code &lt; 300:
+            return result      # Success
+        if response.status_code &gt;= 500 and attempt &lt; max_retries:
+            time.sleep(backoff * (2 ** attempt))  # 1s, 2s, 4s
+            continue           # Retry on 5xx
+        raise DownloadError()  # 4xx = not retryable
+    except TimeoutException:
+        if attempt &lt; max_retries:
+            time.sleep(backoff * (2 ** attempt))
+            continue
+        raise</code></pre>
+        <p>
+            5xx errors and timeouts are transient &mdash; the server may recover. 4xx errors are
+            permanent &mdash; retrying won't help. Exponential backoff prevents hammering a
+            struggling server: the first retry waits 1 second, the second waits 2 seconds, the
+            third waits 4 seconds. This gives the server progressively more breathing room
+            between attempts.
+        </p>
+        <p>
+            The distinction between retryable and non-retryable errors is critical. A
+            <code>404 Not Found</code> means the URL is wrong or the dataset has been moved
+            &mdash; waiting longer won't make it appear. A <code>503 Service Unavailable</code>
+            means the server is temporarily overloaded and will likely recover within seconds.
+            Treating all errors the same wastes time on permanent failures and gives up too
+            quickly on transient ones.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Format Heterogeneity</h2>
+        <p>
+            Federal data sources publish in a variety of formats. The pipeline normalizes all
+            of them to CSV text before parsing, using a format-specific conversion chain.
+        </p>
+        <pre class="lesson-code"><code>def convert_to_text(data, expected_format, sheet_name=None):
+    if expected_format in ("csv", "tsv", "text"):
+        return data.decode("utf-8-sig")         # Already text
+    elif expected_format == "xlsx_in_zip":
+        xlsx_bytes = extract_xlsx_from_zip(data)
+        return xlsx_to_csv(xlsx_bytes)           # ZIP &rarr; XLSX &rarr; CSV
+    elif expected_format == "xlsx":
+        return xlsx_to_csv(data, sheet_name)     # XLSX &rarr; CSV</code></pre>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Source</th>
+                    <th>Format</th>
+                    <th>Conversion Chain</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>OEWS</td>
+                    <td>xlsx_in_zip</td>
+                    <td>ZIP &rarr; XLSX &rarr; CSV</td>
+                </tr>
+                <tr>
+                    <td>SOC 2018</td>
+                    <td>xlsx</td>
+                    <td>XLSX &rarr; CSV</td>
+                </tr>
+                <tr>
+                    <td>O*NET</td>
+                    <td>tsv</td>
+                    <td>decode UTF-8</td>
+                </tr>
+                <tr>
+                    <td>BLS Projections</td>
+                    <td>xlsx</td>
+                    <td>XLSX &rarr; CSV</td>
+                </tr>
+                <tr>
+                    <td>BLS CPI-U</td>
+                    <td>text</td>
+                    <td>decode UTF-8</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            The <code>utf-8-sig</code> encoding handles the BOM (byte order mark) that some
+            government tools insert at the start of text files. Standard <code>utf-8</code>
+            decoding would preserve the BOM as an invisible character in the first column name,
+            causing downstream lookups to fail silently.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Preamble Detection</h2>
+        <p>
+            BLS XLSX files do not start with data. They typically begin with 2&ndash;4 rows of
+            preamble: the agency name, the release date, footnotes, and blank rows. The parser
+            must find the actual header row before it can read any data.
+        </p>
+        <pre class="lesson-code"><code>def _find_header_row(worksheet, max_scan=20):
+    for i, row in enumerate(worksheet.iter_rows(...), start=1):
+        non_none = [c for c in row if c is not None]
+        if len(non_none) &gt;= 3:    # Header has multiple columns
+            return i
+    return 1                       # Fallback to first row</code></pre>
+        <p>
+            The heuristic is simple: scan the first 20 rows and pick the first row that has at
+            least 3 non-empty cells. Preamble rows typically have content in only one or two
+            cells (a title spanning a merged range, or a date in a single cell). The actual
+            header row has a value in every column.
+        </p>
+        <p>
+            The <code>max_scan=20</code> limit prevents pathological behavior on files that are
+            entirely empty or have unusual structure. If no header row is found within 20 rows,
+            the parser falls back to row 1 and lets downstream validation catch the problem
+            rather than scanning the entire file.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Manifest-Driven Downloads</h2>
+        <p>
+            Rather than hard-coding download logic per source, the pipeline uses a declarative
+            manifest that describes every dataset: where to find it, what format to expect,
+            and which parser to route it to.
+        </p>
+        <pre class="lesson-code"><code>@dataclass
+class ManifestEntry:
+    source_name: str              # "bls", "onet"
+    dataset_name: str             # "oews_national", "onet_skills"
+    dataset_url: str              # Full download URL
+    expected_format: str          # "xlsx_in_zip", "csv", "text"
+    parser_name: str              # Which parser to use
+    sheet_name: str | None        # For multi-sheet XLSX
+    enabled: bool = True          # Toggle without deleting</code></pre>
+        <p>
+            All download URLs and format metadata live in a single YAML file. Adding a new data
+            source means adding one entry &mdash; the pipeline handles download, conversion, and
+            routing automatically. The <code>enabled</code> flag lets you temporarily disable a
+            source without deleting its configuration, which is useful during development or when
+            a source is temporarily unavailable.
+        </p>
+        <p>
+            The manifest also serves as documentation. Anyone reading the YAML file can see every
+            external dependency at a glance: which URLs the pipeline contacts, what format each
+            file uses, and how the data flows into the parsing layer. This is more maintainable
+            than scattering URL constants across multiple Python modules.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Extract Contract</h2>
+        <div class="lesson-callout">
+            <p>
+                <strong>Key principle:</strong> Every downloaded artifact gets a SHA-256 checksum,
+                UTC timestamp, and original URL recorded. Raw bytes are preserved immutably &mdash;
+                even if parsing fails, you can debug against the exact data that was downloaded.
+                This contract means you never need to re-download to investigate a parse failure.
+            </p>
+        </div>
+        <p>
+            The raw storage path encodes all the metadata needed to trace a file back to its
+            source: <code>raw/{source_name}/{dataset_name}/{source_release_id}/{run_id}/{original_file_name}</code>.
+            Two downloads of the same dataset with different release IDs are stored side by side,
+            not overwritten. Two runs against the same release are also preserved separately,
+            allowing you to verify that the source data hasn't changed between runs.
+        </p>
+        <p>
+            This immutability contract has a concrete benefit: when a parser bug is discovered,
+            the fix can be tested against the exact bytes that exposed the bug, without waiting
+            for a fresh download. It also means the pipeline can be re-run from the parse step
+            forward, skipping the download entirely, which saves time and avoids unnecessary
+            load on government servers.
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/taxonomy-evolution">&larr; Crosswalk &amp; Taxonomy Evolution</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/derived-metrics">Derived Metrics from Base Observations &rarr;</a>
+        </div>
+    </nav>
+</section>

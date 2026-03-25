@@ -105,9 +105,7 @@ class TestCpiLoader:
         assert count == 1
 
     def test_fact_observation(self, cpi_loaded_db):
-        count = cpi_loaded_db.execute(
-            "SELECT COUNT(*) FROM fact_price_index_observation"
-        ).fetchone()[0]
+        count = cpi_loaded_db.execute("SELECT COUNT(*) FROM fact_price_index_observation").fetchone()[0]
         assert count == 4
 
 
@@ -119,6 +117,7 @@ def cpi_loaded_db(migrated_db, cpi_content):
         load_dim_price_index,
         load_fact_price_index_observation,
     )
+
     rows = parse_cpi(cpi_content, "test-release")
     load_cpi_staging(migrated_db, rows, "test-release")
     load_dim_price_index(migrated_db, "test-release")
