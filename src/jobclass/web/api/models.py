@@ -471,3 +471,50 @@ class CpiAreaDetail(BaseModel):
 class CpiAreaMembersResponse(BaseModel):
     area_code: str
     members: list[CpiMemberSummary]
+
+
+class CpiImportanceEntry(BaseModel):
+    reference_period: str
+    relative_importance: float
+    area_code: str = "0000"
+
+
+class CpiImportanceResponse(BaseModel):
+    member_code: str
+    title: str
+    entries: list[CpiImportanceEntry] = []
+
+
+class CpiExplorerNode(BaseModel):
+    member_code: str
+    title: str
+    hierarchy_level: str | None = None
+    relative_importance: float | None = None
+    children: list[CpiExplorerNode] = []
+
+
+class CpiAveragePriceEntry(BaseModel):
+    year: int
+    period: str
+    average_price: float
+    unit_description: str | None = None
+
+
+class CpiAveragePriceResponse(BaseModel):
+    member_code: str
+    title: str
+    entries: list[CpiAveragePriceEntry] = []
+
+
+class CpiRevisionVintageEntry(BaseModel):
+    year: int
+    period: str
+    vintage_label: str
+    index_value: float
+    is_preliminary: bool
+
+
+class CpiRevisionVintageResponse(BaseModel):
+    member_code: str
+    title: str
+    entries: list[CpiRevisionVintageEntry] = []

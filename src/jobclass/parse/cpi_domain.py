@@ -133,6 +133,44 @@ class CpiAveragePriceRow:
     parser_version: str
 
 
+@dataclass
+class CpiOverlaySeriesRow:
+    """Parsed community overlay series entry (Cleveland Fed, FRED).
+
+    Overlay members are loaded into dim_cpi_member with semantic_role = 'external_overlay'
+    and linked to SA0 via bridge_cpi_member_relation.
+    """
+
+    member_code: str  # e.g. "MEDCPI", "TRMCPI"
+    title: str
+    overlay_source: str  # e.g. "cleveland_fed", "fred"
+    year: int
+    period: str
+    value: float
+    source_release_id: str
+    parser_version: str
+
+
+@dataclass
+class CpiRevisionVintageRow:
+    """Parsed C-CPI-U revision vintage entry.
+
+    Tracks preliminary vs. revised index values for the same member/area/period.
+    C-CPI-U is initially published as a preliminary estimate, then revised over
+    roughly 10-12 months as final expenditure data become available.
+    """
+
+    item_code: str
+    area_code: str
+    year: int
+    period: str
+    vintage_label: str  # e.g. "2024-preliminary", "2024-final"
+    index_value: float
+    is_preliminary: bool
+    source_release_id: str
+    parser_version: str
+
+
 # ---------------------------------------------------------------------------
 # Area type classifier
 # ---------------------------------------------------------------------------

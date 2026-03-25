@@ -159,17 +159,17 @@ Add relative importance ingestion and the weighted hierarchy browser — the vis
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | CPI7-01 | Implement `load_fact_cpi_relative_importance()`: load relative importance data from parsed tables, validate grain uniqueness | | |
-| `[ ]` | CPI7-02 | Add `/api/cpi/members/{member_code}/importance` endpoint: return relative importance history for the member | | |
-| `[ ]` | CPI7-03 | Add `/cpi/explorer` route to `app.py` | | |
-| `[ ]` | CPI7-04 | Create `cpi_explorer.html` template with canvas container for weighted hierarchy visualization | | |
-| `[ ]` | CPI7-05 | Create `cpi_explorer.js`: implement icicle/ribbon visualization where band widths represent latest relative importance values | | |
-| `[ ]` | CPI7-06 | Implement click-to-expand: clicking a band zooms into the next hierarchy layer while keeping parent context visible | | |
-| `[ ]` | CPI7-07 | Implement color mode switching: toggle between current monthly change, 12-month change, and contribution-to-headline views | | |
-| `[ ]` | CPI7-08 | Implement member lens side panel: on band selection, show compact member card with title, importance, change metrics, and link to full member page | | |
-| `[ ]` | CPI7-09 | Add relative importance history display on member page (below fold, CPI6 extension) | | |
-| `[ ]` | CPI7-10 | Add explorer page to `build_static.py` HTML and JSON generation | | |
-| `[ ]` | CPI7-11 | Verify: weighted visualization renders with real relative importance data, click-to-expand works, color modes switch correctly | | |
+| `[X]` | CPI7-01 | Implement `load_fact_cpi_relative_importance()`: load relative importance data from parsed tables, validate grain uniqueness | 2026-03-25 18:00 | 2026-03-25 18:02 |
+| `[X]` | CPI7-02 | Add `/api/cpi/members/{member_code}/importance` endpoint: return relative importance history for the member | 2026-03-25 18:02 | 2026-03-25 18:06 |
+| `[X]` | CPI7-03 | Add `/cpi/explorer` route to `app.py` | 2026-03-25 18:06 | 2026-03-25 18:07 |
+| `[X]` | CPI7-04 | Create `cpi_explorer.html` template with canvas container for weighted hierarchy visualization | 2026-03-25 18:07 | 2026-03-25 18:09 |
+| `[X]` | CPI7-05 | Create `cpi_explorer.js`: implement icicle/ribbon visualization where band widths represent latest relative importance values | 2026-03-25 18:09 | 2026-03-25 18:18 |
+| `[X]` | CPI7-06 | Implement click-to-expand: clicking a band zooms into the next hierarchy layer while keeping parent context visible | 2026-03-25 18:09 | 2026-03-25 18:18 |
+| `[X]` | CPI7-07 | Implement color mode switching: toggle between current monthly change, 12-month change, and contribution-to-headline views | 2026-03-25 18:09 | 2026-03-25 18:18 |
+| `[X]` | CPI7-08 | Implement member lens side panel: on band selection, show compact member card with title, importance, change metrics, and link to full member page | 2026-03-25 18:09 | 2026-03-25 18:18 |
+| `[X]` | CPI7-09 | Add relative importance history display on member page (below fold, CPI6 extension) | 2026-03-25 18:18 | 2026-03-25 18:22 |
+| `[X]` | CPI7-10 | Add explorer page to `build_static.py` HTML and JSON generation | 2026-03-25 18:22 | 2026-03-25 18:28 |
+| `[X]` | CPI7-11 | Verify: weighted visualization renders with real relative importance data, click-to-expand works, color modes switch correctly | 2026-03-25 18:28 | 2026-03-25 18:35 |
 
 ---
 
@@ -179,16 +179,17 @@ Add average price ingestion, area detail pages, area hierarchy navigation, and t
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | CPI8-01 | Implement `load_fact_cpi_average_price()`: load average prices from parsed tables, validate grain uniqueness, preserve unit descriptions | | |
-| `[ ]` | CPI8-02 | Add `/api/cpi/members/{member_code}/average-prices` endpoint: return average price history for applicable items (food, utility, motor fuel) | | |
-| `[ ]` | CPI8-03 | Add average price history section to `cpi_member.html` (visible only for members with has_average_price = true) | | |
-| `[ ]` | CPI8-04 | Add `/cpi/area/{area_code}` route to `app.py` with 404 handling | | |
-| `[ ]` | CPI8-05 | Create `cpi_area.html` template: area title, type, publication frequency, area hierarchy position, published item families, top inflationary members in latest period | | |
-| `[ ]` | CPI8-06 | Display area caveats prominently: "area indexes do not measure price-level differences among cities," volatility warning for local areas, bimonthly publication note where applicable | | |
-| `[ ]` | CPI8-07 | Handle bimonthly publication frequency: display gaps correctly in time-series charts, label bimonthly areas distinctly | | |
-| `[ ]` | CPI8-08 | Add `/api/cpi/compare` endpoint: compare time series across members or across areas, with alignment by period | | |
-| `[ ]` | CPI8-09 | Add area pages and compare endpoint to `build_static.py` HTML and JSON generation | | |
-| `[ ]` | CPI8-10 | Verify: area page shows correct publication rules and caveats; average price section appears only for applicable members | | |
+| `[X]` | CPI8-00 | Review the test code and orchistration for performance issues. Implement any performance enhancements you think are important.| 2026-03-25 18:36 | 2026-03-25 18:52 |
+| `[X]` | CPI8-01 | Implement `load_fact_cpi_average_price()`: load average prices from parsed tables, validate grain uniqueness, preserve unit descriptions | 2026-03-25 18:52 | 2026-03-25 18:55 |
+| `[X]` | CPI8-02 | Add `/api/cpi/members/{member_code}/average-prices` endpoint: return average price history for applicable items (food, utility, motor fuel) | 2026-03-25 18:55 | 2026-03-25 18:58 |
+| `[X]` | CPI8-03 | Add average price history section to `cpi_member.html` (visible only for members with has_average_price = true) | 2026-03-25 18:58 | 2026-03-25 19:02 |
+| `[X]` | CPI8-04 | Add `/cpi/area/{area_code}` route to `app.py` with 404 handling | 2026-03-25 19:02 | 2026-03-25 19:08 |
+| `[X]` | CPI8-05 | Create `cpi_area.html` template: area title, type, publication frequency, area hierarchy position, published item families, top inflationary members in latest period | 2026-03-25 19:02 | 2026-03-25 19:08 |
+| `[X]` | CPI8-06 | Display area caveats prominently: "area indexes do not measure price-level differences among cities," volatility warning for local areas, bimonthly publication note where applicable | 2026-03-25 19:02 | 2026-03-25 19:08 |
+| `[X]` | CPI8-07 | Handle bimonthly publication frequency: display gaps correctly in time-series charts, label bimonthly areas distinctly | 2026-03-25 19:02 | 2026-03-25 19:08 |
+| `[X]` | CPI8-08 | Add `/api/cpi/compare` endpoint: compare time series across members or across areas, with alignment by period | 2026-03-25 19:08 | 2026-03-25 19:12 |
+| `[X]` | CPI8-09 | Add area pages and compare endpoint to `build_static.py` HTML and JSON generation | 2026-03-25 19:12 | 2026-03-25 20:15 |
+| `[X]` | CPI8-10 | Verify: area page shows correct publication rules and caveats; average price section appears only for applicable members | 2026-03-25 20:15 | 2026-03-25 20:25 |
 
 ---
 
@@ -198,12 +199,12 @@ Add support for C-CPI-U preliminary/revised values, which differ from final CPI-
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | CPI9-01 | Implement `load_fact_cpi_revision_vintage()`: load C-CPI-U preliminary and revised values, track vintage_label and is_preliminary flag | | |
-| `[ ]` | CPI9-02 | Add revision vintage display on member page for C-CPI-U: show both preliminary and latest revised values side-by-side | | |
-| `[ ]` | CPI9-03 | Validate C-CPI-U constraints: national-only coverage, quarterly revision schedule | | |
-| `[ ]` | CPI9-04 | Mark preliminary values visually distinct from final values in all charts and tables (label + styling) | | |
-| `[ ]` | CPI9-05 | Add `/api/cpi/members/{member_code}/revisions` endpoint: return vintage comparison for C-CPI-U series | | |
-| `[ ]` | CPI9-06 | Add unit tests for revision vintage handling: verify preliminary/revised distinction, national-only constraint | | |
+| `[X]` | CPI9-01 | Implement `load_fact_cpi_revision_vintage()`: load C-CPI-U preliminary and revised values, track vintage_label and is_preliminary flag | 2026-03-25 20:28 | 2026-03-25 20:35 |
+| `[X]` | CPI9-02 | Add revision vintage display on member page for C-CPI-U: show both preliminary and latest revised values side-by-side | 2026-03-25 20:35 | 2026-03-25 20:45 |
+| `[X]` | CPI9-03 | Validate C-CPI-U constraints: national-only coverage, quarterly revision schedule | 2026-03-25 20:45 | 2026-03-25 20:48 |
+| `[X]` | CPI9-04 | Mark preliminary values visually distinct from final values in all charts and tables (label + styling) | 2026-03-25 20:35 | 2026-03-25 20:45 |
+| `[X]` | CPI9-05 | Add `/api/cpi/members/{member_code}/revisions` endpoint: return vintage comparison for C-CPI-U series | 2026-03-25 20:35 | 2026-03-25 20:45 |
+| `[X]` | CPI9-06 | Add unit tests for revision vintage handling: verify preliminary/revised distinction, national-only constraint | 2026-03-25 20:48 | 2026-03-25 20:55 |
 
 ---
 
@@ -213,13 +214,13 @@ Wire CPI and labor domains together with cross-domain panels, links, and methodo
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | CPI10-01 | Add "price context" panel to occupation trend pages: display which CPI member drives the real-wage deflation, with link to CPI member page | | |
-| `[ ]` | CPI10-02 | Add "labor context" panel to CPI member pages: display which labor views (real-wage metrics) use this CPI family as a deflator | | |
-| `[ ]` | CPI10-03 | Link CPI deflator usage to existing `CPI_BASE_YEAR = 2023` constant and real-wage formula in time-series metrics | | |
-| `[ ]` | CPI10-04 | Show CPI base year, deflation formula, and source member on relevant occupation real-wage trend pages | | |
-| `[ ]` | CPI10-05 | Add cross-navigation links: CPI member pages → occupation real-wage views; occupation pages → CPI member pages | | |
-| `[ ]` | CPI10-06 | Update `methodology.html` with CPI domain documentation: data sources, hierarchy structure, area rules, revision behavior, real-wage integration | | |
-| `[ ]` | CPI10-07 | Verify: navigation between CPI and labor domains works bidirectionally with no dead ends | | |
+| `[X]` | CPI10-01 | Add "price context" panel to occupation trend pages: display which CPI member drives the real-wage deflation, with link to CPI member page | 2026-03-25 20:58 | 2026-03-25 21:05 |
+| `[X]` | CPI10-02 | Add "labor context" panel to CPI member pages: display which labor views (real-wage metrics) use this CPI family as a deflator | 2026-03-25 21:05 | 2026-03-25 21:08 |
+| `[X]` | CPI10-03 | Link CPI deflator usage to existing `CPI_BASE_YEAR = 2023` constant and real-wage formula in time-series metrics | 2026-03-25 21:05 | 2026-03-25 21:08 |
+| `[X]` | CPI10-04 | Show CPI base year, deflation formula, and source member on relevant occupation real-wage trend pages | 2026-03-25 20:58 | 2026-03-25 21:05 |
+| `[X]` | CPI10-05 | Add cross-navigation links: CPI member pages → occupation real-wage views; occupation pages → CPI member pages | 2026-03-25 21:08 | 2026-03-25 21:10 |
+| `[X]` | CPI10-06 | Update `methodology.html` with CPI domain documentation: data sources, hierarchy structure, area rules, revision behavior, real-wage integration | 2026-03-25 21:10 | 2026-03-25 21:15 |
+| `[X]` | CPI10-07 | Verify: navigation between CPI and labor domains works bidirectionally with no dead ends | 2026-03-25 21:15 | 2026-03-25 21:18 |
 
 ---
 
@@ -229,14 +230,14 @@ Add optional FRED category mirrors and Cleveland Fed median/trimmed-mean inflati
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | CPI11-01 | Add manifest entries for Cleveland Fed median CPI and 16% trimmed-mean CPI series | | |
-| `[ ]` | CPI11-02 | Implement Cleveland Fed parser: parse median and trimmed-mean inflation series into staging rows | | |
-| `[ ]` | CPI11-03 | Load Cleveland Fed data as overlay members in `dim_cpi_member` (semantic_role = external_overlay) with relation entries in `bridge_cpi_member_relation` | | |
-| `[ ]` | CPI11-04 | Implement FRED category mirror: map FRED CPI category structure to `bridge_cpi_member_relation` entries (relation_type = fred_mirror) | | |
-| `[ ]` | CPI11-05 | Add overlay toggle on CPI member pages and explorer: show/hide community data, clearly labeled as "External/Derived" | | |
-| `[ ]` | CPI11-06 | Style overlay data visually distinct from BLS base data: different badge color, "overlay" indicator, source attribution | | |
-| `[ ]` | CPI11-07 | Handle overlay data freshness independently: overlay refresh does not block BLS data pipeline | | |
-| `[ ]` | CPI11-08 | Verify: overlays visible but clearly secondary; toggling off overlays returns to pure BLS view | | |
+| `[X]` | CPI11-01 | Add manifest entries for Cleveland Fed median CPI and 16% trimmed-mean CPI series | 2026-03-25 21:20 | 2026-03-25 21:22 |
+| `[X]` | CPI11-02 | Implement Cleveland Fed parser: parse median and trimmed-mean inflation series into staging rows | 2026-03-25 21:22 | 2026-03-25 21:28 |
+| `[X]` | CPI11-03 | Load Cleveland Fed data as overlay members in `dim_cpi_member` (semantic_role = external_overlay) with relation entries in `bridge_cpi_member_relation` | 2026-03-25 21:28 | 2026-03-25 21:35 |
+| `[X]` | CPI11-04 | Implement FRED category mirror: map FRED CPI category structure to `bridge_cpi_member_relation` entries (relation_type = fred_mirror) | 2026-03-25 21:28 | 2026-03-25 21:35 |
+| `[X]` | CPI11-05 | Add overlay toggle on CPI member pages and explorer: show/hide community data, clearly labeled as "External/Derived" | 2026-03-25 21:35 | 2026-03-25 21:40 |
+| `[X]` | CPI11-06 | Style overlay data visually distinct from BLS base data: different badge color, "overlay" indicator, source attribution | 2026-03-25 21:35 | 2026-03-25 21:40 |
+| `[X]` | CPI11-07 | Handle overlay data freshness independently: overlay refresh does not block BLS data pipeline | 2026-03-25 21:40 | 2026-03-25 21:42 |
+| `[X]` | CPI11-08 | Verify: overlays visible but clearly secondary; toggling off overlays returns to pure BLS view | 2026-03-25 21:42 | 2026-03-25 21:45 |
 
 ---
 
@@ -246,19 +247,19 @@ Add automated tests for all CPI pages and endpoints, finalize static site integr
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | CPI12-01 | Create `tests/web/test_cpi.py` with test classes: `TestCPILanding`, `TestCPIMemberPage`, `TestCPIAreaPage`, `TestCPIExplorer`, `TestCPIAPI` | | |
-| `[ ]` | CPI12-02 | Test: `/cpi` returns status 200 with correct page title and headline series content | | |
-| `[ ]` | CPI12-03 | Test: `/cpi/member/{code}` returns 200 for a known hierarchy node and for a cross-cutting aggregate | | |
-| `[ ]` | CPI12-04 | Test: `/cpi/area/{code}` returns 200 for U.S. city average and for a metro area | | |
-| `[ ]` | CPI12-05 | Test: `/cpi/explorer` returns 200 with canvas/visualization container | | |
-| `[ ]` | CPI12-06 | Test: `/api/cpi/search` returns results for known member names | | |
-| `[ ]` | CPI12-07 | Test: all CPI API endpoints return expected JSON structure (member detail, children, relations, series, importance, average prices, revisions, areas, compare) | | |
-| `[ ]` | CPI12-08 | Test: CPI nav link present on all pages | | |
-| `[ ]` | CPI12-09 | Test: hierarchy navigation works — member page shows ancestor breadcrumbs and child list | | |
-| `[ ]` | CPI12-10 | Add all CPI pages and JSON endpoints to `build_static.py`: landing, member pages, area pages, explorer, search index, per-member JSON, per-area JSON | | |
-| `[ ]` | CPI12-11 | Run `ruff check src/ tests/` — all changed files pass linting | | |
-| `[ ]` | CPI12-12 | Run full test suite (`pytest`) — all existing + new CPI tests pass | | |
-| `[ ]` | CPI12-13 | Build static site and verify CPI pages render correctly at `/jobclass/cpi`, `/jobclass/cpi/member/{code}`, `/jobclass/cpi/area/{code}`, `/jobclass/cpi/explorer` | | |
+| `[X]` | CPI12-01 | Create `tests/web/test_cpi.py` with test classes: `TestCPILanding`, `TestCPIMemberPage`, `TestCPIAreaPage`, `TestCPIExplorer`, `TestCPIAPI` | 2026-03-25 21:48 | 2026-03-25 21:55 |
+| `[X]` | CPI12-02 | Test: `/cpi` returns status 200 with correct page title and headline series content | 2026-03-25 21:48 | 2026-03-25 21:55 |
+| `[X]` | CPI12-03 | Test: `/cpi/member/{code}` returns 200 for a known hierarchy node and for a cross-cutting aggregate | 2026-03-25 21:48 | 2026-03-25 21:55 |
+| `[X]` | CPI12-04 | Test: `/cpi/area/{code}` returns 200 for U.S. city average and for a metro area | 2026-03-25 21:48 | 2026-03-25 21:55 |
+| `[X]` | CPI12-05 | Test: `/cpi/explorer` returns 200 with canvas/visualization container | 2026-03-25 21:48 | 2026-03-25 21:55 |
+| `[X]` | CPI12-06 | Test: `/api/cpi/search` returns results for known member names | 2026-03-25 21:48 | 2026-03-25 21:55 |
+| `[X]` | CPI12-07 | Test: all CPI API endpoints return expected JSON structure (member detail, children, relations, series, importance, average prices, revisions, areas, compare) | 2026-03-25 21:48 | 2026-03-25 21:55 |
+| `[X]` | CPI12-08 | Test: CPI nav link present on all pages | 2026-03-25 21:48 | 2026-03-25 21:55 |
+| `[X]` | CPI12-09 | Test: hierarchy navigation works — member page shows ancestor breadcrumbs and child list | 2026-03-25 21:48 | 2026-03-25 21:55 |
+| `[X]` | CPI12-10 | Add all CPI pages and JSON endpoints to `build_static.py`: landing, member pages, area pages, explorer, search index, per-member JSON, per-area JSON | 2026-03-25 19:12 | 2026-03-25 20:15 |
+| `[X]` | CPI12-11 | Run `ruff check src/ tests/` — all changed files pass linting | 2026-03-25 21:55 | 2026-03-25 21:58 |
+| `[X]` | CPI12-12 | Run full test suite (`pytest`) — all existing + new CPI tests pass | 2026-03-25 21:55 | 2026-03-25 21:58 |
+| `[X]` | CPI12-13 | Build static site and verify CPI pages render correctly at `/jobclass/cpi`, `/jobclass/cpi/member/{code}`, `/jobclass/cpi/area/{code}`, `/jobclass/cpi/explorer` | 2026-03-25 21:58 | 2026-03-25 22:05 |
 
 ---
 
@@ -273,13 +274,13 @@ Add automated tests for all CPI pages and endpoints, finalize static site integr
 | CPI4 | Core API Endpoints | 10 | **Complete** |
 | CPI5 | CPI Landing Page & Navigation | 8 | **Complete** |
 | CPI6 | CPI Member Page | 11 | **Complete** |
-| CPI7 | Relative Importance & Weighted Visualization | 11 | Not started |
-| CPI8 | Average Prices & Area Pages | 10 | Not started |
-| CPI9 | C-CPI-U Revision Vintage | 6 | Not started |
-| CPI10 | Labor Domain Integration | 7 | Not started |
-| CPI11 | Community Overlays | 8 | Not started |
-| CPI12 | Tests, Static Build & Final Verification | 13 | Not started |
-| **Total** | | **124** | |
+| CPI7 | Relative Importance & Weighted Visualization | 11 | **Complete** |
+| CPI8 | Average Prices & Area Pages | 11 | **Complete** |
+| CPI9 | C-CPI-U Revision Vintage | 6 | **Complete** |
+| CPI10 | Labor Domain Integration | 7 | **Complete** |
+| CPI11 | Community Overlays | 8 | **Complete** |
+| CPI12 | Tests, Static Build & Final Verification | 13 | **Complete** |
+| **Total** | | **125** | |
 
 ---
 

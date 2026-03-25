@@ -236,6 +236,27 @@ sources:
     version_detection_rule: url_pattern
     enabled: true
 
+  # --- Community Overlays: Cleveland Fed ---
+  # Median CPI — monthly median change measure (less volatile than headline CPI)
+  - source_name: cleveland_fed
+    dataset_name: cleveland_median_cpi
+    dataset_url: https://www.clevelandfed.org/indicators-and-data/median-cpi
+    expected_format: xlsx
+    parser_name: cleveland_median_cpi_parser
+    refresh_cadence: monthly
+    version_detection_rule: url_pattern
+    enabled: false
+
+  # 16% Trimmed-Mean CPI — monthly trimmed-mean measure
+  - source_name: cleveland_fed
+    dataset_name: cleveland_trimmed_mean_cpi
+    dataset_url: https://www.clevelandfed.org/indicators-and-data/trimmed-mean-cpi
+    expected_format: xlsx
+    parser_name: cleveland_trimmed_mean_cpi_parser
+    refresh_cadence: monthly
+    version_detection_rule: url_pattern
+    enabled: false
+
   # --- Employment Projections (Optional R1) ---
   - source_name: bls
     dataset_name: bls_employment_projections

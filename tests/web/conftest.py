@@ -1,5 +1,6 @@
 """Fixtures for website tests."""
 
+import tempfile
 from pathlib import Path
 
 import duckdb
@@ -13,10 +14,15 @@ MIGRATIONS_DIR = Path(__file__).parent.parent.parent / "migrations"
 FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
 
 
-@pytest.fixture
-def warehouse_db(tmp_path):
-    """Provide a DuckDB warehouse populated with sample data for web tests."""
-    db_path = tmp_path / "web_test.duckdb"
+@pytest.fixture(scope="session")
+def warehouse_db():
+    """Provide a DuckDB warehouse populated with sample data for web tests.
+
+    Session-scoped: built once and shared across all web tests.
+    Web tests are read-only (use TestClient for GET requests), so sharing is safe.
+    """
+    tmp_dir = tempfile.mkdtemp()
+    db_path = Path(tmp_dir) / "web_test.duckdb"
     conn = duckdb.connect(str(db_path))
     apply_migrations(conn, migrations_dir=MIGRATIONS_DIR)
 
@@ -232,9 +238,12 @@ def warehouse_db(tmp_path):
     conn.close()
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def client(warehouse_db):
-    """Provide a FastAPI TestClient with the warehouse injected."""
+    """Provide a FastAPI TestClient with the warehouse injected.
+
+    Session-scoped: shares the same app and DB connection across all web tests.
+    """
     set_db(warehouse_db)
     from jobclass.web.app import create_app
 

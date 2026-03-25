@@ -199,6 +199,29 @@ def create_app() -> FastAPI:
             },
         )
 
+    @app.get("/cpi/area/{area_code}", response_class=HTMLResponse)
+    async def cpi_area_page(request: Request, area_code: str):
+        return templates.TemplateResponse(
+            request,
+            "base.html",
+            {
+                "page_title": f"CPI Area — {area_code} — JobClass",
+                "content_template": "cpi_area.html",
+                "area_code": area_code,
+            },
+        )
+
+    @app.get("/cpi/explorer", response_class=HTMLResponse)
+    async def cpi_explorer_page(request: Request):
+        return templates.TemplateResponse(
+            request,
+            "base.html",
+            {
+                "page_title": "CPI Explorer — JobClass",
+                "content_template": "cpi_explorer.html",
+            },
+        )
+
     @app.get("/trends", response_class=HTMLResponse)
     async def trends_landing(request: Request):
         return templates.TemplateResponse(

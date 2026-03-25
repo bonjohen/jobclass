@@ -1,0 +1,79 @@
+<section class="cpi-explorer-page" id="cpi-explorer-page">
+    <nav class="breadcrumb" aria-label="CPI explorer breadcrumb">
+        <a href="/cpi">CPI</a>
+        <span class="breadcrumb-sep">&#8250;</span>
+        <span class="breadcrumb-current">Explorer</span>
+    </nav>
+
+    <h1>CPI Weighted Hierarchy Explorer</h1>
+    <p class="page-intro">
+        Explore the Consumer Price Index hierarchy weighted by relative importance.
+        Band widths represent each item's share of the total CPI basket.
+        Click a band to drill into its children.
+    </p>
+
+    <!-- Controls -->
+    <div class="cpi-explorer-controls">
+        <div class="cpi-explorer-control-group">
+            <label for="explorer-color-mode">Color by:</label>
+            <select id="explorer-color-mode">
+                <option value="importance">Relative importance</option>
+                <option value="monthly">1-month % change</option>
+                <option value="annual">12-month % change</option>
+            </select>
+        </div>
+        <div class="cpi-explorer-control-group">
+            <label for="explorer-depth">Depth:</label>
+            <select id="explorer-depth">
+                <option value="2">2 levels</option>
+                <option value="3" selected>3 levels</option>
+                <option value="4">4 levels</option>
+            </select>
+        </div>
+        <button id="explorer-reset" class="cpi-explorer-btn">Reset to All Items</button>
+    </div>
+
+    <!-- Hierarchy path (breadcrumb for current drill level) -->
+    <div class="cpi-explorer-path" id="explorer-path"></div>
+
+    <!-- Visualization container -->
+    <div class="cpi-explorer-viz-wrapper">
+        <div id="explorer-viz" class="cpi-explorer-viz">
+            <p class="loading">Loading CPI hierarchy data&hellip;</p>
+        </div>
+
+        <!-- Member lens side panel -->
+        <aside class="cpi-explorer-lens" id="explorer-lens" style="display:none;">
+            <div class="cpi-lens-header">
+                <h3 id="lens-title"></h3>
+                <button id="lens-close" class="cpi-detail-close" aria-label="Close">&times;</button>
+            </div>
+            <div class="cpi-lens-meta">
+                <span class="lineage-badge" id="lens-code"></span>
+                <span class="lineage-badge" id="lens-level"></span>
+            </div>
+            <div class="cpi-lens-stats">
+                <div class="cpi-lens-stat">
+                    <span class="cpi-lens-stat-label">Relative Importance</span>
+                    <span class="cpi-lens-stat-value" id="lens-importance">—</span>
+                </div>
+                <div class="cpi-lens-stat">
+                    <span class="cpi-lens-stat-label">Children</span>
+                    <span class="cpi-lens-stat-value" id="lens-children">—</span>
+                </div>
+            </div>
+            <div class="cpi-lens-actions">
+                <a id="lens-link" href="#" class="cpi-lens-link">View full member page &rarr;</a>
+                <button id="lens-drill" class="cpi-explorer-btn">Drill into this member</button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Legend -->
+    <div class="cpi-explorer-legend" id="explorer-legend">
+        <span class="legend-item"><span class="legend-swatch" style="background:#2b6cb0;"></span> Higher weight</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:#bee3f8;"></span> Lower weight</span>
+    </div>
+</section>
+
+<script src="/static/js/cpi_explorer.js"></script>

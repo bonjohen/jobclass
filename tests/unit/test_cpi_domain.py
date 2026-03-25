@@ -718,3 +718,89 @@ class TestCpiDomainLoaders:
         ).fetchone()[0]
         assert variant_after == variant_before
         assert cpi_domain_loaded_db.execute("SELECT COUNT(*) FROM fact_cpi_observation").fetchone()[0] == obs_before
+
+
+# ============================================================
+# Revision vintage loader tests (CPI9)
+# ============================================================
+
+
+class TestCpiRevisionVintageLoader:
+    def test_load_revision_vintage(self, cpi_domain_loaded_db):
+        from jobclass.load.cpi_domain import load_fact_cpi_revision_vintage
+        from jobclass.parse.cpi_domain import CpiRevisionVintageRow
+
+        rows = [
+            CpiRevisionVintageRow(
+                item_code="SA0", area_code="0000", year=2023, period="M13",
+                vintage_label="2024-Q1-preliminary", index_value=304.7,
+                is_preliminary=True, source_release_id="test-release",
+                parser_version="2.0.0",
+            ),
+            CpiRevisionVintageRow(
+                item_code="SA0", area_code="0000", year=2023, period="M13",
+                vintage_label="2024-Q3-final", index_value=304.5,
+                is_preliminary=False, source_release_id="test-release",
+                parser_version="2.0.0",
+            ),
+        ]
+        count = load_fact_cpi_revision_vintage(
+            cpi_domain_loaded_db, rows, "test-release", "test-release"
+        )
+        assert count == 2
+
+        # Verify both vintages stored
+        stored = cpi_domain_loaded_db.execute(
+            "SELECT vintage_label, index_value, is_preliminary FROM fact_cpi_revision_vintage ORDER BY vintage_label"
+        ).fetchall()
+        assert len(stored) == 2
+        assert stored[0][0] == "2024-Q1-preliminary"
+        assert stored[0][2] is True
+        assert stored[1][0] == "2024-Q3-final"
+        assert stored[1][2] is False
+
+    def test_revision_vintage_idempotent(self, cpi_domain_loaded_db):
+        from jobclass.load.cpi_domain import load_fact_cpi_revision_vintage
+        from jobclass.parse.cpi_domain import CpiRevisionVintageRow
+
+        rows = [
+            CpiRevisionVintageRow(
+                item_code="SA0", area_code="0000", year=2023, period="M13",
+                vintage_label="2024-Q1-preliminary", index_value=304.7,
+                is_preliminary=True, source_release_id="test-release",
+                parser_version="2.0.0",
+            ),
+        ]
+        load_fact_cpi_revision_vintage(
+            cpi_domain_loaded_db, rows, "test-release", "test-release"
+        )
+        # Second run — same grain, no duplicates
+        count = load_fact_cpi_revision_vintage(
+            cpi_domain_loaded_db, rows, "test-release", "test-release"
+        )
+        assert count == 0
+
+    def test_revision_vintage_empty_rows(self, cpi_domain_loaded_db):
+        from jobclass.load.cpi_domain import load_fact_cpi_revision_vintage
+
+        count = load_fact_cpi_revision_vintage(
+            cpi_domain_loaded_db, [], "test-release", "test-release"
+        )
+        assert count == 0
+
+    def test_revision_vintage_unknown_member_skipped(self, cpi_domain_loaded_db):
+        from jobclass.load.cpi_domain import load_fact_cpi_revision_vintage
+        from jobclass.parse.cpi_domain import CpiRevisionVintageRow
+
+        rows = [
+            CpiRevisionVintageRow(
+                item_code="ZZZZZ", area_code="0000", year=2023, period="M13",
+                vintage_label="test", index_value=100.0,
+                is_preliminary=True, source_release_id="test-release",
+                parser_version="2.0.0",
+            ),
+        ]
+        count = load_fact_cpi_revision_vintage(
+            cpi_domain_loaded_db, rows, "test-release", "test-release"
+        )
+        assert count == 0

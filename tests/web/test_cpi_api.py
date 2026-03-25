@@ -133,3 +133,85 @@ class TestCpiAreaMembers:
         data = resp.json()
         assert data["area_code"] == "0000"
         assert "members" in data
+
+
+class TestCpiMemberImportance:
+    def test_importance_returns_200(self, client):
+        resp = client.get("/api/cpi/members/SA0/importance")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["member_code"] == "SA0"
+        assert "entries" in data
+
+    def test_importance_unknown_member(self, client):
+        resp = client.get("/api/cpi/members/ZZZZZ/importance")
+        assert resp.status_code == 404
+
+
+class TestCpiMemberAveragePrices:
+    def test_average_prices_returns_200(self, client):
+        resp = client.get("/api/cpi/members/SA0/average-prices")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["member_code"] == "SA0"
+        assert "entries" in data
+
+    def test_average_prices_unknown_member(self, client):
+        resp = client.get("/api/cpi/members/ZZZZZ/average-prices")
+        assert resp.status_code == 404
+
+
+class TestCpiCompare:
+    def test_compare_returns_200(self, client):
+        resp = client.get("/api/cpi/compare?codes=SA0,SAF")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "codes" in data
+        assert "series" in data
+
+    def test_compare_empty_codes(self, client):
+        resp = client.get("/api/cpi/compare?codes=")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["codes"] == []
+
+
+class TestCpiMemberRevisions:
+    def test_revisions_returns_200(self, client):
+        resp = client.get("/api/cpi/members/SA0/revisions")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["member_code"] == "SA0"
+        assert "entries" in data
+
+    def test_revisions_unknown_member(self, client):
+        resp = client.get("/api/cpi/members/ZZZZZ/revisions")
+        assert resp.status_code == 404
+
+    def test_revisions_national_area_default(self, client):
+        """Revision vintage defaults to national area (0000)."""
+        resp = client.get("/api/cpi/members/SA0/revisions")
+        assert resp.status_code == 200
+
+    def test_revisions_entry_fields(self, client):
+        """If entries exist, they must have the expected fields."""
+        resp = client.get("/api/cpi/members/SA0/revisions")
+        data = resp.json()
+        for entry in data["entries"]:
+            assert "year" in entry
+            assert "vintage_label" in entry
+            assert "index_value" in entry
+            assert "is_preliminary" in entry
+
+
+class TestCpiExplorerTree:
+    def test_tree_returns_200(self, client):
+        resp = client.get("/api/cpi/explorer/tree?root=SA0&max_depth=2")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["member_code"] == "SA0"
+        assert "children" in data
+
+    def test_tree_unknown_root(self, client):
+        resp = client.get("/api/cpi/explorer/tree?root=ZZZZZ")
+        assert resp.status_code == 404

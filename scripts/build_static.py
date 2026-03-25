@@ -119,6 +119,26 @@ window.fetch=function(u){
         {headers:{'Content-Type':'application/json'}});
     });
   }
+  if(p==='/api/cpi/explorer/tree'){
+    var root=sp.get('root')||'SA0',md=sp.get('max_depth')||'3';
+    return F(b+'/api/cpi/explorer/tree-'+root+'-'+md+'.json');
+  }
+  if(p==='/api/cpi/compare'){
+    var cc=(sp.get('codes')||'').split(',').filter(Boolean);
+    var cac=sp.get('area_code')||'0000',cif=sp.get('index_family')||'CPI-U',csa=sp.get('seasonal_adjustment')||'S';
+    return Promise.all(cc.map(function(c){
+      var ct=c.trim();
+      return F(b+'/api/cpi/members/'+ct+'/series.json').then(function(r){return r.json()})
+        .catch(function(){return null});
+    })).then(function(arr){
+      var series={};
+      cc.forEach(function(c,i){
+        var d=arr[i];
+        if(d&&d.series)series[c.trim()]=d.series.map(function(s){return{year:s.year,value:s.value}});
+      });
+      return new Response(JSON.stringify({codes:cc,series:series}),{headers:{'Content-Type':'application/json'}});
+    });
+  }
   return F(b+p+'.json');
 };
 })();
@@ -266,7 +286,8 @@ def build_static(base_path: str, output_dir: str) -> None:
     write_html("/hierarchy", "hierarchy/index.html")
     write_html("/methodology", "methodology/index.html")
     write_html("/cpi", "cpi/index.html")
-    print("  5 root pages")
+    write_html("/cpi/explorer", "cpi/explorer/index.html")
+    print("  6 root pages")
 
     # --- HTML: CPI member pages ---
     cpi_member_codes = []
@@ -286,6 +307,18 @@ def build_static(base_path: str, output_dir: str) -> None:
                 print(f"  {i}/{len(cpi_member_codes)} CPI member pages ({rate:.0f}/s, ~{remaining:.0f}s left)")
         elapsed = time.time() - t0_cpi
         print(f"  {len(cpi_member_codes)} CPI member pages ({elapsed:.1f}s)")
+
+    # --- HTML: CPI area pages ---
+    cpi_area_codes = []
+    with contextlib.suppress(Exception):
+        cpi_area_codes = [
+            r[0]
+            for r in db.execute("SELECT area_code FROM dim_cpi_area ORDER BY area_code").fetchall()
+        ]
+    if cpi_area_codes:
+        for ac in cpi_area_codes:
+            write_html(f"/cpi/area/{ac}", f"cpi/area/{ac}/index.html")
+        print(f"  {len(cpi_area_codes)} CPI area pages")
 
     # --- HTML: Trend pages ---
     write_html("/trends", "trends/index.html")
@@ -455,6 +488,9 @@ def build_static(base_path: str, output_dir: str) -> None:
                 (f"/api/cpi/members/{mc}/siblings", f"api/cpi/members/{mc}/siblings.json"),
                 (f"/api/cpi/members/{mc}/variants", f"api/cpi/members/{mc}/variants.json"),
                 (f"/api/cpi/members/{mc}/series", f"api/cpi/members/{mc}/series.json"),
+                (f"/api/cpi/members/{mc}/importance", f"api/cpi/members/{mc}/importance.json"),
+                (f"/api/cpi/members/{mc}/average-prices", f"api/cpi/members/{mc}/average-prices.json"),
+                (f"/api/cpi/members/{mc}/revisions", f"api/cpi/members/{mc}/revisions.json"),
             ]
             for url, filepath in cpi_endpoints:
                 if write_json(url, filepath):
@@ -481,6 +517,21 @@ def build_static(base_path: str, output_dir: str) -> None:
         cpi_search_dest.parent.mkdir(parents=True, exist_ok=True)
         cpi_search_dest.write_text(json.dumps(cpi_search_data), encoding="utf-8")
         cpi_json_count += 1
+        # Explorer tree endpoints (root SA0 at depths 2-4)
+        for depth in (2, 3, 4):
+            if write_json(
+                f"/api/cpi/explorer/tree?root=SA0&max_depth={depth}",
+                f"api/cpi/explorer/tree-SA0-{depth}.json",
+            ):
+                cpi_json_count += 1
+        # Area detail + members JSON
+        if cpi_area_codes:
+            for ac in cpi_area_codes:
+                if write_json(f"/api/cpi/areas/{ac}", f"api/cpi/areas/{ac}.json"):
+                    cpi_json_count += 1
+                if write_json(f"/api/cpi/areas/{ac}/members", f"api/cpi/areas/{ac}/members.json"):
+                    cpi_json_count += 1
+            print(f"  {len(cpi_area_codes)} CPI area JSON endpoints")
         elapsed = time.time() - t0_cpi
         print(f"  {cpi_json_count} CPI JSON files ({elapsed:.1f}s)")
 

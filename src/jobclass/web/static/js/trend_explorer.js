@@ -7,10 +7,17 @@
     var tableContainer = document.getElementById("trend-table-container");
     var metaDiv = document.getElementById("trend-meta");
 
+    var cpiPanel = document.getElementById("cpi-context-panel");
+
     function loadTrend() {
         var metric = document.getElementById("metric-select").value;
         var geoType = document.getElementById("geo-select").value;
         var mode = document.getElementById("mode-select").value;
+
+        // Show CPI context for real-wage metrics
+        if (cpiPanel) {
+            cpiPanel.hidden = metric.indexOf("real_") !== 0;
+        }
 
         chartContainer.className = "loading";
         chartContainer.setAttribute("aria-busy", "true");
@@ -42,7 +49,11 @@
                 document.getElementById("meta-metric").textContent = first.metric_name;
                 document.getElementById("meta-units").textContent = "(" + first.units + ")";
                 document.getElementById("meta-mode").textContent = mode === "comparable" ? "Comparable" : "As Published";
-                document.getElementById("meta-lineage").textContent = "Source: " + (first.source_release_id || "");
+                var lineageText = "Source: " + (first.source_release_id || "");
+                if (metric.indexOf("real_") === 0) {
+                    lineageText += " | Deflator: CPI-U SA0, base 2023";
+                }
+                document.getElementById("meta-lineage").textContent = lineageText;
                 metaDiv.hidden = false;
 
                 // Build simple bar chart using HTML

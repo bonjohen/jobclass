@@ -119,7 +119,7 @@ def run_all_pipelines(
 
     # --- 1b. SOC Crosswalk (optional) ---
     if "soc_crosswalk" in by_name:
-        print("\n[1b/8] SOC 2010↔2018 Crosswalk")
+        print("\n[1b/8] SOC 2010-2018 Crosswalk")
         summary.pipelines_attempted += 1
         try:
             xw_entry = by_name["soc_crosswalk"]

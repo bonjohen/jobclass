@@ -57,6 +57,69 @@
             <div id="relations-list"></div>
         </div>
 
+        <!-- Relative Importance -->
+        <div class="cpi-member-section" id="importance-section" style="display:none;">
+            <h2>Relative Importance</h2>
+            <p class="section-note">Weight of this item in the CPI basket (U.S. city average). Higher values indicate larger consumer expenditure share.</p>
+            <div id="importance-chart" class="cpi-chart-container">
+                <p class="loading">Loading importance data&hellip;</p>
+            </div>
+            <table class="data-table" id="importance-table" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>Period</th>
+                        <th>Relative Importance</th>
+                    </tr>
+                </thead>
+                <tbody id="importance-tbody"></tbody>
+            </table>
+        </div>
+
+        <!-- Average Prices (only for applicable members) -->
+        <div class="cpi-member-section" id="avg-price-section" style="display:none;">
+            <h2>Average Prices</h2>
+            <p class="section-note">Dollar-denominated average prices for this item (food, utility, or motor fuel).</p>
+            <div id="avg-price-chart" class="cpi-chart-container">
+                <p class="loading">Loading average price data&hellip;</p>
+            </div>
+            <table class="data-table" id="avg-price-table" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Average Price</th>
+                    </tr>
+                </thead>
+                <tbody id="avg-price-tbody"></tbody>
+            </table>
+        </div>
+
+        <!-- Revision Vintages (C-CPI-U only) -->
+        <div class="cpi-member-section" id="revisions-section" style="display:none;">
+            <h2>Revision Vintages</h2>
+            <p class="section-note">C-CPI-U values evolve from <span class="cpi-preliminary-label">preliminary</span> to <span class="cpi-final-label">final</span> as BLS revises estimates (~10–12 months after initial release).</p>
+            <div id="revisions-chart" class="cpi-chart-container">
+                <p class="loading">Loading revision data&hellip;</p>
+            </div>
+            <table class="data-table" id="revisions-table" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Vintage</th>
+                        <th>Index Value</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="revisions-tbody"></tbody>
+            </table>
+        </div>
+
+        <!-- Labor domain context (shown for deflator members) -->
+        <div class="cpi-member-section" id="labor-context-section" style="display:none;">
+            <h2>Labor Domain Integration</h2>
+            <p class="section-note">This CPI member is used as a wage deflator in the labor analytics domain.</p>
+            <div class="cpi-context-panel" id="labor-context-content"></div>
+        </div>
+
         <!-- Area availability -->
         <div class="cpi-member-section" id="areas-section" style="display:none;">
             <h2>Area Availability</h2>
