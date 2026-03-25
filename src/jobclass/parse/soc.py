@@ -22,6 +22,19 @@ LEVEL_MAP = {
 
 
 @dataclass
+class CrosswalkRow:
+    source_soc_code: str
+    source_soc_title: str
+    source_soc_version: str
+    target_soc_code: str
+    target_soc_title: str
+    target_soc_version: str
+    mapping_type: str
+    source_release_id: str
+    parser_version: str = PARSER_VERSION
+
+
+@dataclass
 class SocHierarchyRow:
     soc_code: str
     occupation_title: str
@@ -175,6 +188,107 @@ def parse_soc_definitions(content: str | bytes, source_release_id: str) -> list[
             SocDefinitionRow(
                 soc_code=code,
                 occupation_definition=definition,
+                source_release_id=source_release_id,
+            )
+        )
+
+    return rows
+
+
+def _classify_crosswalk_mappings(
+    pairs: list[tuple[str, str, str, str]],
+) -> dict[tuple[str, str], str]:
+    """Classify each (source_code, target_code) pair by cardinality.
+
+    Returns {(source_code, target_code): mapping_type}.
+    """
+    # Count how many targets each source maps to, and vice versa
+    source_targets: dict[str, set[str]] = {}
+    target_sources: dict[str, set[str]] = {}
+    for src_code, _src_title, tgt_code, _tgt_title in pairs:
+        source_targets.setdefault(src_code, set()).add(tgt_code)
+        target_sources.setdefault(tgt_code, set()).add(src_code)
+
+    result = {}
+    for src_code, _src_title, tgt_code, _tgt_title in pairs:
+        src_fan = len(source_targets[src_code])
+        tgt_fan = len(target_sources[tgt_code])
+        if src_fan == 1 and tgt_fan == 1:
+            mapping_type = "1:1"
+        elif src_fan > 1 and tgt_fan == 1:
+            mapping_type = "split"
+        elif src_fan == 1 and tgt_fan > 1:
+            mapping_type = "merge"
+        else:
+            mapping_type = "complex"
+        result[(src_code, tgt_code)] = mapping_type
+
+    return result
+
+
+def parse_soc_crosswalk(content: str | bytes, source_release_id: str) -> list[CrosswalkRow]:
+    """Parse SOC 2010↔2018 crosswalk CSV content.
+
+    Expected columns: 2010 SOC Code, 2010 SOC Title, 2018 SOC Code, 2018 SOC Title
+    (column names are normalized from BLS XLSX format).
+    """
+    if isinstance(content, bytes):
+        content = content.decode("utf-8-sig")
+
+    col_aliases = {
+        "2010 soc code": "source_code",
+        "2010 soc title": "source_title",
+        "2018 soc code": "target_code",
+        "2018 soc title": "target_title",
+    }
+
+    reader = csv.DictReader(io.StringIO(content))
+
+    col_map: dict[str, str] = {}
+    if reader.fieldnames:
+        for raw_name in reader.fieldnames:
+            normalized = raw_name.strip().lower()
+            if normalized in col_aliases:
+                col_map[raw_name] = col_aliases[normalized]
+
+    # First pass: collect all pairs for classification
+    raw_pairs: list[tuple[str, str, str, str]] = []
+    for record in reader:
+        src_code = ""
+        src_title = ""
+        tgt_code = ""
+        tgt_title = ""
+        for raw_col, alias in col_map.items():
+            val = (record.get(raw_col) or "").strip().strip('"')
+            if alias == "source_code":
+                src_code = val
+            elif alias == "source_title":
+                src_title = val
+            elif alias == "target_code":
+                tgt_code = val
+            elif alias == "target_title":
+                tgt_title = val
+
+        if not src_code or not tgt_code:
+            continue
+        if not re.match(r"\d{2}-\d{4}", src_code) or not re.match(r"\d{2}-\d{4}", tgt_code):
+            continue
+        raw_pairs.append((src_code, src_title, tgt_code, tgt_title))
+
+    # Classify mappings
+    classifications = _classify_crosswalk_mappings(raw_pairs)
+
+    rows = []
+    for src_code, src_title, tgt_code, tgt_title in raw_pairs:
+        rows.append(
+            CrosswalkRow(
+                source_soc_code=src_code,
+                source_soc_title=src_title,
+                source_soc_version="2010",
+                target_soc_code=tgt_code,
+                target_soc_title=tgt_title,
+                target_soc_version="2018",
+                mapping_type=classifications[(src_code, tgt_code)],
                 source_release_id=source_release_id,
             )
         )

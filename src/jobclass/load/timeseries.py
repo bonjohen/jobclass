@@ -403,7 +403,28 @@ DERIVED_METRICS = [
         "description": "Change in occupation rank by metric within geography between periods",
         "requires_comparable_input": True,
     },
+    {
+        "metric_name": "real_mean_annual_wage",
+        "units": "dollars",
+        "display_format": "$#,##0",
+        "comparability_constraint": "same_soc_version",
+        "derivation_type": "derived",
+        "description": "Inflation-adjusted mean annual wage (CPI-U deflated to base year)",
+        "requires_comparable_input": False,
+    },
+    {
+        "metric_name": "real_median_annual_wage",
+        "units": "dollars",
+        "display_format": "$#,##0",
+        "comparability_constraint": "same_soc_version",
+        "derivation_type": "derived",
+        "description": "Inflation-adjusted median annual wage (CPI-U deflated to base year)",
+        "requires_comparable_input": False,
+    },
 ]
+
+# Base year for CPI-U deflation (latest complete year with CPI data)
+CPI_BASE_YEAR = 2023
 
 
 def populate_derived_metrics(conn: duckdb.DuckDBPyConnection) -> int:
@@ -754,4 +775,87 @@ def compute_rank_delta(
         total += count
 
     logger.info("Computed %d rank_delta rows", total)
+    return total
+
+
+def compute_real_wages(
+    conn: duckdb.DuckDBPyConnection,
+    run_id: str | None = None,
+) -> int:
+    """Compute inflation-adjusted (real) wages using CPI-U deflation.
+
+    For each nominal wage observation, computes:
+        real_wage = nominal_wage × (CPI_base_year / CPI_observation_year)
+
+    Requires fact_price_index_observation to be populated.
+    """
+    # Check if CPI data exists
+    try:
+        cpi_count = conn.execute("SELECT COUNT(*) FROM fact_price_index_observation").fetchone()[0]
+    except Exception:
+        cpi_count = 0
+
+    if cpi_count == 0:
+        logger.info("No CPI data available — skipping real wage computation")
+        return 0
+
+    # Get base year CPI value
+    base_cpi_row = conn.execute(
+        """SELECT fpi.index_value
+           FROM fact_price_index_observation fpi
+           JOIN dim_time_period tp ON fpi.period_key = tp.period_key
+           WHERE tp.year = ?""",
+        [CPI_BASE_YEAR],
+    ).fetchone()
+
+    if not base_cpi_row:
+        logger.warning("No CPI data for base year %d — skipping real wages", CPI_BASE_YEAR)
+        return 0
+
+    total = 0
+    # Map: (nominal_metric_name -> derived_metric_name)
+    wage_pairs = [
+        ("mean_annual_wage", "real_mean_annual_wage"),
+        ("median_annual_wage", "real_median_annual_wage"),
+    ]
+
+    for nominal_name, real_name in wage_pairs:
+        nominal_key = _get_metric_key(conn, nominal_name)
+        real_key = _get_metric_key(conn, real_name)
+        if nominal_key is None or real_key is None:
+            continue
+
+        # Clear existing real wage rows for this metric
+        conn.execute("DELETE FROM fact_derived_series WHERE metric_key = ?", [real_key])
+
+        conn.execute(
+            """INSERT INTO fact_derived_series
+               (metric_key, base_metric_key, occupation_key, geography_key,
+                period_key, comparability_mode, derived_value, derivation_method, run_id)
+            SELECT
+                ?,
+                ?,
+                obs.occupation_key,
+                obs.geography_key,
+                obs.period_key,
+                obs.comparability_mode,
+                ROUND(obs.observed_value * (? / fpi.index_value), 0),
+                'cpi_deflation',
+                ?
+            FROM fact_time_series_observation obs
+            JOIN dim_time_period tp ON obs.period_key = tp.period_key
+            JOIN fact_price_index_observation fpi ON fpi.period_key = obs.period_key
+            WHERE obs.metric_key = ?
+              AND obs.observed_value IS NOT NULL
+              AND fpi.index_value > 0""",
+            [real_key, nominal_key, base_cpi_row[0], run_id, nominal_key],
+        )
+
+        count = conn.execute(
+            "SELECT COUNT(*) FROM fact_derived_series WHERE metric_key = ?",
+            [real_key],
+        ).fetchone()[0]
+        total += count
+
+    logger.info("Computed %d real wage rows (base year: %d)", total, CPI_BASE_YEAR)
     return total

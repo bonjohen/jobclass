@@ -365,6 +365,8 @@ def build_static(base_path: str, output_dir: str) -> None:
             (f"/api/trends/{soc}", f"api/trends/{soc}.json"),
             (f"/api/trends/{soc}?metric=mean_annual_wage", f"api/trends/{soc}-mean_annual_wage.json"),
             (f"/api/trends/{soc}?metric=median_annual_wage", f"api/trends/{soc}-median_annual_wage.json"),
+            (f"/api/trends/{soc}?metric=real_mean_annual_wage", f"api/trends/{soc}-real_mean_annual_wage.json"),
+            (f"/api/trends/{soc}?metric=real_median_annual_wage", f"api/trends/{soc}-real_median_annual_wage.json"),
             (
                 f"/api/trends/compare/geography?soc_code={soc}",
                 f"api/trends/compare/geography-{soc}.json",

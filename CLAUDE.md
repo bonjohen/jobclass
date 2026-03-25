@@ -125,6 +125,8 @@ cd _site && python -m http.server 8080
 | OEWS | `oews_national`, `oews_state`, `oews_metro`, `oews_industry_national` | Employment counts and wage measures |
 | O*NET | `onet_skills`, `onet_knowledge`, `onet_abilities`, `onet_tasks`, `onet_occupation_data` | Semantic descriptors (skills, tasks, etc.) |
 | BLS Projections | `bls_employment_projections` | Forward-looking employment data |
+| BLS CPI-U | `bls_cpi` | Consumer price index for inflation adjustment |
+| SOC Crosswalk | `soc_crosswalk` | SOC 2010↔2018 occupation code mappings |
 
 ## Key Design Decisions
 
@@ -144,6 +146,8 @@ cd _site && python -m http.server 8080
 - **BLS Projections employment is in thousands**: The XLSX source stores employment as thousands (e.g., 309.4 = 309,400). The projections parser converts to whole numbers.
 - **5 NEM 2024 occupation codes don't map to SOC 2018**: This is an expected gap. The National Employment Matrix uses some codes not present in the SOC 2018 taxonomy. The projections loader performs an inner join against `dim_occupation`, so these rows are silently excluded.
 - **Military occupations (SOC 55-xxxx) have no data**: Military occupations exist in the SOC taxonomy but have no OEWS wages, O*NET descriptors, or BLS projections data in any source.
+- **CPI-U deflation base year is 2023**: Real wage metrics use `CPI_BASE_YEAR = 2023` constant in `timeseries.py`. Formula: `real_wage = nominal × (CPI_2023 / CPI_year)`.
+- **SOC crosswalk mapping types**: The crosswalk parser classifies each 2010→2018 code pair as 1:1, split, merge, or complex based on cardinality. Only 1:1 mappings are used for wage comparisons; splits/merges can aggregate employment counts.
 
 ## Pipeline Flow
 
@@ -153,7 +157,7 @@ Logical pipelines: `taxonomy_refresh`, `oews_refresh`, `onet_refresh`, `projecti
 
 ## Testing Strategy
 
-- **585+ tests** across four test directories:
+- **653+ tests** across four test directories:
   - `tests/unit/` — Fixture-based parser, loader, orchestration, validation, and config tests. No database or network needed.
   - `tests/web/` — FastAPI TestClient tests for all API endpoints, HTML pages, security headers, accessibility, and end-to-end smoke tests. No database needed (uses in-memory fixtures).
   - `tests/warehouse/` — Real data validation tests against `warehouse.duckdb`. **Automatically skipped** if the warehouse file is absent. Run `jobclass-pipeline run-all` first to populate it.

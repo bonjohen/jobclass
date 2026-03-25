@@ -166,22 +166,22 @@ Add CPI data and real (inflation-adjusted) wage metrics.
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | NDS6-01 | Create migration SQL: `dim_price_index` table (price_index_key, series_id, series_name, base_period, seasonally_adjusted, source_release_id), sequence | | |
-| `[ ]` | NDS6-02 | Create migration SQL: `fact_price_index_observation` table (observation_key, price_index_key, period_key FK, index_value, source_release_id, run_id), unique index on (price_index_key, period_key) | | |
-| `[ ]` | NDS6-03 | Add manifest entry for `bls_cpi` in `source_manifest.yaml` pointing to `https://download.bls.gov/pub/time.series/cu/cu.data.1.AllItems` | | |
-| `[ ]` | NDS6-04 | Create `src/jobclass/parse/cpi.py` with `parse_cpi()`: filter to series `CUSR0000SA0`, period `M13` (annual average), extract year + value. Handle whitespace-padded columns | | |
-| `[ ]` | NDS6-05 | Create `CpiRow` dataclass with fields: series_id, year, period, value, source_release_id, parser_version | | |
-| `[ ]` | NDS6-06 | Create staging table `stage__bls__cpi` and staging loader | | |
-| `[ ]` | NDS6-07 | Create `src/jobclass/load/cpi.py` with `load_dim_price_index()` and `load_fact_price_index_observation()` | | |
-| `[ ]` | NDS6-08 | Create `cpi_refresh()` pipeline function in `pipelines.py` and wire into `run_all.py` (runs after OEWS, before timeseries_refresh) | | |
-| `[ ]` | NDS6-09 | Register `real_mean_annual_wage` and `real_median_annual_wage` in `dim_metric` with `derivation_type = 'derived'`, `units = 'dollars'`, `display_format = '$#,##0'` | | |
-| `[ ]` | NDS6-10 | Add `compute_real_wages()` derivation step in `timeseries_refresh.py`: join nominal wage observations to CPI observations on period_key, apply deflation formula `nominal × (CPI_base / CPI_year)`, insert into `fact_derived_series` | | |
-| `[ ]` | NDS6-11 | Choose and document the base year for deflation (e.g., 2023 = latest year with data). Store base year in a config constant | | |
-| `[ ]` | NDS6-12 | Add "Real Mean Annual Wage" and "Real Median Annual Wage" options to metric dropdowns in Trend Explorer and Ranked Movers HTML templates | | |
-| `[ ]` | NDS6-13 | Add per-metric trend files for real wages to `build_static.py` per-occupation generation | | |
-| `[ ]` | NDS6-14 | Add unit tests: CPI parser extracts correct year + value from sample data, handles whitespace padding | | |
-| `[ ]` | NDS6-15 | Add unit tests: deflation formula produces known values (e.g., $100,000 in 2021 → expected 2023 dollars) | | |
-| `[ ]` | NDS6-16 | Add web tests: real wage metrics appear in trend API response, trend explorer page has real wage options | | |
+| `[X]` | NDS6-01 | Create migration SQL: `dim_price_index` table (price_index_key, series_id, series_name, base_period, seasonally_adjusted, source_release_id), sequence | | |
+| `[X]` | NDS6-02 | Create migration SQL: `fact_price_index_observation` table (observation_key, price_index_key, period_key FK, index_value, source_release_id, run_id), unique index on (price_index_key, period_key) | | |
+| `[X]` | NDS6-03 | Add manifest entry for `bls_cpi` in `source_manifest.yaml` pointing to `https://download.bls.gov/pub/time.series/cu/cu.data.1.AllItems` | | |
+| `[X]` | NDS6-04 | Create `src/jobclass/parse/cpi.py` with `parse_cpi()`: filter to series `CUSR0000SA0`, period `M13` (annual average), extract year + value. Handle whitespace-padded columns | | |
+| `[X]` | NDS6-05 | Create `CpiRow` dataclass with fields: series_id, year, period, value, source_release_id, parser_version | | |
+| `[X]` | NDS6-06 | Create staging table `stage__bls__cpi` and staging loader | | |
+| `[X]` | NDS6-07 | Create `src/jobclass/load/cpi.py` with `load_dim_price_index()` and `load_fact_price_index_observation()` | | |
+| `[X]` | NDS6-08 | Create `cpi_refresh()` pipeline function in `pipelines.py` and wire into `run_all.py` (runs after OEWS, before timeseries_refresh) | | |
+| `[X]` | NDS6-09 | Register `real_mean_annual_wage` and `real_median_annual_wage` in `dim_metric` with `derivation_type = 'derived'`, `units = 'dollars'`, `display_format = '$#,##0'` | | |
+| `[X]` | NDS6-10 | Add `compute_real_wages()` derivation step in `timeseries_refresh.py`: join nominal wage observations to CPI observations on period_key, apply deflation formula `nominal × (CPI_base / CPI_year)`, insert into `fact_derived_series` | | |
+| `[X]` | NDS6-11 | Choose and document the base year for deflation (e.g., 2023 = latest year with data). Store base year in a config constant | | |
+| `[X]` | NDS6-12 | Add "Real Mean Annual Wage" and "Real Median Annual Wage" options to metric dropdowns in Trend Explorer and Ranked Movers HTML templates | | |
+| `[X]` | NDS6-13 | Add per-metric trend files for real wages to `build_static.py` per-occupation generation | | |
+| `[X]` | NDS6-14 | Add unit tests: CPI parser extracts correct year + value from sample data, handles whitespace padding | | |
+| `[X]` | NDS6-15 | Add unit tests: deflation formula produces known values (e.g., $100,000 in 2021 → expected 2023 dollars) | | |
+| `[X]` | NDS6-16 | Add web tests: real wage metrics appear in trend API response, trend explorer page has real wage options | | |
 | `[ ]` | NDS6-17 | Run pipeline and verify: CPI loads, real wages computed, trend explorer shows real wage series for a known occupation | | |
 
 ---
@@ -192,11 +192,11 @@ Add the crosswalk and extend comparable history with pre-2018 OEWS vintages.
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | NDS7-01 | Create migration SQL: `bridge_soc_crosswalk` table (crosswalk_key, source_soc_code, source_soc_version, target_soc_code, target_soc_version, mapping_type, source_release_id), unique index on (source_soc_code, source_soc_version, target_soc_code, target_soc_version) | | |
-| `[ ]` | NDS7-02 | Add manifest entry for `soc_crosswalk` in `source_manifest.yaml` pointing to `https://www.bls.gov/soc/2018/soc_2018_crosswalk.xlsx` | | |
-| `[ ]` | NDS7-03 | Create `parse_soc_crosswalk()` in `soc.py`: read XLSX, extract 2010↔2018 code pairs, classify mapping type (1:1, split, merge, complex) by computing cardinality of each source and target code | | |
-| `[ ]` | NDS7-04 | Create `CrosswalkRow` dataclass with fields: source_soc_code, source_soc_version, target_soc_code, target_soc_version, mapping_type, source_release_id, parser_version | | |
-| `[ ]` | NDS7-05 | Create loader `load_bridge_soc_crosswalk()` in `src/jobclass/load/soc.py` with idempotent delete-before-insert | | |
+| `[X]` | NDS7-01 | Create migration SQL: `bridge_soc_crosswalk` table (crosswalk_key, source_soc_code, source_soc_version, target_soc_code, target_soc_version, mapping_type, source_release_id), unique index on (source_soc_code, source_soc_version, target_soc_code, target_soc_version) | | |
+| `[X]` | NDS7-02 | Add manifest entry for `soc_crosswalk` in `source_manifest.yaml` pointing to `https://www.bls.gov/soc/2018/soc_2018_crosswalk.xlsx` | | |
+| `[X]` | NDS7-03 | Create `parse_soc_crosswalk()` in `soc.py`: read XLSX, extract 2010↔2018 code pairs, classify mapping type (1:1, split, merge, complex) by computing cardinality of each source and target code | | |
+| `[X]` | NDS7-04 | Create `CrosswalkRow` dataclass with fields: source_soc_code, source_soc_version, target_soc_code, target_soc_version, mapping_type, source_release_id, parser_version | | |
+| `[X]` | NDS7-05 | Create loader `load_bridge_soc_crosswalk()` in `src/jobclass/load/soc.py` with idempotent delete-before-insert | | |
 | `[ ]` | NDS7-06 | Load SOC 2010 occupations into `dim_occupation` with `soc_version = '2010'`, `is_current = false`. Source: crosswalk file contains 2010 titles | | |
 | `[ ]` | NDS7-07 | Add OEWS 2017 national + state manifest entries (first pre-2018 vintage to integrate) | | |
 | `[ ]` | NDS7-08 | Verify OEWS 2017 parser handles column variations (check `_OEWS_COLUMN_ALIASES` in `oews.py`) | | |
@@ -206,7 +206,7 @@ Add the crosswalk and extend comparable history with pre-2018 OEWS vintages.
 | `[ ]` | NDS7-12 | For split/merge mappings with wage metrics: only include 1:1 mappings. Wage averages cannot be meaningfully combined without employment weights in the initial release | | |
 | `[ ]` | NDS7-13 | Add OEWS 2012–2016 national + state manifest entries (10 additional entries) | | |
 | `[ ]` | NDS7-14 | Run full pipeline with all OEWS vintages 2012–2023 and verify time-series extends back to 2012 for 1:1 mapped occupations | | |
-| `[ ]` | NDS7-15 | Add unit tests: crosswalk parser classifies known mappings correctly (test 1:1, split, merge, complex examples) | | |
+| `[X]` | NDS7-15 | Add unit tests: crosswalk parser classifies known mappings correctly (test 1:1, split, merge, complex examples) | | |
 | `[ ]` | NDS7-16 | Add unit tests: comparable history builder remaps occupation keys through crosswalk | | |
 | `[ ]` | NDS7-17 | Add warehouse tests: verify Trend Explorer shows 2012–2023 data for a 1:1 mapped occupation | | |
 | `[ ]` | NDS7-18 | Add warehouse tests: verify split/merge occupations have employment comparable history but not wage comparable history | | |
@@ -220,8 +220,8 @@ Final verification across all new sources. Includes remaining code review test c
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | NDS8-01 | Run `ruff check src/ tests/` and `ruff format --check src/ tests/` — all clean | | |
-| `[ ]` | NDS8-02 | Run `pytest tests/unit/ tests/web/ -q` — all tests pass | | |
+| `[X]` | NDS8-01 | Run `ruff check src/ tests/` and `ruff format --check src/ tests/` — all clean | | |
+| `[X]` | NDS8-02 | Run `pytest tests/unit/ tests/web/ -q` — all tests pass (653 tests) | | |
 | `[ ]` | NDS8-03 | Run `jobclass-pipeline run-all` with all new sources enabled — all stages succeed | | |
 | `[ ]` | NDS8-04 | Run `pytest tests/warehouse/` against populated warehouse — all validation tests pass | | |
 | `[ ]` | NDS8-05 | Verify occupation profile page for 15-1252 (Software Developers) shows: Skills, Knowledge, Abilities, Work Activities, Education, Tasks, Technology, Projections, Similar | | |
@@ -238,10 +238,10 @@ Final verification across all new sources. Includes remaining code review test c
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
 | `[ ]` | CR2-10a | Create `tests/test_build_static.py`: test shim injection, URL rewriting, per-year movers JSON, per-metric trend JSON, search index, lesson pages, `.nojekyll`, static assets copied | | |
-| `[ ]` | CR2-11a | Add tests for ranked movers year filter: explicit year, `available_years` field, nonexistent year, year+metric combo | | |
-| `[ ]` | CR2-12a | Add tests for trends comparison endpoints: >10 codes rejected, invalid SOC format, geography year/metric params, missing data graceful handling | | |
+| `[X]` | CR2-11a | Add tests for ranked movers year filter: explicit year, `available_years` field, nonexistent year, year+metric combo | | |
+| `[X]` | CR2-12a | Add tests for trends comparison endpoints: >10 codes rejected, invalid SOC format, geography year/metric params, missing data graceful handling | | |
 | `[ ]` | CR2-13a | Add CI step in `.github/workflows/ci.yml` that runs `python scripts/build_static.py --base-path /jobclass` and verifies `_site/index.html` exists | | |
-| `[ ]` | CR2-14a | Add contract tests: parse each trends endpoint response through Pydantic model, assert no validation errors | | |
+| `[X]` | CR2-14a | Add contract tests: parse each trends endpoint response through Pydantic model, assert no validation errors | | |
 | `[ ]` | CR2-16a | Expand Static Site section in CLAUDE.md with any new URL pattern → JSON file mappings added during NDS phases | | |
 
 ---

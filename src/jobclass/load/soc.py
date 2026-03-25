@@ -2,7 +2,7 @@
 
 import duckdb
 
-from jobclass.parse.soc import SocDefinitionRow, SocHierarchyRow
+from jobclass.parse.soc import CrosswalkRow, SocDefinitionRow, SocHierarchyRow
 
 
 def load_soc_hierarchy_staging(
@@ -204,3 +204,50 @@ def load_bridge_occupation_hierarchy(
         loaded += 1
 
     return loaded
+
+
+def load_crosswalk_staging(
+    conn: duckdb.DuckDBPyConnection,
+    rows: list[CrosswalkRow],
+    source_release_id: str,
+) -> int:
+    """Load parsed crosswalk rows into staging. Idempotent: deletes before inserting."""
+    conn.execute("DELETE FROM stage__soc__crosswalk WHERE source_release_id = ?", [source_release_id])
+    for r in rows:
+        conn.execute(
+            """INSERT INTO stage__soc__crosswalk
+               (source_soc_code, source_soc_title, source_soc_version,
+                target_soc_code, target_soc_title, target_soc_version,
+                mapping_type, source_release_id, parser_version)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [
+                r.source_soc_code, r.source_soc_title, r.source_soc_version,
+                r.target_soc_code, r.target_soc_title, r.target_soc_version,
+                r.mapping_type, r.source_release_id, r.parser_version,
+            ],
+        )
+    return len(rows)
+
+
+def load_bridge_soc_crosswalk(
+    conn: duckdb.DuckDBPyConnection,
+    source_release_id: str,
+) -> int:
+    """Load bridge_soc_crosswalk from staging. Idempotent via delete-before-insert."""
+    conn.execute("DELETE FROM bridge_soc_crosswalk WHERE source_release_id = ?", [source_release_id])
+    conn.execute(
+        """INSERT INTO bridge_soc_crosswalk
+           (source_soc_code, source_soc_version, target_soc_code,
+            target_soc_version, mapping_type, source_release_id)
+           SELECT DISTINCT source_soc_code, source_soc_version,
+                  target_soc_code, target_soc_version,
+                  mapping_type, source_release_id
+           FROM stage__soc__crosswalk
+           WHERE source_release_id = ?""",
+        [source_release_id],
+    )
+    count = conn.execute(
+        "SELECT COUNT(*) FROM bridge_soc_crosswalk WHERE source_release_id = ?",
+        [source_release_id],
+    ).fetchone()[0]
+    return count

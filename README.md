@@ -27,8 +27,10 @@ jobclass-web
 |--------|-----------------|
 | **SOC** (Standard Occupational Classification) | Occupation taxonomy and hierarchy — the backbone for all joins |
 | **OEWS** (Occupational Employment & Wage Statistics) | Employment counts and wage distributions by occupation and geography |
-| **O\*NET** | Skills, knowledge, abilities, and tasks tied to each occupation |
+| **O\*NET** | Skills, knowledge, abilities, work activities, education, technology, and tasks tied to each occupation |
 | **BLS Employment Projections** | Forward-looking employment outlook by occupation |
+| **BLS CPI-U** | Consumer price index for inflation-adjusted (real) wage metrics |
+| **SOC Crosswalk** | SOC 2010↔2018 occupation code mappings for historical depth |
 
 ## Architecture
 
@@ -49,7 +51,7 @@ The pipeline is idempotent: re-running the same source version produces no dupli
 src/jobclass/
   config/        Settings, database, migrations
   extract/       Download, manifest, storage, version detection
-  parse/         Source-specific parsers (SOC, OEWS, O*NET, Projections)
+  parse/         Source-specific parsers (SOC, OEWS, O*NET, Projections, CPI)
   load/          Staging and warehouse loaders
   validate/      Structural, semantic, temporal, drift validations
   observe/       Logging, run manifest
@@ -66,11 +68,11 @@ scripts/         Static site build and deploy
 
 The warehouse extends point-in-time occupation reporting with time-series analysis:
 
-- **Conformed metric catalog** (`dim_metric`) — 6 base metrics + 5 derived metrics with units, display format, comparability constraints
+- **Conformed metric catalog** (`dim_metric`) — 6 base metrics + 7 derived metrics with units, display format, comparability constraints
 - **Time-period dimension** (`dim_time_period`) — annual periods auto-populated from warehouse fact years
 - **Multi-vintage OEWS** — pipeline downloads and loads 3 years of OEWS data (2021–2023) for true multi-year time-series
 - **Observation fact** (`fact_time_series_observation`) — normalized from OEWS and projections at the grain of metric + occupation + geography + period + source release + comparability mode
-- **Derived-series fact** (`fact_derived_series`) — year-over-year change, percent change, 3-year rolling average, state-vs-national gap, rank delta
+- **Derived-series fact** (`fact_derived_series`) — year-over-year change, percent change, 3-year rolling average, state-vs-national gap, rank delta, real (inflation-adjusted) wages
 - **Comparable history** — as-published vs. comparable-history modes; projection metrics excluded from comparable series
 - **5 time-series marts** — trend series, geography gap, rank change, projection context, similarity trend overlay
 
@@ -82,7 +84,7 @@ jobclass-pipeline timeseries-refresh
 ## Testing
 
 ```bash
-# Full suite (585+ tests)
+# Full suite (653+ tests)
 pytest
 
 # Warehouse-only tests (real data validation)
@@ -124,6 +126,27 @@ docker run -p 8000:8000 -v ./warehouse.duckdb:/app/warehouse.duckdb:ro jobclass
 ```
 
 Health check: `GET /api/health` | Readiness: `GET /api/ready` | Metrics: `GET /metrics`
+
+## Release notes
+
+### NDS6-7 — CPI Inflation, SOC Crosswalk, Extended Test Coverage (2026-03-24)
+
+- **BLS CPI-U integration**: Parser, loader, and pipeline for Consumer Price Index data. Real (inflation-adjusted) mean and median wage metrics computed via CPI-U deflation (base year 2023).
+- **SOC 2010↔2018 crosswalk**: Parser auto-classifies mapping types (1:1, split, merge, complex) by cardinality. Bridge table and pipeline wired into `run-all`. Foundation for extending comparable history to pre-2018 OEWS vintages.
+- **Real wage UI**: Trend Explorer and Ranked Movers dropdowns include Real Mean/Median Annual Wage options. Static site generator produces per-occupation real wage JSON files.
+- **Extended test coverage**: 653 tests (+37). New: CPI parser/loader/deflation tests (16), crosswalk parser/loader tests (13), ranked movers year filter tests (7), comparison endpoint edge cases (8), Pydantic contract validation (7), real wage UI tests (2).
+
+### NDS3-5 — Work Activities, Education, Technology Skills (2026-03-24)
+
+- **O\*NET Work Activities**: Reuses generic descriptor pipeline. New API endpoint, occupation profile section, and 8 tests.
+- **O\*NET Education & Training**: Custom parser for category-based schema. Education summary with highest-percentage level labels. 9 tests.
+- **O\*NET Technology Skills**: Custom parser for commodity-based schema. Tools/Technology grouping with Hot Technology badges. 9 tests.
+
+### NDS0-2 — Code Quality Prep, Knowledge, Abilities (2026-03-24)
+
+- Centralized `fetchWithTimeout` and lesson slug registry. Fixed `_table_exists`, drift thresholds, deploy sanity checks.
+- Surfaced O\*NET Knowledge and Abilities on occupation profiles (zero new downloads — data already in warehouse).
+- Added `response_model=` to all trends API endpoints. Fixed `TrendPoint.suppressed` type.
 
 ## License
 

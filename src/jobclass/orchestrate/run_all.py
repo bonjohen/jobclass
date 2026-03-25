@@ -75,6 +75,8 @@ def run_all_pipelines(
     """Execute all pipelines end-to-end: download → convert → parse → load → publish."""
     from jobclass.orchestrate.pipelines import (
         PipelineStatus,
+        cpi_refresh,
+        crosswalk_refresh,
         oews_refresh,
         onet_refresh,
         projections_refresh,
@@ -89,7 +91,7 @@ def run_all_pipelines(
     by_name: dict[str, ManifestEntry] = {e.dataset_name: e for e in entries}
 
     # --- 1. SOC Taxonomy ---
-    print("\n[1/6] SOC Taxonomy Pipeline")
+    print("\n[1/8] SOC Taxonomy Pipeline")
     summary.pipelines_attempted += 1
     try:
         soc_h_entry = by_name["soc_hierarchy"]
@@ -114,6 +116,28 @@ def run_all_pipelines(
         summary.errors.append(msg)
         soc_version = "2018"  # fallback for downstream
 
+    # --- 1b. SOC Crosswalk (optional) ---
+    if "soc_crosswalk" in by_name:
+        print("\n[1b/8] SOC 2010↔2018 Crosswalk")
+        summary.pipelines_attempted += 1
+        try:
+            xw_entry = by_name["soc_crosswalk"]
+            xw_text, xw_version = _download_and_convert(xw_entry, raw_root)
+            result = crosswalk_refresh(conn, xw_text, xw_version)
+            if result.status == PipelineStatus.SUCCESS:
+                print(f"  OK — Crosswalk loaded (run_id: {result.run_id})")
+                summary.pipelines_succeeded += 1
+            else:
+                msg = f"  FAILED — {result.status.value}: {result.message}"
+                print(msg)
+                summary.pipelines_failed += 1
+                summary.errors.append(msg)
+        except Exception as e:
+            msg = f"  ERROR — Crosswalk: {e}"
+            print(msg)
+            summary.pipelines_failed += 1
+            summary.errors.append(msg)
+
     # --- 2. OEWS Employment & Wages (multi-vintage) ---
     # Find all OEWS national/state pairs and process each vintage
     oews_nat_entries = sorted(
@@ -134,7 +158,7 @@ def run_all_pipelines(
             print(msg)
             continue
 
-        print(f"\n[2/6] OEWS Employment & Wages Pipeline (vintage {vi}/{oews_vintages}: {nat_entry.dataset_name})")
+        print(f"\n[2/8] OEWS Employment & Wages Pipeline (vintage {vi}/{oews_vintages}: {nat_entry.dataset_name})")
         summary.pipelines_attempted += 1
         try:
             nat_text, vintage_release = _download_and_convert(nat_entry, raw_root)
@@ -157,7 +181,7 @@ def run_all_pipelines(
             summary.errors.append(msg)
 
     # --- 3. O*NET Semantic Descriptors ---
-    print("\n[3/6] O*NET Semantic Descriptors Pipeline")
+    print("\n[3/8] O*NET Semantic Descriptors Pipeline")
     summary.pipelines_attempted += 1
     try:
         skills_entry = by_name["onet_skills"]
@@ -170,6 +194,15 @@ def run_all_pipelines(
         abilities_text, _ = _download_and_convert(abilities_entry, raw_root)
         tasks_text, _ = _download_and_convert(tasks_entry, raw_root)
 
+        # Optional new O*NET data sources
+        wa_text = ed_text = tech_text = None
+        if "onet_work_activities" in by_name:
+            wa_text, _ = _download_and_convert(by_name["onet_work_activities"], raw_root)
+        if "onet_education" in by_name:
+            ed_text, _ = _download_and_convert(by_name["onet_education"], raw_root)
+        if "onet_technology_skills" in by_name:
+            tech_text, _ = _download_and_convert(by_name["onet_technology_skills"], raw_root)
+
         result = onet_refresh(
             conn,
             skills_text,
@@ -179,6 +212,9 @@ def run_all_pipelines(
             onet_version,
             onet_version,
             soc_version,
+            work_activities_content=wa_text,
+            education_content=ed_text,
+            technology_content=tech_text,
         )
         if result.status == PipelineStatus.SUCCESS:
             print(f"  OK — O*NET loaded (run_id: {result.run_id})")
@@ -196,7 +232,7 @@ def run_all_pipelines(
         onet_version = "unknown"
 
     # --- 4. Employment Projections ---
-    print("\n[4/6] Employment Projections Pipeline")
+    print("\n[4/8] Employment Projections Pipeline")
     summary.pipelines_attempted += 1
     try:
         proj_entry = by_name["bls_employment_projections"]
@@ -218,8 +254,31 @@ def run_all_pipelines(
         summary.pipelines_failed += 1
         summary.errors.append(msg)
 
-    # --- 5. Warehouse Publish ---
-    print("\n[5/6] Warehouse Publish (validation gate)")
+    # --- 5. CPI-U Price Index ---
+    print("\n[5/8] CPI-U Price Index Pipeline")
+    summary.pipelines_attempted += 1
+    try:
+        cpi_entry = by_name["bls_cpi"]
+        cpi_raw, cpi_version = _download_entry(cpi_entry, raw_root)
+        cpi_text = cpi_raw.decode("utf-8-sig")
+
+        result = cpi_refresh(conn, cpi_text, cpi_version)
+        if result.status == PipelineStatus.SUCCESS:
+            print(f"  OK — CPI loaded (run_id: {result.run_id})")
+            summary.pipelines_succeeded += 1
+        else:
+            msg = f"  FAILED — {result.status.value}: {result.message}"
+            print(msg)
+            summary.pipelines_failed += 1
+            summary.errors.append(msg)
+    except Exception as e:
+        msg = f"  ERROR — CPI: {e}"
+        print(msg)
+        summary.pipelines_failed += 1
+        summary.errors.append(msg)
+
+    # --- 6. Warehouse Publish ---
+    print("\n[6/8] Warehouse Publish (validation gate)")
     summary.pipelines_attempted += 1
     try:
         result = warehouse_publish(conn, soc_version, oews_release, onet_version)
@@ -237,8 +296,8 @@ def run_all_pipelines(
         summary.pipelines_failed += 1
         summary.errors.append(msg)
 
-    # --- 6. Time-Series Refresh ---
-    print("\n[6/6] Time-Series Refresh")
+    # --- 7. Time-Series Refresh ---
+    print("\n[7/8] Time-Series Refresh")
     summary.pipelines_attempted += 1
     try:
         from jobclass.orchestrate.timeseries_refresh import timeseries_refresh

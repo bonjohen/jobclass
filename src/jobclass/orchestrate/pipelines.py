@@ -422,6 +422,112 @@ def onet_refresh(
 # ============================================================
 
 
+def cpi_refresh(
+    conn: duckdb.DuckDBPyConnection,
+    content: str,
+    source_release_id: str,
+) -> PipelineResult:
+    """Execute the CPI-U pipeline: parse → load staging → load dimension → load fact."""
+    from jobclass.load.cpi import load_cpi_staging, load_dim_price_index, load_fact_price_index_observation
+    from jobclass.parse.cpi import parse_cpi
+
+    run_id = generate_run_id()
+    create_run_record(
+        conn,
+        run_id=run_id,
+        pipeline_name="cpi_refresh",
+        dataset_name="bls_cpi",
+        source_name="bls",
+        source_release_id=source_release_id,
+    )
+
+    try:
+        rows = parse_cpi(content, source_release_id)
+        load_cpi_staging(conn, rows, source_release_id)
+        load_dim_price_index(conn, source_release_id)
+        load_fact_price_index_observation(conn, source_release_id)
+
+        fact_count = conn.execute("SELECT COUNT(*) FROM fact_price_index_observation").fetchone()[0]
+        update_run_counts(
+            conn,
+            run_id,
+            row_count_raw=len(rows),
+            row_count_stage=len(rows),
+            row_count_loaded=fact_count,
+            load_status="success",
+        )
+        return PipelineResult(
+            pipeline_name="cpi_refresh",
+            status=PipelineStatus.SUCCESS,
+            run_id=run_id,
+        )
+    except Exception as e:
+        update_run_counts(
+            conn,
+            run_id,
+            load_status="load_failure",
+            failure_classification=FailureClassification.LOAD_FAILURE.value,
+        )
+        return PipelineResult(
+            pipeline_name="cpi_refresh",
+            status=PipelineStatus.LOAD_FAILURE,
+            run_id=run_id,
+            message=str(e),
+        )
+
+
+def crosswalk_refresh(
+    conn: duckdb.DuckDBPyConnection,
+    content: str,
+    source_release_id: str,
+) -> PipelineResult:
+    """Execute the SOC crosswalk pipeline: parse → load staging → load bridge."""
+    from jobclass.load.soc import load_bridge_soc_crosswalk, load_crosswalk_staging
+    from jobclass.parse.soc import parse_soc_crosswalk
+
+    run_id = generate_run_id()
+    create_run_record(
+        conn,
+        run_id=run_id,
+        pipeline_name="crosswalk_refresh",
+        dataset_name="soc_crosswalk",
+        source_name="soc",
+        source_release_id=source_release_id,
+    )
+
+    try:
+        rows = parse_soc_crosswalk(content, source_release_id)
+        load_crosswalk_staging(conn, rows, source_release_id)
+        bridge_count = load_bridge_soc_crosswalk(conn, source_release_id)
+
+        update_run_counts(
+            conn,
+            run_id,
+            row_count_raw=len(rows),
+            row_count_stage=len(rows),
+            row_count_loaded=bridge_count,
+            load_status="success",
+        )
+        return PipelineResult(
+            pipeline_name="crosswalk_refresh",
+            status=PipelineStatus.SUCCESS,
+            run_id=run_id,
+        )
+    except Exception as e:
+        update_run_counts(
+            conn,
+            run_id,
+            load_status="load_failure",
+            failure_classification=FailureClassification.LOAD_FAILURE.value,
+        )
+        return PipelineResult(
+            pipeline_name="crosswalk_refresh",
+            status=PipelineStatus.LOAD_FAILURE,
+            run_id=run_id,
+            message=str(e),
+        )
+
+
 def warehouse_publish(
     conn: duckdb.DuckDBPyConnection,
     soc_version: str,

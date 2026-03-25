@@ -160,6 +160,15 @@ def warehouse_db(tmp_path):
     load_bridge_occupation_technology(conn, onet_ver, onet_ver, soc_ver)
     load_bridge_occupation_task(conn, onet_ver, onet_ver, soc_ver)
 
+    # Load CPI
+    from jobclass.load.cpi import load_cpi_staging, load_dim_price_index, load_fact_price_index_observation
+    from jobclass.parse.cpi import parse_cpi
+
+    cpi_content = (FIXTURES_DIR / "cpi_sample.txt").read_text(encoding="utf-8")
+    cpi_rows = parse_cpi(cpi_content, release)
+    load_cpi_staging(conn, cpi_rows, release)
+    load_dim_price_index(conn, release)
+
     # Load Projections
     from jobclass.load.projections import load_fact_occupation_projections, load_projections_staging
     from jobclass.parse.projections import parse_employment_projections
@@ -173,6 +182,13 @@ def warehouse_db(tmp_path):
     from jobclass.orchestrate.timeseries_refresh import timeseries_refresh
 
     timeseries_refresh(conn)
+
+    # Load CPI fact observations (needs dim_time_period from timeseries_refresh)
+    # Then recompute real wages
+    load_fact_price_index_observation(conn, release)
+    from jobclass.load.timeseries import compute_real_wages
+
+    compute_real_wages(conn)
 
     # Run manifest entry for metadata endpoint
     conn.execute("""

@@ -154,6 +154,26 @@ sources:
     version_detection_rule: url_pattern
     enabled: true
 
+  # --- SOC 2010↔2018 Crosswalk ---
+  - source_name: soc
+    dataset_name: soc_crosswalk
+    dataset_url: https://www.bls.gov/soc/2018/soc_2018_crosswalk.xlsx
+    expected_format: xlsx
+    parser_name: soc_crosswalk_parser
+    refresh_cadence: on_revision
+    version_detection_rule: content_header
+    enabled: true
+
+  # --- CPI-U (Consumer Price Index) ---
+  - source_name: bls
+    dataset_name: bls_cpi
+    dataset_url: https://download.bls.gov/pub/time.series/cu/cu.data.1.AllItems
+    expected_format: text
+    parser_name: cpi_parser
+    refresh_cadence: annual
+    version_detection_rule: url_pattern
+    enabled: true
+
   # --- Employment Projections (Optional R1) ---
   - source_name: bls
     dataset_name: bls_employment_projections

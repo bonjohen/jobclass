@@ -13,6 +13,7 @@ import duckdb
 from jobclass.load.timeseries import (
     build_comparable_history,
     compute_rank_delta,
+    compute_real_wages,
     compute_rolling_avg_3yr,
     compute_state_vs_national_gap,
     compute_yoy_absolute_change,
@@ -58,6 +59,7 @@ def timeseries_refresh(conn: duckdb.DuckDBPyConnection) -> dict[str, int]:
             lambda: compute_state_vs_national_gap(conn, run_id),
         ),
         ("compute_rank_delta", lambda: compute_rank_delta(conn, run_id)),
+        ("compute_real_wages", lambda: compute_real_wages(conn, run_id)),
     ]
 
     for step_name, step_fn in steps:
