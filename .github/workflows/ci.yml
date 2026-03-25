@@ -35,3 +35,24 @@ jobs:
         with:
           name: coverage-report
           path: coverage.xml
+
+  deploy:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - run: pip install -e .
+      - run: jobclass-pipeline run-all
+      - run: python scripts/build_static.py --base-path /jobclass
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          force_orphan: true
