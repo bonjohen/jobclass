@@ -48,7 +48,11 @@ jobs:
         with:
           python-version: "3.14"
       - run: pip install -e .
-      - run: jobclass-pipeline run-all
+      - name: Download pre-built warehouse
+        run: gh release download warehouse-v1 --pattern warehouse.duckdb.gz
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: gunzip warehouse.duckdb.gz
       - run: python scripts/build_static.py --base-path /jobclass
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
