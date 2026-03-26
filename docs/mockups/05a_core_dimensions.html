@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pipeline Mockup — Core Warehouse: Dimensions</title>
+<style>
+  body {
+    margin: 0; background: #0f172a;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #e2e8f0;
+  }
+  h1 { font-size: 18px; font-weight: 600; margin-bottom: 2px; color: #f1f5f9; }
+  .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
+  .back { position: fixed; top: 16px; left: 16px; color: #1976d2; text-decoration: none; font-size: 13px; }
+  .back:hover { text-decoration: underline; }
+  .node { cursor: pointer; transition: filter 0.2s; }
+  .node:hover { filter: brightness(1.15); }
+  .legend { display: flex; gap: 18px; margin-top: 20px; font-size: 11px; color: #94a3b8; flex-wrap: wrap; justify-content: center; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+<a class="back" href="00_summary_topology.html">&larr; Summary Topology</a>
+<h1>Core Warehouse — Dimensions</h1>
+<p class="subtitle">4 dimension groups &middot; Reference data that describes &ldquo;what&rdquo; &middot; Accent: <span style="color:#1976d2">#1976d2</span></p>
+
+<svg width="780" height="580" viewBox="0 0 780 580">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrow-ghost" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+  </pattern>
+  <rect width="780" height="580" fill="url(#grid)" rx="12"/>
+
+  <!-- Lane background -->
+  <rect x="70" y="30" width="640" height="505" rx="10" fill="#1976d208" stroke="#1976d225" stroke-width="1"/>
+  <text x="390" y="58" text-anchor="middle" font-size="12" font-weight="600" fill="#1976d2" opacity="0.7">Core Warehouse — Dimension Tables</text>
+
+  <!-- Ghost incoming from Validation -->
+  <text x="20" y="50" font-size="10" fill="#475569" font-style="italic">&larr; from Validation</text>
+  <line x1="15" y1="155" x2="95" y2="155" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+
+  <!-- Ghost outgoing to Facts & Bridges -->
+  <text x="760" y="50" text-anchor="end" font-size="10" fill="#475569" font-style="italic">to Facts &amp; Bridges &rarr;</text>
+  <line x1="590" y1="120" x2="760" y2="90" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="760" y="100" text-anchor="end" font-size="8" fill="#475569">FK: soc_code</text>
+  <line x1="590" y1="200" x2="760" y2="130" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="760" y="140" text-anchor="end" font-size="8" fill="#475569">FK: area_code</text>
+  <line x1="590" y1="310" x2="760" y2="180" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="760" y="190" text-anchor="end" font-size="8" fill="#475569">FK: descriptor IDs</text>
+
+  <!-- Ghost outgoing to Time-Series -->
+  <line x1="590" y1="130" x2="760" y2="300" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="760" y="310" text-anchor="end" font-size="8" fill="#475569">occupation keys &rarr; Metrics</text>
+  <line x1="590" y1="450" x2="760" y2="360" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="760" y="370" text-anchor="end" font-size="8" fill="#475569">CPI indices &rarr; Deflation</text>
+
+  <!-- Internal edge: dim_occupation is the backbone -->
+  <line x1="310" y1="140" x2="310" y2="180" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="320" y="168" font-size="7" fill="#94a3b8">geo joins via soc</text>
+
+  <!-- dim_occupation → Descriptors (through bridges) -->
+  <line x1="310" y1="140" x2="310" y2="270" stroke="#94a3b8" stroke-width="1.0" stroke-dasharray="5,3"/>
+  <text x="320" y="218" font-size="7" fill="#64748b">via bridge tables</text>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- DIMENSION NODES                        -->
+  <!-- ══════════════════════════════════════ -->
+
+  <!-- dim_occupation (primary) -->
+  <g class="node" transform="translate(100, 85)">
+    <rect width="420" height="55" rx="8" fill="#1e293b" stroke="#1976d2" stroke-width="2"/>
+    <rect width="5" height="55" rx="2" fill="#1976d2"/>
+    <text x="20" y="22" font-size="13" font-weight="700" fill="#f1f5f9">dim_occupation</text>
+    <text x="20" y="39" font-size="10" fill="#94a3b8">SOC codes, titles, hierarchy (Major &rarr; Detailed)</text>
+    <text x="20" y="51" font-size="8" fill="#64748b">grain: soc_code + release_id &middot; 867 detailed occupations</text>
+    <rect x="325" y="10" width="80" height="18" rx="9" fill="#1976d220" stroke="#1976d250" stroke-width="0.5"/>
+    <text x="365" y="23" text-anchor="middle" font-size="9" fill="#1976d2">backbone</text>
+  </g>
+
+  <!-- dim_geography -->
+  <g class="node" transform="translate(100, 175)">
+    <rect width="420" height="55" rx="8" fill="#1e293b" stroke="#1976d2" stroke-width="1.5"/>
+    <rect width="5" height="55" rx="2" fill="#1976d2"/>
+    <text x="20" y="22" font-size="13" font-weight="600" fill="#f1f5f9">dim_geography</text>
+    <text x="20" y="39" font-size="10" fill="#94a3b8">National, state, MSA areas &middot; area_type discriminator</text>
+    <text x="20" y="51" font-size="8" fill="#64748b">grain: area_code &middot; ~400 areas (1 national + 51 state + 380+ MSA)</text>
+  </g>
+
+  <!-- Descriptor Dimensions -->
+  <g class="node" transform="translate(100, 270)">
+    <rect width="420" height="110" rx="8" fill="#1e293b" stroke="#1976d2" stroke-width="1.5"/>
+    <rect width="5" height="110" rx="2" fill="#1976d2"/>
+    <text x="20" y="22" font-size="13" font-weight="600" fill="#f1f5f9">Descriptor Dimensions (7 tables)</text>
+    <text x="20" y="42" font-size="10" fill="#94a3b8">Each table defines one O*NET domain:</text>
+    <text x="30" y="58" font-size="9" fill="#94a3b8">&bull; dim_skill &mdash; 35 skills (importance + level)</text>
+    <text x="30" y="71" font-size="9" fill="#94a3b8">&bull; dim_knowledge &mdash; 33 knowledge areas</text>
+    <text x="30" y="84" font-size="9" fill="#94a3b8">&bull; dim_ability &mdash; 52 cognitive &amp; physical abilities</text>
+    <text x="30" y="97" font-size="9" fill="#94a3b8">&bull; dim_task, dim_work_activity, dim_education, dim_tech</text>
+  </g>
+
+  <!-- CPI Dimensions & Facts -->
+  <g class="node" transform="translate(100, 420)">
+    <rect width="420" height="95" rx="8" fill="#1e293b" stroke="#1976d2" stroke-width="1.5"/>
+    <rect width="5" height="95" rx="2" fill="#1976d2"/>
+    <text x="20" y="22" font-size="13" font-weight="600" fill="#f1f5f9">CPI Dimensions &amp; Facts</text>
+    <text x="20" y="42" font-size="10" fill="#94a3b8">Consumer price indices for inflation adjustment:</text>
+    <text x="30" y="58" font-size="9" fill="#94a3b8">&bull; dim_price_index &mdash; CPI-U series identifiers</text>
+    <text x="30" y="71" font-size="9" fill="#94a3b8">&bull; dim_cpi_member &mdash; item hierarchy &amp; membership</text>
+    <text x="30" y="84" font-size="9" fill="#94a3b8">&bull; fact_cpi_observation &mdash; monthly index values</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="390" y="565" text-anchor="middle" font-size="11" fill="#475569">
+    4 dimension groups &middot; Occupation is the backbone &mdash; all other dims and facts join through soc_code
+  </text>
+</svg>
+
+<div class="legend">
+  <div class="legend-item">
+    <svg width="22" height="16"><rect width="22" height="16" rx="4" fill="#1e293b" stroke="#1976d2" stroke-width="2"/></svg>
+    <span>Primary dimension</span>
+  </div>
+  <div class="legend-item">
+    <svg width="22" height="16"><rect width="22" height="16" rx="4" fill="#1e293b" stroke="#1976d2" stroke-width="1.5"/></svg>
+    <span>Dimension</span>
+  </div>
+  <div class="legend-item">
+    <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#94a3b8" stroke-width="1.2"/></svg>
+    <span>Joins</span>
+  </div>
+  <div class="legend-item">
+    <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4"/></svg>
+    <span>Ghost (to other diagrams)</span>
+  </div>
+</div>
+</body>
+</html>

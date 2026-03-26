@@ -89,7 +89,7 @@
   <!-- ═══════════════════════════════════════════ -->
 
   <!-- 1. Data Sources (acquire) — main spine -->
-  <g class="block" transform="translate(20, 140)">
+  <g class="block" data-page="sources" transform="translate(20, 140)">
     <rect width="160" height="100" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
     <rect width="4" height="100" rx="2" fill="#3b82f6"/>
     <text x="16" y="28" font-size="14" font-weight="600" fill="#f1f5f9">Data Sources</text>
@@ -100,7 +100,7 @@
   </g>
 
   <!-- 2. Raw Landing (land) — upper branch -->
-  <g class="block" transform="translate(220, 80)">
+  <g class="block" data-page="raw" transform="translate(220, 80)">
     <rect width="160" height="100" rx="8" fill="#1e293b" stroke="#e91e63" stroke-width="1.5"/>
     <rect width="4" height="100" rx="2" fill="#e91e63"/>
     <text x="16" y="28" font-size="14" font-weight="600" fill="#f1f5f9">Raw Landing</text>
@@ -111,7 +111,7 @@
   </g>
 
   <!-- 3. Stage & Parse (parse) — lower branch -->
-  <g class="block" transform="translate(220, 260)">
+  <g class="block" data-page="parse" transform="translate(220, 260)">
     <rect width="160" height="100" rx="8" fill="#1e293b" stroke="#4caf50" stroke-width="1.5"/>
     <rect width="4" height="100" rx="2" fill="#4caf50"/>
     <text x="16" y="28" font-size="14" font-weight="600" fill="#f1f5f9">Stage &amp; Parse</text>
@@ -122,7 +122,7 @@
   </g>
 
   <!-- 4. Validation Gates (validate) — main spine -->
-  <g class="block" transform="translate(420, 140)">
+  <g class="block" data-page="validate" transform="translate(420, 140)">
     <rect width="160" height="100" rx="8" fill="#1e293b" stroke="#ef4444" stroke-width="1.5"/>
     <rect width="4" height="100" rx="2" fill="#ef4444"/>
     <text x="16" y="28" font-size="14" font-weight="600" fill="#f1f5f9">Validation Gates</text>
@@ -133,7 +133,7 @@
   </g>
 
   <!-- 5. Core Warehouse + Time-Series (warehouse) — main spine -->
-  <g class="block" transform="translate(620, 140)">
+  <g class="block" data-page="warehouse" transform="translate(620, 140)">
     <rect width="160" height="100" rx="8" fill="#1e293b" stroke="#1976d2" stroke-width="1.5"/>
     <rect width="4" height="100" rx="2" fill="#1976d2"/>
     <text x="16" y="28" font-size="14" font-weight="600" fill="#f1f5f9">Core Warehouse</text>
@@ -143,7 +143,7 @@
     <text x="42" y="86" text-anchor="middle" font-size="9" fill="#1976d2">14 nodes</text>
   </g>
   <!-- Time-Series sub-block attached below -->
-  <g class="block" transform="translate(640, 255)">
+  <g class="block" data-page="warehouse" transform="translate(640, 255)">
     <rect width="120" height="50" rx="6" fill="#1e293b" stroke="#9c27b0" stroke-width="1.2"/>
     <rect width="3" height="50" rx="1.5" fill="#9c27b0"/>
     <text x="12" y="19" font-size="10" font-weight="600" fill="#ce93d8">Time-Series</text>
@@ -156,7 +156,7 @@
   <path d="M 760 280 Q 785 280, 785 210 Q 785 190, 780 190" fill="none" stroke="#9c27b0" stroke-width="1.2" stroke-dasharray="4,3"/>
 
   <!-- 6. Marts & Web (serve) — main spine -->
-  <g class="block" transform="translate(820, 140)">
+  <g class="block" data-page="marts" transform="translate(820, 140)">
     <rect width="160" height="100" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="1.5"/>
     <rect width="4" height="100" rx="2" fill="#6366f1"/>
     <text x="16" y="28" font-size="14" font-weight="600" fill="#f1f5f9">Marts &amp; Web</text>
@@ -167,7 +167,7 @@
   </g>
 
   <!-- 7. Build & Deploy (deploy) — main spine -->
-  <g class="block" transform="translate(1020, 140)">
+  <g class="block" data-page="deploy" transform="translate(1020, 140)">
     <rect width="160" height="100" rx="8" fill="#1e293b" stroke="#795548" stroke-width="1.5"/>
     <rect width="4" height="100" rx="2" fill="#795548"/>
     <text x="16" y="28" font-size="14" font-weight="600" fill="#f1f5f9">Build &amp; Deploy</text>
@@ -187,5 +187,14 @@
   <div class="legend-item"><div class="legend-line dashed"></div><span>Conditional (gate)</span></div>
 </div>
 
+<script>
+document.querySelectorAll('.block[data-page]').forEach(function(block) {
+  block.addEventListener('dblclick', function() {
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'drill', page: block.dataset.page }, '*');
+    }
+  });
+});
+</script>
 </body>
 </html>

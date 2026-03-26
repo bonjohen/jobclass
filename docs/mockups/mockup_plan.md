@@ -30,9 +30,10 @@ Always assign a task a status of [>] before beginning work. Mark work as complet
 | `[X]` | MK-02 | `02_raw_landing.html` | Raw Landing stage: 6 immutable file storage nodes with path patterns and checksums | 6 | 2026-03-26 14:48 PST | 2026-03-26 14:53 PST |
 | `[X]` | MK-03 | `03_stage_parse.html` | Stage & Parse: 7 dataset-specific parsers (SOC, OEWS, O\*NET, Projections, CPI, CPI Domain, Crosswalk) | 7 | 2026-03-26 14:48 PST | 2026-03-26 14:53 PST |
 | `[X]` | MK-04 | `04_validation_gates.html` | Validation Gates: 6 sequential quality gates with pass/block conditions | 6 | 2026-03-26 14:53 PST | 2026-03-26 14:58 PST |
-| `[X]` | MK-05 | `05_core_warehouse.html` | Core Warehouse: dims, facts, bridges, CPI dimensions, crosswalk mappings | 8 | 2026-03-26 14:53 PST | 2026-03-26 14:58 PST |
-| `[X]` | MK-06 | `06_time_series.html` | Time-Series Enrichment: metric catalog, multi-vintage loading, CPI deflation, derived series, comparable history | 6 | 2026-03-26 14:53 PST | 2026-03-26 14:58 PST |
-| `[X]` | MK-07 | `07_marts_web.html` | Marts & Web: 7 mart tables + 12 interface pages showing mart-to-page data flow | 19 | 2026-03-26 14:58 PST | 2026-03-26 15:05 PST |
+| `[X]` | MK-05 | `05_core_warehouse.html` | Core Warehouse: dims, facts, bridges, CPI dimensions, crosswalk mappings + time-series enrichment (merged) | 14 | 2026-03-26 14:53 PST | 2026-03-26 14:58 PST |
+| `[X]` | MK-06 | `06_time_series.html` | Redirect to Core Warehouse (merged into MK-05) | — | 2026-03-26 14:53 PST | 2026-03-26 12:35 PST |
+| `[X]` | MK-07 | `07_marts_web.html` | Marts & Web: 3-column layout — 7 marts + 7 APIs + 12 pages | 26 | 2026-03-26 14:58 PST | 2026-03-26 15:05 PST |
+| `[X]` | MK-08 | `08_build_deploy.html` | Build & Deploy: CLI commands, static site builder, fetch shim, deploy, health check | 5 | 2026-03-26 10:14 PST | 2026-03-26 10:14 PST |
 
 ---
 

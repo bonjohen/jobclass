@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pipeline Mockup — Core Warehouse: Facts &amp; Bridges</title>
+<style>
+  body {
+    margin: 0; background: #0f172a;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #e2e8f0;
+  }
+  h1 { font-size: 18px; font-weight: 600; margin-bottom: 2px; color: #f1f5f9; }
+  .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
+  .back { position: fixed; top: 16px; left: 16px; color: #1976d2; text-decoration: none; font-size: 13px; }
+  .back:hover { text-decoration: underline; }
+  .node { cursor: pointer; transition: filter 0.2s; }
+  .node:hover { filter: brightness(1.15); }
+  .legend { display: flex; gap: 18px; margin-top: 20px; font-size: 11px; color: #94a3b8; flex-wrap: wrap; justify-content: center; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+<a class="back" href="00_summary_topology.html">&larr; Summary Topology</a>
+<h1>Core Warehouse — Facts &amp; Bridges</h1>
+<p class="subtitle">4 storage groups &middot; Measurement data that records &ldquo;how much&rdquo; &middot; Accents: <span style="color:#42a5f5">#42a5f5</span> / <span style="color:#7e57c2">#7e57c2</span></p>
+
+<svg width="860" height="620" viewBox="0 0 860 620">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrow-fk" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#f59e0b"/>
+    </marker>
+    <marker id="arrow-ghost" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+  </pattern>
+  <rect width="860" height="620" fill="url(#grid)" rx="12"/>
+
+  <!-- Lane background -->
+  <rect x="70" y="30" width="720" height="550" rx="10" fill="#42a5f508" stroke="#42a5f520" stroke-width="1"/>
+  <text x="430" y="58" text-anchor="middle" font-size="12" font-weight="600" fill="#42a5f5" opacity="0.7">Core Warehouse — Facts &amp; Bridges</text>
+
+  <!-- Ghost incoming: FK from Dimensions (left edge) -->
+  <text x="20" y="50" font-size="10" fill="#475569" font-style="italic">&larr; from Dimensions</text>
+  <!-- dim_occupation ghost -->
+  <g transform="translate(15, 85)">
+    <rect width="110" height="32" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="10" y="14" font-size="8" fill="#475569">dim_occupation</text>
+    <text x="10" y="26" font-size="7" fill="#475569">soc_code</text>
+  </g>
+  <!-- dim_geography ghost -->
+  <g transform="translate(15, 140)">
+    <rect width="110" height="32" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="10" y="14" font-size="8" fill="#475569">dim_geography</text>
+    <text x="10" y="26" font-size="7" fill="#475569">area_code</text>
+  </g>
+  <!-- descriptors ghost -->
+  <g transform="translate(15, 315)">
+    <rect width="110" height="32" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="10" y="14" font-size="8" fill="#475569">7 descriptor dims</text>
+    <text x="10" y="26" font-size="7" fill="#475569">skill_id, etc.</text>
+  </g>
+
+  <!-- FK edges from ghost dims to facts -->
+  <line x1="125" y1="100" x2="180" y2="115" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-fk)"/>
+  <line x1="125" y1="100" x2="180" y2="230" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-fk)"/>
+  <line x1="125" y1="155" x2="180" y2="120" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-fk)"/>
+  <line x1="125" y1="100" x2="180" y2="340" stroke="#f59e0b" stroke-width="1.0" stroke-dasharray="6,3"/>
+  <line x1="125" y1="330" x2="180" y2="340" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-fk)"/>
+
+  <!-- FK labels -->
+  <rect x="130" y="98" width="42" height="12" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="151" y="108" text-anchor="middle" font-size="7" fill="#f59e0b">FK: soc</text>
+  <rect x="130" y="145" width="42" height="12" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="151" y="155" text-anchor="middle" font-size="7" fill="#f59e0b">FK: geo</text>
+
+  <!-- Ghost outgoing: to Time-Series (right edge) -->
+  <text x="840" y="50" text-anchor="end" font-size="10" fill="#475569" font-style="italic">to Time-Series &rarr;</text>
+  <line x1="660" y1="130" x2="840" y2="100" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="840" y="110" text-anchor="end" font-size="8" fill="#475569">wages &rarr; OEWS Loading</text>
+
+  <!-- Ghost outgoing: to Marts -->
+  <line x1="660" y1="140" x2="840" y2="170" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="840" y="180" text-anchor="end" font-size="8" fill="#475569">to Marts &rarr;</text>
+
+  <!-- Ghost outgoing: crosswalk to Time-Series -->
+  <line x1="660" y1="480" x2="840" y2="410" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="840" y="420" text-anchor="end" font-size="8" fill="#475569">crosswalk &rarr; Comparable History</text>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- FACT NODES                             -->
+  <!-- ══════════════════════════════════════ -->
+
+  <!-- fact_occupation_employment_wages (primary) -->
+  <g class="node" transform="translate(185, 85)">
+    <rect width="470" height="75" rx="8" fill="#1e293b" stroke="#42a5f5" stroke-width="2"/>
+    <rect width="5" height="75" rx="2" fill="#42a5f5"/>
+    <text x="20" y="22" font-size="13" font-weight="700" fill="#f1f5f9">fact_occupation_employment_wages</text>
+    <text x="20" y="42" font-size="10" fill="#94a3b8">Employment counts &amp; wage percentiles (10th, 25th, median, 75th, 90th)</text>
+    <text x="20" y="57" font-size="9" fill="#64748b">grain: soc_code + area_code + release_id</text>
+    <text x="20" y="69" font-size="8" fill="#64748b">~830 occupations &times; ~400 areas &times; 3 vintages = ~480K rows</text>
+    <rect x="380" y="8" width="75" height="18" rx="9" fill="#42a5f520" stroke="#42a5f550" stroke-width="0.5"/>
+    <text x="417" y="21" text-anchor="middle" font-size="9" fill="#42a5f5">primary</text>
+  </g>
+
+  <!-- fact_occupation_projections -->
+  <g class="node" transform="translate(185, 195)">
+    <rect width="470" height="70" rx="8" fill="#1e293b" stroke="#42a5f5" stroke-width="1.5"/>
+    <rect width="5" height="70" rx="2" fill="#42a5f5"/>
+    <text x="20" y="22" font-size="13" font-weight="600" fill="#f1f5f9">fact_occupation_projections</text>
+    <text x="20" y="42" font-size="10" fill="#94a3b8">Base year employment, projected employment, numeric &amp; percent change</text>
+    <text x="20" y="57" font-size="9" fill="#64748b">grain: soc_code + release_id &middot; Source values in thousands &rarr; converted to whole</text>
+  </g>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- BRIDGE TABLES                          -->
+  <!-- ══════════════════════════════════════ -->
+
+  <!-- Bridge Tables -->
+  <g class="node" transform="translate(185, 310)">
+    <rect width="470" height="105" rx="8" fill="#1e293b" stroke="#7e57c2" stroke-width="1.5"/>
+    <rect width="5" height="105" rx="2" fill="#7e57c2"/>
+    <text x="20" y="22" font-size="13" font-weight="600" fill="#f1f5f9">Bridge Tables (7 tables)</text>
+    <text x="20" y="42" font-size="10" fill="#94a3b8">Many-to-many links: occupation &harr; O*NET descriptors</text>
+    <text x="30" y="60" font-size="9" fill="#94a3b8">&bull; bridge_occupation_skill &mdash; importance + level scores per SOC</text>
+    <text x="30" y="73" font-size="9" fill="#94a3b8">&bull; bridge_occupation_knowledge, _ability, _task</text>
+    <text x="30" y="86" font-size="9" fill="#94a3b8">&bull; bridge_occupation_work_activity, _education, _technology</text>
+    <text x="20" y="100" font-size="8" fill="#64748b">grain: soc_code + descriptor_id + release_id</text>
+  </g>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SOC CROSSWALK                          -->
+  <!-- ══════════════════════════════════════ -->
+
+  <!-- SOC Crosswalk Mappings -->
+  <g class="node" transform="translate(185, 450)">
+    <rect width="470" height="85" rx="8" fill="#1e293b" stroke="#1976d2" stroke-width="1.5"/>
+    <rect width="5" height="85" rx="2" fill="#1976d2"/>
+    <text x="20" y="22" font-size="13" font-weight="600" fill="#f1f5f9">SOC Crosswalk Mappings</text>
+    <text x="20" y="42" font-size="10" fill="#94a3b8">SOC 2010 &harr; 2018 occupation code mappings</text>
+    <text x="30" y="60" font-size="9" fill="#94a3b8">&bull; 1:1 &mdash; direct rename (used for wage comparison)</text>
+    <text x="30" y="73" font-size="9" fill="#94a3b8">&bull; split / merge / complex &mdash; cardinality changes (employment only)</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="430" y="600" text-anchor="middle" font-size="11" fill="#475569">
+    2 fact tables &middot; 7 bridge tables &middot; 1 crosswalk &middot; All keyed on soc_code &middot; Version-aware via release_id
+  </text>
+</svg>
+
+<div class="legend">
+  <div class="legend-item">
+    <svg width="22" height="16"><rect width="22" height="16" rx="4" fill="#1e293b" stroke="#42a5f5" stroke-width="1.5"/></svg>
+    <span>Fact</span>
+  </div>
+  <div class="legend-item">
+    <svg width="22" height="16"><rect width="22" height="16" rx="4" fill="#1e293b" stroke="#7e57c2" stroke-width="1.5"/></svg>
+    <span>Bridge</span>
+  </div>
+  <div class="legend-item">
+    <svg width="22" height="16"><rect width="22" height="16" rx="4" fill="#1e293b" stroke="#1976d2" stroke-width="1.5"/></svg>
+    <span>Crosswalk</span>
+  </div>
+  <div class="legend-item">
+    <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="5,3"/></svg>
+    <span>FK constraint</span>
+  </div>
+  <div class="legend-item">
+    <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4"/></svg>
+    <span>Ghost (to other diagrams)</span>
+  </div>
+</div>
+</body>
+</html>
