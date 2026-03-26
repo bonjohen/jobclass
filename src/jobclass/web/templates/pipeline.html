@@ -1,0 +1,75 @@
+<section class="pipeline-page">
+    <!-- Control Bar -->
+    <div class="pipeline-controls" role="toolbar" aria-label="Pipeline Explorer controls">
+        <div class="pipeline-controls-left">
+            <input type="text" id="pipeline-search" class="pipeline-search-input" placeholder="Search nodes..." autocomplete="off" aria-label="Search pipeline nodes">
+            <div id="pipeline-search-results" class="pipeline-search-dropdown" role="listbox" aria-label="Search results"></div>
+        </div>
+        <div class="pipeline-controls-center">
+            <div class="pipeline-filter-group" role="group" aria-label="Node type filters">
+                <button class="pipeline-filter-btn active" data-filter="all">All</button>
+                <button class="pipeline-filter-btn" data-filter="source">Sources</button>
+                <button class="pipeline-filter-btn" data-filter="process">Process</button>
+                <button class="pipeline-filter-btn" data-filter="storage">Storage</button>
+                <button class="pipeline-filter-btn" data-filter="gate">Gates</button>
+                <button class="pipeline-filter-btn" data-filter="interface">Interface</button>
+                <button class="pipeline-filter-btn" data-filter="lesson">Lessons</button>
+            </div>
+        </div>
+        <div class="pipeline-controls-right">
+            <button id="pipeline-reset-btn" class="pipeline-btn" title="Reset view">Reset</button>
+            <span id="pipeline-zoom-level" class="pipeline-zoom-indicator" aria-live="polite">100%</span>
+        </div>
+    </div>
+
+    <!-- Guided Mode Selector -->
+    <div class="pipeline-modes" role="group" aria-label="Guided exploration modes">
+        <button class="pipeline-mode-btn" data-mode="follow-data">Follow the Data</button>
+        <button class="pipeline-mode-btn" data-mode="what-breaks">What Can Break</button>
+        <button class="pipeline-mode-btn" data-mode="time-series">Time-Series Path</button>
+        <button class="pipeline-mode-btn" data-mode="query-proof">From Query to Proof</button>
+    </div>
+
+    <!-- Main Canvas Area -->
+    <div class="pipeline-canvas-wrapper">
+        <div id="pipeline-canvas-container" class="pipeline-canvas-container">
+            <canvas id="pipeline-canvas" aria-label="Pipeline Explorer interactive graph" role="img"></canvas>
+        </div>
+
+        <!-- Minimap -->
+        <div id="pipeline-minimap" class="pipeline-minimap" aria-label="Pipeline overview minimap">
+            <canvas id="pipeline-minimap-canvas"></canvas>
+        </div>
+
+        <!-- Detail Panel -->
+        <aside id="pipeline-detail-panel" class="pipeline-detail-panel" role="complementary" aria-label="Node details" hidden>
+            <div class="pipeline-detail-header">
+                <h2 id="pipeline-detail-title">Node Title</h2>
+                <span id="pipeline-detail-type" class="pipeline-type-badge"></span>
+                <button id="pipeline-detail-close" class="pipeline-detail-close" aria-label="Close detail panel">&times;</button>
+            </div>
+            <div id="pipeline-detail-body" class="pipeline-detail-body">
+                <p class="pipeline-detail-placeholder">Select a node to view details.</p>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Guided Mode Step Overlay -->
+    <div id="pipeline-guided-overlay" class="pipeline-guided-overlay" hidden>
+        <div class="pipeline-guided-content">
+            <p id="pipeline-guided-text"></p>
+            <div class="pipeline-guided-nav">
+                <button id="pipeline-guided-prev" class="pipeline-btn">Previous</button>
+                <span id="pipeline-guided-step" class="pipeline-guided-step"></span>
+                <button id="pipeline-guided-next" class="pipeline-btn">Next</button>
+                <button id="pipeline-guided-exit" class="pipeline-btn pipeline-btn-secondary">Exit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen reader announcements -->
+    <div id="pipeline-announcements" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="/static/js/pipeline_graph_data.js?v=PE0"></script>
+    <script src="/static/js/pipeline.js?v=PE0"></script>
+</section>

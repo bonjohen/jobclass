@@ -222,6 +222,17 @@ def create_app() -> FastAPI:
             },
         )
 
+    @app.get("/pipeline", response_class=HTMLResponse)
+    async def pipeline_page(request: Request):
+        return templates.TemplateResponse(
+            request,
+            "base.html",
+            {
+                "page_title": "Pipeline Explorer — JobClass",
+                "content_template": "pipeline.html",
+            },
+        )
+
     @app.get("/trends", response_class=HTMLResponse)
     async def trends_landing(request: Request):
         return templates.TemplateResponse(

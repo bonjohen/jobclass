@@ -17,10 +17,14 @@ Subsequent release plans (all complete):
 * `docs\specs\lessons_release_plan.md` — Lessons section with 12 educational pages (36/36 tasks)
 
 Active release plans:
-* `docs\specs\new_data_source_plan.md` — 7 new data sources, 102 tasks across 8 phases (NDS1–NDS8), with integrated code review fixes from `docs\specs\phased_code_review_release_plan_v2.md`
+* `docs\specs\pipeline_explorer_plan.md` — Pipeline Explorer interactive visualization, 140 tasks across 14 phases (PE0–PE13)
+
+Completed release plans:
+* `docs\specs\new_data_source_plan.md` — 7 new data sources, 102 tasks across 8 phases (NDS1–NDS8)
 * `docs\specs\phased_code_review_release_plan_v2.md` — 18 findings, 62 tasks across 4 phases (CR2-P1–P4)
 
 Design documents:
+* `docs\specs\pipeline_explorer_design.md` — Pipeline Explorer design requirements and experience concept
 * `docs\specs\new_data_source_design.md` — Detailed design for all 7 new data sources
 * `docs\specs\code_review_plan_v2.md` — Full V2 code review findings and remediation plan
 * `docs\specs\code_review_agent_v2.md` — V2 review prompt
@@ -177,8 +181,12 @@ Logical pipelines: `taxonomy_refresh`, `oews_refresh`, `onet_refresh`, `projecti
 
 **Lessons Release** — 12 educational lesson pages covering federal data, dimensional modeling, multi-vintage challenges, data quality, time-series normalization, idempotent pipelines, static site generation, testing/deployment, similarity algorithms, thread safety, multi-vintage queries, and UI-data alignment.
 
-## Current Release: New Data Sources
+**New Data Sources Release** — 7 new data sources (O*NET knowledge/abilities/work-activities/education/technology, BLS CPI-U, SOC crosswalk), CPI explorer pages, integrated code review fixes.
 
-See `docs\specs\new_data_source_plan.md` for the active work plan. Seven new data sources across four tiers: surface existing O*NET knowledge/abilities, add work activities/education/technology, BLS CPI for inflation-adjusted wages, SOC crosswalk for historical depth.
+**Code Review V2 Release** — 18 findings across 4 phases: security hardening, performance optimization, code quality, and test coverage improvements.
+
+## Current Release: Pipeline Explorer
+
+See `docs\specs\pipeline_explorer_plan.md` for the active work plan. Canvas-based, graph-driven visualization of the entire JobClass pipeline — from federal data sources through extraction, staging, core warehouse, marts, APIs, and web pages. Semantic zoom, guided educational modes, rich detail panels. 140 tasks across 14 phases (PE0–PE13). No third-party libraries; vanilla JS consistent with existing approach.
 
 Not in scope: HR job architecture, title normalization, international harmonization, real-time APIs.

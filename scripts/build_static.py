@@ -182,6 +182,9 @@ def rewrite_paths(content: str, base_path: str) -> str:
         ('"/trends/', f'"{bp}/trends/'),
         ("'/trends/", f"'{bp}/trends/"),
         ("`/trends/", f"`{bp}/trends/"),
+        # Pipeline links
+        ('"/pipeline"', f'"{bp}/pipeline"'),
+        ("'/pipeline'", f"'{bp}/pipeline'"),
         # Lesson links
         ('"/lessons"', f'"{bp}/lessons"'),
         ("'/lessons'", f"'{bp}/lessons'"),
@@ -285,9 +288,10 @@ def build_static(base_path: str, output_dir: str) -> None:
     write_html("/search", "search/index.html")
     write_html("/hierarchy", "hierarchy/index.html")
     write_html("/methodology", "methodology/index.html")
+    write_html("/pipeline", "pipeline/index.html")
     write_html("/cpi", "cpi/index.html")
     write_html("/cpi/explorer", "cpi/explorer/index.html")
-    print("  6 root pages")
+    print("  7 root pages")
 
     # --- HTML: CPI member pages ---
     cpi_member_codes = []
