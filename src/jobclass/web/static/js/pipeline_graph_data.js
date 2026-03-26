@@ -36,12 +36,12 @@ var LANES = [
     { id: "extraction", label: "Extraction & Acquisition", color: "#fef3e2", x: 240,  y: 0,   w: 180, h: 700 },
     { id: "raw",        label: "Raw Landing",              color: "#fce4ec", x: 440,  y: 0,   w: 180, h: 700 },
     { id: "staging",    label: "Staging & Parsing",        color: "#e8f5e9", x: 640,  y: 0,   w: 220, h: 700 },
-    { id: "validation", label: "Validation Gates",         color: "#fff3e0", x: 880,  y: 0,   w: 180, h: 700 },
-    { id: "core",       label: "Core Warehouse",           color: "#e3f2fd", x: 1080, y: 0,   w: 240, h: 700 },
-    { id: "timeseries", label: "Time-Series Enrichment",   color: "#f3e5f5", x: 1340, y: 0,   w: 200, h: 700 },
-    { id: "marts",      label: "Analyst Marts",            color: "#e0f2f1", x: 1560, y: 0,   w: 200, h: 700 },
-    { id: "api_web",    label: "API & Web Pages",          color: "#fff9c4", x: 1780, y: 0,   w: 240, h: 700 },
-    { id: "deployment", label: "Build & Deployment",       color: "#efebe9", x: 2040, y: 0,   w: 200, h: 700 }
+    { id: "validation", label: "Validation Gates",         color: "#fff3e0", x: 880,  y: 0,   w: 200, h: 700 },
+    { id: "core",       label: "Core Warehouse",           color: "#e3f2fd", x: 1100, y: 0,   w: 240, h: 700 },
+    { id: "timeseries", label: "Time-Series Enrichment",   color: "#f3e5f5", x: 1360, y: 0,   w: 200, h: 700 },
+    { id: "marts",      label: "Analyst Marts",            color: "#e0f2f1", x: 1580, y: 0,   w: 200, h: 700 },
+    { id: "api_web",    label: "API & Web Pages",          color: "#fff9c4", x: 1800, y: 0,   w: 320, h: 700 },
+    { id: "deployment", label: "Build & Deployment",       color: "#efebe9", x: 2140, y: 0,   w: 200, h: 700 }
 ];
 
 /* --- Node Definitions --- */
@@ -50,7 +50,7 @@ var LANES = [
 var SOURCE_NODES = [
     {
         id: "src_soc", type: NODE_TYPES.SOURCE, lane: "sources",
-        label: "SOC Taxonomy", x: 60, y: 60,
+        label: "SOC Taxonomy", x: 110, y: 153,
         purpose: "Standard Occupational Classification — the backbone taxonomy for all occupation codes.",
         cadence: "Periodic (major revisions ~10 years, minor updates more often)",
         artifact: "XLSX / CSV hierarchy and definitions files",
@@ -59,7 +59,7 @@ var SOURCE_NODES = [
     },
     {
         id: "src_oews", type: NODE_TYPES.SOURCE, lane: "sources",
-        label: "OEWS Survey", x: 60, y: 150,
+        label: "OEWS Survey", x: 110, y: 238,
         purpose: "Occupational Employment and Wage Statistics — employment counts and wage measures by occupation and geography.",
         cadence: "Annual (May reference period)",
         artifact: "XLSX files from BLS",
@@ -68,7 +68,7 @@ var SOURCE_NODES = [
     },
     {
         id: "src_onet", type: NODE_TYPES.SOURCE, lane: "sources",
-        label: "O*NET", x: 60, y: 240,
+        label: "O*NET", x: 110, y: 323,
         purpose: "Occupational Information Network — skills, knowledge, abilities, tasks, work activities, education, and technology descriptors.",
         cadence: "Semi-annual updates",
         artifact: "CSV/XLSX files from O*NET Resource Center",
@@ -77,7 +77,7 @@ var SOURCE_NODES = [
     },
     {
         id: "src_projections", type: NODE_TYPES.SOURCE, lane: "sources",
-        label: "BLS Projections", x: 60, y: 330,
+        label: "BLS Projections", x: 110, y: 408,
         purpose: "Employment Projections — forward-looking employment estimates from the National Employment Matrix.",
         cadence: "Biennial (10-year horizon)",
         artifact: "XLSX from BLS",
@@ -86,7 +86,7 @@ var SOURCE_NODES = [
     },
     {
         id: "src_cpi", type: NODE_TYPES.SOURCE, lane: "sources",
-        label: "BLS CPI-U", x: 60, y: 420,
+        label: "BLS CPI-U", x: 110, y: 493,
         purpose: "Consumer Price Index for All Urban Consumers — used for inflation adjustment of nominal wages.",
         cadence: "Monthly",
         artifact: "BLS public data API / flat files",
@@ -95,7 +95,7 @@ var SOURCE_NODES = [
     },
     {
         id: "src_crosswalk", type: NODE_TYPES.SOURCE, lane: "sources",
-        label: "SOC Crosswalk", x: 60, y: 510,
+        label: "SOC Crosswalk", x: 110, y: 578,
         purpose: "SOC 2010-to-2018 occupation code mappings for historical comparability.",
         cadence: "One-time per SOC revision pair",
         artifact: "XLSX mapping file",
@@ -108,21 +108,21 @@ var SOURCE_NODES = [
 var EXTRACTION_NODES = [
     {
         id: "proc_download_mgr", type: NODE_TYPES.PROCESS, lane: "extraction",
-        label: "Download Manager", x: 290, y: 100,
+        label: "Download Manager", x: 330, y: 280,
         purpose: "Declarative, manifest-driven download engine. Fetches source artifacts by URL with browser-like headers.",
         artifact: "Downloaded files written to raw landing paths",
         metadata: { file: "src/jobclass/extract/download.py", cli: "jobclass-pipeline run-all" }
     },
     {
         id: "proc_run_manifest", type: NODE_TYPES.PROCESS, lane: "extraction",
-        label: "Run Manifest", x: 290, y: 220,
+        label: "Run Manifest", x: 330, y: 365,
         purpose: "Tracks each pipeline execution: run ID, timestamps, source URLs, and checksums for reproducibility.",
         artifact: "Manifest metadata per run",
         metadata: { file: "src/jobclass/extract/manifest.py" }
     },
     {
         id: "proc_browser_headers", type: NODE_TYPES.PROCESS, lane: "extraction",
-        label: "Browser Header\nWorkaround", x: 290, y: 340,
+        label: "Browser Header\nWorkaround", x: 330, y: 450,
         purpose: "Injects Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site, Sec-Fetch-User headers to bypass BLS blocking.",
         artifact: "HTTP headers on every BLS request",
         caveats: "BLS.gov rejects requests without these headers.",
@@ -134,37 +134,37 @@ var EXTRACTION_NODES = [
 var RAW_NODES = [
     {
         id: "store_raw_soc", type: NODE_TYPES.STORAGE, lane: "raw",
-        label: "Raw SOC Files", x: 490, y: 60,
+        label: "Raw SOC Files", x: 530, y: 153,
         purpose: "Immutable capture of SOC hierarchy and definitions source files.",
         metadata: { path_pattern: "raw/soc/{dataset}/{release_id}/{run_id}/{filename}" }
     },
     {
         id: "store_raw_oews", type: NODE_TYPES.STORAGE, lane: "raw",
-        label: "Raw OEWS Files", x: 490, y: 150,
+        label: "Raw OEWS Files", x: 530, y: 238,
         purpose: "Immutable capture of OEWS XLSX files (national and state employment/wages).",
         metadata: { path_pattern: "raw/bls/oews_{geo}/{release_id}/{run_id}/{filename}" }
     },
     {
         id: "store_raw_onet", type: NODE_TYPES.STORAGE, lane: "raw",
-        label: "Raw O*NET Files", x: 490, y: 240,
+        label: "Raw O*NET Files", x: 530, y: 323,
         purpose: "Immutable capture of O*NET descriptor CSV/XLSX files (7 domains).",
         metadata: { path_pattern: "raw/onet/{dataset}/{release_id}/{run_id}/{filename}" }
     },
     {
         id: "store_raw_proj", type: NODE_TYPES.STORAGE, lane: "raw",
-        label: "Raw Projections\nFiles", x: 490, y: 330,
+        label: "Raw Projections\nFiles", x: 530, y: 408,
         purpose: "Immutable capture of BLS Employment Projections XLSX.",
         metadata: { path_pattern: "raw/bls/employment_projections/{release_id}/{run_id}/{filename}" }
     },
     {
         id: "store_raw_cpi", type: NODE_TYPES.STORAGE, lane: "raw",
-        label: "Raw CPI Files", x: 490, y: 420,
+        label: "Raw CPI Files", x: 530, y: 493,
         purpose: "Immutable capture of CPI-U data files.",
         metadata: { path_pattern: "raw/bls/cpi/{release_id}/{run_id}/{filename}" }
     },
     {
         id: "store_raw_xwalk", type: NODE_TYPES.STORAGE, lane: "raw",
-        label: "Raw Crosswalk\nFiles", x: 490, y: 510,
+        label: "Raw Crosswalk\nFiles", x: 530, y: 578,
         purpose: "Immutable capture of SOC 2010-2018 crosswalk mapping XLSX.",
         metadata: { path_pattern: "raw/soc/crosswalk/{release_id}/{run_id}/{filename}" }
     }
@@ -174,43 +174,43 @@ var RAW_NODES = [
 var STAGING_NODES = [
     {
         id: "proc_parse_soc", type: NODE_TYPES.PROCESS, lane: "staging",
-        label: "SOC Parser", x: 710, y: 40,
+        label: "SOC Parser", x: 750, y: 110,
         purpose: "Parses SOC hierarchy XLSX/CSV into standardized staging tables.",
         metadata: { file: "src/jobclass/parse/soc.py", tables: ["stage__soc__hierarchy", "stage__soc__definitions"] }
     },
     {
         id: "proc_parse_oews", type: NODE_TYPES.PROCESS, lane: "staging",
-        label: "OEWS Parser", x: 710, y: 120,
+        label: "OEWS Parser", x: 750, y: 195,
         purpose: "Parses OEWS XLSX with UPPERCASE column normalization via _OEWS_COLUMN_ALIASES.",
         metadata: { file: "src/jobclass/parse/oews.py", tables: ["stage__bls__oews_national", "stage__bls__oews_state"] }
     },
     {
         id: "proc_parse_onet", type: NODE_TYPES.PROCESS, lane: "staging",
-        label: "O*NET Parser", x: 710, y: 200,
+        label: "O*NET Parser", x: 750, y: 280,
         purpose: "Parses 7 O*NET descriptor domains into separate staging tables.",
         metadata: { file: "src/jobclass/parse/onet.py", tables: ["stage__onet__skills", "stage__onet__knowledge", "stage__onet__abilities", "stage__onet__tasks", "stage__onet__work_activities", "stage__onet__education", "stage__onet__technology_skills"] }
     },
     {
         id: "proc_parse_proj", type: NODE_TYPES.PROCESS, lane: "staging",
-        label: "Projections\nParser", x: 710, y: 300,
+        label: "Projections\nParser", x: 750, y: 365,
         purpose: "Parses BLS Projections XLSX, converting employment from thousands to whole numbers.",
         metadata: { file: "src/jobclass/parse/projections.py", tables: ["stage__bls__employment_projections"] }
     },
     {
         id: "proc_parse_cpi", type: NODE_TYPES.PROCESS, lane: "staging",
-        label: "CPI Parser", x: 710, y: 400,
+        label: "CPI Parser", x: 750, y: 450,
         purpose: "Parses CPI-U data into staging tables for price index observations.",
         metadata: { file: "src/jobclass/parse/cpi.py", tables: ["stage__bls__cpi"] }
     },
     {
         id: "proc_parse_cpi_domain", type: NODE_TYPES.PROCESS, lane: "staging",
-        label: "CPI Domain\nParser", x: 710, y: 480,
+        label: "CPI Domain\nParser", x: 750, y: 535,
         purpose: "Full CPI domain parser: series metadata, item hierarchy, publication levels, importance, prices.",
         metadata: { file: "src/jobclass/parse/cpi_domain.py", tables: ["stage__bls__cpi_series", "stage__bls__cpi_item_hierarchy", "stage__bls__cpi_publication_level", "stage__bls__cpi_relative_importance", "stage__bls__cpi_average_price"] }
     },
     {
         id: "proc_parse_xwalk", type: NODE_TYPES.PROCESS, lane: "staging",
-        label: "Crosswalk Parser", x: 710, y: 560,
+        label: "Crosswalk Parser", x: 750, y: 620,
         purpose: "Parses SOC 2010-2018 crosswalk, classifying mapping types (1:1, split, merge, complex).",
         metadata: { file: "src/jobclass/parse/soc.py", tables: ["stage__soc__crosswalk"] }
     }
@@ -220,37 +220,37 @@ var STAGING_NODES = [
 var VALIDATION_NODES = [
     {
         id: "gate_schema_drift", type: NODE_TYPES.GATE, lane: "validation",
-        label: "Schema Drift\nDetection", x: 940, y: 60,
+        label: "Schema Drift\nDetection", x: 980, y: 153,
         purpose: "Blocks warehouse publication if source columns change. Fail-fast on missing/changed columns.",
         metadata: { file: "src/jobclass/validate/framework.py", functions: ["validate_required_columns", "validate_column_types"] }
     },
     {
         id: "gate_referential", type: NODE_TYPES.GATE, lane: "validation",
-        label: "Referential\nIntegrity", x: 940, y: 170,
+        label: "Referential\nIntegrity", x: 980, y: 238,
         purpose: "Ensures facts and bridges point to existing dimension records.",
         metadata: { file: "src/jobclass/validate/framework.py", functions: ["validate_referential_integrity"] }
     },
     {
         id: "gate_grain", type: NODE_TYPES.GATE, lane: "validation",
-        label: "Grain\nUniqueness", x: 940, y: 280,
+        label: "Grain\nUniqueness", x: 980, y: 323,
         purpose: "Prevents duplicate business keys. Verifies idempotent re-run safety.",
         metadata: { file: "src/jobclass/validate/framework.py", functions: ["validate_grain_uniqueness", "validate_append_only"] }
     },
     {
         id: "gate_null_semantics", type: NODE_TYPES.GATE, lane: "validation",
-        label: "Null Semantics\nPreservation", x: 940, y: 390,
+        label: "Null Semantics\nPreservation", x: 980, y: 408,
         purpose: "Ensures suppressed/missing OEWS values remain null — never imputed.",
         metadata: { file: "src/jobclass/validate/oews.py" }
     },
     {
         id: "gate_temporal", type: NODE_TYPES.GATE, lane: "validation",
-        label: "Temporal\nConsistency", x: 940, y: 500,
+        label: "Temporal\nConsistency", x: 980, y: 493,
         purpose: "Validates version monotonicity, period ordering, and source-vs-business time integrity.",
         metadata: { file: "src/jobclass/validate/framework.py", functions: ["validate_version_monotonicity"] }
     },
     {
         id: "gate_soc_alignment", type: NODE_TYPES.GATE, lane: "validation",
-        label: "SOC Alignment", x: 940, y: 610,
+        label: "SOC Alignment", x: 980, y: 578,
         purpose: "Validates that OEWS, O*NET, and Projections occupation codes map to dim_occupation.",
         metadata: { files: ["src/jobclass/validate/oews.py", "src/jobclass/validate/onet.py", "src/jobclass/validate/projections.py"] }
     }
@@ -260,49 +260,49 @@ var VALIDATION_NODES = [
 var CORE_NODES = [
     {
         id: "store_dim_occupation", type: NODE_TYPES.STORAGE, lane: "core",
-        label: "dim_occupation", x: 1150, y: 40,
+        label: "dim_occupation", x: 1220, y: 68,
         purpose: "Conformed occupation dimension — SOC codes, titles, definitions, hierarchy levels, and version tracking.",
         metadata: { loader: "src/jobclass/load/soc.py", grain: "soc_code + source_release_id" }
     },
     {
         id: "store_dim_geography", type: NODE_TYPES.STORAGE, lane: "core",
-        label: "dim_geography", x: 1150, y: 110,
+        label: "dim_geography", x: 1220, y: 153,
         purpose: "Geographic dimension — national, state, and MSA areas.",
         metadata: { loader: "src/jobclass/load/oews.py" }
     },
     {
         id: "store_dim_descriptors", type: NODE_TYPES.STORAGE, lane: "core",
-        label: "Descriptor\nDimensions", x: 1150, y: 180,
+        label: "Descriptor\nDimensions", x: 1220, y: 238,
         purpose: "dim_skill, dim_knowledge, dim_ability, dim_task, dim_work_activity, dim_education_requirement, dim_technology",
         metadata: { loader: "src/jobclass/load/onet.py", tables: ["dim_skill", "dim_knowledge", "dim_ability", "dim_task", "dim_work_activity", "dim_education_requirement", "dim_technology"] }
     },
     {
         id: "store_fact_wages", type: NODE_TYPES.STORAGE, lane: "core",
-        label: "fact_occupation_\nemployment_wages", x: 1150, y: 270,
+        label: "fact_occupation_\nemployment_wages", x: 1220, y: 323,
         purpose: "OEWS employment counts and wage measures by occupation, geography, and vintage.",
         metadata: { loader: "src/jobclass/load/oews.py", grain: "soc_code + geo_code + source_release_id" }
     },
     {
         id: "store_fact_proj", type: NODE_TYPES.STORAGE, lane: "core",
-        label: "fact_occupation_\nprojections", x: 1150, y: 360,
+        label: "fact_occupation_\nprojections", x: 1220, y: 408,
         purpose: "BLS employment projections (base year, projected year, employment change).",
         metadata: { loader: "src/jobclass/load/projections.py" }
     },
     {
         id: "store_bridges", type: NODE_TYPES.STORAGE, lane: "core",
-        label: "Bridge Tables", x: 1150, y: 440,
+        label: "Bridge Tables", x: 1220, y: 493,
         purpose: "M-to-M: bridge_occupation_skill, _knowledge, _ability, _task, _work_activity, _education, _technology, _hierarchy",
         metadata: { loader: "src/jobclass/load/onet.py" }
     },
     {
         id: "store_dim_cpi", type: NODE_TYPES.STORAGE, lane: "core",
-        label: "CPI Dimensions\n& Facts", x: 1150, y: 530,
+        label: "CPI Dimensions\n& Facts", x: 1220, y: 578,
         purpose: "dim_price_index, dim_cpi_member, dim_cpi_area, fact_price_index_observation, fact_cpi_observation, bridge_cpi_*",
         metadata: { loaders: ["src/jobclass/load/cpi.py", "src/jobclass/load/cpi_domain.py"] }
     },
     {
         id: "store_crosswalk", type: NODE_TYPES.STORAGE, lane: "core",
-        label: "SOC Crosswalk\nMappings", x: 1150, y: 620,
+        label: "SOC Crosswalk\nMappings", x: 1220, y: 663,
         purpose: "SOC 2010-to-2018 code mappings with type classification (1:1, split, merge, complex).",
         metadata: { loader: "src/jobclass/load/soc.py" }
     }
@@ -312,37 +312,37 @@ var CORE_NODES = [
 var TIMESERIES_NODES = [
     {
         id: "proc_ts_metrics", type: NODE_TYPES.PROCESS, lane: "timeseries",
-        label: "Metric Catalog\nBuilder", x: 1400, y: 80,
+        label: "Metric Catalog\nBuilder", x: 1460, y: 153,
         purpose: "Populates dim_metric with 6 base metrics: employment_count, mean/median wage, projected employment, change, pct change.",
         metadata: { file: "src/jobclass/load/timeseries.py", function: "populate_dim_metric" }
     },
     {
         id: "proc_ts_periods", type: NODE_TYPES.PROCESS, lane: "timeseries",
-        label: "Time Period\nBuilder", x: 1400, y: 180,
+        label: "Time Period\nBuilder", x: 1460, y: 238,
         purpose: "Creates dim_time_period with annual period dimension records.",
         metadata: { file: "src/jobclass/load/timeseries.py", function: "populate_dim_time_period" }
     },
     {
         id: "proc_ts_observations", type: NODE_TYPES.PROCESS, lane: "timeseries",
-        label: "Multi-Vintage\nOEWS Loading", x: 1400, y: 280,
+        label: "Multi-Vintage\nOEWS Loading", x: 1460, y: 323,
         purpose: "Aggregates OEWS observations into fact_time_series_observation with comparable/as-published modes.",
         metadata: { file: "src/jobclass/load/timeseries.py", function: "populate_fact_time_series_observation" }
     },
     {
         id: "proc_ts_cpi_deflation", type: NODE_TYPES.PROCESS, lane: "timeseries",
-        label: "CPI Deflation", x: 1400, y: 380,
+        label: "CPI Deflation", x: 1460, y: 408,
         purpose: "Applies CPI-U deflation for real wage metrics. Base year: 2023. Formula: real = nominal * (CPI_2023 / CPI_year).",
         metadata: { file: "src/jobclass/load/timeseries.py", constant: "CPI_BASE_YEAR = 2023" }
     },
     {
         id: "proc_ts_derived", type: NODE_TYPES.PROCESS, lane: "timeseries",
-        label: "Derived Series\nComputation", x: 1400, y: 480,
+        label: "Derived Series\nComputation", x: 1460, y: 493,
         purpose: "Calculates year-over-year changes, percent changes, and stores in fact_derived_series.",
         metadata: { file: "src/jobclass/load/timeseries.py", function: "populate_fact_derived_series" }
     },
     {
         id: "proc_ts_comparable", type: NODE_TYPES.PROCESS, lane: "timeseries",
-        label: "Comparable\nHistory Logic", x: 1400, y: 580,
+        label: "Comparable\nHistory Logic", x: 1460, y: 578,
         purpose: "Uses SOC crosswalk to build comparable history across SOC revisions. Only 1:1 mappings for wages; splits/merges for employment.",
         metadata: { file: "src/jobclass/load/timeseries.py" }
     }
@@ -352,43 +352,43 @@ var TIMESERIES_NODES = [
 var MART_NODES = [
     {
         id: "store_mart_summary", type: NODE_TYPES.STORAGE, lane: "marts",
-        label: "occupation_\nsummary", x: 1620, y: 60,
+        label: "occupation_\nsummary", x: 1680, y: 110,
         purpose: "One row per current occupation with hierarchy fields — the main lookup mart.",
         metadata: { grain: "soc_code" }
     },
     {
         id: "store_mart_wages_geo", type: NODE_TYPES.STORAGE, lane: "marts",
-        label: "occupation_wages_\nby_geography", x: 1620, y: 150,
+        label: "occupation_wages_\nby_geography", x: 1680, y: 195,
         purpose: "Employment and wage measures by occupation and geography — powers wage comparison views.",
         metadata: { grain: "soc_code + geo_code + source_release_id" }
     },
     {
         id: "store_mart_skill_profile", type: NODE_TYPES.STORAGE, lane: "marts",
-        label: "occupation_skill_\nprofile", x: 1620, y: 240,
+        label: "occupation_skill_\nprofile", x: 1680, y: 280,
         purpose: "Occupation-to-skill relationships with importance and level scores.",
         metadata: { grain: "soc_code + skill_id" }
     },
     {
         id: "store_mart_trend", type: NODE_TYPES.STORAGE, lane: "marts",
-        label: "mart_occupation_\ntrend_series", x: 1620, y: 330,
+        label: "mart_occupation_\ntrend_series", x: 1680, y: 365,
         purpose: "Trends over time per occupation, metric, and geography — powers trend explorer.",
         metadata: { grain: "soc_code + metric_id + geo_code + period" }
     },
     {
         id: "store_mart_geo_gap", type: NODE_TYPES.STORAGE, lane: "marts",
-        label: "mart_occupation_\ngeo_gap_series", x: 1620, y: 420,
+        label: "mart_occupation_\ngeo_gap_series", x: 1680, y: 450,
         purpose: "State vs. national wage gaps over time — powers geography comparison.",
         metadata: { grain: "soc_code + geo_code + period" }
     },
     {
         id: "store_mart_rank", type: NODE_TYPES.STORAGE, lane: "marts",
-        label: "mart_occupation_\nrank_change", x: 1620, y: 510,
+        label: "mart_occupation_\nrank_change", x: 1680, y: 535,
         purpose: "Year-over-year ranking changes — powers ranked movers page.",
         metadata: { grain: "soc_code + metric_id + period" }
     },
     {
         id: "store_mart_similarity", type: NODE_TYPES.STORAGE, lane: "marts",
-        label: "occupation_\nsimilarity_seeded", x: 1620, y: 600,
+        label: "occupation_\nsimilarity_seeded", x: 1680, y: 620,
         purpose: "Jaccard cosine similarity on skill importance vectors between occupations.",
         metadata: { grain: "soc_code_a + soc_code_b" }
     }
@@ -398,73 +398,73 @@ var MART_NODES = [
 var INTERFACE_NODES = [
     {
         id: "iface_search", type: NODE_TYPES.INTERFACE, lane: "api_web",
-        label: "Search Page", x: 1860, y: 30,
+        label: "Search Page", x: 1880, y: 153,
         purpose: "Occupation search by keyword or SOC code.",
         metadata: { route: "/search", api: "/api/occupations/search", template: "search.html" }
     },
     {
         id: "iface_hierarchy", type: NODE_TYPES.INTERFACE, lane: "api_web",
-        label: "Hierarchy\nBrowser", x: 1860, y: 90,
+        label: "Hierarchy\nBrowser", x: 1880, y: 238,
         purpose: "Interactive SOC hierarchy tree browser.",
         metadata: { route: "/hierarchy", api: "/api/occupations/hierarchy", template: "hierarchy.html" }
     },
     {
         id: "iface_occupation", type: NODE_TYPES.INTERFACE, lane: "api_web",
-        label: "Occupation\nProfile", x: 1860, y: 160,
+        label: "Occupation\nProfile", x: 1880, y: 323,
         purpose: "Detailed occupation page: wages, skills, knowledge, abilities, tasks, projections, similar occupations.",
         metadata: { route: "/occupation/{soc_code}", apis: ["/api/occupations/{soc_code}", "/api/occupations/{soc_code}/skills", "/api/occupations/{soc_code}/wages"], template: "occupation.html" }
     },
     {
         id: "iface_wages", type: NODE_TYPES.INTERFACE, lane: "api_web",
-        label: "Wage\nComparison", x: 1860, y: 240,
+        label: "Wage\nComparison", x: 1880, y: 408,
         purpose: "State-level wage comparison for a given occupation.",
         metadata: { route: "/occupation/{soc_code}/wages", api: "/api/occupations/{soc_code}/wages", template: "wages_comparison.html" }
     },
     {
         id: "iface_trend_explorer", type: NODE_TYPES.INTERFACE, lane: "api_web",
-        label: "Trend Explorer", x: 1860, y: 310,
+        label: "Trend Explorer", x: 1880, y: 493,
         purpose: "Time-series charts for a single occupation — employment, wages, projections over time.",
         metadata: { route: "/trends/explorer/{soc_code}", api: "/api/trends/{soc_code}", template: "trend_explorer.html" }
     },
     {
         id: "iface_occ_compare", type: NODE_TYPES.INTERFACE, lane: "api_web",
-        label: "Occupation\nComparison", x: 1860, y: 380,
+        label: "Occupation\nComparison", x: 1880, y: 578,
         purpose: "Compare the same metric across multiple occupations over time.",
         metadata: { route: "/trends/compare", api: "/api/trends/compare/occupations", template: "occupation_comparison.html" }
     },
     {
         id: "iface_geo_compare", type: NODE_TYPES.INTERFACE, lane: "api_web",
-        label: "Geography\nComparison", x: 1860, y: 450,
+        label: "Geography\nComparison", x: 2040, y: 153,
         purpose: "Compare an occupation's metrics across states for a given year.",
         metadata: { route: "/trends/geography/{soc_code}", api: "/api/trends/compare/geography", template: "geography_comparison.html" }
     },
     {
         id: "iface_movers", type: NODE_TYPES.INTERFACE, lane: "api_web",
-        label: "Ranked Movers", x: 1860, y: 520,
+        label: "Ranked Movers", x: 2040, y: 238,
         purpose: "Top gainers and losers by employment, wage, or projection metrics.",
         metadata: { route: "/trends/movers", api: "/api/trends/movers", template: "ranked_movers.html" }
     },
     {
         id: "iface_cpi", type: NODE_TYPES.INTERFACE, lane: "api_web",
-        label: "CPI Explorer", x: 1860, y: 590,
+        label: "CPI Explorer", x: 2040, y: 323,
         purpose: "Interactive CPI member hierarchy browser with series, areas, and prices.",
         metadata: { routes: ["/cpi", "/cpi/explorer", "/cpi/member/{code}", "/cpi/area/{code}"], template: "cpi_explorer.html" }
     },
     {
         id: "iface_methodology", type: NODE_TYPES.INTERFACE, lane: "api_web",
-        label: "Methodology", x: 1860, y: 650,
+        label: "Methodology", x: 2040, y: 408,
         purpose: "Documents data sources, metrics, validation approach, and analytical methods.",
         metadata: { route: "/methodology", template: "methodology.html" }
     },
     {
         id: "iface_lessons", type: NODE_TYPES.INTERFACE, lane: "api_web",
-        label: "Lessons Section", x: 1960, y: 30,
+        label: "Lessons Section", x: 2040, y: 493,
         purpose: "20 educational lessons on data engineering, from federal data to fetch shim architecture.",
         metadata: { route: "/lessons", template: "lessons.html", count: 20 }
     },
     {
         id: "iface_pipeline", type: NODE_TYPES.INTERFACE, lane: "api_web",
-        label: "Pipeline\nExplorer", x: 1960, y: 110,
+        label: "Pipeline\nExplorer", x: 2040, y: 578,
         purpose: "This page — interactive canvas-based visualization of the entire JobClass pipeline.",
         metadata: { route: "/pipeline", template: "pipeline.html" }
     }
@@ -474,31 +474,31 @@ var INTERFACE_NODES = [
 var DEPLOYMENT_NODES = [
     {
         id: "proc_build_static", type: NODE_TYPES.PROCESS, lane: "deployment",
-        label: "Static Site\nBuilder", x: 2100, y: 80,
+        label: "Static Site\nBuilder", x: 2240, y: 195,
         purpose: "Pre-renders all HTML pages via FastAPI TestClient and generates static JSON API responses.",
         metadata: { file: "scripts/build_static.py", cli: "python scripts/build_static.py --base-path /jobclass" }
     },
     {
         id: "proc_fetch_shim", type: NODE_TYPES.PROCESS, lane: "deployment",
-        label: "Fetch Shim\nInjection", x: 2100, y: 200,
+        label: "Fetch Shim\nInjection", x: 2240, y: 280,
         purpose: "Injects client-side JavaScript shim into HTML pages to intercept fetch() calls and redirect to static JSON.",
         metadata: { file: "scripts/build_static.py" }
     },
     {
         id: "proc_deploy", type: NODE_TYPES.PROCESS, lane: "deployment",
-        label: "Deploy to\nGitHub Pages", x: 2100, y: 320,
+        label: "Deploy to\nGitHub Pages", x: 2240, y: 365,
         purpose: "Force-pushes _site/ to gh-pages branch. Includes .nojekyll file.",
         metadata: { file: "scripts/deploy_pages.py", url: "https://bonjohen.github.io/jobclass/" }
     },
     {
         id: "proc_health", type: NODE_TYPES.PROCESS, lane: "deployment",
-        label: "Health Check", x: 2100, y: 440,
+        label: "Health Check", x: 2240, y: 450,
         purpose: "API health endpoint verifying database connectivity and table availability.",
         metadata: { api: "/api/health", file: "src/jobclass/web/api/health.py" }
     },
     {
         id: "proc_cli", type: NODE_TYPES.PROCESS, lane: "deployment",
-        label: "CLI Commands", x: 2100, y: 560,
+        label: "CLI Commands", x: 2240, y: 535,
         purpose: "Pipeline orchestration: migrate, run-all, status, timeseries-refresh.",
         metadata: { file: "src/jobclass/cli.py", commands: ["migrate", "run-all", "status", "timeseries-refresh"] }
     }
@@ -526,7 +526,7 @@ var GRAPH_EDGES = [
     { from: "src_onet",        to: "proc_download_mgr", type: EDGE_TYPES.REQUIRED },
     { from: "src_projections",  to: "proc_download_mgr", type: EDGE_TYPES.REQUIRED },
     { from: "src_cpi",         to: "proc_download_mgr", type: EDGE_TYPES.REQUIRED },
-    { from: "src_crosswalk",   to: "proc_download_mgr", type: EDGE_TYPES.OPTIONAL },
+    { from: "src_crosswalk",   to: "proc_download_mgr", type: EDGE_TYPES.REQUIRED },
     { from: "proc_download_mgr", to: "proc_run_manifest", type: EDGE_TYPES.REQUIRED },
     { from: "proc_download_mgr", to: "proc_browser_headers", type: EDGE_TYPES.REQUIRED, condition: "BLS sources only" },
 
@@ -536,7 +536,7 @@ var GRAPH_EDGES = [
     { from: "proc_download_mgr", to: "store_raw_onet",  type: EDGE_TYPES.REQUIRED },
     { from: "proc_download_mgr", to: "store_raw_proj",  type: EDGE_TYPES.REQUIRED },
     { from: "proc_download_mgr", to: "store_raw_cpi",   type: EDGE_TYPES.REQUIRED },
-    { from: "proc_download_mgr", to: "store_raw_xwalk", type: EDGE_TYPES.OPTIONAL },
+    { from: "proc_download_mgr", to: "store_raw_xwalk", type: EDGE_TYPES.REQUIRED },
 
     /* Raw → Parsing */
     { from: "store_raw_soc",   to: "proc_parse_soc",        type: EDGE_TYPES.REQUIRED },
@@ -545,7 +545,7 @@ var GRAPH_EDGES = [
     { from: "store_raw_proj",  to: "proc_parse_proj",       type: EDGE_TYPES.REQUIRED },
     { from: "store_raw_cpi",   to: "proc_parse_cpi",        type: EDGE_TYPES.REQUIRED },
     { from: "store_raw_cpi",   to: "proc_parse_cpi_domain", type: EDGE_TYPES.REQUIRED },
-    { from: "store_raw_xwalk", to: "proc_parse_xwalk",      type: EDGE_TYPES.OPTIONAL },
+    { from: "store_raw_xwalk", to: "proc_parse_xwalk",      type: EDGE_TYPES.REQUIRED },
 
     /* Parsing → Validation */
     { from: "proc_parse_soc",        to: "gate_schema_drift",  type: EDGE_TYPES.REQUIRED },
@@ -554,7 +554,7 @@ var GRAPH_EDGES = [
     { from: "proc_parse_proj",       to: "gate_schema_drift",  type: EDGE_TYPES.REQUIRED },
     { from: "proc_parse_cpi",        to: "gate_schema_drift",  type: EDGE_TYPES.REQUIRED },
     { from: "proc_parse_cpi_domain", to: "gate_schema_drift",  type: EDGE_TYPES.REQUIRED },
-    { from: "proc_parse_xwalk",      to: "gate_schema_drift",  type: EDGE_TYPES.OPTIONAL },
+    { from: "proc_parse_xwalk",      to: "gate_schema_drift",  type: EDGE_TYPES.REQUIRED },
 
     { from: "gate_schema_drift", to: "gate_referential",    type: EDGE_TYPES.REQUIRED, condition: "Schema valid" },
     { from: "gate_schema_drift", to: "gate_grain",          type: EDGE_TYPES.BLOCKED,  condition: "Schema drift blocks publication" },
@@ -571,7 +571,7 @@ var GRAPH_EDGES = [
     { from: "gate_soc_alignment",  to: "store_fact_proj",        type: EDGE_TYPES.REQUIRED },
     { from: "gate_soc_alignment",  to: "store_bridges",          type: EDGE_TYPES.REQUIRED },
     { from: "gate_soc_alignment",  to: "store_dim_cpi",          type: EDGE_TYPES.REQUIRED },
-    { from: "gate_soc_alignment",  to: "store_crosswalk",        type: EDGE_TYPES.OPTIONAL },
+    { from: "gate_soc_alignment",  to: "store_crosswalk",        type: EDGE_TYPES.REQUIRED },
 
     /* Core dimension dependencies */
     { from: "store_dim_occupation", to: "store_fact_wages",  type: EDGE_TYPES.REQUIRED, condition: "FK: soc_code" },
@@ -723,6 +723,58 @@ var GUIDED_MODES = [
     }
 ];
 
+/* --- Summary Groups for Overview Mode (semantic zoom) --- */
+var SUMMARY_GROUPS = [
+    {
+        id: "acquire", label: "Data Sources", accent: "#3b82f6",
+        purpose: "Download 6 federal data products with browser-header workaround",
+        lanes: ["sources", "extraction"],
+        items: ["SOC Taxonomy", "OEWS Wages", "O*NET Descriptors", "BLS Projections", "CPI-U Prices", "SOC Crosswalk"]
+    },
+    {
+        id: "land", label: "Raw Landing", accent: "#e91e63",
+        purpose: "Immutable capture with checksums and run metadata",
+        lanes: ["raw"],
+        items: ["XLSX/CSV artifacts", "Source URLs logged", "Never overwritten", "Reproducible runs"]
+    },
+    {
+        id: "parse", label: "Stage & Parse", accent: "#4caf50",
+        purpose: "Normalize heterogeneous files into typed relational tables",
+        lanes: ["staging"],
+        items: ["SOC Parser", "OEWS Parser", "O*NET Parser (7 domains)", "Projections Parser", "CPI Parser", "Crosswalk Parser"]
+    },
+    {
+        id: "validate", label: "Validation Gates", accent: "#ef4444",
+        purpose: "Fail-fast quality checks before warehouse loading",
+        lanes: ["validation"],
+        items: ["Schema drift detection", "Referential integrity", "Grain uniqueness", "Null semantics", "Temporal consistency", "SOC alignment"]
+    },
+    {
+        id: "warehouse", label: "Core Warehouse", accent: "#1976d2",
+        purpose: "Conformed dimensions, facts, and bridges with version tracking",
+        lanes: ["core"],
+        items: ["dim_occupation", "dim_geography", "7 descriptor dims", "fact_wages", "fact_projections", "Bridge tables", "CPI dimensions"]
+    },
+    {
+        id: "timeseries", label: "Time-Series", accent: "#9c27b0",
+        purpose: "Multi-vintage enrichment with CPI deflation and derived metrics",
+        lanes: ["timeseries"],
+        items: ["Metric catalog", "Multi-vintage OEWS", "CPI deflation (2023$)", "YoY derived series", "Comparable history"]
+    },
+    {
+        id: "serve", label: "Marts & Web", accent: "#6366f1",
+        purpose: "Denormalized marts powering interactive web pages",
+        lanes: ["marts", "api_web"],
+        items: ["occupation_summary", "wages_by_geography", "trend_series", "Search & Hierarchy", "Trend Explorer", "CPI Explorer", "20 Lessons"]
+    },
+    {
+        id: "deploy", label: "Build & Deploy", accent: "#795548",
+        purpose: "Pre-render static site and publish to GitHub Pages",
+        lanes: ["deployment"],
+        items: ["Static site builder", "Fetch shim injection", "GitHub Pages deploy", "Health check API", "CLI orchestration"]
+    }
+];
+
 /* --- Exported Graph Object --- */
 var PIPELINE_GRAPH = {
     nodeTypes: NODE_TYPES,
@@ -731,5 +783,6 @@ var PIPELINE_GRAPH = {
     nodes: GRAPH_NODES,
     edges: GRAPH_EDGES,
     lessonAnchors: LESSON_ANCHORS,
-    guidedModes: GUIDED_MODES
+    guidedModes: GUIDED_MODES,
+    summaryGroups: SUMMARY_GROUPS
 };

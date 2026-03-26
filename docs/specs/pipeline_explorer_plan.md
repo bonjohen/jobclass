@@ -98,7 +98,7 @@ Implement all navigation inputs: mouse wheel zoom, click-drag pan, touch gesture
 | `[X]` | PE3-05 | Implement double-click to center and zoom on nearest node | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE3-06 | Implement "Reset View" button with animated transition back to fit-to-screen | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE3-07 | Implement zoom level indicator display (text or bar showing current scale) | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
-| `[ ]` | PE3-08 | Implement smooth animated transitions for all camera movements (ease-in-out interpolation) | | |
+| `[X]` | PE3-08 | Implement smooth animated transitions for all camera movements (ease-in-out interpolation) | 2026-03-25 16:00 PST | 2026-03-25 16:05 PST |
 | `[X]` | PE3-09 | Implement zoom clamping: minimum scale (full overview) and maximum scale (detail level) | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 
 ---
@@ -109,14 +109,14 @@ Implement tiered zoom levels where deeper zoom reveals richer representations ra
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | PE4-01 | Define three zoom threshold breakpoints: overview (scale < 0.4), subsystem (0.4–1.2), detail (> 1.2) | | |
-| `[ ]` | PE4-02 | Overview level rendering: show lane blocks only with aggregate labels and node counts per group | | |
-| `[ ]` | PE4-03 | Subsystem level rendering: show individual nodes with names, type icons, and basic connections | | |
-| `[X]` | PE4-04 | Detail level rendering: show full metadata, input/output ports, edge labels, and condition annotations | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
-| `[ ]` | PE4-05 | Implement smooth crossfade between zoom levels (opacity transitions during threshold crossing) | | |
-| `[X]` | PE4-06 | Implement progressive label disclosure: more text and metadata visible at deeper zoom | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
-| `[ ]` | PE4-07 | Implement edge simplification at overview level: bundle edges between lanes into single aggregate arrows | | |
-| `[ ]` | PE4-08 | Implement level-appropriate hit targets: larger clickable areas at overview, precise at detail | | |
+| `[X]` | PE4-01 | Define three zoom threshold breakpoints: overview (scale < 0.4), subsystem (0.4–1.2), detail (> 1.2) | 2026-03-25 16:12 PST | 2026-03-25 16:15 PST |
+| `[X]` | PE4-02 | Overview level rendering: show lane blocks only with aggregate labels and node counts per group | 2026-03-25 16:12 PST | 2026-03-25 16:15 PST |
+| `[X]` | PE4-03 | Subsystem level rendering: show individual nodes with names, type icons, and basic connections | 2026-03-25 16:12 PST | 2026-03-25 16:15 PST |
+| `[X]` | PE4-04 | Detail level rendering: show full metadata, input/output ports, edge labels, and condition annotations | 2026-03-25 15:32 PST | 2026-03-25 16:15 PST |
+| `[X]` | PE4-05 | Implement smooth crossfade between zoom levels (opacity transitions during threshold crossing) | 2026-03-25 16:40 PST | 2026-03-25 16:44 PST |
+| `[X]` | PE4-06 | Implement progressive label disclosure: more text and metadata visible at deeper zoom | 2026-03-25 15:32 PST | 2026-03-25 16:15 PST |
+| `[X]` | PE4-07 | Implement edge simplification at overview level: bundle edges between lanes into single aggregate arrows | 2026-03-25 16:12 PST | 2026-03-25 16:15 PST |
+| `[X]` | PE4-08 | Implement level-appropriate hit targets: larger clickable areas at overview, precise at detail | 2026-03-25 16:12 PST | 2026-03-25 16:15 PST |
 
 ---
 
@@ -128,14 +128,14 @@ Implement hit testing, hover tooltips, click selection, path highlighting, and d
 |--------|---------|-------------|---------|-----------|
 | `[X]` | PE5-01 | Implement point-in-node hit testing using screen-to-world coordinate transform and shape-aware bounds | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE5-02 | Implement hover detection with pointer cursor change on hoverable elements | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
-| `[ ]` | PE5-03 | Implement hover tooltip: node name, type badge, one-line purpose — positioned near cursor | | |
-| `[ ]` | PE5-04 | Implement tooltip positioning logic: clamp to canvas bounds, avoid edge clipping | | |
+| `[X]` | PE5-03 | Implement hover tooltip: node name, type badge, one-line purpose — positioned near cursor | 2026-03-25 16:05 PST | 2026-03-25 16:08 PST |
+| `[X]` | PE5-04 | Implement tooltip positioning logic: clamp to canvas bounds, avoid edge clipping | 2026-03-25 16:05 PST | 2026-03-25 16:08 PST |
 | `[X]` | PE5-05 | Implement click-to-select with visual highlight: border glow, raised appearance, color accent | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE5-06 | Implement upstream ancestry path highlighting on select: brighten all upstream nodes and edges | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE5-07 | Implement downstream descendant path highlighting on select: brighten all downstream nodes and edges | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE5-08 | Implement dim/fade for nodes and edges not in the selected node's ancestry or descendant paths | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE5-09 | Implement deselect on canvas background click (restore full graph visibility) | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
-| `[ ]` | PE5-10 | Implement edge hit testing and edge hover highlight (increase opacity/width on mouseover) | | |
+| `[X]` | PE5-10 | Implement edge hit testing and edge hover highlight (increase opacity/width on mouseover) | 2026-03-25 16:08 PST | 2026-03-25 16:12 PST |
 
 ---
 
@@ -154,7 +154,7 @@ Implement the right-side drawer panel with tabbed sections for selected node/edg
 | `[X]` | PE6-07 | Implement Validation section: associated validation rules, failure modes, caveats (e.g., "5 NEM codes don't map to SOC 2018") | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE6-08 | Implement Lessons section: linked lesson cards with lesson number, title, and brief description | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE6-09 | Implement "Jump to" links: clickable links to methodology, lesson pages, occupation pages, or trends as appropriate | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
-| `[ ]` | PE6-10 | Implement edge detail view: relationship meaning, condition text, type explanation, source/target node names | | |
+| `[X]` | PE6-10 | Implement edge detail view: relationship meaning, condition text, type explanation, source/target node names | 2026-03-25 16:08 PST | 2026-03-25 16:12 PST |
 | `[X]` | PE6-11 | Implement panel responsiveness: collapse to bottom sheet on narrow viewports (< 768px) | 2026-03-25 15:20 PST | 2026-03-25 15:21 PST |
 | `[X]` | PE6-12 | Style panel with JobClass design language: CSS variables, consistent typography, compact and curated layout | 2026-03-25 15:20 PST | 2026-03-25 15:38 PST |
 
@@ -170,7 +170,7 @@ Implement the overview minimap widget with viewport indicator and click-to-navig
 | `[X]` | PE7-02 | Render scaled-down version of entire graph on minimap (simplified: lane blocks + node dots) | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE7-03 | Draw viewport rectangle on minimap showing the currently visible area | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE7-04 | Implement click-to-navigate: click on minimap pans main canvas to the clicked position | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
-| `[ ]` | PE7-05 | Implement drag viewport rectangle on minimap to pan main canvas | | |
+| `[X]` | PE7-05 | Implement drag viewport rectangle on minimap to pan main canvas | 2026-03-25 16:20 PST | 2026-03-25 16:22 PST |
 | `[X]` | PE7-06 | Update minimap rendering on every pan/zoom action | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE7-07 | Style minimap: semi-transparent background, intentional border, unobtrusive positioning | 2026-03-25 15:20 PST | 2026-03-25 15:21 PST |
 
@@ -185,11 +185,11 @@ Implement the graph-specific control bar: search, type/domain filters, overlay t
 | `[X]` | PE8-01 | Add search input with dropdown suggestions: search by node name, table name, page name, lesson title, or concept keyword | 2026-03-25 15:18 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE8-02 | Implement search result highlighting: matching nodes visually emphasized, camera pans to first match | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE8-03 | Add node type filter toggles: source, process, storage, gate, interface, lesson (multi-select) | 2026-03-25 15:18 PST | 2026-03-25 15:38 PST |
-| `[ ]` | PE8-04 | Add domain filter toggles: time-series, extraction, validation, deployment, lessons (multi-select) | | |
+| `[X]` | PE8-04 | Add domain filter toggles: time-series, extraction, validation, deployment, lessons (multi-select) | 2026-03-25 17:11 PST | 2026-03-25 17:18 PST |
 | `[X]` | PE8-05 | Implement filter logic: hide non-matching nodes and their disconnected edges, update minimap accordingly | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
-| `[ ]` | PE8-06 | Add overlay toggles: validation paths, failure/blocked paths, lesson links, time-series branches | | |
-| `[ ]` | PE8-07 | Implement overlay rendering: highlighted subgraph with distinct color per overlay type | | |
-| `[ ]` | PE8-08 | Add "Isolate Path" action: from selected node, show only the connected path to a chosen target (or all reachable pages) | | |
+| `[X]` | PE8-06 | Add overlay toggles: validation paths, failure/blocked paths, lesson links, time-series branches | 2026-03-25 17:19 PST | 2026-03-25 17:26 PST |
+| `[X]` | PE8-07 | Implement overlay rendering: highlighted subgraph with distinct color per overlay type | 2026-03-25 17:19 PST | 2026-03-25 17:26 PST |
+| `[X]` | PE8-08 | Add "Isolate Path" action: from selected node, show only the connected path to a chosen target (or all reachable pages) | 2026-03-25 17:27 PST | 2026-03-25 17:31 PST |
 | `[X]` | PE8-09 | Add "Reset Filters" button: clear all filters, overlays, and path isolation; return to full graph view | 2026-03-25 15:18 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE8-10 | Style control bar: compact horizontal bar above canvas, wraps responsively on narrow screens | 2026-03-25 15:20 PST | 2026-03-25 15:21 PST |
 
@@ -208,11 +208,11 @@ Implement four guided modes with step-by-step path tracing, annotations, and les
 | `[X]` | PE9-05 | Implement "Time-Series Path" mode: highlight multi-vintage OEWS, CPI deflation, crosswalk comparability, derived series, trend pages | 2026-03-25 15:30 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE9-06 | Implement "From Query to Proof" mode: start from a visible page or metric, trace backward through marts → facts → staging → sources | 2026-03-25 15:30 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE9-07 | Implement step-by-step progression: next/previous buttons, step counter (e.g., "Step 3 of 8") | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
-| `[ ]` | PE9-08 | Implement animated path tracing: pulse animation along edges in the current step's path | | |
+| `[X]` | PE9-08 | Implement animated path tracing: pulse animation along edges in the current step's path | 2026-03-25 16:34 PST | 2026-03-25 16:38 PST |
 | `[X]` | PE9-09 | Implement step annotations: text callout positioned near the highlighted node with context description | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE9-10 | Implement lesson link display: show relevant lesson link at each step where a lesson is mapped | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE9-11 | Implement skip/exit mode: button to exit guided mode and return to free exploration | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
-| `[ ]` | PE9-12 | Implement mode introduction overlay: brief description of the mode's purpose before the first step begins | | |
+| `[X]` | PE9-12 | Implement mode introduction overlay: brief description of the mode's purpose before the first step begins | 2026-03-25 16:30 PST | 2026-03-25 16:33 PST |
 
 ---
 
@@ -222,14 +222,14 @@ Add subtle animations, flow effects, layer glows, micro-interactions, and reduce
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | PE10-01 | Add flow animation on data-flow edges: subtle moving dots/dashes suggesting directional data movement | | |
+| `[X]` | PE10-01 | Add flow animation on data-flow edges: subtle moving dots/dashes suggesting directional data movement | 2026-03-25 16:54 PST | 2026-03-25 16:58 PST |
 | `[X]` | PE10-02 | Add layer glow/halo for grouped zones: soft color tinting behind each lane (Raw, Staging, Core, Marts, Web) | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
-| `[ ]` | PE10-03 | Add edge brightening on hover: increase opacity and width on mouseover, restore on mouseout | | |
-| `[ ]` | PE10-04 | Add smooth camera transitions for all programmatic navigation (guided mode, search jump, reset) with ease-in-out | | |
-| `[ ]` | PE10-05 | Add breadcrumb trail highlighting during drill-in: show visual path from overview to current focus | | |
-| `[ ]` | PE10-06 | Add node entrance animation on first load: staggered fade-in with slight scale-up per lane group | | |
-| `[ ]` | PE10-07 | Implement `prefers-reduced-motion` detection: disable all animations, use instant transitions when media query matches | | |
-| `[ ]` | PE10-08 | Performance optimization: offscreen node culling, canvas draw call batching, throttle resize handler | | |
+| `[X]` | PE10-03 | Add edge brightening on hover: increase opacity and width on mouseover, restore on mouseout | 2026-03-25 16:45 PST | 2026-03-25 16:48 PST |
+| `[X]` | PE10-04 | Add smooth camera transitions for all programmatic navigation (guided mode, search jump, reset) with ease-in-out | 2026-03-25 16:49 PST | 2026-03-25 16:50 PST |
+| `[X]` | PE10-05 | Add breadcrumb trail highlighting during drill-in: show visual path from overview to current focus | 2026-03-25 16:59 PST | 2026-03-25 17:00 PST |
+| `[X]` | PE10-06 | Add node entrance animation on first load: staggered fade-in with slight scale-up per lane group | 2026-03-25 17:01 PST | 2026-03-25 17:05 PST |
+| `[X]` | PE10-07 | Implement `prefers-reduced-motion` detection: disable all animations, use instant transitions when media query matches | 2026-03-25 16:51 PST | 2026-03-25 16:53 PST |
+| `[X]` | PE10-08 | Performance optimization: offscreen node culling, canvas draw call batching, throttle resize handler | 2026-03-25 17:06 PST | 2026-03-25 17:10 PST |
 
 ---
 
@@ -239,15 +239,15 @@ Wire the Pipeline Explorer into existing Methodology and Lesson pages. Add deep-
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | PE11-01 | Add "View in Pipeline Explorer" link to `methodology.html` — deep-links to pipeline page with relevant lane focused | | |
-| `[ ]` | PE11-02 | Add pipeline cross-reference links to lessons 1–5 templates (federal data, dimensional modeling, multi-vintage, data quality, time-series) | | |
-| `[ ]` | PE11-03 | Add pipeline cross-reference links to lessons 6–10 templates (idempotent pipelines, static site, testing, similarity, thread safety) | | |
-| `[ ]` | PE11-04 | Add pipeline cross-reference links to lessons 11–15 templates (multi-vintage queries, UI alignment, schema drift, inflation, taxonomy) | | |
-| `[ ]` | PE11-05 | Add pipeline cross-reference links to lessons 16–20 templates (government APIs, derived metrics, outlier interpretation, geography pitfalls, fetch shim) | | |
+| `[X]` | PE11-01 | Add "View in Pipeline Explorer" link to `methodology.html` — deep-links to pipeline page with relevant lane focused | 2026-03-25 17:32 PST | 2026-03-25 17:34 PST |
+| `[X]` | PE11-02 | Add pipeline cross-reference links to lessons 1–5 templates (federal data, dimensional modeling, multi-vintage, data quality, time-series) | 2026-03-25 17:35 PST | 2026-03-25 17:40 PST |
+| `[X]` | PE11-03 | Add pipeline cross-reference links to lessons 6–10 templates (idempotent pipelines, static site, testing, similarity, thread safety) | 2026-03-25 17:35 PST | 2026-03-25 17:40 PST |
+| `[X]` | PE11-04 | Add pipeline cross-reference links to lessons 11–15 templates (multi-vintage queries, UI alignment, schema drift, inflation, taxonomy) | 2026-03-25 17:35 PST | 2026-03-25 17:40 PST |
+| `[X]` | PE11-05 | Add pipeline cross-reference links to lessons 16–20 templates (government APIs, derived metrics, outlier interpretation, geography pitfalls, fetch shim) | 2026-03-25 17:35 PST | 2026-03-25 17:40 PST |
 | `[X]` | PE11-06 | Implement URL hash deep-linking: `/pipeline#node=<node_id>` focuses and selects the specified node on page load | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
-| `[ ]` | PE11-07 | Implement "Copy link to this node" action in detail panel: copies deep-link URL to clipboard | | |
+| `[X]` | PE11-07 | Implement "Copy link to this node" action in detail panel: copies deep-link URL to clipboard | 2026-03-25 17:41 PST | 2026-03-25 17:43 PST |
 | `[X]` | PE11-08 | Add reverse links from pipeline node detail panel back to associated lesson/methodology/occupation pages | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
-| `[ ]` | PE11-09 | Verify all cross-links navigate correctly in both directions (pipeline → lessons/methodology, lessons/methodology → pipeline) | | |
+| `[X]` | PE11-09 | Verify all cross-links navigate correctly in both directions (pipeline → lessons/methodology, lessons/methodology → pipeline) | 2026-03-25 17:44 PST | 2026-03-25 17:46 PST |
 
 ---
 
@@ -257,14 +257,14 @@ Ensure keyboard navigation, screen reader support, visible focus states, reduced
 
 | Status | Task ID | Description | Started | Completed |
 |--------|---------|-------------|---------|-----------|
-| `[ ]` | PE12-01 | Implement keyboard navigation for control bar: Tab to cycle through search, filters, modes, and reset; Enter/Space to activate | | |
-| `[ ]` | PE12-02 | Implement arrow-key traversal between graph nodes: follow edges directionally, wrap within groups | | |
+| `[X]` | PE12-01 | Implement keyboard navigation for control bar: Tab to cycle through search, filters, modes, and reset; Enter/Space to activate | 2026-03-25 17:47 PST | 2026-03-25 17:48 PST |
+| `[X]` | PE12-02 | Implement arrow-key traversal between graph nodes: follow edges directionally, wrap within groups | 2026-03-25 17:49 PST | 2026-03-25 17:52 PST |
 | `[X]` | PE12-03 | Implement keyboard-accessible detail panel: Tab into panel sections, Escape to close | 2026-03-25 15:32 PST | 2026-03-25 15:38 PST |
 | `[X]` | PE12-04 | Add visible focus indicators on all interactive elements (buttons, toggles, search input, canvas nodes) | 2026-03-25 15:20 PST | 2026-03-25 15:21 PST |
 | `[X]` | PE12-05 | Add ARIA labels and roles: canvas (`role="img"` with `aria-label`), controls (`role="toolbar"`), detail panel (`role="complementary"`), minimap (`aria-label`) | 2026-03-25 15:18 PST | 2026-03-25 15:18 PST |
 | `[X]` | PE12-06 | Add `aria-live` region for screen reader announcements on node selection, mode activation, and filter changes | 2026-03-25 15:18 PST | 2026-03-25 15:38 PST |
-| `[ ]` | PE12-07 | Verify reduced-motion mode: confirm all animations disabled when `prefers-reduced-motion: reduce` is active | | |
-| `[ ]` | PE12-08 | Validate color contrast ratios: all node type colors, edge colors, text, and interactive elements meet WCAG AA (4.5:1 for text, 3:1 for UI) | | |
+| `[X]` | PE12-07 | Verify reduced-motion mode: confirm all animations disabled when `prefers-reduced-motion: reduce` is active | 2026-03-25 17:53 PST | 2026-03-25 17:53 PST |
+| `[X]` | PE12-08 | Validate color contrast ratios: all node type colors, edge colors, text, and interactive elements meet WCAG AA (4.5:1 for text, 3:1 for UI) | 2026-03-25 17:54 PST | 2026-03-25 17:56 PST |
 
 ---
 
@@ -285,7 +285,7 @@ Add automated tests, integrate with the static site builder, lint, and verify en
 | `[X]` | PE13-09 | Ensure `pipeline.js` and `pipeline_graph_data.js` are included in static asset output | 2026-03-25 15:45 PST | 2026-03-25 15:47 PST |
 | `[X]` | PE13-10 | Run `ruff check src/ tests/` — all changed files pass linting | 2026-03-25 15:45 PST | 2026-03-25 15:48 PST |
 | `[X]` | PE13-11 | Run full test suite (`pytest`) — all existing + new tests pass | 2026-03-25 15:45 PST | 2026-03-25 15:49 PST |
-| `[ ]` | PE13-12 | Build static site (`build_static.py --base-path /jobclass`) and verify pipeline page renders at `/jobclass/pipeline` | | |
+| `[X]` | PE13-12 | Build static site (`build_static.py --base-path /jobclass`) and verify pipeline page renders at `/jobclass/pipeline` | 2026-03-25 17:57 PST | 2026-03-25 18:00 PST |
 
 ---
 
@@ -296,17 +296,17 @@ Add automated tests, integrate with the static site builder, lint, and verify en
 | PE0 | Infrastructure & Route Setup | 8 | Complete |
 | PE1 | Graph Data Model | 15 | Complete |
 | PE2 | Canvas Rendering Engine | 12 | Complete |
-| PE3 | Pan, Zoom & Camera | 9 | In progress (8/9) |
-| PE4 | Semantic Zoom | 8 | In progress (2/8) |
-| PE5 | Node Interaction — Hover & Select | 10 | In progress (7/10) |
-| PE6 | Detail Panel | 12 | In progress (10/12) |
-| PE7 | Minimap | 7 | In progress (6/7) |
-| PE8 | Search, Filter & Controls | 10 | In progress (6/10) |
-| PE9 | Guided Educational Modes | 12 | In progress (10/12) |
-| PE10 | Animation & Visual Polish | 8 | In progress (1/8) |
-| PE11 | Cross-Links & Integration | 9 | In progress (2/9) |
-| PE12 | Accessibility | 8 | In progress (4/8) |
-| PE13 | Tests, Static Build & Deployment | 12 | In progress (11/12) |
+| PE3 | Pan, Zoom & Camera | 9 | Complete |
+| PE4 | Semantic Zoom | 8 | Complete |
+| PE5 | Node Interaction — Hover & Select | 10 | Complete |
+| PE6 | Detail Panel | 12 | Complete |
+| PE7 | Minimap | 7 | Complete |
+| PE8 | Search, Filter & Controls | 10 | Complete |
+| PE9 | Guided Educational Modes | 12 | Complete |
+| PE10 | Animation & Visual Polish | 8 | Complete |
+| PE11 | Cross-Links & Integration | 9 | Complete |
+| PE12 | Accessibility | 8 | Complete |
+| PE13 | Tests, Static Build & Deployment | 12 | Complete |
 | **Total** | | **140** | |
 
 ---

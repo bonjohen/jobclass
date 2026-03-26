@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(MSYS_NO_PATHCONV=1 python scripts/build_static.py --base-path /jobclass)"
+    ],
+    "defaultMode": "bypassPermissions"
+  }
+}

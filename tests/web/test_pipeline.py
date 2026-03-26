@@ -29,6 +29,14 @@ class TestPipelinePage:
         assert 'data-filter="gate"' in resp.text
         assert 'data-filter="interface"' in resp.text
 
+    def test_has_domain_filter_buttons(self, client):
+        resp = client.get("/pipeline")
+        assert 'data-domain="extraction"' in resp.text
+        assert 'data-domain="timeseries"' in resp.text
+        assert 'data-domain="validation"' in resp.text
+        assert 'data-domain="deployment"' in resp.text
+        assert 'data-domain="lessons"' in resp.text
+
     def test_has_guided_mode_buttons(self, client):
         resp = client.get("/pipeline")
         assert "Follow the Data" in resp.text
@@ -97,3 +105,17 @@ class TestPipelineNavLink:
         pipeline_pos = resp.text.find('href="/pipeline"')
         methodology_pos = resp.text.find('href="/methodology"')
         assert cpi_pos < pipeline_pos < methodology_pos
+
+    def test_has_overview_button(self, client):
+        resp = client.get("/pipeline")
+        assert 'id="pipeline-overview-btn"' in resp.text
+
+    def test_has_view_mode_attribute(self, client):
+        resp = client.get("/pipeline")
+        assert 'data-view-mode="overview"' in resp.text
+
+    def test_graph_data_has_summary_groups(self, client):
+        resp = client.get("/static/js/pipeline_graph_data.js")
+        assert resp.status_code == 200
+        assert "SUMMARY_GROUPS" in resp.text
+        assert "summaryGroups" in resp.text

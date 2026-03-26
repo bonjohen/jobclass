@@ -1,4 +1,4 @@
-<section class="pipeline-page">
+<section class="pipeline-page" data-view-mode="overview">
     <!-- Control Bar -->
     <div class="pipeline-controls" role="toolbar" aria-label="Pipeline Explorer controls">
         <div class="pipeline-controls-left">
@@ -15,8 +15,16 @@
                 <button class="pipeline-filter-btn" data-filter="interface">Interface</button>
                 <button class="pipeline-filter-btn" data-filter="lesson">Lessons</button>
             </div>
+            <div class="pipeline-domain-group" role="group" aria-label="Domain filters">
+                <button class="pipeline-domain-btn" data-domain="extraction">Extraction</button>
+                <button class="pipeline-domain-btn" data-domain="timeseries">Time-Series</button>
+                <button class="pipeline-domain-btn" data-domain="validation">Validation</button>
+                <button class="pipeline-domain-btn" data-domain="deployment">Deployment</button>
+                <button class="pipeline-domain-btn" data-domain="lessons">Lessons</button>
+            </div>
         </div>
         <div class="pipeline-controls-right">
+            <button id="pipeline-overview-btn" class="pipeline-btn pipeline-overview-btn" title="Return to overview">&larr; Overview</button>
             <button id="pipeline-reset-btn" class="pipeline-btn" title="Reset view">Reset</button>
             <span id="pipeline-zoom-level" class="pipeline-zoom-indicator" aria-live="polite">100%</span>
         </div>
@@ -30,10 +38,18 @@
         <button class="pipeline-mode-btn" data-mode="query-proof">From Query to Proof</button>
     </div>
 
+    <!-- Overlay Toggles (PE8-06) -->
+    <div class="pipeline-overlays" role="group" aria-label="Path overlay toggles">
+        <button class="pipeline-overlay-btn" data-overlay="validation" style="--overlay-color: #f59e0b">Validation Paths</button>
+        <button class="pipeline-overlay-btn" data-overlay="blocked" style="--overlay-color: #ef4444">Failure/Blocked</button>
+        <button class="pipeline-overlay-btn" data-overlay="lessons" style="--overlay-color: #a855f7">Lesson Links</button>
+        <button class="pipeline-overlay-btn" data-overlay="timeseries" style="--overlay-color: #3b82f6">Time-Series</button>
+    </div>
+
     <!-- Main Canvas Area -->
     <div class="pipeline-canvas-wrapper">
         <div id="pipeline-canvas-container" class="pipeline-canvas-container">
-            <canvas id="pipeline-canvas" aria-label="Pipeline Explorer interactive graph" role="img"></canvas>
+            <canvas id="pipeline-canvas" aria-label="Pipeline Explorer interactive graph" role="img" tabindex="0"></canvas>
         </div>
 
         <!-- Minimap -->
@@ -70,6 +86,6 @@
     <!-- Screen reader announcements -->
     <div id="pipeline-announcements" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
-    <script src="/static/js/pipeline_graph_data.js?v=PE0"></script>
-    <script src="/static/js/pipeline.js?v=PE0"></script>
+    <script src="/static/js/pipeline_graph_data.js?v=SZ1"></script>
+    <script src="/static/js/pipeline.js?v=SZ1"></script>
 </section>

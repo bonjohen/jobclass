@@ -1842,6 +1842,71 @@ main:has(.pipeline-page) {
     z-index: 1;
 }
 
+/* --- Overlay Toggle Buttons (PE8-06) --- */
+.pipeline-overlays {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    padding: 4px 12px;
+}
+
+.pipeline-overlay-btn {
+    padding: 3px 10px;
+    font-size: 0.72rem;
+    border: 1px solid #d1d5db;
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.pipeline-overlay-btn:hover {
+    background: var(--color-bg);
+}
+
+.pipeline-overlay-btn.active {
+    background: var(--overlay-color, #6366f1);
+    color: white;
+    border-color: var(--overlay-color, #6366f1);
+}
+
+.pipeline-overlay-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -1px;
+}
+
+/* --- Domain Filter Buttons (PE8-04) --- */
+.pipeline-domain-group {
+    display: flex;
+    gap: 4px;
+    margin-left: 8px;
+}
+
+.pipeline-domain-btn {
+    padding: 3px 8px;
+    font-size: 0.72rem;
+    border: 1px solid #d1d5db;
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.pipeline-domain-btn:hover {
+    background: var(--color-bg);
+}
+
+.pipeline-domain-btn.active {
+    background: #6366f1;
+    color: white;
+    border-color: #6366f1;
+}
+
+.pipeline-domain-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -1px;
+}
+
 /* --- Generic Pipeline Buttons --- */
 .pipeline-btn {
     padding: var(--space-xs) var(--space-sm);
@@ -2070,6 +2135,36 @@ main:has(.pipeline-page) {
     font-size: 0.8rem;
     color: var(--color-text-muted);
     font-family: var(--font-mono);
+}
+
+/* --- Overview / Detail View Mode Visibility --- */
+.pipeline-page[data-view-mode="overview"] .pipeline-filter-group,
+.pipeline-page[data-view-mode="overview"] .pipeline-domain-group,
+.pipeline-page[data-view-mode="overview"] .pipeline-overlays,
+.pipeline-page[data-view-mode="overview"] .pipeline-modes,
+.pipeline-page[data-view-mode="overview"] .pipeline-minimap,
+.pipeline-page[data-view-mode="overview"] .pipeline-overview-btn {
+    display: none;
+}
+
+.pipeline-page[data-view-mode="detail"] .pipeline-overview-btn {
+    display: inline-flex;
+}
+
+.pipeline-overview-btn {
+    display: none;
+    background: var(--color-primary, #3b82f6);
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+}
+
+.pipeline-overview-btn:hover {
+    background: var(--color-primary-dark, #2563eb);
 }
 
 /* --- Responsive: narrow screens --- */

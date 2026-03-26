@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var EDGE_STYLES = {
         required:    { color: "#64748b", width: 1.5, dash: [] },
-        conditional: { color: "#f59e0b", width: 1.5, dash: [6, 4] },
+        conditional: { color: "#d97706", width: 1.5, dash: [6, 4] },
         blocked:     { color: "#ef4444", width: 2,   dash: [] },
         optional:    { color: "#94a3b8", width: 1,   dash: [3, 3] },
         educational: { color: "#a855f7", width: 1,   dash: [2, 4] },
@@ -72,9 +72,34 @@ document.addEventListener("DOMContentLoaded", function () {
     var hoveredNode = null;
     var highlightedNodes = null; /* Set of node IDs for path highlighting */
     var highlightedEdges = null; /* Set of edge indices */
-    var activeFilters = { type: "all" };
+    var selectedEdge = null;     /* Currently selected edge object */
+    var hoveredEdge = null;      /* Currently hovered edge index (PE10-03) */
+    var guidedPulseT = 0;        /* 0-1 looping pulse for guided path animation (PE9-08) */
+    var flowAnimT = 0;           /* monotonic counter for edge flow animation (PE10-01) */
+    var loadStartTime = 0;       /* timestamp for entrance animation (PE10-06) */
+    var entranceComplete = false;
+    var activeFilters = { type: "all", domains: [] };
+    var activeOverlay = null;     /* "validation", "blocked", "lessons", "timeseries" (PE8-06/07) */
+    var overlayNodes = null;      /* Set of node IDs in the overlay subgraph */
+    var overlayEdges = null;      /* Set of edge indices in the overlay subgraph */
+    var prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var canvasW = 0;
     var canvasH = 0;
+    var mouseScreenX = 0;
+    var mouseScreenY = 0;
+
+    /* --- Overview / Detail View Mode --- */
+    var viewMode = "overview"; /* "overview" | "detail" */
+    var viewTransition = null; /* { toMode, progress, startTime } or null */
+    var overviewHoveredGroup = null; /* index into summaryBlocks */
+    var drillGroup = null; /* currently drilled-into group, or null */
+    var summaryBlocks = []; /* computed at init from graph.summaryGroups */
+
+    var OVERVIEW_CARD_W = 250;
+    var OVERVIEW_CARD_H = 260;
+    var OVERVIEW_CARD_R = 10;
+    var OVERVIEW_TRANSITION_MS = 400;
+    var DETAIL_RETURN_SCALE = 0.12;
 
     /* --- Canvas Sizing (PE2-01, PE2-12) --- */
     function resizeCanvas() {
@@ -111,28 +136,414 @@ document.addEventListener("DOMContentLoaded", function () {
         return { minX: minX, minY: minY, maxX: maxX, maxY: maxY, w: maxX - minX, h: maxY - minY };
     }
 
+    /* --- Camera Animation (PE3-08) --- */
+    var animating = false;
+    var animStartTime = 0;
+    var animDuration = 350;
+    var animFrom = { x: 0, y: 0, scale: 1 };
+    var animTo = { x: 0, y: 0, scale: 1 };
+
+    function easeInOutCubic(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function animateCamera(targetX, targetY, targetScale, duration) {
+        /* Skip animation when reduced motion is preferred (PE10-07) */
+        if (prefersReducedMotion) {
+            camera.x = targetX;
+            camera.y = targetY;
+            camera.scale = targetScale;
+            dirty = true;
+            return;
+        }
+        animFrom.x = camera.x;
+        animFrom.y = camera.y;
+        animFrom.scale = camera.scale;
+        animTo.x = targetX;
+        animTo.y = targetY;
+        animTo.scale = targetScale;
+        animDuration = duration || 350;
+        animStartTime = performance.now();
+        animating = true;
+        dirty = true;
+    }
+
+    function tickAnimation() {
+        if (!animating) return;
+        var elapsed = performance.now() - animStartTime;
+        var t = Math.min(elapsed / animDuration, 1);
+        var e = easeInOutCubic(t);
+        camera.x = animFrom.x + (animTo.x - animFrom.x) * e;
+        camera.y = animFrom.y + (animTo.y - animFrom.y) * e;
+        camera.scale = animFrom.scale + (animTo.scale - animFrom.scale) * e;
+        dirty = true;
+        if (t >= 1) animating = false;
+    }
+
     /* --- Fit to Screen (PE2-11) --- */
-    function fitToScreen() {
+    function fitToScreen(instant) {
         var bounds = getGraphBounds();
         var pad = 40;
         var scaleX = (canvasW - pad * 2) / bounds.w;
         var scaleY = (canvasH - pad * 2) / bounds.h;
-        camera.scale = Math.min(scaleX, scaleY, 1);
-        camera.x = (canvasW - bounds.w * camera.scale) / 2 - bounds.minX * camera.scale;
-        camera.y = (canvasH - bounds.h * camera.scale) / 2 - bounds.minY * camera.scale;
+        var targetScale = Math.min(scaleX, scaleY, 1);
+        var targetX = (canvasW - bounds.w * targetScale) / 2 - bounds.minX * targetScale;
+        var targetY = (canvasH - bounds.h * targetScale) / 2 - bounds.minY * targetScale;
+        if (instant) {
+            camera.scale = targetScale;
+            camera.x = targetX;
+            camera.y = targetY;
+            dirty = true;
+        } else {
+            animateCamera(targetX, targetY, targetScale, 400);
+        }
+    }
+
+    function panToNode(node, scale) {
+        var s = scale || 0.8;
+        var tx = canvasW / 2 - node.x * s;
+        var ty = canvasH / 2 - node.y * s;
+        animateCamera(tx, ty, s, 350);
+    }
+
+    /* --- Summary Block Computation --- */
+    function computeSummaryBlocks() {
+        var groups = graph.summaryGroups || [];
+        summaryBlocks = [];
+        /* Layout: 2 rows x 4 columns for a compact readable flow */
+        var cols = 4;
+        var gapX = 40;
+        var gapY = 40;
+        var startX = OVERVIEW_CARD_W / 2 + 20;
+        var startY = OVERVIEW_CARD_H / 2 + 30;
+        for (var g = 0; g < groups.length; g++) {
+            var grp = groups[g];
+            var col = g % cols;
+            var row = Math.floor(g / cols);
+            /* Compute lane bounds for drill-in camera */
+            var minLX = Infinity, maxLX = -Infinity;
+            for (var l = 0; l < grp.lanes.length; l++) {
+                for (var li = 0; li < graph.lanes.length; li++) {
+                    if (graph.lanes[li].id === grp.lanes[l]) {
+                        var lane = graph.lanes[li];
+                        if (lane.x < minLX) minLX = lane.x;
+                        if (lane.x + lane.w > maxLX) maxLX = lane.x + lane.w;
+                    }
+                }
+            }
+            summaryBlocks.push({
+                id: grp.id,
+                label: grp.label,
+                purpose: grp.purpose,
+                accent: grp.accent,
+                lanes: grp.lanes,
+                items: grp.items || [],
+                x: startX + col * (OVERVIEW_CARD_W + gapX),
+                y: startY + row * (OVERVIEW_CARD_H + gapY),
+                w: OVERVIEW_CARD_W,
+                h: OVERVIEW_CARD_H,
+                laneMinX: minLX,
+                laneMaxX: maxLX
+            });
+        }
+    }
+
+    function getOverviewBounds() {
+        if (summaryBlocks.length === 0) return getGraphBounds();
+        var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (var i = 0; i < summaryBlocks.length; i++) {
+            var b = summaryBlocks[i];
+            if (b.x - b.w / 2 < minX) minX = b.x - b.w / 2;
+            if (b.x + b.w / 2 > maxX) maxX = b.x + b.w / 2;
+            if (b.y - b.h / 2 < minY) minY = b.y - b.h / 2;
+            if (b.y + b.h / 2 > maxY) maxY = b.y + b.h / 2;
+        }
+        return { minX: minX - 10, minY: minY - 10, maxX: maxX + 10, maxY: maxY + 10, w: maxX - minX + 20, h: maxY - minY + 20 };
+    }
+
+    function fitOverview(instant) {
+        var bounds = getOverviewBounds();
+        var pad = 30;
+        var scaleX = (canvasW - pad * 2) / bounds.w;
+        var scaleY = (canvasH - pad * 2) / bounds.h;
+        var targetScale = Math.min(scaleX, scaleY, 1.2);
+        var targetX = (canvasW - bounds.w * targetScale) / 2 - bounds.minX * targetScale;
+        var targetY = (canvasH - bounds.h * targetScale) / 2 - bounds.minY * targetScale;
+        if (instant || prefersReducedMotion) {
+            camera.scale = targetScale;
+            camera.x = targetX;
+            camera.y = targetY;
+            dirty = true;
+        } else {
+            animateCamera(targetX, targetY, targetScale, 400);
+        }
+    }
+
+    function getGroupCamera(group) {
+        var pad = 40;
+        var lw = group.laneMaxX - group.laneMinX;
+        var lh = 700;
+        var scaleX = (canvasW - pad * 2) / lw;
+        var scaleY = (canvasH - pad * 2) / lh;
+        var s = Math.min(scaleX, scaleY, 1.2);
+        var tx = (canvasW - lw * s) / 2 - group.laneMinX * s;
+        var ty = (canvasH - lh * s) / 2;
+        return { x: tx, y: ty, scale: s };
+    }
+
+    function getGroupForNode(nodeId) {
+        var node = nodeById[nodeId];
+        if (!node) return null;
+        for (var i = 0; i < summaryBlocks.length; i++) {
+            for (var l = 0; l < summaryBlocks[i].lanes.length; l++) {
+                if (node.lane === summaryBlocks[i].lanes[l]) return summaryBlocks[i];
+            }
+        }
+        return null;
+    }
+
+    function isNodeInDrillGroup(node) {
+        if (!drillGroup) return true; /* no filter active */
+        for (var l = 0; l < drillGroup.lanes.length; l++) {
+            if (node.lane === drillGroup.lanes[l]) return true;
+        }
+        return false;
+    }
+
+    function drillIntoGroup(group) {
+        viewMode = "detail";
+        drillGroup = group;
+        updateControlsVisibility();
+        var cam = getGroupCamera(group);
+        if (prefersReducedMotion) {
+            camera.x = cam.x; camera.y = cam.y; camera.scale = cam.scale;
+            dirty = true;
+        } else {
+            viewTransition = { toMode: "detail", progress: 0, startTime: performance.now() };
+            animateCamera(cam.x, cam.y, cam.scale, OVERVIEW_TRANSITION_MS);
+        }
+        entranceComplete = true;
+        announce("Viewing " + group.label + " detail");
+    }
+
+    function showFullDetail() {
+        viewMode = "detail";
+        drillGroup = null;
+        updateControlsVisibility();
+        entranceComplete = true;
+        fitToScreen();
+    }
+
+    function returnToOverview() {
+        viewMode = "overview";
+        drillGroup = null;
+        selectedNode = null;
+        selectedEdge = null;
+        highlightedNodes = null;
+        highlightedEdges = null;
+        hoveredNode = null;
+        hoveredEdge = null;
+        activeOverlay = null;
+        overlayNodes = null;
+        overlayEdges = null;
+        overviewHoveredGroup = null;
+        hideDetailPanel();
+        updateControlsVisibility();
+        if (prefersReducedMotion) {
+            fitOverview(true);
+        } else {
+            viewTransition = { toMode: "overview", progress: 0, startTime: performance.now() };
+            fitOverview(false);
+        }
+        announce("Pipeline overview");
+    }
+
+    function tickViewTransition() {
+        if (!viewTransition) return;
+        var elapsed = performance.now() - viewTransition.startTime;
+        viewTransition.progress = Math.min(elapsed / OVERVIEW_TRANSITION_MS, 1);
         dirty = true;
+        if (viewTransition.progress >= 1) {
+            viewTransition = null;
+        }
+    }
+
+    function updateControlsVisibility() {
+        var page = document.querySelector(".pipeline-page");
+        if (page) page.setAttribute("data-view-mode", viewMode);
+    }
+
+    /* --- Zoom Level Constants (PE4-01) --- */
+    var ZOOM_OVERVIEW = 0.35;
+    var ZOOM_DETAIL = 1.0;
+    var ZOOM_FADE_RANGE = 0.08; /* scale range over which crossfade occurs (PE4-05) */
+
+    function getZoomLevel() {
+        if (camera.scale < ZOOM_OVERVIEW) return "overview";
+        if (camera.scale > ZOOM_DETAIL) return "detail";
+        return "subsystem";
+    }
+
+    /* Returns 0-1 blend factors for crossfade near zoom thresholds (PE4-05).
+       overviewFade: 1 = fully overview, 0 = no overview elements visible
+       detailFade:   1 = fully detail,   0 = no detail extras visible */
+    function getZoomBlend() {
+        var s = camera.scale;
+        var overviewFade = 0;
+        var detailFade = 0;
+        if (s < ZOOM_OVERVIEW - ZOOM_FADE_RANGE) {
+            overviewFade = 1;
+        } else if (s < ZOOM_OVERVIEW + ZOOM_FADE_RANGE) {
+            overviewFade = 1 - (s - (ZOOM_OVERVIEW - ZOOM_FADE_RANGE)) / (2 * ZOOM_FADE_RANGE);
+        }
+        if (s > ZOOM_DETAIL + ZOOM_FADE_RANGE) {
+            detailFade = 1;
+        } else if (s > ZOOM_DETAIL - ZOOM_FADE_RANGE) {
+            detailFade = (s - (ZOOM_DETAIL - ZOOM_FADE_RANGE)) / (2 * ZOOM_FADE_RANGE);
+        }
+        return { overviewFade: overviewFade, detailFade: detailFade };
+    }
+
+    /* --- Entrance Animation (PE10-06) --- */
+    var laneOrder = {};
+    for (var li = 0; li < graph.lanes.length; li++) laneOrder[graph.lanes[li].id] = li;
+
+    function getEntranceAlpha(laneId) {
+        if (entranceComplete || prefersReducedMotion) return 1;
+        var elapsed = performance.now() - loadStartTime;
+        var idx = laneOrder[laneId] || 0;
+        var stagger = idx * 60; /* 60ms per lane */
+        var fadeIn = 120;       /* 120ms fade duration */
+        var t = Math.min(Math.max((elapsed - stagger) / fadeIn, 0), 1);
+        return t;
+    }
+
+    /* --- Overlay Subgraph Computation (PE8-06/07) --- */
+    function computeOverlay(type) {
+        var nodes = {};
+        var edges = {};
+        if (type === "validation") {
+            /* Edges of type conditional or blocked, and their connected nodes */
+            for (var i = 0; i < graph.edges.length; i++) {
+                if (graph.edges[i].type === "conditional" || graph.edges[i].type === "blocked") {
+                    edges[i] = true;
+                    nodes[graph.edges[i].from] = true;
+                    nodes[graph.edges[i].to] = true;
+                }
+            }
+        } else if (type === "blocked") {
+            for (var i = 0; i < graph.edges.length; i++) {
+                if (graph.edges[i].type === "blocked") {
+                    edges[i] = true;
+                    nodes[graph.edges[i].from] = true;
+                    nodes[graph.edges[i].to] = true;
+                }
+            }
+            /* Also include gate nodes */
+            for (var j = 0; j < graph.nodes.length; j++) {
+                if (graph.nodes[j].type === "gate") nodes[graph.nodes[j].id] = true;
+            }
+        } else if (type === "lessons") {
+            /* Edges of type educational, and nodes with lesson anchors */
+            for (var i = 0; i < graph.edges.length; i++) {
+                if (graph.edges[i].type === "educational") {
+                    edges[i] = true;
+                    nodes[graph.edges[i].from] = true;
+                    nodes[graph.edges[i].to] = true;
+                }
+            }
+            if (graph.lessonAnchors) {
+                for (var lk in graph.lessonAnchors) {
+                    var ids = graph.lessonAnchors[lk];
+                    for (var la = 0; la < ids.length; la++) nodes[ids[la]] = true;
+                }
+            }
+        } else if (type === "timeseries") {
+            /* Nodes in timeseries lane, and derived edges */
+            for (var j = 0; j < graph.nodes.length; j++) {
+                if (graph.nodes[j].lane === "timeseries") nodes[graph.nodes[j].id] = true;
+            }
+            for (var i = 0; i < graph.edges.length; i++) {
+                if (graph.edges[i].type === "derived") {
+                    edges[i] = true;
+                    nodes[graph.edges[i].from] = true;
+                    nodes[graph.edges[i].to] = true;
+                }
+            }
+        }
+        return { nodes: nodes, edges: edges };
+    }
+
+    /* --- Domain-to-Lane Mapping (PE8-04) --- */
+    var DOMAIN_LANES = {
+        extraction: ["extraction", "raw", "staging"],
+        timeseries: ["timeseries"],
+        validation: ["validation"],
+        deployment: ["deployment"],
+        lessons:    [] /* special: filters by lesson anchor, not lane */
+    };
+
+    /* Build set of node IDs with lesson anchors */
+    var lessonNodeIds = {};
+    if (graph.lessonAnchors) {
+        for (var lk in graph.lessonAnchors) {
+            var anchors = graph.lessonAnchors[lk];
+            for (var la = 0; la < anchors.length; la++) lessonNodeIds[anchors[la]] = true;
+        }
     }
 
     /* --- Node Visibility --- */
     function isNodeVisible(node) {
+        /* Drill-group filter: only show nodes in the focused stage */
+        if (drillGroup && !isNodeInDrillGroup(node)) return false;
         if (activeFilters.type !== "all" && node.type !== activeFilters.type) return false;
+        if (activeFilters.domains.length > 0) {
+            var domainMatch = false;
+            for (var d = 0; d < activeFilters.domains.length; d++) {
+                var dom = activeFilters.domains[d];
+                if (dom === "lessons") {
+                    if (lessonNodeIds[node.id]) { domainMatch = true; break; }
+                } else {
+                    var lanes = DOMAIN_LANES[dom];
+                    if (lanes) {
+                        for (var dl = 0; dl < lanes.length; dl++) {
+                            if (node.lane === lanes[dl]) { domainMatch = true; break; }
+                        }
+                    }
+                }
+                if (domainMatch) break;
+            }
+            if (!domainMatch) return false;
+        }
         return true;
     }
 
-    /* --- Drawing: Lanes (PE2-04) --- */
+    /* --- Offscreen Culling (PE10-08) — skip drawing nodes outside viewport --- */
+    function isOnScreen(wx, wy, margin) {
+        var sx = wx * camera.scale + camera.x;
+        var sy = wy * camera.scale + camera.y;
+        var m = margin || 80;
+        return sx > -m && sx < canvasW + m && sy > -m && sy < canvasH + m;
+    }
+
+    /* --- Drawing: Lanes (PE2-04, PE4-02) --- */
     function drawLanes() {
+        var zoomLevel = getZoomLevel();
+        var fontFamily = getComputedStyle(document.body).fontFamily;
+
         for (var i = 0; i < graph.lanes.length; i++) {
             var lane = graph.lanes[i];
+            /* Only draw lanes in the drill group when focused */
+            if (drillGroup) {
+                var inGroup = false;
+                for (var dg = 0; dg < drillGroup.lanes.length; dg++) {
+                    if (lane.id === drillGroup.lanes[dg]) { inGroup = true; break; }
+                }
+                if (!inGroup) continue;
+            }
+            var entAlpha = getEntranceAlpha(lane.id);
+            ctx.save();
+            ctx.globalAlpha = entAlpha;
             ctx.fillStyle = lane.color;
             ctx.fillRect(lane.x, lane.y, lane.w, lane.h);
             ctx.strokeStyle = "#cbd5e1";
@@ -140,11 +551,22 @@ document.addEventListener("DOMContentLoaded", function () {
             ctx.strokeRect(lane.x, lane.y, lane.w, lane.h);
 
             /* Lane label at top */
-            ctx.save();
             ctx.fillStyle = "#475569";
-            ctx.font = "bold 11px " + getComputedStyle(document.body).fontFamily;
+            ctx.font = "bold 11px " + fontFamily;
             ctx.textAlign = "center";
             ctx.fillText(lane.label, lane.x + lane.w / 2, lane.y + 16);
+
+            /* At overview zoom, show node counts per lane */
+            if (zoomLevel === "overview") {
+                var count = 0;
+                for (var j = 0; j < graph.nodes.length; j++) {
+                    if (graph.nodes[j].lane === lane.id && isNodeVisible(graph.nodes[j])) count++;
+                }
+                ctx.fillStyle = "#94a3b8";
+                ctx.font = "bold 14px " + fontFamily;
+                ctx.fillText(count + " node" + (count !== 1 ? "s" : ""), lane.x + lane.w / 2, lane.y + lane.h / 2);
+            }
+
             ctx.restore();
         }
     }
@@ -293,11 +715,38 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    /* --- Drawing: Nodes (PE2-05, PE2-06, PE2-10) --- */
+    /* --- Drawing: Nodes (PE2-05, PE2-06, PE2-10, PE4-02/03/04, PE4-05) --- */
     function drawNodes() {
+        var zoomLevel = getZoomLevel();
+        var blend = getZoomBlend();
+
+        /* At overview zoom, draw small dots for nodes; crossfade near threshold (PE4-05) */
+        if (zoomLevel === "overview" || blend.overviewFade > 0) {
+            var dotAlpha = zoomLevel === "overview" ? 1 : blend.overviewFade;
+            for (var oi = 0; oi < graph.nodes.length; oi++) {
+                var onode = graph.nodes[oi];
+                if (!isNodeVisible(onode)) continue;
+                if (!isOnScreen(onode.x, onode.y)) continue;
+                var dimmedO = (highlightedNodes && !highlightedNodes[onode.id]) || (overlayNodes && !overlayNodes[onode.id]);
+                ctx.save();
+                ctx.globalAlpha = dotAlpha * (dimmedO ? 0.2 : 1) * getEntranceAlpha(onode.lane);
+                var ocolors = TYPE_COLORS[onode.type] || TYPE_COLORS.process;
+                ctx.fillStyle = ocolors.stroke;
+                ctx.beginPath();
+                ctx.arc(onode.x, onode.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+            if (zoomLevel === "overview") return;
+        }
+
+        /* Subsystem/detail: full node shapes; fade in near overview threshold (PE4-05) */
+        var nodeAlpha = blend.overviewFade > 0 ? (1 - blend.overviewFade) : 1;
+        var fontFamily = getComputedStyle(document.body).fontFamily;
         for (var i = 0; i < graph.nodes.length; i++) {
             var node = graph.nodes[i];
             if (!isNodeVisible(node)) continue;
+            if (!isOnScreen(node.x, node.y, 120)) continue;
 
             var colors = TYPE_COLORS[node.type] || TYPE_COLORS.process;
             var isHovered = hoveredNode === node;
@@ -305,23 +754,87 @@ document.addEventListener("DOMContentLoaded", function () {
 
             /* Dim if path highlighting is active and this node isn't in the path */
             var dimmed = false;
-            if (highlightedNodes && !highlightedNodes[node.id]) {
-                dimmed = true;
-            }
+            if (highlightedNodes && !highlightedNodes[node.id]) dimmed = true;
+            if (overlayNodes && !overlayNodes[node.id]) dimmed = true;
 
             ctx.save();
-            if (dimmed) ctx.globalAlpha = 0.2;
+            ctx.globalAlpha = nodeAlpha * (dimmed ? 0.2 : 1) * getEntranceAlpha(node.lane);
 
             drawNodeShape(node, colors, isHovered, isSelected);
             drawNodeLabel(node, colors);
             drawStatusChip(node);
 
+            /* At detail zoom, show extra metadata below node with fade-in (PE4-04, PE4-05) */
+            if ((zoomLevel === "detail" || blend.detailFade > 0) && !dimmed) {
+                var metaText = "";
+                if (node.metadata && node.metadata.file) metaText = node.metadata.file;
+                else if (node.metadata && node.metadata.route) metaText = node.metadata.route;
+                else if (node.metadata && node.metadata.grain) metaText = node.metadata.grain;
+                if (metaText) {
+                    var metaAlpha = blend.detailFade < 1 ? blend.detailFade : 1;
+                    ctx.globalAlpha = nodeAlpha * metaAlpha;
+                    ctx.fillStyle = "#94a3b8";
+                    ctx.font = "8px " + fontFamily;
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "top";
+                    ctx.fillText(metaText, node.x, node.y + NODE_H / 2 + 3);
+                }
+            }
+
             ctx.restore();
         }
     }
 
-    /* --- Drawing: Edges (PE2-07, PE2-08, PE2-09) --- */
+    /* --- Drawing: Edges (PE2-07, PE2-08, PE2-09, PE4-07) --- */
     function drawEdges() {
+        var zoomLevel = getZoomLevel();
+
+        /* At overview, draw simplified inter-lane arrows (PE4-07) */
+        if (zoomLevel === "overview") {
+            var laneEdges = {};
+            for (var ei = 0; ei < graph.edges.length; ei++) {
+                var edge = graph.edges[ei];
+                var fn = nodeById[edge.from];
+                var tn = nodeById[edge.to];
+                if (!fn || !tn || fn.lane === tn.lane) continue;
+                if (!isNodeVisible(fn) || !isNodeVisible(tn)) continue;
+                var key = fn.lane + "->" + tn.lane;
+                if (!laneEdges[key]) laneEdges[key] = { from: fn.lane, to: tn.lane, count: 0 };
+                laneEdges[key].count++;
+            }
+            var laneById = {};
+            for (var li = 0; li < graph.lanes.length; li++) laneById[graph.lanes[li].id] = graph.lanes[li];
+
+            for (var lk in laneEdges) {
+                var le = laneEdges[lk];
+                var fl = laneById[le.from];
+                var tl = laneById[le.to];
+                if (!fl || !tl) continue;
+                var lx1 = fl.x + fl.w;
+                var ly1 = fl.y + fl.h / 2;
+                var lx2 = tl.x;
+                var ly2 = tl.y + tl.h / 2;
+                ctx.save();
+                ctx.strokeStyle = "#94a3b8";
+                ctx.lineWidth = Math.min(le.count * 0.5, 4);
+                ctx.globalAlpha = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(lx1, ly1);
+                ctx.lineTo(lx2, ly2);
+                ctx.stroke();
+                /* Arrow */
+                var a = Math.atan2(ly2 - ly1, lx2 - lx1);
+                ctx.beginPath();
+                ctx.moveTo(lx2, ly2);
+                ctx.lineTo(lx2 - 8 * Math.cos(a - 0.4), ly2 - 8 * Math.sin(a - 0.4));
+                ctx.moveTo(lx2, ly2);
+                ctx.lineTo(lx2 - 8 * Math.cos(a + 0.4), ly2 - 8 * Math.sin(a + 0.4));
+                ctx.stroke();
+                ctx.restore();
+            }
+            return;
+        }
+
         for (var i = 0; i < graph.edges.length; i++) {
             var edge = graph.edges[i];
             var fromNode = nodeById[edge.from];
@@ -331,18 +844,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
             var style = EDGE_STYLES[edge.type] || EDGE_STYLES.required;
 
-            /* Dim if path highlighting is active and this edge isn't highlighted */
+            /* Dim if path/overlay highlighting is active and this edge isn't highlighted */
             var dimmed = false;
             if (highlightedEdges && !highlightedEdges[i]) {
                 dimmed = true;
             }
+            if (overlayEdges && !overlayEdges[i]) {
+                dimmed = true;
+            }
+
+            /* Edge hover brightening (PE10-03) */
+            var isEdgeHovered = hoveredEdge && hoveredEdge.index === i;
 
             ctx.save();
             if (dimmed) ctx.globalAlpha = 0.1;
+            else if (isEdgeHovered) ctx.globalAlpha = 1;
 
             ctx.strokeStyle = style.color;
-            ctx.lineWidth = style.width;
+            ctx.lineWidth = isEdgeHovered ? style.width + 1.5 : style.width;
             ctx.setLineDash(style.dash);
+
+            /* Flow animation: animate dash offset for dashed edges (PE10-01) */
+            if (!prefersReducedMotion && !dimmed && style.dash.length > 0) {
+                ctx.lineDashOffset = -flowAnimT;
+            }
 
             /* Simple straight-line edge from right of source to left of target */
             var x1 = fromNode.x + NODE_W / 2;
@@ -391,6 +916,45 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    /* --- Guided Mode Pulse Animation on Edges (PE9-08) --- */
+    function drawGuidedPulse() {
+        if (!activeMode || activeModeStep < 0 || !highlightedEdges) return;
+        for (var i = 0; i < graph.edges.length; i++) {
+            if (!highlightedEdges[i]) continue;
+            var edge = graph.edges[i];
+            var fromNode = nodeById[edge.from];
+            var toNode = nodeById[edge.to];
+            if (!fromNode || !toNode) continue;
+            if (!isNodeVisible(fromNode) || !isNodeVisible(toNode)) continue;
+
+            var x1 = fromNode.x + NODE_W / 2;
+            var y1 = fromNode.y;
+            var x2 = toNode.x - NODE_W / 2;
+            var y2 = toNode.y;
+            if (fromNode.lane === toNode.lane) {
+                x1 = fromNode.x;
+                y1 = fromNode.y + NODE_H / 2;
+                x2 = toNode.x;
+                y2 = toNode.y - NODE_H / 2;
+            }
+
+            /* Compute point along the quadratic curve at parameter t */
+            var mx = (x1 + x2) / 2;
+            var t = guidedPulseT;
+            var u = 1 - t;
+            var px = u * u * x1 + 2 * u * t * mx + t * t * x2;
+            var py = u * u * y1 + 2 * u * t * y1 + t * t * y2;
+
+            ctx.save();
+            ctx.fillStyle = "#3b82f6";
+            ctx.globalAlpha = 0.9;
+            ctx.beginPath();
+            ctx.arc(px, py, 4 / camera.scale, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
     /* --- Minimap Rendering (PE7 stub, basic implementation) --- */
     function drawMinimap() {
         if (!minimapCtx || !minimapCanvas) return;
@@ -432,8 +996,206 @@ document.addEventListener("DOMContentLoaded", function () {
         minimapCtx.strokeRect(vx, vy, vw, vh);
     }
 
+    /* --- Overview Drawing --- */
+    function drawOverview() {
+        drawOverviewArrows();
+        for (var i = 0; i < summaryBlocks.length; i++) {
+            drawOverviewBlock(summaryBlocks[i], i, overviewHoveredGroup === i);
+        }
+    }
+
+    function overviewRoundRect(bx, by, bw, bh, r) {
+        ctx.beginPath();
+        ctx.moveTo(bx + r, by);
+        ctx.lineTo(bx + bw - r, by);
+        ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + r);
+        ctx.lineTo(bx + bw, by + bh - r);
+        ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - r, by + bh);
+        ctx.lineTo(bx + r, by + bh);
+        ctx.quadraticCurveTo(bx, by + bh, bx, by + bh - r);
+        ctx.lineTo(bx, by + r);
+        ctx.quadraticCurveTo(bx, by, bx + r, by);
+        ctx.closePath();
+    }
+
+    function drawOverviewBlock(block, idx, isHovered) {
+        var bx = block.x - block.w / 2;
+        var by = block.y - block.h / 2;
+        var r = OVERVIEW_CARD_R;
+        var font = "system-ui, sans-serif";
+
+        /* Shadow + fill */
+        ctx.save();
+        ctx.shadowColor = isHovered ? "rgba(0,0,0,0.18)" : "rgba(0,0,0,0.07)";
+        ctx.shadowBlur = isHovered ? 14 : 6;
+        ctx.shadowOffsetY = isHovered ? 3 : 1;
+        overviewRoundRect(bx, by, block.w, block.h, r);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+        ctx.restore();
+
+        /* Border */
+        overviewRoundRect(bx, by, block.w, block.h, r);
+        ctx.strokeStyle = isHovered ? block.accent : "#d1d5db";
+        ctx.lineWidth = isHovered ? 2 : 1;
+        ctx.stroke();
+
+        /* Accent left edge */
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(bx + r, by);
+        ctx.quadraticCurveTo(bx, by, bx, by + r);
+        ctx.lineTo(bx, by + block.h - r);
+        ctx.quadraticCurveTo(bx, by + block.h, bx + r, by + block.h);
+        ctx.lineTo(bx + 4, by + block.h);
+        ctx.lineTo(bx + 4, by);
+        ctx.closePath();
+        ctx.fillStyle = block.accent;
+        ctx.fill();
+        ctx.restore();
+
+        /* Step badge */
+        var badgeX = bx + 18;
+        var badgeY = by + 16;
+        ctx.fillStyle = block.accent;
+        ctx.font = "bold 10px " + font;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText((idx + 1) + ".", badgeX, badgeY);
+
+        /* Title */
+        ctx.fillStyle = "#111827";
+        ctx.font = "bold 14px " + font;
+        ctx.textAlign = "left";
+        ctx.fillText(block.label, badgeX + 18, badgeY);
+
+        /* Purpose line */
+        ctx.fillStyle = "#6b7280";
+        ctx.font = "11px " + font;
+        ctx.textAlign = "left";
+        var purposeY = badgeY + 22;
+        ctx.fillText(block.purpose, badgeX, purposeY);
+
+        /* Divider */
+        ctx.strokeStyle = "#e5e7eb";
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(badgeX, purposeY + 12);
+        ctx.lineTo(bx + block.w - 14, purposeY + 12);
+        ctx.stroke();
+
+        /* Item list */
+        ctx.fillStyle = "#374151";
+        ctx.font = "11px " + font;
+        var itemStartY = purposeY + 26;
+        var itemH = 16;
+        for (var j = 0; j < block.items.length; j++) {
+            var iy = itemStartY + j * itemH;
+            if (iy > by + block.h - 14) break; /* don't overflow */
+            /* Bullet dot */
+            ctx.fillStyle = block.accent;
+            ctx.beginPath();
+            ctx.arc(badgeX + 3, iy, 2, 0, Math.PI * 2);
+            ctx.fill();
+            /* Text */
+            ctx.fillStyle = "#374151";
+            ctx.fillText(block.items[j], badgeX + 12, iy);
+        }
+    }
+
+    function drawOverviewArrows() {
+        var cols = 4;
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 1.8;
+        ctx.setLineDash([]);
+
+        for (var i = 0; i < summaryBlocks.length - 1; i++) {
+            var from = summaryBlocks[i];
+            var to = summaryBlocks[i + 1];
+            var fromCol = i % cols;
+            var toCol = (i + 1) % cols;
+            var fromRow = Math.floor(i / cols);
+            var toRow = Math.floor((i + 1) / cols);
+            var x1, y1, x2, y2;
+
+            if (fromRow === toRow) {
+                /* Same row: right side → left side */
+                x1 = from.x + from.w / 2;
+                y1 = from.y;
+                x2 = to.x - to.w / 2;
+                y2 = to.y;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+                drawArrowhead(x2, y2, Math.atan2(y2 - y1, x2 - x1));
+            } else {
+                /* Row transition: bottom of last col → top of first col next row */
+                x1 = from.x;
+                y1 = from.y + from.h / 2;
+                x2 = to.x;
+                y2 = to.y - to.h / 2;
+                var midY = (y1 + y2) / 2;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x1, midY);
+                ctx.lineTo(x2, midY);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+                drawArrowhead(x2, y2, Math.PI / 2); /* pointing down */
+            }
+        }
+    }
+
+    function drawArrowhead(tipX, tipY, angle) {
+        var aSize = 7;
+        ctx.fillStyle = "#94a3b8";
+        ctx.beginPath();
+        ctx.moveTo(tipX, tipY);
+        ctx.lineTo(tipX - aSize * Math.cos(angle - 0.4), tipY - aSize * Math.sin(angle - 0.4));
+        ctx.lineTo(tipX - aSize * Math.cos(angle + 0.4), tipY - aSize * Math.sin(angle + 0.4));
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    function hitTestSummaryBlock(wx, wy) {
+        for (var i = 0; i < summaryBlocks.length; i++) {
+            var b = summaryBlocks[i];
+            if (wx >= b.x - b.w / 2 && wx <= b.x + b.w / 2 &&
+                wy >= b.y - b.h / 2 && wy <= b.y + b.h / 2) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     /* --- Main Render Loop (PE2-02) --- */
     function render() {
+        tickAnimation();
+        tickViewTransition();
+
+        if (viewMode === "detail") {
+            /* Keep animating while guided mode pulse is active (PE9-08, PE10-07) */
+            if (activeMode && activeModeStep >= 0 && highlightedEdges && !prefersReducedMotion) {
+                guidedPulseT = (guidedPulseT + 0.008) % 1;
+                dirty = true;
+            }
+            /* Entrance animation on first load (PE10-06) */
+            if (!entranceComplete && !prefersReducedMotion) {
+                var entranceElapsed = performance.now() - loadStartTime;
+                if (entranceElapsed < graph.lanes.length * 60 + 120) {
+                    dirty = true;
+                } else {
+                    entranceComplete = true;
+                }
+            }
+            /* Flow animation on edges at subsystem+ zoom (PE10-01) */
+            if (!prefersReducedMotion && getZoomLevel() !== "overview") {
+                flowAnimT = (flowAnimT + 0.3) % 20;
+                dirty = true;
+            }
+        }
+
         if (!dirty) {
             requestAnimationFrame(render);
             return;
@@ -441,38 +1203,205 @@ document.addEventListener("DOMContentLoaded", function () {
         dirty = false;
 
         ctx.clearRect(0, 0, canvasW, canvasH);
-        ctx.save();
-        ctx.translate(camera.x, camera.y);
-        ctx.scale(camera.scale, camera.scale);
 
-        drawLanes();
-        drawEdges();
-        drawNodes();
+        if (viewTransition) {
+            /* Crossfade: first half fades out old, second half fades in new */
+            var t = viewTransition.progress;
+            ctx.save();
+            ctx.translate(camera.x, camera.y);
+            ctx.scale(camera.scale, camera.scale);
+            if (t < 0.5) {
+                /* Fading out the departing view */
+                ctx.globalAlpha = 1 - t * 2;
+                if (viewTransition.toMode === "detail") {
+                    drawOverview();
+                } else {
+                    drawLanes(); drawEdges(); drawNodes();
+                }
+            } else {
+                /* Fading in the arriving view */
+                ctx.globalAlpha = (t - 0.5) * 2;
+                if (viewTransition.toMode === "detail") {
+                    drawLanes(); drawEdges(); drawNodes();
+                } else {
+                    drawOverview();
+                }
+            }
+            ctx.globalAlpha = 1;
+            ctx.restore();
+        } else if (viewMode === "overview") {
+            ctx.save();
+            ctx.translate(camera.x, camera.y);
+            ctx.scale(camera.scale, camera.scale);
+            drawOverview();
+            ctx.restore();
+        } else {
+            ctx.save();
+            ctx.translate(camera.x, camera.y);
+            ctx.scale(camera.scale, camera.scale);
+            drawLanes();
+            drawEdges();
+            drawGuidedPulse();
+            drawNodes();
+            ctx.restore();
 
-        ctx.restore();
+            drawMinimap();
+            drawTooltip();
+        }
 
         /* Zoom indicator */
         if (zoomIndicator) {
             zoomIndicator.textContent = Math.round(camera.scale * 100) + "%";
         }
 
-        drawMinimap();
-
         requestAnimationFrame(render);
     }
 
-    /* --- Hit Testing (PE5-01, needed for hover/select) --- */
+    /* --- Hover Tooltip (PE5-03, PE5-04) --- */
+    function drawTooltip() {
+        if (!hoveredNode || hoveredNode === selectedNode || isDragging) return;
+
+        var fontFamily = getComputedStyle(document.body).fontFamily;
+        var title = hoveredNode.label.replace(/\n/g, " ");
+        var purpose = hoveredNode.purpose || "";
+        var maxW = 260;
+        var pad = 8;
+        var lineH = 16;
+        var titleH = 14;
+
+        ctx.save();
+        ctx.font = "bold 11px " + fontFamily;
+        var titleWidth = ctx.measureText(title).width;
+        ctx.font = "10px " + fontFamily;
+
+        /* Word-wrap purpose text */
+        var purposeLines = [];
+        if (purpose) {
+            var words = purpose.split(" ");
+            var line = "";
+            for (var wi = 0; wi < words.length; wi++) {
+                var test = line ? line + " " + words[wi] : words[wi];
+                if (ctx.measureText(test).width > maxW - pad * 2) {
+                    if (line) purposeLines.push(line);
+                    line = words[wi];
+                } else {
+                    line = test;
+                }
+            }
+            if (line) purposeLines.push(line);
+            if (purposeLines.length > 3) {
+                purposeLines = purposeLines.slice(0, 3);
+                purposeLines[2] = purposeLines[2].replace(/\s+\S*$/, "") + "...";
+            }
+        }
+
+        var boxW = Math.min(maxW, Math.max(titleWidth + pad * 2, maxW));
+        var boxH = pad * 2 + titleH + purposeLines.length * lineH;
+
+        /* Position: offset from mouse, clamped to canvas */
+        var tx = mouseScreenX + 12;
+        var ty = mouseScreenY + 12;
+        if (tx + boxW > canvasW - 4) tx = mouseScreenX - boxW - 8;
+        if (ty + boxH > canvasH - 4) ty = mouseScreenY - boxH - 8;
+        if (tx < 4) tx = 4;
+        if (ty < 4) ty = 4;
+
+        /* Draw background */
+        ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
+        roundedRect(tx, ty, boxW, boxH, 4);
+        ctx.fill();
+
+        /* Draw title */
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = "bold 11px " + fontFamily;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.fillText(title, tx + pad, ty + pad);
+
+        /* Draw type badge */
+        var badgeText = hoveredNode.type;
+        ctx.font = "9px " + fontFamily;
+        var badgeW = ctx.measureText(badgeText).width + 6;
+        var badgeX = tx + pad + ctx.measureText(title).width + 6;
+        if (badgeX + badgeW < tx + boxW - pad) {
+            ctx.font = "bold 11px " + fontFamily;
+            badgeX = tx + pad + ctx.measureText(title).width + 6;
+            ctx.font = "9px " + fontFamily;
+            var colors = TYPE_COLORS[hoveredNode.type] || TYPE_COLORS.process;
+            ctx.fillStyle = colors.stroke;
+            roundedRect(badgeX, ty + pad + 1, badgeW, 13, 2);
+            ctx.fill();
+            ctx.fillStyle = "#fff";
+            ctx.fillText(badgeText, badgeX + 3, ty + pad + 2);
+        }
+
+        /* Draw purpose lines */
+        ctx.fillStyle = "#cbd5e1";
+        ctx.font = "10px " + fontFamily;
+        for (var pi = 0; pi < purposeLines.length; pi++) {
+            ctx.fillText(purposeLines[pi], tx + pad, ty + pad + titleH + pi * lineH);
+        }
+
+        ctx.restore();
+    }
+
+    /* --- Hit Testing (PE5-01, PE4-08) --- */
     function hitTestNode(wx, wy) {
+        /* Larger hit targets at overview zoom */
+        var zoomLevel = getZoomLevel();
+        var hitPad = zoomLevel === "overview" ? 12 : 0;
         for (var i = graph.nodes.length - 1; i >= 0; i--) {
             var node = graph.nodes[i];
             if (!isNodeVisible(node)) continue;
-            var hw = NODE_W / 2;
-            var hh = NODE_H / 2;
+            var hw = NODE_W / 2 + hitPad;
+            var hh = NODE_H / 2 + hitPad;
             if (wx >= node.x - hw && wx <= node.x + hw && wy >= node.y - hh && wy <= node.y + hh) {
                 return node;
             }
         }
         return null;
+    }
+
+    /* --- Edge Hit Testing (PE5-10) --- */
+    function hitTestEdge(wx, wy) {
+        var threshold = 8 / camera.scale;
+        for (var i = graph.edges.length - 1; i >= 0; i--) {
+            var edge = graph.edges[i];
+            var fromNode = nodeById[edge.from];
+            var toNode = nodeById[edge.to];
+            if (!fromNode || !toNode) continue;
+            if (!isNodeVisible(fromNode) || !isNodeVisible(toNode)) continue;
+
+            var x1 = fromNode.x + NODE_W / 2;
+            var y1 = fromNode.y;
+            var x2 = toNode.x - NODE_W / 2;
+            var y2 = toNode.y;
+            if (fromNode.lane === toNode.lane) {
+                x1 = fromNode.x;
+                y1 = fromNode.y + NODE_H / 2;
+                x2 = toNode.x;
+                y2 = toNode.y - NODE_H / 2;
+            }
+
+            /* Point-to-segment distance (simplified for quadratic curve: use midpoint) */
+            var mx = (x1 + x2) / 2;
+            var my = (y1 + y2) / 2;
+            /* Check distance to two line segments: start→mid and mid→end */
+            if (pointToSegDist(wx, wy, x1, y1, mx, (y1 + my) / 2) < threshold ||
+                pointToSegDist(wx, wy, mx, (y1 + my) / 2, x2, y2) < threshold) {
+                return { edge: edge, index: i };
+            }
+        }
+        return null;
+    }
+
+    function pointToSegDist(px, py, ax, ay, bx, by) {
+        var dx = bx - ax, dy = by - ay;
+        var lenSq = dx * dx + dy * dy;
+        if (lenSq === 0) return Math.hypot(px - ax, py - ay);
+        var t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / lenSq));
+        var projX = ax + t * dx, projY = ay + t * dy;
+        return Math.hypot(px - projX, py - projY);
     }
 
     /* --- Path Tracing (PE5-06, PE5-07) --- */
@@ -559,6 +1488,86 @@ document.addEventListener("DOMContentLoaded", function () {
             html += "</div>";
         }
 
+        /* Isolate Path and Copy Link buttons (PE8-08, PE11-07) */
+        html += '<div style="margin-top:0.75rem;border-top:1px solid #e2e8f0;padding-top:0.5rem;display:flex;gap:6px;">';
+        html += '<button class="pipeline-btn pipeline-isolate-btn" data-node-id="' + escapeAttr(node.id) + '" style="font-size:0.78rem;flex:1;">Isolate Path</button>';
+        html += '<button class="pipeline-btn pipeline-copy-link-btn" data-node-id="' + escapeAttr(node.id) + '" style="font-size:0.78rem;flex:1;">Copy Link</button>';
+        html += '</div>';
+
+        detailBody.innerHTML = html;
+        detailPanel.hidden = false;
+
+        /* Bind isolate path button */
+        var isolateBtn = detailBody.querySelector(".pipeline-isolate-btn");
+        if (isolateBtn) {
+            isolateBtn.addEventListener("click", function () {
+                var nid = this.getAttribute("data-node-id");
+                var traced = traceConnectedNodes(nid);
+                overlayNodes = traced.nodes;
+                overlayEdges = traced.edges;
+                activeOverlay = "isolate";
+                for (var ok = 0; ok < overlayBtns.length; ok++) overlayBtns[ok].classList.remove("active");
+                announce("Path isolated for " + (nodeById[nid] ? nodeById[nid].label.replace(/\n/g, " ") : nid));
+                dirty = true;
+            });
+        }
+        /* Bind copy link button (PE11-07) */
+        var copyBtn = detailBody.querySelector(".pipeline-copy-link-btn");
+        if (copyBtn) {
+            copyBtn.addEventListener("click", function () {
+                var nid = this.getAttribute("data-node-id");
+                var url = window.location.origin + window.location.pathname + "#node=" + encodeURIComponent(nid);
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(url);
+                }
+                this.textContent = "Copied!";
+                var btn = this;
+                setTimeout(function () { btn.textContent = "Copy Link"; }, 1500);
+                announce("Link copied to clipboard");
+            });
+        }
+    }
+
+    /* --- Edge Detail Panel (PE6-10) --- */
+    function showEdgeDetailPanel(edge) {
+        if (!detailPanel || !detailTitle || !detailBody) return;
+        var fromNode = nodeById[edge.from];
+        var toNode = nodeById[edge.to];
+        var fromLabel = fromNode ? fromNode.label.replace(/\n/g, " ") : edge.from;
+        var toLabel = toNode ? toNode.label.replace(/\n/g, " ") : edge.to;
+
+        detailTitle.textContent = fromLabel + " \u2192 " + toLabel;
+        if (detailType) {
+            detailType.textContent = edge.type;
+            detailType.className = "pipeline-type-badge";
+        }
+
+        var style = EDGE_STYLES[edge.type] || EDGE_STYLES.required;
+        var typeDescriptions = {
+            required: "This is a required dependency \u2014 the downstream node cannot function without the upstream.",
+            conditional: "This dependency applies only when a specific condition is met.",
+            blocked: "This path is blocked when the upstream gate fails validation.",
+            optional: "This is an optional dependency \u2014 the downstream node works without it but gains features from it.",
+            educational: "This is an educational link connecting a lesson to related pipeline components.",
+            derived: "This represents a derived data relationship \u2014 the downstream is computed from the upstream."
+        };
+
+        var html = '<p style="margin-bottom:0.75rem;font-size:0.9rem;">' + escapeHtml(typeDescriptions[edge.type] || "Data flows from source to target.") + "</p>";
+
+        if (edge.condition) {
+            html += '<p style="margin-bottom:0.5rem;font-size:0.85rem;color:#b45309;"><strong>Condition:</strong> ' + escapeHtml(edge.condition) + "</p>";
+        }
+
+        html += '<div style="font-size:0.85rem;margin-top:0.75rem;border-top:1px solid #e2e8f0;padding-top:0.5rem;">';
+        html += '<div style="margin-bottom:0.25rem;"><strong>From:</strong> ' + escapeHtml(fromLabel) + ' <span style="color:#64748b;">(' + (fromNode ? fromNode.type : "?") + ')</span></div>';
+        html += '<div><strong>To:</strong> ' + escapeHtml(toLabel) + ' <span style="color:#64748b;">(' + (toNode ? toNode.type : "?") + ')</span></div>';
+        html += "</div>";
+
+        /* Visual style info */
+        html += '<div style="font-size:0.8rem;color:#64748b;margin-top:0.5rem;">';
+        html += '<div><strong>Line style:</strong> <span style="color:' + style.color + ';">' + (style.dash.length > 0 ? "dashed" : "solid") + " (" + edge.type + ")</span></div>";
+        html += "</div>";
+
         detailBody.innerHTML = html;
         detailPanel.hidden = false;
     }
@@ -600,13 +1609,37 @@ document.addEventListener("DOMContentLoaded", function () {
         var rect = canvas.getBoundingClientRect();
         var sx = e.clientX - rect.left;
         var sy = e.clientY - rect.top;
+        mouseScreenX = sx;
+        mouseScreenY = sy;
         var world = screenToWorld(sx, sy);
+
+        /* Overview mode hover: summary blocks */
+        if (viewMode === "overview") {
+            var groupIdx = hitTestSummaryBlock(world.x, world.y);
+            if (groupIdx !== overviewHoveredGroup) {
+                overviewHoveredGroup = groupIdx >= 0 ? groupIdx : null;
+                dirty = true;
+            }
+            canvas.style.cursor = groupIdx >= 0 ? "pointer" : "grab";
+            return;
+        }
+
         var hit = hitTestNode(world.x, world.y);
         if (hit !== hoveredNode) {
             hoveredNode = hit;
-            canvas.style.cursor = hit ? "pointer" : "grab";
             dirty = true;
         }
+        /* Edge hover detection when no node is hovered (PE10-03) */
+        var edgeHit = null;
+        if (!hit) {
+            edgeHit = hitTestEdge(world.x, world.y);
+        }
+        if (edgeHit !== hoveredEdge) {
+            hoveredEdge = edgeHit;
+            dirty = true;
+        }
+        canvas.style.cursor = (hit || edgeHit !== null) ? "pointer" : "grab";
+        if (hit) dirty = true; /* Redraw tooltip at new position */
     });
 
     window.addEventListener("mouseup", function () {
@@ -621,20 +1654,50 @@ document.addEventListener("DOMContentLoaded", function () {
         var sx = e.clientX - rect.left;
         var sy = e.clientY - rect.top;
         var world = screenToWorld(sx, sy);
+
+        /* Overview mode: click summary blocks to drill in */
+        if (viewMode === "overview") {
+            var groupIdx = hitTestSummaryBlock(world.x, world.y);
+            if (groupIdx >= 0) {
+                drillIntoGroup(summaryBlocks[groupIdx]);
+            }
+            dirty = true;
+            return;
+        }
+
         var hit = hitTestNode(world.x, world.y);
 
         if (hit) {
             selectedNode = hit;
+            selectedEdge = null;
             var traced = traceConnectedNodes(hit.id);
             highlightedNodes = traced.nodes;
             highlightedEdges = traced.edges;
             showDetailPanel(hit);
             announce("Selected " + hit.label.replace(/\n/g, " ") + ", " + hit.type);
         } else {
-            selectedNode = null;
-            highlightedNodes = null;
-            highlightedEdges = null;
-            hideDetailPanel();
+            /* Check edge hit */
+            var edgeHit = hitTestEdge(world.x, world.y);
+            if (edgeHit) {
+                selectedNode = null;
+                selectedEdge = edgeHit.edge;
+                /* Highlight just this edge and its two endpoints */
+                highlightedNodes = {};
+                highlightedNodes[edgeHit.edge.from] = true;
+                highlightedNodes[edgeHit.edge.to] = true;
+                highlightedEdges = {};
+                highlightedEdges[edgeHit.index] = true;
+                showEdgeDetailPanel(edgeHit.edge);
+                var fromNode = nodeById[edgeHit.edge.from];
+                var toNode = nodeById[edgeHit.edge.to];
+                announce("Selected edge from " + (fromNode ? fromNode.label.replace(/\n/g, " ") : "") + " to " + (toNode ? toNode.label.replace(/\n/g, " ") : ""));
+            } else {
+                selectedNode = null;
+                selectedEdge = null;
+                highlightedNodes = null;
+                highlightedEdges = null;
+                hideDetailPanel();
+            }
         }
         dirty = true;
     });
@@ -647,10 +1710,8 @@ document.addEventListener("DOMContentLoaded", function () {
         var hit = hitTestNode(world.x, world.y);
         if (hit) {
             /* Zoom to node */
-            camera.scale = Math.min(camera.scale * 2, camera.maxScale);
-            camera.x = canvasW / 2 - hit.x * camera.scale;
-            camera.y = canvasH / 2 - hit.y * camera.scale;
-            dirty = true;
+            var newScale = Math.min(camera.scale * 2, camera.maxScale);
+            panToNode(hit, newScale);
         }
     });
 
@@ -670,6 +1731,11 @@ document.addEventListener("DOMContentLoaded", function () {
         camera.y = my - (my - camera.y) * (newScale / camera.scale);
         camera.scale = newScale;
         dirty = true;
+
+        /* Auto-return to overview when zoomed out very far in detail mode */
+        if (viewMode === "detail" && camera.scale <= DETAIL_RETURN_SCALE) {
+            returnToOverview();
+        }
     }, { passive: false });
 
     /* --- Touch Events (PE3-03, PE3-04) --- */
@@ -734,6 +1800,48 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    /* --- Overlay Toggles (PE8-06/07) --- */
+    var overlayBtns = document.querySelectorAll(".pipeline-overlay-btn");
+    for (var oi = 0; oi < overlayBtns.length; oi++) {
+        overlayBtns[oi].addEventListener("click", function () {
+            var otype = this.getAttribute("data-overlay");
+            if (activeOverlay === otype) {
+                /* Toggle off */
+                activeOverlay = null;
+                overlayNodes = null;
+                overlayEdges = null;
+                this.classList.remove("active");
+            } else {
+                /* Turn off previous overlay button */
+                for (var ok = 0; ok < overlayBtns.length; ok++) overlayBtns[ok].classList.remove("active");
+                activeOverlay = otype;
+                var result = computeOverlay(otype);
+                overlayNodes = result.nodes;
+                overlayEdges = result.edges;
+                this.classList.add("active");
+            }
+            announce("Overlay: " + (activeOverlay || "none"));
+            dirty = true;
+        });
+    }
+
+    /* --- Domain Filters (PE8-04) --- */
+    var domainBtns = document.querySelectorAll(".pipeline-domain-btn");
+    for (var di = 0; di < domainBtns.length; di++) {
+        domainBtns[di].addEventListener("click", function () {
+            var dom = this.getAttribute("data-domain");
+            this.classList.toggle("active");
+            var idx = activeFilters.domains.indexOf(dom);
+            if (idx >= 0) {
+                activeFilters.domains.splice(idx, 1);
+            } else {
+                activeFilters.domains.push(dom);
+            }
+            announce("Domain filter: " + (activeFilters.domains.length > 0 ? activeFilters.domains.join(", ") : "all"));
+            dirty = true;
+        });
+    }
+
     /* --- Search --- */
     if (searchInput && searchDropdown) {
         searchInput.addEventListener("input", function () {
@@ -766,15 +1874,21 @@ document.addEventListener("DOMContentLoaded", function () {
                     var nid = this.getAttribute("data-node-id");
                     var node = nodeById[nid];
                     if (node) {
-                        camera.scale = 0.8;
-                        camera.x = canvasW / 2 - node.x * camera.scale;
-                        camera.y = canvasH / 2 - node.y * camera.scale;
+                        /* Switch to detail mode if in overview */
+                        if (viewMode === "overview") {
+                            var grp = getGroupForNode(nid);
+                            if (grp) {
+                                viewMode = "detail";
+                                updateControlsVisibility();
+                                entranceComplete = true;
+                            }
+                        }
                         selectedNode = node;
                         var traced = traceConnectedNodes(node.id);
                         highlightedNodes = traced.nodes;
                         highlightedEdges = traced.edges;
                         showDetailPanel(node);
-                        dirty = true;
+                        panToNode(node, 0.8);
                     }
                     searchDropdown.style.display = "none";
                     searchInput.value = "";
@@ -795,17 +1909,15 @@ document.addEventListener("DOMContentLoaded", function () {
     /* --- Reset Button (PE3-06) --- */
     if (resetBtn) {
         resetBtn.addEventListener("click", function () {
-            selectedNode = null;
-            hoveredNode = null;
-            highlightedNodes = null;
-            highlightedEdges = null;
-            hideDetailPanel();
-            /* Reset filters */
+            returnToOverview();
+            /* Also reset filters */
             activeFilters.type = "all";
+            activeFilters.domains = [];
             for (var ri = 0; ri < filterBtns.length; ri++) {
                 filterBtns[ri].classList.toggle("active", filterBtns[ri].getAttribute("data-filter") === "all");
             }
-            fitToScreen();
+            for (var rdi = 0; rdi < domainBtns.length; rdi++) domainBtns[rdi].classList.remove("active");
+            for (var roi = 0; roi < overlayBtns.length; roi++) overlayBtns[roi].classList.remove("active");
             announce("View reset");
         });
     }
@@ -814,10 +1926,19 @@ document.addEventListener("DOMContentLoaded", function () {
     if (detailClose) {
         detailClose.addEventListener("click", function () {
             selectedNode = null;
+            selectedEdge = null;
             highlightedNodes = null;
             highlightedEdges = null;
             hideDetailPanel();
             dirty = true;
+        });
+    }
+
+    /* --- Overview Button --- */
+    var overviewBtn = document.getElementById("pipeline-overview-btn");
+    if (overviewBtn) {
+        overviewBtn.addEventListener("click", function () {
+            returnToOverview();
         });
     }
 
@@ -831,23 +1952,36 @@ document.addEventListener("DOMContentLoaded", function () {
     var activeMode = null;
     var activeModeStep = 0;
 
+    function showModeIntro() {
+        if (!activeMode) return;
+        selectedNode = null;
+        highlightedNodes = null;
+        highlightedEdges = null;
+        hideDetailPanel();
+        fitToScreen();
+        if (guidedText) guidedText.textContent = activeMode.description;
+        if (guidedStep) guidedStep.textContent = "Intro";
+        if (guidedPrev) guidedPrev.disabled = true;
+        if (guidedNext) guidedNext.disabled = false;
+        if (guidedOverlay) guidedOverlay.hidden = false;
+        dirty = true;
+    }
+
     function showGuidedStep() {
         if (!activeMode) return;
         var step = activeMode.steps[activeModeStep];
         var node = nodeById[step.nodeId];
         if (node) {
-            camera.scale = 0.6;
-            camera.x = canvasW / 2 - node.x * camera.scale;
-            camera.y = canvasH / 2 - node.y * camera.scale;
             selectedNode = node;
             var traced = traceConnectedNodes(node.id);
             highlightedNodes = traced.nodes;
             highlightedEdges = traced.edges;
             showDetailPanel(node);
+            panToNode(node, 0.6);
         }
         if (guidedText) guidedText.textContent = step.annotation;
         if (guidedStep) guidedStep.textContent = "Step " + (activeModeStep + 1) + " of " + activeMode.steps.length;
-        if (guidedPrev) guidedPrev.disabled = activeModeStep === 0;
+        if (guidedPrev) guidedPrev.disabled = false;
         if (guidedNext) guidedNext.disabled = activeModeStep === activeMode.steps.length - 1;
         if (guidedOverlay) guidedOverlay.hidden = false;
         dirty = true;
@@ -856,6 +1990,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function exitGuidedMode() {
         activeMode = null;
         activeModeStep = 0;
+        guidedPulseT = 0;
         if (guidedOverlay) guidedOverlay.hidden = true;
         selectedNode = null;
         highlightedNodes = null;
@@ -879,11 +2014,18 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             this.classList.add("active");
+            /* Auto-switch to detail mode for guided tours */
+            if (viewMode === "overview") {
+                viewMode = "detail";
+                updateControlsVisibility();
+                entranceComplete = true;
+                fitToScreen(true);
+            }
             for (var mk = 0; mk < graph.guidedModes.length; mk++) {
                 if (graph.guidedModes[mk].id === modeId) {
                     activeMode = graph.guidedModes[mk];
-                    activeModeStep = 0;
-                    showGuidedStep();
+                    activeModeStep = -1; /* -1 signals intro step */
+                    showModeIntro();
                     announce("Guided mode: " + activeMode.name);
                     break;
                 }
@@ -893,15 +2035,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (guidedPrev) {
         guidedPrev.addEventListener("click", function () {
-            if (activeMode && activeModeStep > 0) {
+            if (!activeMode) return;
+            if (activeModeStep > 0) {
                 activeModeStep--;
                 showGuidedStep();
+            } else if (activeModeStep === 0) {
+                activeModeStep = -1;
+                showModeIntro();
             }
         });
     }
     if (guidedNext) {
         guidedNext.addEventListener("click", function () {
-            if (activeMode && activeModeStep < activeMode.steps.length - 1) {
+            if (!activeMode) return;
+            if (activeModeStep === -1) {
+                activeModeStep = 0;
+                showGuidedStep();
+            } else if (activeModeStep < activeMode.steps.length - 1) {
                 activeModeStep++;
                 showGuidedStep();
             }
@@ -911,22 +2061,40 @@ document.addEventListener("DOMContentLoaded", function () {
         guidedExit.addEventListener("click", exitGuidedMode);
     }
 
-    /* --- Minimap Click-to-Navigate (PE7-04) --- */
+    /* --- Minimap Click-to-Navigate & Drag (PE7-04, PE7-05) --- */
+    var minimapDragging = false;
+    function minimapToWorld(clientX, clientY) {
+        var rect = minimapCanvas.getBoundingClientRect();
+        var mx = clientX - rect.left;
+        var my = clientY - rect.top;
+        var bounds = getGraphBounds();
+        var mw = minimapCanvas.width;
+        var mh = minimapCanvas.height;
+        var scale = Math.min(mw / (bounds.w + 40), mh / (bounds.h + 40));
+        return {
+            x: (mx - 10) / scale + bounds.minX,
+            y: (my - 5) / scale + bounds.minY
+        };
+    }
+    function minimapNavigate(clientX, clientY) {
+        var world = minimapToWorld(clientX, clientY);
+        camera.x = canvasW / 2 - world.x * camera.scale;
+        camera.y = canvasH / 2 - world.y * camera.scale;
+        dirty = true;
+    }
     if (minimapCanvas) {
-        minimapCanvas.addEventListener("click", function (e) {
-            var rect = minimapCanvas.getBoundingClientRect();
-            var mx = e.clientX - rect.left;
-            var my = e.clientY - rect.top;
-            var bounds = getGraphBounds();
-            var mw = minimapCanvas.width;
-            var mh = minimapCanvas.height;
-            var scale = Math.min(mw / (bounds.w + 40), mh / (bounds.h + 40));
-
-            var worldX = (mx - 10) / scale + bounds.minX;
-            var worldY = (my - 5) / scale + bounds.minY;
-            camera.x = canvasW / 2 - worldX * camera.scale;
-            camera.y = canvasH / 2 - worldY * camera.scale;
-            dirty = true;
+        minimapCanvas.addEventListener("mousedown", function (e) {
+            minimapDragging = true;
+            minimapNavigate(e.clientX, e.clientY);
+            e.preventDefault();
+        });
+        window.addEventListener("mousemove", function (e) {
+            if (minimapDragging) {
+                minimapNavigate(e.clientX, e.clientY);
+            }
+        });
+        window.addEventListener("mouseup", function () {
+            minimapDragging = false;
         });
     }
 
@@ -939,14 +2107,19 @@ document.addEventListener("DOMContentLoaded", function () {
             var nid = decodeURIComponent(match[1]);
             var node = nodeById[nid];
             if (node) {
-                camera.scale = 0.8;
-                camera.x = canvasW / 2 - node.x * camera.scale;
-                camera.y = canvasH / 2 - node.y * camera.scale;
+                /* Deep-link goes straight to detail mode */
+                viewMode = "detail";
+                updateControlsVisibility();
+                entranceComplete = true;
                 selectedNode = node;
                 var traced = traceConnectedNodes(node.id);
                 highlightedNodes = traced.nodes;
                 highlightedEdges = traced.edges;
                 showDetailPanel(node);
+                /* Instant on initial load, no animation needed */
+                camera.scale = 0.8;
+                camera.x = canvasW / 2 - node.x * camera.scale;
+                camera.y = canvasH / 2 - node.y * camera.scale;
                 dirty = true;
             }
         }
@@ -958,24 +2131,98 @@ document.addEventListener("DOMContentLoaded", function () {
         if (e.key === "Escape") {
             if (activeMode) {
                 exitGuidedMode();
+            } else if (viewMode === "detail") {
+                returnToOverview();
             } else {
                 selectedNode = null;
+                selectedEdge = null;
                 highlightedNodes = null;
                 highlightedEdges = null;
+                activeOverlay = null;
+                overlayNodes = null;
+                overlayEdges = null;
                 hideDetailPanel();
                 dirty = true;
+            }
+        }
+        /* Overview mode: arrow keys cycle summary blocks, Enter drills in */
+        if (viewMode === "overview") {
+            if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                e.preventDefault();
+                var cur = overviewHoveredGroup !== null ? overviewHoveredGroup : -1;
+                if (e.key === "ArrowRight") cur = Math.min(cur + 1, summaryBlocks.length - 1);
+                else cur = Math.max(cur - 1, 0);
+                overviewHoveredGroup = cur;
+                dirty = true;
+            }
+            if (e.key === "Enter" && overviewHoveredGroup !== null && overviewHoveredGroup >= 0) {
+                drillIntoGroup(summaryBlocks[overviewHoveredGroup]);
+            }
+            return;
+        }
+        /* Arrow-key node traversal (PE12-02) */
+        if (selectedNode && (e.key === "ArrowRight" || e.key === "ArrowLeft" || e.key === "ArrowUp" || e.key === "ArrowDown")) {
+            e.preventDefault();
+            var target = null;
+            if (e.key === "ArrowRight") {
+                /* Follow first outgoing edge */
+                for (var ei = 0; ei < graph.edges.length; ei++) {
+                    if (graph.edges[ei].from === selectedNode.id) {
+                        target = nodeById[graph.edges[ei].to];
+                        if (target && isNodeVisible(target)) break;
+                        target = null;
+                    }
+                }
+            } else if (e.key === "ArrowLeft") {
+                /* Follow first incoming edge */
+                for (var ei = 0; ei < graph.edges.length; ei++) {
+                    if (graph.edges[ei].to === selectedNode.id) {
+                        target = nodeById[graph.edges[ei].from];
+                        if (target && isNodeVisible(target)) break;
+                        target = null;
+                    }
+                }
+            } else {
+                /* Up/Down: cycle within same lane */
+                var laneNodes = [];
+                for (var ni = 0; ni < graph.nodes.length; ni++) {
+                    if (graph.nodes[ni].lane === selectedNode.lane && isNodeVisible(graph.nodes[ni])) {
+                        laneNodes.push(graph.nodes[ni]);
+                    }
+                }
+                laneNodes.sort(function (a, b) { return a.y - b.y; });
+                var idx = laneNodes.indexOf(selectedNode);
+                if (e.key === "ArrowUp" && idx > 0) target = laneNodes[idx - 1];
+                if (e.key === "ArrowDown" && idx < laneNodes.length - 1) target = laneNodes[idx + 1];
+            }
+            if (target) {
+                selectedNode = target;
+                selectedEdge = null;
+                var traced = traceConnectedNodes(target.id);
+                highlightedNodes = traced.nodes;
+                highlightedEdges = traced.edges;
+                showDetailPanel(target);
+                panToNode(target, camera.scale);
+                announce("Selected " + target.label.replace(/\n/g, " "));
             }
         }
     });
 
     /* --- Initialization --- */
+    var resizeTimer = 0;
     window.addEventListener("resize", function () {
-        resizeCanvas();
-        dirty = true;
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+            resizeCanvas();
+            dirty = true;
+        }, 100);
     });
 
     resizeCanvas();
-    fitToScreen();
-    handleHashNavigation();
+    computeSummaryBlocks();
+    updateControlsVisibility();
+    fitOverview(true); /* Start with overview fitted */
+    handleHashNavigation(); /* May switch to detail mode if #node= present */
+    loadStartTime = performance.now();
     requestAnimationFrame(render);
 });
