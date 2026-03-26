@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pipeline Mockup — Marts &amp; Web (serve)</title>
+<style>
+  body {
+    margin: 0; background: #0f172a;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #e2e8f0;
+  }
+  h1 { font-size: 18px; font-weight: 600; margin-bottom: 2px; color: #f1f5f9; }
+  .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
+  .back { position: fixed; top: 16px; left: 16px; color: #6366f1; text-decoration: none; font-size: 13px; }
+  .back:hover { text-decoration: underline; }
+  .legend { display: flex; gap: 18px; margin-top: 20px; font-size: 11px; color: #94a3b8; flex-wrap: wrap; justify-content: center; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .node { cursor: pointer; transition: filter 0.2s; }
+  .node:hover { filter: brightness(1.15); }
+</style>
+</head>
+<body>
+<a class="back" href="00_summary_topology.html">&larr; Summary Topology</a>
+<h1>Marts &amp; Web — Drill-In View</h1>
+<p class="subtitle">26 nodes (7 marts + 7 APIs + 12 pages) &middot; 3 columns &middot; Marts &rarr; APIs &rarr; Pages</p>
+
+<svg width="1200" height="780" viewBox="0 0 1200 780">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrow-opt" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-ghost" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-api" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#ff9800"/>
+    </marker>
+  </defs>
+
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+  </pattern>
+  <rect width="1200" height="780" fill="url(#grid)" rx="12"/>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- LANE BACKGROUNDS                   -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- Analyst Marts (left) -->
+  <rect x="30" y="35" width="310" height="700" rx="8" fill="#00bcd408" stroke="#00bcd425" stroke-width="1"/>
+  <text x="185" y="60" text-anchor="middle" font-size="12" font-weight="600" fill="#00bcd4" opacity="0.7">Analyst Marts</text>
+
+  <!-- API Endpoints (middle) -->
+  <rect x="370" y="35" width="260" height="700" rx="8" fill="#ff980008" stroke="#ff980025" stroke-width="1"/>
+  <text x="500" y="60" text-anchor="middle" font-size="12" font-weight="600" fill="#ff9800" opacity="0.7">API Endpoints</text>
+
+  <!-- Web Pages (right) -->
+  <rect x="660" y="35" width="260" height="700" rx="8" fill="#ffd74408" stroke="#ffd74425" stroke-width="1"/>
+  <text x="790" y="60" text-anchor="middle" font-size="12" font-weight="600" fill="#ffd744" opacity="0.7">Web Pages</text>
+
+  <!-- Ghost incoming label -->
+  <text x="15" y="78" font-size="9" fill="#475569" font-style="italic">&larr; Core &amp;</text>
+  <text x="15" y="90" font-size="9" fill="#475569" font-style="italic">Time-Series</text>
+
+  <!-- Ghost outgoing label -->
+  <text x="1180" y="58" text-anchor="end" font-size="10" fill="#475569" font-style="italic">to Deploy &rarr;</text>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- GHOST INCOMING: Core → Marts       -->
+  <!-- ══════════════════════════════════ -->
+  <line x1="20" y1="110" x2="46" y2="100" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="20" y1="170" x2="46" y2="155" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="20" y1="225" x2="46" y2="210" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="20" y1="280" x2="46" y2="265" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="20" y1="335" x2="46" y2="320" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="20" y1="390" x2="46" y2="375" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="20" y1="445" x2="46" y2="430" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- EDGES: Marts → API Endpoints       -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- occupation_summary → Search API -->
+  <line x1="320" y1="100" x2="385" y2="100" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <!-- occupation_summary → Hierarchy API -->
+  <line x1="320" y1="108" x2="385" y2="150" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <!-- occupation_summary → Occupation API -->
+  <line x1="320" y1="115" x2="385" y2="200" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- occupation_wages_by_geography → Wages API -->
+  <line x1="320" y1="160" x2="385" y2="250" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- occupation_skill_profile → Occupation API -->
+  <line x1="320" y1="215" x2="385" y2="208" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- mart_occupation_trend_series → Trends API -->
+  <line x1="320" y1="270" x2="385" y2="300" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <!-- mart_occupation_geo_gap_series → Trends API -->
+  <line x1="320" y1="325" x2="385" y2="308" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <!-- mart_occupation_rank_change → Trends API -->
+  <line x1="320" y1="380" x2="385" y2="315" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- occupation_similarity_seeded → Occupation API (optional/dashed) -->
+  <line x1="320" y1="435" x2="385" y2="215" stroke="#64748b" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrow-opt)"/>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- EDGES: API Endpoints → Web Pages   -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- Search API → Search Page -->
+  <line x1="615" y1="100" x2="675" y2="100" stroke="#ff9800" stroke-width="1.2" marker-end="url(#arrow-api)"/>
+  <!-- Hierarchy API → Hierarchy Browser -->
+  <line x1="615" y1="150" x2="675" y2="150" stroke="#ff9800" stroke-width="1.2" marker-end="url(#arrow-api)"/>
+  <!-- Occupation API → Occupation Profile -->
+  <line x1="615" y1="200" x2="675" y2="200" stroke="#ff9800" stroke-width="1.2" marker-end="url(#arrow-api)"/>
+  <!-- Wages API → Wage Comparison -->
+  <line x1="615" y1="250" x2="675" y2="250" stroke="#ff9800" stroke-width="1.2" marker-end="url(#arrow-api)"/>
+  <!-- Trends API → Trend Explorer -->
+  <line x1="615" y1="300" x2="675" y2="300" stroke="#ff9800" stroke-width="1.2" marker-end="url(#arrow-api)"/>
+  <!-- Trends API → Occupation Compare -->
+  <line x1="615" y1="308" x2="675" y2="350" stroke="#ff9800" stroke-width="1.2" marker-end="url(#arrow-api)"/>
+  <!-- Trends API → Geography Compare -->
+  <line x1="615" y1="312" x2="675" y2="400" stroke="#ff9800" stroke-width="1.2" marker-end="url(#arrow-api)"/>
+  <!-- Trends API → Ranked Movers -->
+  <line x1="615" y1="316" x2="675" y2="450" stroke="#ff9800" stroke-width="1.2" marker-end="url(#arrow-api)"/>
+  <!-- CPI API → CPI Explorer -->
+  <line x1="615" y1="350" x2="675" y2="500" stroke="#ff9800" stroke-width="1.2" marker-end="url(#arrow-api)"/>
+  <!-- Health API: no page arrow (monitoring only) -->
+
+  <!-- ══════════════════════════════════ -->
+  <!-- Content-only ghost arrows           -->
+  <!-- ══════════════════════════════════ -->
+  <line x1="660" y1="558" x2="675" y2="558" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="661" y="572" font-size="7" fill="#475569">content-only (no API)</text>
+  <line x1="660" y1="608" x2="675" y2="608" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="661" y="622" font-size="7" fill="#475569">content-only (no API)</text>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- DEPLOY COLLECTOR BAR + ARROWS      -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- Vertical collector bar at right edge -->
+  <line x1="950" y1="80" x2="950" y2="680" stroke="#475569" stroke-width="2" stroke-dasharray="6,3"/>
+
+  <!-- Web Pages → collector bar (ghost lines) -->
+  <line x1="905" y1="100" x2="948" y2="100" stroke="#475569" stroke-width="0.8" stroke-dasharray="3,4"/>
+  <line x1="905" y1="150" x2="948" y2="150" stroke="#475569" stroke-width="0.8" stroke-dasharray="3,4"/>
+  <line x1="905" y1="200" x2="948" y2="200" stroke="#475569" stroke-width="0.8" stroke-dasharray="3,4"/>
+  <line x1="905" y1="250" x2="948" y2="250" stroke="#475569" stroke-width="0.8" stroke-dasharray="3,4"/>
+  <line x1="905" y1="300" x2="948" y2="300" stroke="#475569" stroke-width="0.8" stroke-dasharray="3,4"/>
+  <line x1="905" y1="350" x2="948" y2="350" stroke="#475569" stroke-width="0.8" stroke-dasharray="3,4"/>
+  <line x1="905" y1="400" x2="948" y2="400" stroke="#475569" stroke-width="0.8" stroke-dasharray="3,4"/>
+  <line x1="905" y1="450" x2="948" y2="450" stroke="#475569" stroke-width="0.8" stroke-dasharray="3,4"/>
+  <line x1="905" y1="500" x2="948" y2="500" stroke="#475569" stroke-width="0.8" stroke-dasharray="3,4"/>
+  <line x1="905" y1="550" x2="948" y2="550" stroke="#475569" stroke-width="0.8" stroke-dasharray="3,4"/>
+  <line x1="905" y1="600" x2="948" y2="600" stroke="#475569" stroke-width="0.8" stroke-dasharray="3,4"/>
+  <line x1="905" y1="660" x2="948" y2="660" stroke="#475569" stroke-width="0.8" stroke-dasharray="3,4"/>
+
+  <!-- Collector bar → build_static.py -->
+  <line x1="952" y1="380" x2="1000" y2="380" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <g transform="translate(1005, 360)">
+    <rect width="140" height="38" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <text x="70" y="16" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">build_static.py</text>
+    <text x="70" y="30" text-anchor="middle" font-size="8" fill="#475569">static site builder</text>
+  </g>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- MART NODES (left column)           -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- Y positions: 80, 135, 190, 245, 300, 355, 410 -->
+
+  <g class="node" transform="translate(46, 80)">
+    <rect width="270" height="40" rx="6" fill="#1e293b" stroke="#00bcd4" stroke-width="1.5"/>
+    <rect width="4" height="40" rx="2" fill="#00bcd4"/>
+    <text x="16" y="17" font-size="11" font-weight="600" fill="#f1f5f9">occupation_summary</text>
+    <text x="16" y="32" font-size="9" fill="#94a3b8">One row per occupation &middot; main lookup</text>
+  </g>
+
+  <g class="node" transform="translate(46, 135)">
+    <rect width="270" height="40" rx="6" fill="#1e293b" stroke="#00bcd4" stroke-width="1.5"/>
+    <rect width="4" height="40" rx="2" fill="#00bcd4"/>
+    <text x="16" y="17" font-size="11" font-weight="600" fill="#f1f5f9">occupation_wages_by_geography</text>
+    <text x="16" y="32" font-size="9" fill="#94a3b8">Wages by SOC + geography</text>
+  </g>
+
+  <g class="node" transform="translate(46, 190)">
+    <rect width="270" height="40" rx="6" fill="#1e293b" stroke="#00bcd4" stroke-width="1.5"/>
+    <rect width="4" height="40" rx="2" fill="#00bcd4"/>
+    <text x="16" y="17" font-size="11" font-weight="600" fill="#f1f5f9">occupation_skill_profile</text>
+    <text x="16" y="32" font-size="9" fill="#94a3b8">Skill importance &amp; level scores</text>
+  </g>
+
+  <g class="node" transform="translate(46, 245)">
+    <rect width="270" height="40" rx="6" fill="#1e293b" stroke="#00bcd4" stroke-width="1.5"/>
+    <rect width="4" height="40" rx="2" fill="#00bcd4"/>
+    <text x="16" y="17" font-size="11" font-weight="600" fill="#f1f5f9">mart_occupation_trend_series</text>
+    <text x="16" y="32" font-size="9" fill="#94a3b8">Trends per occupation, metric, geo</text>
+  </g>
+
+  <g class="node" transform="translate(46, 300)">
+    <rect width="270" height="40" rx="6" fill="#1e293b" stroke="#00bcd4" stroke-width="1.5"/>
+    <rect width="4" height="40" rx="2" fill="#00bcd4"/>
+    <text x="16" y="17" font-size="11" font-weight="600" fill="#f1f5f9">mart_occupation_geo_gap_series</text>
+    <text x="16" y="32" font-size="9" fill="#94a3b8">State vs. national wage gaps</text>
+  </g>
+
+  <g class="node" transform="translate(46, 355)">
+    <rect width="270" height="40" rx="6" fill="#1e293b" stroke="#00bcd4" stroke-width="1.5"/>
+    <rect width="4" height="40" rx="2" fill="#00bcd4"/>
+    <text x="16" y="17" font-size="11" font-weight="600" fill="#f1f5f9">mart_occupation_rank_change</text>
+    <text x="16" y="32" font-size="9" fill="#94a3b8">YoY ranking changes</text>
+  </g>
+
+  <g class="node" transform="translate(46, 410)">
+    <rect width="270" height="40" rx="6" fill="#1e293b" stroke="#00bcd4" stroke-width="1.5"/>
+    <rect width="4" height="40" rx="2" fill="#00bcd4"/>
+    <text x="16" y="17" font-size="11" font-weight="600" fill="#f1f5f9">occupation_similarity_seeded</text>
+    <text x="16" y="32" font-size="9" fill="#94a3b8">Jaccard cosine on skill vectors</text>
+  </g>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- API ENDPOINT NODES (middle column) -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- Y positions: 80, 130, 180, 230, 280, 330, 380 -->
+
+  <g class="node" transform="translate(385, 80)">
+    <rect width="225" height="36" rx="8" fill="#1e293b" stroke="#ff9800" stroke-width="1.5"/>
+    <rect width="4" height="36" rx="2" fill="#ff9800"/>
+    <text x="16" y="15" font-size="10" font-weight="600" fill="#f1f5f9">Search API</text>
+    <text x="16" y="29" font-size="8" fill="#94a3b8">/api/occupations/search</text>
+  </g>
+
+  <g class="node" transform="translate(385, 130)">
+    <rect width="225" height="36" rx="8" fill="#1e293b" stroke="#ff9800" stroke-width="1.5"/>
+    <rect width="4" height="36" rx="2" fill="#ff9800"/>
+    <text x="16" y="15" font-size="10" font-weight="600" fill="#f1f5f9">Hierarchy API</text>
+    <text x="16" y="29" font-size="8" fill="#94a3b8">/api/occupations/hierarchy</text>
+  </g>
+
+  <g class="node" transform="translate(385, 180)">
+    <rect width="225" height="36" rx="8" fill="#1e293b" stroke="#ff9800" stroke-width="1.5"/>
+    <rect width="4" height="36" rx="2" fill="#ff9800"/>
+    <text x="16" y="15" font-size="10" font-weight="600" fill="#f1f5f9">Occupation API</text>
+    <text x="16" y="29" font-size="8" fill="#94a3b8">/api/occupations/{soc}</text>
+  </g>
+
+  <g class="node" transform="translate(385, 230)">
+    <rect width="225" height="36" rx="8" fill="#1e293b" stroke="#ff9800" stroke-width="1.5"/>
+    <rect width="4" height="36" rx="2" fill="#ff9800"/>
+    <text x="16" y="15" font-size="10" font-weight="600" fill="#f1f5f9">Wages API</text>
+    <text x="16" y="29" font-size="8" fill="#94a3b8">/api/occupations/{soc}/wages</text>
+  </g>
+
+  <g class="node" transform="translate(385, 280)">
+    <rect width="225" height="36" rx="8" fill="#1e293b" stroke="#ff9800" stroke-width="1.5"/>
+    <rect width="4" height="36" rx="2" fill="#ff9800"/>
+    <text x="16" y="15" font-size="10" font-weight="600" fill="#f1f5f9">Trends API</text>
+    <text x="16" y="29" font-size="8" fill="#94a3b8">/api/trends/*</text>
+  </g>
+
+  <g class="node" transform="translate(385, 330)">
+    <rect width="225" height="36" rx="8" fill="#1e293b" stroke="#ff9800" stroke-width="1.5"/>
+    <rect width="4" height="36" rx="2" fill="#ff9800"/>
+    <text x="16" y="15" font-size="10" font-weight="600" fill="#f1f5f9">CPI API</text>
+    <text x="16" y="29" font-size="8" fill="#94a3b8">/api/cpi/*</text>
+  </g>
+
+  <g class="node" transform="translate(385, 380)">
+    <rect width="225" height="36" rx="8" fill="#1e293b" stroke="#ff9800" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <rect width="4" height="36" rx="2" fill="#ff9800" opacity="0.5"/>
+    <text x="16" y="15" font-size="10" font-weight="600" fill="#94a3b8">Health API</text>
+    <text x="16" y="29" font-size="8" fill="#64748b">/api/health (monitoring)</text>
+  </g>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- WEB PAGE NODES (right column)      -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- Y positions: 80, 130, 180, 230, 280, 330, 380, 430, 480, 535, 585, 640 -->
+
+  <g class="node" transform="translate(675, 80)">
+    <rect width="225" height="36" rx="20" fill="#1e293b" stroke="#ffd744" stroke-width="1.5"/>
+    <text x="112" y="15" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Search Page</text>
+    <text x="112" y="29" text-anchor="middle" font-size="8" fill="#94a3b8">/search</text>
+  </g>
+
+  <g class="node" transform="translate(675, 130)">
+    <rect width="225" height="36" rx="20" fill="#1e293b" stroke="#ffd744" stroke-width="1.5"/>
+    <text x="112" y="15" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Hierarchy Browser</text>
+    <text x="112" y="29" text-anchor="middle" font-size="8" fill="#94a3b8">/hierarchy</text>
+  </g>
+
+  <g class="node" transform="translate(675, 180)">
+    <rect width="225" height="36" rx="20" fill="#1e293b" stroke="#ffd744" stroke-width="1.8"/>
+    <text x="112" y="15" text-anchor="middle" font-size="10" font-weight="700" fill="#f1f5f9">Occupation Profile</text>
+    <text x="112" y="29" text-anchor="middle" font-size="8" fill="#94a3b8">/occupation/{soc}</text>
+  </g>
+
+  <g class="node" transform="translate(675, 230)">
+    <rect width="225" height="36" rx="20" fill="#1e293b" stroke="#ffd744" stroke-width="1.5"/>
+    <text x="112" y="15" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Wage Comparison</text>
+    <text x="112" y="29" text-anchor="middle" font-size="8" fill="#94a3b8">/occupation/{soc}/wages</text>
+  </g>
+
+  <g class="node" transform="translate(675, 280)">
+    <rect width="225" height="36" rx="20" fill="#1e293b" stroke="#ffd744" stroke-width="1.5"/>
+    <text x="112" y="15" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Trend Explorer</text>
+    <text x="112" y="29" text-anchor="middle" font-size="8" fill="#94a3b8">/trends/explorer/{soc}</text>
+  </g>
+
+  <g class="node" transform="translate(675, 330)">
+    <rect width="225" height="36" rx="20" fill="#1e293b" stroke="#ffd744" stroke-width="1.5"/>
+    <text x="112" y="15" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Occupation Compare</text>
+    <text x="112" y="29" text-anchor="middle" font-size="8" fill="#94a3b8">/trends/compare</text>
+  </g>
+
+  <g class="node" transform="translate(675, 380)">
+    <rect width="225" height="36" rx="20" fill="#1e293b" stroke="#ffd744" stroke-width="1.5"/>
+    <text x="112" y="15" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Geography Compare</text>
+    <text x="112" y="29" text-anchor="middle" font-size="8" fill="#94a3b8">/trends/geography</text>
+  </g>
+
+  <g class="node" transform="translate(675, 430)">
+    <rect width="225" height="36" rx="20" fill="#1e293b" stroke="#ffd744" stroke-width="1.5"/>
+    <text x="112" y="15" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Ranked Movers</text>
+    <text x="112" y="29" text-anchor="middle" font-size="8" fill="#94a3b8">/trends/movers</text>
+  </g>
+
+  <g class="node" transform="translate(675, 480)">
+    <rect width="225" height="36" rx="20" fill="#1e293b" stroke="#ffd744" stroke-width="1.5"/>
+    <text x="112" y="15" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">CPI Explorer</text>
+    <text x="112" y="29" text-anchor="middle" font-size="8" fill="#94a3b8">/cpi</text>
+  </g>
+
+  <g class="node" transform="translate(675, 535)">
+    <rect width="225" height="36" rx="20" fill="#1e293b" stroke="#ffd744" stroke-width="1.2" stroke-dasharray="6,3"/>
+    <text x="112" y="15" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Methodology</text>
+    <text x="112" y="29" text-anchor="middle" font-size="8" fill="#64748b">/methodology</text>
+  </g>
+
+  <g class="node" transform="translate(675, 585)">
+    <rect width="225" height="36" rx="20" fill="#1e293b" stroke="#ffd744" stroke-width="1.2" stroke-dasharray="6,3"/>
+    <text x="112" y="15" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Lessons (20)</text>
+    <text x="112" y="29" text-anchor="middle" font-size="8" fill="#64748b">/lessons</text>
+  </g>
+
+  <g class="node" transform="translate(675, 640)">
+    <rect width="225" height="36" rx="20" fill="#1e293b" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <text x="112" y="15" text-anchor="middle" font-size="10" font-weight="600" fill="#a5b4fc">Pipeline Explorer</text>
+    <text x="112" y="29" text-anchor="middle" font-size="8" fill="#64748b">/pipeline (self-ref)</text>
+    <!-- Self-referential loop -->
+    <path d="M 225 18 C 240 18, 240 36, 225 36" fill="none" stroke="#818cf8" stroke-width="1.0" stroke-dasharray="3,3"/>
+  </g>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- FOOTER SUMMARY                     -->
+  <!-- ══════════════════════════════════ -->
+  <text x="600" y="755" text-anchor="middle" font-size="11" fill="#475569">
+    7 marts &middot; 7 APIs &middot; 12 web pages &middot; 3-column data flow: Marts &rarr; APIs &rarr; Pages
+  </text>
+</svg>
+
+<div class="legend">
+  <div class="legend-item">
+    <svg width="22" height="16"><rect width="22" height="16" rx="4" fill="#1e293b" stroke="#00bcd4" stroke-width="1.5"/></svg>
+    <span>Mart</span>
+  </div>
+  <div class="legend-item">
+    <svg width="22" height="16"><rect width="22" height="16" rx="6" fill="#1e293b" stroke="#ff9800" stroke-width="1.5"/></svg>
+    <span>API Endpoint</span>
+  </div>
+  <div class="legend-item">
+    <svg width="22" height="16"><rect width="22" height="16" rx="10" fill="#1e293b" stroke="#ffd744" stroke-width="1.5"/></svg>
+    <span>Web Page</span>
+  </div>
+  <div class="legend-item">
+    <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#94a3b8" stroke-width="1.2"/></svg>
+    <span>Required</span>
+  </div>
+  <div class="legend-item">
+    <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#64748b" stroke-width="1.2" stroke-dasharray="4,3"/></svg>
+    <span>Optional</span>
+  </div>
+  <div class="legend-item">
+    <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4"/></svg>
+    <span>External</span>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pipeline Mockup — Raw Landing (land)</title>
+<style>
+  body {
+    margin: 0; background: #0f172a;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #e2e8f0;
+  }
+  h1 { font-size: 18px; font-weight: 600; margin-bottom: 2px; color: #f1f5f9; }
+  .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
+  .back { position: fixed; top: 16px; left: 16px; color: #e91e63; text-decoration: none; font-size: 13px; }
+  .back:hover { text-decoration: underline; }
+  .legend { display: flex; gap: 20px; margin-top: 20px; font-size: 11px; color: #94a3b8; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .node { cursor: pointer; transition: filter 0.2s; }
+  .node:hover { filter: brightness(1.15); }
+</style>
+</head>
+<body>
+<a class="back" href="00_summary_topology.html">&larr; Summary Topology</a>
+<h1>Raw Landing — Drill-In View</h1>
+<p class="subtitle">6 storage nodes &middot; 1 lane (Raw Landing) &middot; Accent: <span style="color:#e91e63">#e91e63</span></p>
+
+<svg width="700" height="620" viewBox="0 0 700 620">
+  <defs>
+    <marker id="arrow-ghost" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+  </pattern>
+  <rect width="700" height="620" fill="url(#grid)" rx="12"/>
+
+  <!-- Lane background -->
+  <rect x="160" y="35" width="380" height="540" rx="8" fill="#e91e6308" stroke="#e91e6325" stroke-width="1"/>
+  <text x="350" y="63" text-anchor="middle" font-size="12" font-weight="600" fill="#e91e63" opacity="0.7">Raw Landing — Immutable Storage</text>
+
+  <!-- Ghost incoming arrows from Data Sources -->
+  <text x="30" y="55" font-size="10" fill="#475569" font-style="italic">&larr; from Download Mgr</text>
+  <line x1="30" y1="110" x2="195" y2="110" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="30" y1="190" x2="195" y2="190" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="30" y1="270" x2="195" y2="270" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="30" y1="350" x2="195" y2="350" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="30" y1="430" x2="195" y2="430" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="30" y1="510" x2="195" y2="510" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+
+  <!-- Ghost outgoing arrows to Stage & Parse -->
+  <text x="670" y="55" text-anchor="end" font-size="10" fill="#475569" font-style="italic">to Parsers &rarr;</text>
+  <line x1="505" y1="110" x2="670" y2="110" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="505" y1="190" x2="670" y2="190" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="505" y1="270" x2="670" y2="270" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="505" y1="350" x2="670" y2="350" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="505" y1="430" x2="670" y2="410" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="505" y1="430" x2="670" y2="440" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="505" y1="510" x2="670" y2="510" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- STORAGE NODES (cylinders)          -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- Raw SOC Files -->
+  <g class="node" transform="translate(200, 82)">
+    <path d="M 0,12 Q 0,0 150,0 Q 300,0 300,12 L 300,48 Q 300,60 150,60 Q 0,60 0,48 Z" fill="#1e293b" stroke="#e91e63" stroke-width="1.5"/>
+    <ellipse cx="150" cy="12" rx="150" ry="12" fill="#1e293b" stroke="#e91e63" stroke-width="1.5"/>
+    <text x="150" y="32" text-anchor="middle" font-size="12" font-weight="600" fill="#f1f5f9">Raw SOC Files</text>
+    <text x="150" y="48" text-anchor="middle" font-size="9" fill="#94a3b8">raw/soc/{dataset}/{release}/{run}/</text>
+  </g>
+
+  <!-- Raw OEWS Files -->
+  <g class="node" transform="translate(200, 162)">
+    <path d="M 0,12 Q 0,0 150,0 Q 300,0 300,12 L 300,48 Q 300,60 150,60 Q 0,60 0,48 Z" fill="#1e293b" stroke="#e91e63" stroke-width="1.5"/>
+    <ellipse cx="150" cy="12" rx="150" ry="12" fill="#1e293b" stroke="#e91e63" stroke-width="1.5"/>
+    <text x="150" y="32" text-anchor="middle" font-size="12" font-weight="600" fill="#f1f5f9">Raw OEWS Files</text>
+    <text x="150" y="48" text-anchor="middle" font-size="9" fill="#94a3b8">raw/bls/oews_{geo}/{release}/{run}/</text>
+  </g>
+
+  <!-- Raw O*NET Files -->
+  <g class="node" transform="translate(200, 242)">
+    <path d="M 0,12 Q 0,0 150,0 Q 300,0 300,12 L 300,48 Q 300,60 150,60 Q 0,60 0,48 Z" fill="#1e293b" stroke="#e91e63" stroke-width="1.5"/>
+    <ellipse cx="150" cy="12" rx="150" ry="12" fill="#1e293b" stroke="#e91e63" stroke-width="1.5"/>
+    <text x="150" y="32" text-anchor="middle" font-size="12" font-weight="600" fill="#f1f5f9">Raw O*NET Files</text>
+    <text x="150" y="48" text-anchor="middle" font-size="9" fill="#94a3b8">raw/onet/{dataset}/{release}/{run}/</text>
+  </g>
+
+  <!-- Raw Projections Files -->
+  <g class="node" transform="translate(200, 322)">
+    <path d="M 0,12 Q 0,0 150,0 Q 300,0 300,12 L 300,48 Q 300,60 150,60 Q 0,60 0,48 Z" fill="#1e293b" stroke="#e91e63" stroke-width="1.5"/>
+    <ellipse cx="150" cy="12" rx="150" ry="12" fill="#1e293b" stroke="#e91e63" stroke-width="1.5"/>
+    <text x="150" y="32" text-anchor="middle" font-size="12" font-weight="600" fill="#f1f5f9">Raw Projections Files</text>
+    <text x="150" y="48" text-anchor="middle" font-size="9" fill="#94a3b8">raw/bls/employment_proj/{release}/{run}/</text>
+  </g>
+
+  <!-- Raw CPI Files -->
+  <g class="node" transform="translate(200, 402)">
+    <path d="M 0,12 Q 0,0 150,0 Q 300,0 300,12 L 300,48 Q 300,60 150,60 Q 0,60 0,48 Z" fill="#1e293b" stroke="#e91e63" stroke-width="1.5"/>
+    <ellipse cx="150" cy="12" rx="150" ry="12" fill="#1e293b" stroke="#e91e63" stroke-width="1.5"/>
+    <text x="150" y="32" text-anchor="middle" font-size="12" font-weight="600" fill="#f1f5f9">Raw CPI Files</text>
+    <text x="150" y="48" text-anchor="middle" font-size="9" fill="#94a3b8">raw/bls/cpi/{release}/{run}/</text>
+  </g>
+
+  <!-- Raw Crosswalk Files -->
+  <g class="node" transform="translate(200, 482)">
+    <path d="M 0,12 Q 0,0 150,0 Q 300,0 300,12 L 300,48 Q 300,60 150,60 Q 0,60 0,48 Z" fill="#1e293b" stroke="#e91e63" stroke-width="1.5"/>
+    <ellipse cx="150" cy="12" rx="150" ry="12" fill="#1e293b" stroke="#e91e63" stroke-width="1.5"/>
+    <text x="150" y="32" text-anchor="middle" font-size="12" font-weight="600" fill="#f1f5f9">Raw Crosswalk Files</text>
+    <text x="150" y="48" text-anchor="middle" font-size="9" fill="#94a3b8">raw/soc/crosswalk/{release}/{run}/</text>
+  </g>
+
+  <text x="350" y="600" text-anchor="middle" font-size="11" fill="#475569">
+    6 storage nodes (cylinders) &middot; No internal edges &middot; Immutable — never overwritten
+  </text>
+</svg>
+
+<div class="legend">
+  <div class="legend-item">
+    <svg width="24" height="18"><path d="M 2,6 Q 2,2 12,2 Q 22,2 22,6 L 22,14 Q 22,18 12,18 Q 2,18 2,14 Z" fill="#1e293b" stroke="#e91e63" stroke-width="1.2"/></svg>
+    <span>Storage (cylinder)</span>
+  </div>
+  <div class="legend-item">
+    <svg width="24" height="18"><path d="M 2,6 Q 2,2 12,2 Q 22,2 22,6 L 22,14 Q 22,18 12,18 Q 2,18 2,14 Z" fill="#1e293b" stroke="#64748b" stroke-width="1.2" stroke-dasharray="3,2"/></svg>
+    <span>Optional storage</span>
+  </div>
+  <div class="legend-item">
+    <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4"/></svg>
+    <span>External (ghost)</span>
+  </div>
+</div>
+</body>
+</html>

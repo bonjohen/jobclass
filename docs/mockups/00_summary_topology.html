@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pipeline Explorer V2 — Summary Topology Mockup</title>
+<style>
+  body {
+    margin: 0;
+    background: #0f172a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #e2e8f0;
+  }
+  h1 { font-size: 18px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 4px; color: #f1f5f9; }
+  .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 32px; }
+  svg { filter: drop-shadow(0 4px 24px rgba(0,0,0,0.3)); }
+  .block { cursor: pointer; transition: filter 0.2s; }
+  .block:hover { filter: brightness(1.15); }
+  .legend { display: flex; gap: 24px; margin-top: 28px; font-size: 12px; color: #94a3b8; }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .legend-line { width: 32px; height: 2px; }
+  .legend-line.solid { background: #94a3b8; }
+  .legend-line.dashed { background: repeating-linear-gradient(90deg, #f59e0b 0, #f59e0b 6px, transparent 6px, transparent 10px); }
+</style>
+</head>
+<body>
+
+<h1>Pipeline Explorer V2 — Summary Topology</h1>
+<p class="subtitle">7 stages, 7 directed edges, branching flow with validation gate and time-series sub-process</p>
+
+<!--
+  Layout: Uniform 160px block width, 40px horizontal gap = 200px center-to-center
+  Main spine y=140 (block top). Branch row y=290.
+  Blocks at x: 20, 220, 420, 620, 820, 1020
+  SVG: 1180 x 420
+-->
+<svg width="1180" height="420" viewBox="0 0 1180 420">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#f59e0b"/>
+    </marker>
+  </defs>
+
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+  </pattern>
+  <rect width="1180" height="420" fill="url(#grid)" rx="12"/>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- EDGES (behind blocks)                       -->
+  <!-- Block centers: 100, 300, 500, 700, 900, 1100 -->
+  <!-- Block edges: left=x, right=x+160            -->
+  <!-- Main spine block tops at y=140, h=100        -->
+  <!-- Branch blocks at y=290                       -->
+  <!-- ═══════════════════════════════════════════ -->
+
+  <!-- acquire → land (right-up to upper branch) -->
+  <line x1="180" y1="172" x2="218" y2="140" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- acquire → parse (right-down to lower branch) -->
+  <line x1="180" y1="208" x2="218" y2="300" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- land → validate (right-down to main spine) -->
+  <line x1="380" y1="140" x2="418" y2="172" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- parse → validate (right-up from lower branch) -->
+  <line x1="380" y1="310" x2="418" y2="218" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- validate → warehouse (conditional, dashed) -->
+  <line x1="580" y1="190" x2="618" y2="190" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8,4" marker-end="url(#arrow-amber)"/>
+  <rect x="577" y="164" width="70" height="18" rx="9" fill="#0f172a" stroke="#f59e0b" stroke-width="0.8"/>
+  <text x="612" y="177" text-anchor="middle" font-size="10" font-weight="500" fill="#f59e0b">gates pass</text>
+
+  <!-- warehouse → serve (right, main spine) -->
+  <line x1="780" y1="190" x2="818" y2="190" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- serve → deploy (right, main spine) -->
+  <line x1="980" y1="190" x2="1018" y2="190" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- BLOCKS (uniform 160x100, 40px gaps)         -->
+  <!-- ═══════════════════════════════════════════ -->
+
+  <!-- 1. Data Sources (acquire) — main spine -->
+  <g class="block" transform="translate(20, 140)">
+    <rect width="160" height="100" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+    <rect width="4" height="100" rx="2" fill="#3b82f6"/>
+    <text x="16" y="28" font-size="14" font-weight="600" fill="#f1f5f9">Data Sources</text>
+    <text x="16" y="46" font-size="10" fill="#94a3b8">Download 6 federal</text>
+    <text x="16" y="59" font-size="10" fill="#94a3b8">data products</text>
+    <rect x="16" y="74" width="48" height="18" rx="9" fill="#3b82f620" stroke="#3b82f650" stroke-width="0.5"/>
+    <text x="40" y="86" text-anchor="middle" font-size="9" fill="#3b82f6">9 nodes</text>
+  </g>
+
+  <!-- 2. Raw Landing (land) — upper branch -->
+  <g class="block" transform="translate(220, 80)">
+    <rect width="160" height="100" rx="8" fill="#1e293b" stroke="#e91e63" stroke-width="1.5"/>
+    <rect width="4" height="100" rx="2" fill="#e91e63"/>
+    <text x="16" y="28" font-size="14" font-weight="600" fill="#f1f5f9">Raw Landing</text>
+    <text x="16" y="46" font-size="10" fill="#94a3b8">Immutable capture</text>
+    <text x="16" y="59" font-size="10" fill="#94a3b8">with checksums</text>
+    <rect x="16" y="74" width="48" height="18" rx="9" fill="#e91e6320" stroke="#e91e6350" stroke-width="0.5"/>
+    <text x="40" y="86" text-anchor="middle" font-size="9" fill="#e91e63">6 nodes</text>
+  </g>
+
+  <!-- 3. Stage & Parse (parse) — lower branch -->
+  <g class="block" transform="translate(220, 260)">
+    <rect width="160" height="100" rx="8" fill="#1e293b" stroke="#4caf50" stroke-width="1.5"/>
+    <rect width="4" height="100" rx="2" fill="#4caf50"/>
+    <text x="16" y="28" font-size="14" font-weight="600" fill="#f1f5f9">Stage &amp; Parse</text>
+    <text x="16" y="46" font-size="10" fill="#94a3b8">Normalize into typed</text>
+    <text x="16" y="59" font-size="10" fill="#94a3b8">relational tables</text>
+    <rect x="16" y="74" width="48" height="18" rx="9" fill="#4caf5020" stroke="#4caf5050" stroke-width="0.5"/>
+    <text x="40" y="86" text-anchor="middle" font-size="9" fill="#4caf50">7 nodes</text>
+  </g>
+
+  <!-- 4. Validation Gates (validate) — main spine -->
+  <g class="block" transform="translate(420, 140)">
+    <rect width="160" height="100" rx="8" fill="#1e293b" stroke="#ef4444" stroke-width="1.5"/>
+    <rect width="4" height="100" rx="2" fill="#ef4444"/>
+    <text x="16" y="28" font-size="14" font-weight="600" fill="#f1f5f9">Validation Gates</text>
+    <text x="16" y="46" font-size="10" fill="#94a3b8">Fail-fast quality</text>
+    <text x="16" y="59" font-size="10" fill="#94a3b8">checks before loading</text>
+    <rect x="16" y="74" width="48" height="18" rx="9" fill="#ef444420" stroke="#ef444450" stroke-width="0.5"/>
+    <text x="40" y="86" text-anchor="middle" font-size="9" fill="#ef4444">6 nodes</text>
+  </g>
+
+  <!-- 5. Core Warehouse + Time-Series (warehouse) — main spine -->
+  <g class="block" transform="translate(620, 140)">
+    <rect width="160" height="100" rx="8" fill="#1e293b" stroke="#1976d2" stroke-width="1.5"/>
+    <rect width="4" height="100" rx="2" fill="#1976d2"/>
+    <text x="16" y="28" font-size="14" font-weight="600" fill="#f1f5f9">Core Warehouse</text>
+    <text x="16" y="46" font-size="10" fill="#94a3b8">Dims, facts, bridges</text>
+    <text x="16" y="59" font-size="10" fill="#94a3b8">+ time-series enrichment</text>
+    <rect x="16" y="74" width="52" height="18" rx="9" fill="#1976d220" stroke="#1976d250" stroke-width="0.5"/>
+    <text x="42" y="86" text-anchor="middle" font-size="9" fill="#1976d2">14 nodes</text>
+  </g>
+  <!-- Time-Series sub-block attached below -->
+  <g class="block" transform="translate(640, 255)">
+    <rect width="120" height="50" rx="6" fill="#1e293b" stroke="#9c27b0" stroke-width="1.2"/>
+    <rect width="3" height="50" rx="1.5" fill="#9c27b0"/>
+    <text x="12" y="19" font-size="10" font-weight="600" fill="#ce93d8">Time-Series</text>
+    <text x="12" y="33" font-size="9" fill="#94a3b8">CPI deflation,</text>
+    <text x="12" y="44" font-size="9" fill="#94a3b8">derived metrics</text>
+  </g>
+  <!-- Connector from Core down to sub-block -->
+  <line x1="700" y1="240" x2="700" y2="253" stroke="#9c27b0" stroke-width="1.2"/>
+  <!-- Loop arrow: Time-Series feeds back into Core output -->
+  <path d="M 760 280 Q 785 280, 785 210 Q 785 190, 780 190" fill="none" stroke="#9c27b0" stroke-width="1.2" stroke-dasharray="4,3"/>
+
+  <!-- 6. Marts & Web (serve) — main spine -->
+  <g class="block" transform="translate(820, 140)">
+    <rect width="160" height="100" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="1.5"/>
+    <rect width="4" height="100" rx="2" fill="#6366f1"/>
+    <text x="16" y="28" font-size="14" font-weight="600" fill="#f1f5f9">Marts &amp; Web</text>
+    <text x="16" y="46" font-size="10" fill="#94a3b8">Marts powering</text>
+    <text x="16" y="59" font-size="10" fill="#94a3b8">interactive pages</text>
+    <rect x="16" y="74" width="52" height="18" rx="9" fill="#6366f120" stroke="#6366f150" stroke-width="0.5"/>
+    <text x="42" y="86" text-anchor="middle" font-size="9" fill="#6366f1">19 nodes</text>
+  </g>
+
+  <!-- 7. Build & Deploy (deploy) — main spine -->
+  <g class="block" transform="translate(1020, 140)">
+    <rect width="160" height="100" rx="8" fill="#1e293b" stroke="#795548" stroke-width="1.5"/>
+    <rect width="4" height="100" rx="2" fill="#795548"/>
+    <text x="16" y="28" font-size="14" font-weight="600" fill="#f1f5f9">Build &amp; Deploy</text>
+    <text x="16" y="46" font-size="10" fill="#94a3b8">Static site &amp;</text>
+    <text x="16" y="59" font-size="10" fill="#94a3b8">GitHub Pages</text>
+    <rect x="16" y="74" width="48" height="18" rx="9" fill="#79554820" stroke="#79554850" stroke-width="0.5"/>
+    <text x="40" y="86" text-anchor="middle" font-size="9" fill="#795548">5 nodes</text>
+  </g>
+
+  <text x="590" y="400" text-anchor="middle" font-size="11" fill="#475569">
+    Data flows left to right &#x2192;  |  57 nodes across 7 stages  |  7 topology edges
+  </text>
+</svg>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-line solid"></div><span>Required flow</span></div>
+  <div class="legend-item"><div class="legend-line dashed"></div><span>Conditional (gate)</span></div>
+</div>
+
+</body>
+</html>

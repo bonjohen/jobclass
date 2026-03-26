@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pipeline Explorer V2 — Mockup Gallery</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0f172a;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── Sidebar ── */
+  nav {
+    width: 280px;
+    min-width: 280px;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+  }
+  .nav-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid #334155;
+  }
+  .nav-header h1 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #f1f5f9;
+    letter-spacing: 0.3px;
+  }
+  .nav-header p {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .nav-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+  }
+  .nav-item {
+    display: block;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: #94a3b8;
+    border-left: 3px solid transparent;
+    transition: all 0.15s ease;
+    cursor: pointer;
+  }
+  .nav-item:hover {
+    background: #0f172a;
+    color: #e2e8f0;
+  }
+  .nav-item.active {
+    background: #0f172a;
+    color: #f1f5f9;
+    border-left-color: var(--accent);
+  }
+  .nav-item-label {
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-item-desc {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 2px;
+    line-height: 1.3;
+  }
+  .nav-item.active .nav-item-desc {
+    color: #94a3b8;
+  }
+  .nav-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+  .nav-badge {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #0f172a;
+    font-weight: 700;
+    margin-left: auto;
+  }
+  .nav-footer {
+    padding: 12px 20px;
+    border-top: 1px solid #334155;
+    font-size: 10px;
+    color: #475569;
+    line-height: 1.5;
+  }
+
+  /* ── Main content ── */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  iframe {
+    flex: 1;
+    border: none;
+    background: #0f172a;
+    width: 100%;
+  }
+  .toolbar {
+    height: 40px;
+    background: #1e293b;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .toolbar-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f1f5f9;
+  }
+  .toolbar-sep {
+    width: 1px;
+    height: 20px;
+    background: #334155;
+  }
+  .toolbar-file {
+    font-size: 11px;
+    color: #64748b;
+    font-family: "SF Mono", "Fira Code", monospace;
+  }
+  .toolbar-nav {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+  }
+  .toolbar-btn {
+    background: #334155;
+    border: none;
+    color: #94a3b8;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .toolbar-btn:hover {
+    background: #475569;
+    color: #f1f5f9;
+  }
+  .toolbar-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .toolbar-btn:disabled:hover {
+    background: #334155;
+    color: #94a3b8;
+  }
+  .toolbar-open {
+    background: none;
+    border: 1px solid #334155;
+    color: #64748b;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .toolbar-open:hover {
+    border-color: #64748b;
+    color: #94a3b8;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-header">
+    <h1>Pipeline Explorer V2</h1>
+    <p>Mockup Gallery &mdash; 8 diagrams covering the full pipeline from federal data sources to deployed website</p>
+  </div>
+  <div class="nav-items" id="nav-items">
+    <a class="nav-item active" data-index="0" data-src="00_summary_topology.html" style="--accent: #94a3b8">
+      <div class="nav-item-label">
+        <span class="nav-dot"></span>
+        Summary Topology
+        <span class="nav-badge">8</span>
+      </div>
+      <div class="nav-item-desc">Top-level pipeline flow with branching</div>
+    </a>
+    <a class="nav-item" data-index="1" data-src="01_data_sources.html" style="--accent: #3b82f6">
+      <div class="nav-item-label">
+        <span class="nav-dot"></span>
+        Data Sources
+        <span class="nav-badge">9</span>
+      </div>
+      <div class="nav-item-desc">6 federal sources + extraction engine</div>
+    </a>
+    <a class="nav-item" data-index="2" data-src="02_raw_landing.html" style="--accent: #e91e63">
+      <div class="nav-item-label">
+        <span class="nav-dot"></span>
+        Raw Landing
+        <span class="nav-badge">6</span>
+      </div>
+      <div class="nav-item-desc">Immutable file storage with path patterns</div>
+    </a>
+    <a class="nav-item" data-index="3" data-src="03_stage_parse.html" style="--accent: #4caf50">
+      <div class="nav-item-label">
+        <span class="nav-dot"></span>
+        Stage &amp; Parse
+        <span class="nav-badge">7</span>
+      </div>
+      <div class="nav-item-desc">Dataset-specific parsers with staging tables</div>
+    </a>
+    <a class="nav-item" data-index="4" data-src="04_validation_gates.html" style="--accent: #ef4444">
+      <div class="nav-item-label">
+        <span class="nav-dot"></span>
+        Validation Gates
+        <span class="nav-badge">6</span>
+      </div>
+      <div class="nav-item-desc">Sequential fail-fast quality chain</div>
+    </a>
+    <a class="nav-item" data-index="5" data-src="05_core_warehouse.html" style="--accent: #1976d2">
+      <div class="nav-item-label">
+        <span class="nav-dot"></span>
+        Core Warehouse
+        <span class="nav-badge">8</span>
+      </div>
+      <div class="nav-item-desc">Conformed dims, facts, bridges</div>
+    </a>
+    <a class="nav-item" data-index="6" data-src="06_time_series.html" style="--accent: #9c27b0">
+      <div class="nav-item-label">
+        <span class="nav-dot"></span>
+        Time-Series
+        <span class="nav-badge">6</span>
+      </div>
+      <div class="nav-item-desc">CPI deflation, derived metrics, history</div>
+    </a>
+    <a class="nav-item" data-index="7" data-src="07_marts_web.html" style="--accent: #6366f1">
+      <div class="nav-item-label">
+        <span class="nav-dot"></span>
+        Marts &amp; Web
+        <span class="nav-badge">19</span>
+      </div>
+      <div class="nav-item-desc">7 marts feeding 12 interactive pages</div>
+    </a>
+  </div>
+  <div class="nav-footer">
+    57 nodes &middot; 100+ edges &middot; 10 lanes<br>
+    Data from pipeline_graph_data.js
+  </div>
+</nav>
+
+<main>
+  <div class="toolbar">
+    <span class="toolbar-title" id="toolbar-title">Summary Topology</span>
+    <span class="toolbar-sep"></span>
+    <span class="toolbar-file" id="toolbar-file">00_summary_topology.html</span>
+    <a class="toolbar-open" id="toolbar-open" href="00_summary_topology.html" target="_blank" title="Open in new tab">Open &nearr;</a>
+    <div class="toolbar-nav">
+      <button class="toolbar-btn" id="btn-prev" disabled>&larr; Prev</button>
+      <button class="toolbar-btn" id="btn-next">Next &rarr;</button>
+    </div>
+  </div>
+  <iframe id="viewer" src="00_summary_topology.html"></iframe>
+</main>
+
+<script>
+(function() {
+  var items = document.querySelectorAll('.nav-item');
+  var viewer = document.getElementById('viewer');
+  var titleEl = document.getElementById('toolbar-title');
+  var fileEl = document.getElementById('toolbar-file');
+  var openEl = document.getElementById('toolbar-open');
+  var prevBtn = document.getElementById('btn-prev');
+  var nextBtn = document.getElementById('btn-next');
+  var current = 0;
+
+  function select(index) {
+    if (index < 0 || index >= items.length) return;
+    current = index;
+    var item = items[index];
+    var src = item.getAttribute('data-src');
+
+    items.forEach(function(el) { el.classList.remove('active'); });
+    item.classList.add('active');
+    item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+    viewer.src = src;
+    titleEl.textContent = item.querySelector('.nav-item-label').textContent.trim().replace(/\d+$/, '').trim();
+    fileEl.textContent = src;
+    openEl.href = src;
+
+    prevBtn.disabled = (index === 0);
+    nextBtn.disabled = (index === items.length - 1);
+  }
+
+  items.forEach(function(item, i) {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      select(i);
+    });
+  });
+
+  prevBtn.addEventListener('click', function() { select(current - 1); });
+  nextBtn.addEventListener('click', function() { select(current + 1); });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); select(current - 1); }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); select(current + 1); }
+  });
+})();
+</script>
+
+</body>
+</html>

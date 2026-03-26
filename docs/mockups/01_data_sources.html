@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pipeline Mockup — Data Sources (acquire)</title>
+<style>
+  body {
+    margin: 0; background: #0f172a;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #e2e8f0;
+  }
+  h1 { font-size: 18px; font-weight: 600; margin-bottom: 2px; color: #f1f5f9; }
+  .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
+  .back { position: fixed; top: 16px; left: 16px; color: #3b82f6; text-decoration: none; font-size: 13px; }
+  .back:hover { text-decoration: underline; }
+  .node { cursor: pointer; transition: filter 0.2s; }
+  .node:hover { filter: brightness(1.15); }
+  .legend { display: flex; gap: 20px; margin-top: 20px; font-size: 11px; color: #94a3b8; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 20px; height: 20px; border-radius: 4px; border: 1.5px solid; }
+</style>
+</head>
+<body>
+<a class="back" href="00_summary_topology.html">&larr; Summary Topology</a>
+<h1>Data Sources — Drill-In View</h1>
+<p class="subtitle">9 nodes &middot; 2 lanes (Federal Data Sources + Extraction &amp; Acquisition) &middot; Accent: <span style="color:#3b82f6">#3b82f6</span></p>
+
+<svg width="920" height="560" viewBox="0 0 920 560">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrow-cond" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#f59e0b"/>
+    </marker>
+    <marker id="arrow-opt" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-ghost" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <!-- Background grid -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+  </pattern>
+  <rect width="920" height="560" fill="url(#grid)" rx="12"/>
+
+  <!-- Lane backgrounds -->
+  <rect x="30" y="40" width="340" height="490" rx="8" fill="#3b82f608" stroke="#3b82f625" stroke-width="1"/>
+  <text x="200" y="68" text-anchor="middle" font-size="12" font-weight="600" fill="#3b82f6" opacity="0.7">Federal Data Sources</text>
+
+  <rect x="410" y="40" width="290" height="490" rx="8" fill="#f59e0b08" stroke="#f59e0b25" stroke-width="1"/>
+  <text x="555" y="68" text-anchor="middle" font-size="12" font-weight="600" fill="#f59e0b" opacity="0.7">Extraction &amp; Acquisition</text>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- EDGES                              -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- Sources → Download Manager -->
+  <line x1="280" y1="120" x2="468" y2="255" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="280" y1="185" x2="468" y2="260" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="280" y1="250" x2="468" y2="270" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="280" y1="315" x2="468" y2="280" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="280" y1="380" x2="468" y2="285" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- crosswalk → download (required) -->
+  <line x1="280" y1="445" x2="468" y2="290" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Download Manager → Run Manifest -->
+  <line x1="555" y1="305" x2="555" y2="358" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Download Manager → Browser Headers -->
+  <line x1="555" y1="305" x2="555" y2="428" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
+  <rect x="565" y="360" width="90" height="16" rx="8" fill="#0f172a" stroke="#f59e0b" stroke-width="0.7"/>
+  <text x="610" y="371" text-anchor="middle" font-size="9" fill="#f59e0b">BLS sources only</text>
+
+  <!-- Ghost outgoing arrows → Raw Landing -->
+  <line x1="635" y1="270" x2="890" y2="120" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="635" y1="270" x2="890" y2="185" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="635" y1="270" x2="890" y2="250" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="635" y1="270" x2="890" y2="315" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="635" y1="275" x2="890" y2="380" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="635" y1="275" x2="890" y2="445" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+
+  <!-- Ghost label -->
+  <text x="870" y="70" text-anchor="end" font-size="10" fill="#475569" font-style="italic">to Raw Landing &rarr;</text>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- SOURCE NODES (hexagons)            -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- SOC Taxonomy -->
+  <g class="node" transform="translate(170, 100)">
+    <polygon points="0,20 15,0 95,0 110,20 95,40 15,40" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="55" y="17" text-anchor="middle" font-size="11" font-weight="600" fill="#f1f5f9">SOC Taxonomy</text>
+    <text x="55" y="32" text-anchor="middle" font-size="9" fill="#94a3b8">Periodic &middot; XLSX/CSV</text>
+  </g>
+
+  <!-- OEWS Survey -->
+  <g class="node" transform="translate(170, 165)">
+    <polygon points="0,20 15,0 95,0 110,20 95,40 15,40" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="55" y="17" text-anchor="middle" font-size="11" font-weight="600" fill="#f1f5f9">OEWS Survey</text>
+    <text x="55" y="32" text-anchor="middle" font-size="9" fill="#94a3b8">Annual &middot; XLSX</text>
+  </g>
+
+  <!-- O*NET -->
+  <g class="node" transform="translate(170, 230)">
+    <polygon points="0,20 15,0 95,0 110,20 95,40 15,40" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="55" y="17" text-anchor="middle" font-size="11" font-weight="600" fill="#f1f5f9">O*NET</text>
+    <text x="55" y="32" text-anchor="middle" font-size="9" fill="#94a3b8">Semi-annual &middot; 7 domains</text>
+  </g>
+
+  <!-- BLS Projections -->
+  <g class="node" transform="translate(170, 295)">
+    <polygon points="0,20 15,0 95,0 110,20 95,40 15,40" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="55" y="17" text-anchor="middle" font-size="11" font-weight="600" fill="#f1f5f9">BLS Projections</text>
+    <text x="55" y="32" text-anchor="middle" font-size="9" fill="#94a3b8">Biennial &middot; XLSX</text>
+  </g>
+
+  <!-- BLS CPI-U -->
+  <g class="node" transform="translate(170, 360)">
+    <polygon points="0,20 15,0 95,0 110,20 95,40 15,40" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="55" y="17" text-anchor="middle" font-size="11" font-weight="600" fill="#f1f5f9">BLS CPI-U</text>
+    <text x="55" y="32" text-anchor="middle" font-size="9" fill="#94a3b8">Monthly &middot; Flat files</text>
+  </g>
+
+  <!-- SOC Crosswalk -->
+  <g class="node" transform="translate(170, 425)">
+    <polygon points="0,20 15,0 95,0 110,20 95,40 15,40" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="55" y="17" text-anchor="middle" font-size="11" font-weight="600" fill="#f1f5f9">SOC Crosswalk</text>
+    <text x="55" y="32" text-anchor="middle" font-size="9" fill="#94a3b8">One-time &middot; XLSX</text>
+  </g>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- PROCESS NODES (rounded rects)      -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- Download Manager -->
+  <g class="node" transform="translate(470, 245)">
+    <rect width="170" height="58" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="85" y="22" text-anchor="middle" font-size="12" font-weight="600" fill="#f1f5f9">Download Manager</text>
+    <text x="85" y="38" text-anchor="middle" font-size="9" fill="#94a3b8">Manifest-driven engine</text>
+    <text x="85" y="51" text-anchor="middle" font-size="9" fill="#64748b">download.py</text>
+  </g>
+
+  <!-- Run Manifest -->
+  <g class="node" transform="translate(470, 360)">
+    <rect width="170" height="50" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="85" y="22" text-anchor="middle" font-size="12" font-weight="600" fill="#f1f5f9">Run Manifest</text>
+    <text x="85" y="38" text-anchor="middle" font-size="9" fill="#94a3b8">Run ID, timestamps, checksums</text>
+  </g>
+
+  <!-- Browser Header Workaround -->
+  <g class="node" transform="translate(470, 430)">
+    <rect width="170" height="58" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="85" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#f1f5f9">Browser Header</text>
+    <text x="85" y="34" text-anchor="middle" font-size="11" font-weight="600" fill="#f1f5f9">Workaround</text>
+    <text x="85" y="50" text-anchor="middle" font-size="9" fill="#94a3b8">Sec-Fetch-* headers</text>
+  </g>
+
+  <!-- Node count summary -->
+  <text x="460" y="540" text-anchor="middle" font-size="11" fill="#475569">
+    6 source nodes (hexagons) &middot; 3 process nodes (rounded rects) &middot; 8 internal edges
+  </text>
+</svg>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#1e293b; border-color:#3b82f6; clip-path: polygon(15% 50%, 25% 0%, 75% 0%, 85% 50%, 75% 100%, 25% 100%)"></div>
+    <span>Source (hexagon)</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:#1e293b; border-color:#f59e0b; border-radius:6px;"></div>
+    <span>Process</span>
+  </div>
+  <div class="legend-item">
+    <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#94a3b8" stroke-width="1.5"/></svg>
+    <span>Required</span>
+  </div>
+  <div class="legend-item">
+    <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,3"/></svg>
+    <span>Conditional</span>
+  </div>
+  <div class="legend-item">
+    <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4"/></svg>
+    <span>Optional</span>
+  </div>
+  <div class="legend-item">
+    <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4"/></svg>
+    <span>External (ghost)</span>
+  </div>
+</div>
+</body>
+</html>

@@ -17,9 +17,10 @@ Subsequent release plans (all complete):
 * `docs\specs\lessons_release_plan.md` — Lessons section with 12 educational pages (36/36 tasks)
 
 Active release plans:
-* `docs\specs\pipeline_explorer_plan.md` — Pipeline Explorer interactive visualization, 140 tasks across 14 phases (PE0–PE13)
+(none)
 
 Completed release plans:
+* `docs\specs\pipeline_explorer_plan.md` — Pipeline Explorer interactive visualization (140/140 tasks, PE0–PE13)
 * `docs\specs\new_data_source_plan.md` — 7 new data sources, 102 tasks across 8 phases (NDS1–NDS8)
 * `docs\specs\phased_code_review_release_plan_v2.md` — 18 findings, 62 tasks across 4 phases (CR2-P1–P4)
 
@@ -185,8 +186,6 @@ Logical pipelines: `taxonomy_refresh`, `oews_refresh`, `onet_refresh`, `projecti
 
 **Code Review V2 Release** — 18 findings across 4 phases: security hardening, performance optimization, code quality, and test coverage improvements.
 
-## Current Release: Pipeline Explorer
-
-See `docs\specs\pipeline_explorer_plan.md` for the active work plan. Canvas-based, graph-driven visualization of the entire JobClass pipeline — from federal data sources through extraction, staging, core warehouse, marts, APIs, and web pages. Semantic zoom, guided educational modes, rich detail panels. 140 tasks across 14 phases (PE0–PE13). No third-party libraries; vanilla JS consistent with existing approach.
+**Pipeline Explorer Release** — Canvas-based interactive graph visualization of the entire JobClass pipeline at `/pipeline`. 57 nodes, 100+ edges, 10 lane groups. Semantic zoom (overview/subsystem/detail), smooth camera animation, guided educational modes (4 modes with intro overlay and pulse animation), node/edge interaction with detail panel, minimap with drag viewport, search/filter/overlay controls, domain filters, path isolation, cross-links to all 20 lessons and methodology, URL hash deep-linking, arrow-key navigation, reduced-motion support, 19 new tests.
 
 Not in scope: HR job architecture, title normalization, international harmonization, real-time APIs.
