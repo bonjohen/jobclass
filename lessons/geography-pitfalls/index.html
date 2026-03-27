@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Labor market occupation data — employment, wages, skills, tasks, and projections from federal sources.">
+    <title>Geography Comparison Pitfalls — Lessons — JobClass</title>
+    <link rel="stylesheet" href="/static/css/main.css?v=PE0">
+    <script src="/static/js/main.js?v=PE0"></script>
+<script>
+(function(){
+var F=window.fetch,SC=null;
+function LS(b){
+  if(!SC)SC=F(b+'/api/occupations/search.json').then(function(r){return r.json()});
+  return SC;
+}
+window.fetch=function(u){
+  if(typeof u!=='string')return F.apply(this,arguments);
+  var ai=u.indexOf('/api/');
+  if(ai<0)return F.apply(this,arguments);
+  var b=u.substring(0,ai),r=u.substring(ai);
+  var qi=r.indexOf('?'),p=qi>=0?r.substring(0,qi):r;
+  var sp=new URLSearchParams(qi>=0?r.substring(qi+1):'');
+  if(p==='/api/occupations/search'){
+    return LS(b).then(function(d){
+      var q=(sp.get('q')||'').toLowerCase(),
+          lm=+(sp.get('limit')||50),of=+(sp.get('offset')||0),
+          rs=d.results||[];
+      if(q)rs=rs.filter(function(x){
+        return x.soc_code.toLowerCase().indexOf(q)>=0||
+               x.occupation_title.toLowerCase().indexOf(q)>=0;
+      });
+      return new Response(JSON.stringify({
+        results:rs.slice(of,of+lm),total:rs.length,limit:lm,offset:of
+      }),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  var pts=p.split('/');
+  if(pts.length===5&&pts[4]==='wages'&&pts[2]==='occupations'){
+    return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
+  }
+  if(p==='/api/trends/movers'){
+    var yr=sp.get('year'),mt=sp.get('metric')||'employment_count';
+    var mf=mt==='employment_count'?'':'_'+mt;
+    if(yr)return F(b+'/api/trends/movers-'+yr+mf+'.json');
+    return F(b+'/api/trends/movers'+mf+'.json');
+  }
+  if(p==='/api/trends/compare/occupations'){
+    var codes=(sp.get('soc_codes')||'').split(',').filter(Boolean);
+    var met=sp.get('metric')||'employment_count';
+    var gt=sp.get('geo_type')||'national';
+    return Promise.all(codes.map(function(c){
+      var ct=c.trim();
+      var tf=met==='employment_count'?ct+'.json':ct+'-'+met+'.json';
+      return Promise.all([
+        F(b+'/api/trends/'+tf).then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:trend',ct,e);return null}),
+        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:occ',ct,e);return null})
+      ]);
+    })).then(function(arr){
+      var occs=[];
+      arr.forEach(function(pair,i){
+        var d=pair[0],info=pair[1];
+        if(!d||!d.series)return;
+        var title=(info&&info.occupation_title)?info.occupation_title:codes[i];
+        occs.push({soc_code:codes[i],title:title,series:d.series.map(function(s){return{year:s.year,value:s.value}})});
+      });
+      var body=JSON.stringify({metric:met,geo_type:gt,occupations:occs});
+      return new Response(body,{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(pts.length===4&&pts[1]==='api'&&pts[2]==='trends'&&/^\d{2}-\d{4}$/.test(pts[3])){
+    var tm=sp.get('metric');
+    if(tm&&tm!=='employment_count')return F(b+'/api/trends/'+pts[3]+'-'+tm+'.json');
+    return F(b+'/api/trends/'+pts[3]+'.json');
+  }
+  if(p==='/api/trends/compare/geography'){
+    var sc=sp.get('soc_code');
+    if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
+  }
+  if(p==='/api/cpi/search'){
+    return F(b+'/api/cpi/search.json').then(function(r){return r.json()}).then(function(d){
+      var q2=(sp.get('q')||'').toLowerCase(),lm2=+(sp.get('limit')||50),
+          rs2=d.results||[];
+      if(q2)rs2=rs2.filter(function(x){
+        return x.member_code.toLowerCase().indexOf(q2)>=0||x.title.toLowerCase().indexOf(q2)>=0;
+      });
+      return new Response(JSON.stringify({query:sp.get('q')||'',total:rs2.length,results:rs2.slice(0,lm2)}),
+        {headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(p==='/api/cpi/explorer/tree'){
+    var root=sp.get('root')||'SA0',md=sp.get('max_depth')||'3';
+    return F(b+'/api/cpi/explorer/tree-'+root+'-'+md+'.json');
+  }
+  if(p==='/api/cpi/compare'){
+    var cc=(sp.get('codes')||'').split(',').filter(Boolean);
+    var cac=sp.get('area_code')||'0000',cif=sp.get('index_family')||'CPI-U',csa=sp.get('seasonal_adjustment')||'S';
+    return Promise.all(cc.map(function(c){
+      var ct=c.trim();
+      return F(b+'/api/cpi/members/'+ct+'/series.json').then(function(r){return r.json()})
+        .catch(function(){return null});
+    })).then(function(arr){
+      var series={};
+      cc.forEach(function(c,i){
+        var d=arr[i];
+        if(d&&d.series)series[c.trim()]=d.series.map(function(s){return{year:s.year,value:s.value}});
+      });
+      return new Response(JSON.stringify({codes:cc,series:series}),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  return F(b+p+'.json');
+};
+})();
+</script>
+</head>
+<body>
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <header role="banner">
+        <nav aria-label="Main navigation">
+            <div class="nav-brand">
+                <a href="/">JobClass</a>
+            </div>
+            <ul class="nav-links" role="list">
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search</a></li>
+                <li><a href="/hierarchy">Hierarchy</a></li>
+                <li><a href="/trends">Trends</a></li>
+                <li><a href="/cpi">CPI</a></li>
+                <li><a href="/pipeline">Pipeline</a></li>
+                <li><a href="/methodology">Methodology</a></li>
+                <li><a href="/lessons">Lessons</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content" role="main">
+        
+        
+            <section class="lesson-page">
+    <h1>Geography Comparison Pitfalls</h1>
+    <p class="lesson-meta">Lesson 19 &mdash; State-level data challenges</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/outlier-interpretation">&larr; Ranked Movers &amp; Outlier Interpretation</a>
+        </div>
+        <div style="text-align: center;">
+            <a href="/pipeline#node=store_dim_geography">View in Pipeline &rarr;</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/fetch-shim">Fetch Shim Architecture &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>State vs. National Gaps</h2>
+        <p>
+            One of the most useful derived metrics in the warehouse is the state-vs-national gap:
+            how much does a state's wage for a given occupation differ from the national average?
+            The computation is a single INSERT&hellip;SELECT that pairs each state observation
+            with the corresponding national observation for the same occupation, metric, and period.
+        </p>
+        <pre class="lesson-code"><code>-- State minus national for the same metric, occupation, period
+INSERT INTO fact_derived_series (...)
+SELECT
+    derived_key, base_key,
+    state_obs.occupation_key,
+    state_obs.geography_key,
+    state_obs.period_key,
+    state_obs.comparability_mode,
+    state_obs.observed_value - nat_obs.observed_value,
+    'state_vs_national_gap', run_id
+FROM fact_time_series_observation state_obs
+JOIN dim_geography g ON state_obs.geography_key = g.geography_key
+JOIN dim_geography g_nat ON g_nat.geo_type = 'national'
+JOIN fact_time_series_observation nat_obs
+  ON nat_obs.occupation_key = state_obs.occupation_key
+  AND nat_obs.geography_key = g_nat.geography_key
+  AND nat_obs.period_key = state_obs.period_key
+WHERE g.geo_type = 'state'
+  AND state_obs.observed_value IS NOT NULL
+  AND nat_obs.observed_value IS NOT NULL</code></pre>
+        <p>
+            The derived value is simply state minus national. A positive gap means the state pays
+            more than the national average; a negative gap means less. The join on
+            <code>occupation_key</code> and <code>period_key</code> ensures each comparison is
+            apples-to-apples &mdash; same occupation, same time period, same metric. The
+            <code>IS NOT NULL</code> filters exclude suppressed values, so the derived series
+            only contains gaps where both sides have real data.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Geography Compare Endpoint</h2>
+        <p>
+            The API endpoint that powers the geography comparison view follows a common
+            year-resolution pattern. If the caller does not specify a year, the endpoint
+            automatically finds the latest available year in the data.
+        </p>
+        <pre class="lesson-code"><code># compare_geography(soc_code, metric, year)
+# 1. If year not specified, find MAX(year) from data
+# 2. Filter observations by:
+#    - soc_code (specific occupation)
+#    - metric (mean_annual_wage, etc.)
+#    - geo_type = 'state'
+#    - year (specific period)
+# 3. Return list of {geo_name, geo_code, value, source_release_id}
+# 4. Order by geo_name for consistent display</code></pre>
+        <p>
+            The year-resolution pattern (default to latest available) is a common UX strategy.
+            It ensures users always see data even if they don't specify a year. This is especially
+            important because different data vintages may have different latest years &mdash;
+            OEWS 2023 data might be the newest available, while another source might only go
+            through 2022. The endpoint resolves the year within the context of the specific
+            occupation and metric being queried.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Cost-of-Living Confounders</h2>
+        <p>
+            A $10,000 state-vs-national wage gap does NOT mean the state is "better paid."
+            California's software developers earn roughly $20K above the national average, but
+            San Francisco housing costs $30K more per year than the national average. A positive
+            gap in nominal wages can mask a negative gap in purchasing power.
+        </p>
+        <p>
+            This is not a solvable problem within the OEWS data alone. The Bureau of Economic
+            Analysis publishes Regional Price Parities (RPPs) that could adjust for geographic
+            cost differences, but the warehouse does not currently ingest RPP data. Until it does,
+            geographic wage comparisons must carry an explicit caveat.
+        </p>
+        <div class="lesson-callout">
+            <p>
+                <strong>Important:</strong> The warehouse does not include cost-of-living data.
+                All geographic wage comparisons are nominal. A positive gap signals higher pay,
+                not higher purchasing power. Users must bring their own cost-of-living context
+                to interpret these numbers.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Suppressed Cells in Small States</h2>
+        <p>
+            States with few workers in a given occupation have suppressed OEWS data. Wyoming
+            may have data for "Registered Nurses" but not for "Industrial-Organizational
+            Psychologists" (a niche occupation with perhaps 1&ndash;2 practitioners statewide).
+            The BLS suppresses cells to protect confidentiality when the number of respondents
+            is too small.
+        </p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Occupation</th>
+                    <th>States with data</th>
+                    <th>States suppressed</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Registered Nurses (29-1141)</td>
+                    <td>51</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>Software Developers (15-1252)</td>
+                    <td>51</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>Dancers (27-2031)</td>
+                    <td>12</td>
+                    <td>39</td>
+                </tr>
+                <tr>
+                    <td>Astronomers (19-2011)</td>
+                    <td>7</td>
+                    <td>44</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            The API returns only non-NULL values &mdash; suppressed states simply don't appear
+            in the response. This means small-occupation geographic comparisons show an incomplete
+            picture. A map visualization for "Dancers" would have 39 blank states, which could be
+            mistaken for zero employment rather than suppressed data. The distinction matters:
+            suppressed means "data exists but can't be disclosed," not "no workers in this state."
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Dimension-Driven Filtering</h2>
+        <p>
+            The geography dimension table is the key to flexible geographic queries. Every
+            observation links to <code>dim_geography</code> through a surrogate key, and the
+            dimension carries the <code>geo_type</code> classifier that enables level-based
+            filtering.
+        </p>
+        <pre class="lesson-code"><code>dim_geography:
+  geo_key | geo_type  | geo_code | geo_name
+  1       | national  | US       | National
+  2       | state     | CA       | California
+  3       | state     | NY       | New York
+  4       | metro     | 31080    | Los Angeles-Long Beach-Anaheim</code></pre>
+        <p>
+            All endpoints filter by <code>geo_type</code> &mdash; the same query pattern works
+            across national, state, and metro comparisons. The dimension design means adding a
+            new geography level (e.g., county) requires no schema changes &mdash; just new rows
+            in <code>dim_geography</code>. The fact tables don't know or care what kind of
+            geography they're pointing to; the dimension carries that context.
+        </p>
+        <p>
+            This is a textbook example of why dimensional modeling favors explicit type columns
+            over separate tables. A <code>dim_state</code> table and a <code>dim_metro</code>
+            table would force every query to know which table to join. A single
+            <code>dim_geography</code> with a <code>geo_type</code> filter lets the same SQL
+            work for any level.
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/outlier-interpretation">&larr; Ranked Movers &amp; Outlier Interpretation</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/fetch-shim">Fetch Shim Architecture &rarr;</a>
+        </div>
+    </nav>
+</section>
+        
+        
+    </main>
+
+    <footer role="contentinfo">
+        <div class="footer-content">
+            <p>JobClass — Labor Market Occupation Pipeline</p>
+            <p class="footer-meta">Data sourced from BLS (SOC, OEWS, Employment Projections) and O*NET</p>
+        </div>
+    </footer>
+
+</body>
+</html>

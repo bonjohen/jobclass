@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Labor market occupation data — employment, wages, skills, tasks, and projections from federal sources.">
+    <title>Crosswalk &amp; Taxonomy Evolution — Lessons — JobClass</title>
+    <link rel="stylesheet" href="/static/css/main.css?v=PE0">
+    <script src="/static/js/main.js?v=PE0"></script>
+<script>
+(function(){
+var F=window.fetch,SC=null;
+function LS(b){
+  if(!SC)SC=F(b+'/api/occupations/search.json').then(function(r){return r.json()});
+  return SC;
+}
+window.fetch=function(u){
+  if(typeof u!=='string')return F.apply(this,arguments);
+  var ai=u.indexOf('/api/');
+  if(ai<0)return F.apply(this,arguments);
+  var b=u.substring(0,ai),r=u.substring(ai);
+  var qi=r.indexOf('?'),p=qi>=0?r.substring(0,qi):r;
+  var sp=new URLSearchParams(qi>=0?r.substring(qi+1):'');
+  if(p==='/api/occupations/search'){
+    return LS(b).then(function(d){
+      var q=(sp.get('q')||'').toLowerCase(),
+          lm=+(sp.get('limit')||50),of=+(sp.get('offset')||0),
+          rs=d.results||[];
+      if(q)rs=rs.filter(function(x){
+        return x.soc_code.toLowerCase().indexOf(q)>=0||
+               x.occupation_title.toLowerCase().indexOf(q)>=0;
+      });
+      return new Response(JSON.stringify({
+        results:rs.slice(of,of+lm),total:rs.length,limit:lm,offset:of
+      }),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  var pts=p.split('/');
+  if(pts.length===5&&pts[4]==='wages'&&pts[2]==='occupations'){
+    return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
+  }
+  if(p==='/api/trends/movers'){
+    var yr=sp.get('year'),mt=sp.get('metric')||'employment_count';
+    var mf=mt==='employment_count'?'':'_'+mt;
+    if(yr)return F(b+'/api/trends/movers-'+yr+mf+'.json');
+    return F(b+'/api/trends/movers'+mf+'.json');
+  }
+  if(p==='/api/trends/compare/occupations'){
+    var codes=(sp.get('soc_codes')||'').split(',').filter(Boolean);
+    var met=sp.get('metric')||'employment_count';
+    var gt=sp.get('geo_type')||'national';
+    return Promise.all(codes.map(function(c){
+      var ct=c.trim();
+      var tf=met==='employment_count'?ct+'.json':ct+'-'+met+'.json';
+      return Promise.all([
+        F(b+'/api/trends/'+tf).then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:trend',ct,e);return null}),
+        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:occ',ct,e);return null})
+      ]);
+    })).then(function(arr){
+      var occs=[];
+      arr.forEach(function(pair,i){
+        var d=pair[0],info=pair[1];
+        if(!d||!d.series)return;
+        var title=(info&&info.occupation_title)?info.occupation_title:codes[i];
+        occs.push({soc_code:codes[i],title:title,series:d.series.map(function(s){return{year:s.year,value:s.value}})});
+      });
+      var body=JSON.stringify({metric:met,geo_type:gt,occupations:occs});
+      return new Response(body,{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(pts.length===4&&pts[1]==='api'&&pts[2]==='trends'&&/^\d{2}-\d{4}$/.test(pts[3])){
+    var tm=sp.get('metric');
+    if(tm&&tm!=='employment_count')return F(b+'/api/trends/'+pts[3]+'-'+tm+'.json');
+    return F(b+'/api/trends/'+pts[3]+'.json');
+  }
+  if(p==='/api/trends/compare/geography'){
+    var sc=sp.get('soc_code');
+    if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
+  }
+  if(p==='/api/cpi/search'){
+    return F(b+'/api/cpi/search.json').then(function(r){return r.json()}).then(function(d){
+      var q2=(sp.get('q')||'').toLowerCase(),lm2=+(sp.get('limit')||50),
+          rs2=d.results||[];
+      if(q2)rs2=rs2.filter(function(x){
+        return x.member_code.toLowerCase().indexOf(q2)>=0||x.title.toLowerCase().indexOf(q2)>=0;
+      });
+      return new Response(JSON.stringify({query:sp.get('q')||'',total:rs2.length,results:rs2.slice(0,lm2)}),
+        {headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(p==='/api/cpi/explorer/tree'){
+    var root=sp.get('root')||'SA0',md=sp.get('max_depth')||'3';
+    return F(b+'/api/cpi/explorer/tree-'+root+'-'+md+'.json');
+  }
+  if(p==='/api/cpi/compare'){
+    var cc=(sp.get('codes')||'').split(',').filter(Boolean);
+    var cac=sp.get('area_code')||'0000',cif=sp.get('index_family')||'CPI-U',csa=sp.get('seasonal_adjustment')||'S';
+    return Promise.all(cc.map(function(c){
+      var ct=c.trim();
+      return F(b+'/api/cpi/members/'+ct+'/series.json').then(function(r){return r.json()})
+        .catch(function(){return null});
+    })).then(function(arr){
+      var series={};
+      cc.forEach(function(c,i){
+        var d=arr[i];
+        if(d&&d.series)series[c.trim()]=d.series.map(function(s){return{year:s.year,value:s.value}});
+      });
+      return new Response(JSON.stringify({codes:cc,series:series}),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  return F(b+p+'.json');
+};
+})();
+</script>
+</head>
+<body>
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <header role="banner">
+        <nav aria-label="Main navigation">
+            <div class="nav-brand">
+                <a href="/">JobClass</a>
+            </div>
+            <ul class="nav-links" role="list">
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search</a></li>
+                <li><a href="/hierarchy">Hierarchy</a></li>
+                <li><a href="/trends">Trends</a></li>
+                <li><a href="/cpi">CPI</a></li>
+                <li><a href="/pipeline">Pipeline</a></li>
+                <li><a href="/methodology">Methodology</a></li>
+                <li><a href="/lessons">Lessons</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content" role="main">
+        
+        
+            <section class="lesson-page">
+    <h1>Crosswalk &amp; Taxonomy Evolution</h1>
+    <p class="lesson-meta">Lesson 15 &mdash; Occupation code versioning</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/inflation-adjustment">&larr; Inflation Adjustment with CPI</a>
+        </div>
+        <div style="text-align: center;">
+            <a href="/pipeline#node=src_crosswalk">View in Pipeline &rarr;</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/government-apis">Extract Patterns for Government APIs &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>The Illusion of Stable Codes</h2>
+        <p>
+            SOC code <code>15-1131</code> meant "Computer Programmers" in SOC 2010. In SOC 2018,
+            it was renumbered to <code>15-1251</code> ("Software Developers"). The definition also
+            changed. Naively comparing wages for "15-1131" across vintages mixes two different
+            occupation definitions. Same code does not mean same occupation.
+        </p>
+        <p>
+            This is not an edge case. The SOC 2010-to-2018 revision restructured entire occupation
+            groups. Some codes were split into multiple new codes. Others were merged. A few shifted
+            to different major groups entirely. Any time-series analysis that treats SOC codes as
+            stable identifiers across revisions will produce misleading results.
+        </p>
+        <p>
+            The solution is a <strong>crosswalk</strong> &mdash; an explicit mapping from every old
+            code to every new code, with metadata about the type of change. The BLS publishes this
+            mapping as a downloadable CSV. The pipeline parses it, classifies each pair, and stores
+            the result in a bridge table that downstream queries can join against.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Crosswalk Structure</h2>
+        <p>
+            The parser produces one <code>CrosswalkRow</code> per (source, target) pair. Each row
+            captures both the old and new code, plus metadata about the mapping relationship.
+        </p>
+        <pre class="lesson-code"><code>@dataclass
+class CrosswalkRow:
+    source_soc_code: str        # SOC 2010 code
+    source_soc_title: str
+    source_soc_version: str     # "2010"
+    target_soc_code: str        # SOC 2018 code
+    target_soc_title: str
+    target_soc_version: str     # "2018"
+    mapping_type: str           # "1:1", "split", "merge", "complex"
+    source_release_id: str
+    parser_version: str</code></pre>
+        <p>
+            Each row maps one 2010 code to one 2018 code. The <code>mapping_type</code> field is
+            not present in the source data &mdash; it is computed by analyzing cardinality across
+            all pairs. A 2010 code that maps to exactly one 2018 code (and vice versa) is
+            <code>1:1</code>. A 2010 code that maps to multiple 2018 codes is a <code>split</code>.
+            The classification depends on the full set of pairs, not any single row in isolation.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Cardinality-Based Classification</h2>
+        <p>
+            The mapping type is derived from two counts: how many targets each source maps to
+            (fan-out), and how many sources each target receives (fan-in). The algorithm builds
+            these dictionaries in a first pass, then classifies each pair in a second pass.
+        </p>
+        <pre class="lesson-code"><code># Count fan-out and fan-in
+source_targets = {}  # 2010 code &rarr; set of 2018 codes
+target_sources = {}  # 2018 code &rarr; set of 2010 codes
+
+for pair in all_pairs:
+    source_targets[pair.source].add(pair.target)
+    target_sources[pair.target].add(pair.source)
+
+# Classify each pair
+for pair in all_pairs:
+    src_fan = len(source_targets[pair.source])
+    tgt_fan = len(target_sources[pair.target])
+    if src_fan == 1 and tgt_fan == 1:
+        pair.mapping_type = "1:1"      # Unchanged
+    elif src_fan &gt; 1 and tgt_fan == 1:
+        pair.mapping_type = "split"    # One old &rarr; many new
+    elif src_fan == 1 and tgt_fan &gt; 1:
+        pair.mapping_type = "merge"    # Many old &rarr; one new
+    else:
+        pair.mapping_type = "complex"  # Many-to-many</code></pre>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Fan-out</th>
+                    <th>Fan-in</th>
+                    <th>Safe for wage comparison?</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1:1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>Yes &mdash; same occupation, different code</td>
+                </tr>
+                <tr>
+                    <td>split</td>
+                    <td>&gt;1</td>
+                    <td>1</td>
+                    <td>No &mdash; wages can't be disaggregated</td>
+                </tr>
+                <tr>
+                    <td>merge</td>
+                    <td>1</td>
+                    <td>&gt;1</td>
+                    <td>No &mdash; wages can't be averaged meaningfully</td>
+                </tr>
+                <tr>
+                    <td>complex</td>
+                    <td>&gt;1</td>
+                    <td>&gt;1</td>
+                    <td>No &mdash; requires manual analysis</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            The four types cover every possible relationship. In the SOC 2010&rarr;2018 crosswalk,
+            the majority of codes are 1:1 mappings. Splits and merges are less common but affect
+            some of the most analytically interesting occupations (technology roles, healthcare
+            specialties). Complex mappings are rare and typically involve major group restructuring.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Why This Matters for Time Series</h2>
+        <div class="lesson-callout">
+            <p>
+                <strong>Key principle:</strong> Only 1:1 mappings are safe for direct wage comparison
+                across SOC versions. Splits can aggregate employment counts (addition) but not wages
+                (you can't split a mean). Merges lose granularity. The crosswalk bridge table stores
+                all mapping types, but the comparable-history pipeline only uses 1:1 pairs.
+            </p>
+        </div>
+        <p>
+            Consider a split: SOC 2010 code <code>15-1100</code> (Computer Occupations) splits into
+            three SOC 2018 codes. The 2010 vintage reports a single mean wage for the combined group.
+            You cannot divide that mean wage into three parts because the component occupations have
+            different wage distributions. However, you <em>can</em> sum the 2018 employment counts
+            back to the 2010 group level, because employment is additive.
+        </p>
+        <p>
+            Merges have the opposite problem: two SOC 2010 codes collapse into one SOC 2018 code.
+            You could average the 2010 wages, but an unweighted average misrepresents the combined
+            group. A weighted average requires employment counts, which introduces circular
+            dependencies when both wages and employment are the quantities you're trying to compare.
+        </p>
+        <p>
+            The pipeline sidesteps these problems by restricting comparable history to 1:1 mappings.
+            This sacrifices coverage (some occupations can't be tracked across versions) in exchange
+            for correctness (every comparison that is made is statistically valid).
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Parse Pipeline</h2>
+        <p>
+            The crosswalk parser uses a two-pass approach. The first pass collects all (source, target)
+            pairs from the CSV. The second pass classifies each pair using the cardinality dictionaries
+            built during the first pass.
+        </p>
+        <pre class="lesson-code"><code># Pass 1: Collect all pairs and build cardinality maps
+pairs = []
+source_targets = defaultdict(set)
+target_sources = defaultdict(set)
+
+for row in csv_reader:
+    src = normalize_code(row[source_col])
+    tgt = normalize_code(row[target_col])
+    pairs.append((src, tgt, row))
+    source_targets[src].add(tgt)
+    target_sources[tgt].add(src)
+
+# Pass 2: Classify and emit CrosswalkRow objects
+for src, tgt, row in pairs:
+    mapping_type = classify(src, tgt, source_targets, target_sources)
+    yield CrosswalkRow(
+        source_soc_code=src,
+        target_soc_code=tgt,
+        mapping_type=mapping_type,
+        ...
+    )</code></pre>
+        <p>
+            Column aliases handle both possible header formats in the BLS CSV &mdash;
+            <code>"2010 SOC Code"</code> vs. <code>"Old SOC Code"</code>. The parser tries each
+            alias in order and uses the first match. Regex validation ensures all codes match the
+            <code>XX-XXXX</code> pattern before processing, catching malformed rows early.
+        </p>
+        <p>
+            The two-pass design is necessary because classification requires global knowledge.
+            You cannot determine whether a pair is 1:1 or part of a split until you've seen
+            every pair involving that source code. Streaming single-pass processing would require
+            deferred classification with a flush step &mdash; more complex for no real benefit
+            given the small size of the crosswalk file (under 2,000 rows).
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/inflation-adjustment">&larr; Inflation Adjustment with CPI</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/government-apis">Extract Patterns for Government APIs &rarr;</a>
+        </div>
+    </nav>
+</section>
+        
+        
+    </main>
+
+    <footer role="contentinfo">
+        <div class="footer-content">
+            <p>JobClass — Labor Market Occupation Pipeline</p>
+            <p class="footer-meta">Data sourced from BLS (SOC, OEWS, Employment Projections) and O*NET</p>
+        </div>
+    </footer>
+
+</body>
+</html>
