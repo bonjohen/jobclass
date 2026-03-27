@@ -26,7 +26,7 @@
 <h1>Build &amp; Deploy — Drill-In View</h1>
 <p class="subtitle">5 process nodes &middot; 1 lane (Build &amp; Deploy) &middot; Accent: <span style="color:#795548">#795548</span></p>
 
-<svg width="700" height="450" viewBox="0 0 700 450">
+<svg width="780" height="450" viewBox="0 0 780 450">
   <defs>
     <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
       <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#94a3b8"/>
@@ -42,60 +42,60 @@
   <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
     <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
   </pattern>
-  <rect width="700" height="450" fill="url(#grid)" rx="12"/>
+  <rect width="780" height="450" fill="url(#grid)" rx="12"/>
 
   <!-- Lane background -->
-  <rect x="30" y="30" width="640" height="380" rx="8" fill="#79554808" stroke="#79554825" stroke-width="1"/>
-  <text x="350" y="55" text-anchor="middle" font-size="12" font-weight="600" fill="#795548" opacity="0.7">Build &amp; Deploy — Static Site Pipeline</text>
+  <rect x="30" y="30" width="720" height="380" rx="8" fill="#79554808" stroke="#79554825" stroke-width="1"/>
+  <text x="390" y="55" text-anchor="middle" font-size="12" font-weight="600" fill="#795548" opacity="0.7">Build &amp; Deploy — Static Site Pipeline</text>
 
   <!-- ══════════════════════════════════ -->
   <!-- GHOST INCOMING (left edge)         -->
   <!-- ══════════════════════════════════ -->
 
   <!-- 12 interface pages → build_static -->
-  <line x1="15" y1="180" x2="195" y2="200" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
-  <text x="10" y="165" font-size="9" fill="#475569" font-style="italic">12 interface</text>
-  <text x="10" y="176" font-size="9" fill="#475569" font-style="italic">pages</text>
+  <line x1="15" y1="195" x2="195" y2="207" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="10" y="180" font-size="9" fill="#475569" font-style="italic">12 interface</text>
+  <text x="10" y="191" font-size="9" fill="#475569" font-style="italic">pages</text>
 
   <!-- API responses → build_static -->
-  <line x1="15" y1="240" x2="195" y2="220" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
-  <text x="10" y="255" font-size="9" fill="#475569" font-style="italic">API responses</text>
+  <line x1="15" y1="235" x2="195" y2="217" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="10" y="250" font-size="9" fill="#475569" font-style="italic">API responses</text>
 
   <!-- ══════════════════════════════════ -->
   <!-- GHOST OUTGOING (right edge)        -->
   <!-- ══════════════════════════════════ -->
 
   <!-- deploy → gh-pages branch -->
-  <line x1="595" y1="210" x2="680" y2="180" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
-  <text x="690" y="170" text-anchor="end" font-size="9" fill="#475569" font-style="italic">gh-pages</text>
-  <text x="690" y="181" text-anchor="end" font-size="9" fill="#475569" font-style="italic">branch</text>
+  <line x1="735" y1="207" x2="760" y2="180" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="770" y="170" text-anchor="end" font-size="9" fill="#475569" font-style="italic">gh-pages</text>
+  <text x="770" y="181" text-anchor="end" font-size="9" fill="#475569" font-style="italic">branch</text>
 
   <!-- deploy → GitHub Pages -->
-  <line x1="595" y1="220" x2="680" y2="240" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
-  <text x="690" y="248" text-anchor="end" font-size="9" fill="#475548" font-style="italic">GitHub</text>
-  <text x="690" y="259" text-anchor="end" font-size="9" fill="#475548" font-style="italic">Pages</text>
+  <line x1="735" y1="217" x2="760" y2="240" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="770" y="248" text-anchor="end" font-size="9" fill="#475569" font-style="italic">GitHub</text>
+  <text x="770" y="259" text-anchor="end" font-size="9" fill="#475569" font-style="italic">Pages</text>
 
   <!-- ══════════════════════════════════ -->
   <!-- INTERNAL EDGES                     -->
   <!-- ══════════════════════════════════ -->
 
   <!-- build_static → fetch_shim (required, solid) -->
-  <line x1="355" y1="210" x2="365" y2="210" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="355" y1="212" x2="385" y2="212" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <!-- fetch_shim → deploy (required, solid) -->
-  <line x1="525" y1="210" x2="535" y2="210" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="545" y1="212" x2="575" y2="212" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <!-- cli → build_static (conditional, dashed) -->
-  <line x1="175" y1="115" x2="245" y2="190" stroke="#64748b" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arrow-cond)"/>
-  <text x="185" y="147" font-size="8" fill="#64748b" transform="rotate(22, 185, 147)">build-static</text>
+  <line x1="215" y1="110" x2="275" y2="190" stroke="#64748b" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arrow-cond)"/>
+  <text x="225" y="147" font-size="8" fill="#64748b" transform="rotate(38, 225, 147)">build-static</text>
 
   <!-- cli → deploy (conditional, dashed) -->
-  <line x1="175" y1="100" x2="535" y2="195" stroke="#64748b" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arrow-cond)"/>
-  <text x="370" y="132" font-size="8" fill="#64748b">deploy</text>
+  <line x1="215" y1="99" x2="655" y2="190" stroke="#64748b" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arrow-cond)"/>
+  <text x="420" y="132" font-size="8" fill="#64748b">deploy</text>
 
   <!-- cli → health (conditional, dashed) -->
-  <line x1="155" y1="120" x2="545" y2="295" stroke="#64748b" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arrow-cond)"/>
-  <text x="320" y="220" font-size="8" fill="#64748b" transform="rotate(24, 320, 220)">status</text>
+  <line x1="135" y1="123" x2="655" y2="295" stroke="#64748b" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arrow-cond)"/>
+  <text x="370" y="220" font-size="8" fill="#64748b" transform="rotate(19, 370, 220)">status</text>
 
   <!-- ══════════════════════════════════ -->
   <!-- PROCESS NODES                      -->
@@ -119,7 +119,7 @@
   </g>
 
   <!-- proc_fetch_shim — Fetch Shim Injection (middle chain, center) -->
-  <g class="node" transform="translate(365, 190)">
+  <g class="node" transform="translate(385, 190)">
     <rect width="160" height="44" rx="6" fill="#1e293b" stroke="#795548" stroke-width="1.5"/>
     <rect width="4" height="44" rx="2" fill="#795548"/>
     <text x="16" y="18" font-size="11" font-weight="600" fill="#f1f5f9">Fetch Shim Injection</text>
@@ -127,7 +127,7 @@
   </g>
 
   <!-- proc_deploy — Deploy to GitHub Pages (middle chain, right) -->
-  <g class="node" transform="translate(535, 190)">
+  <g class="node" transform="translate(575, 190)">
     <rect width="160" height="44" rx="6" fill="#1e293b" stroke="#795548" stroke-width="1.5"/>
     <rect width="4" height="44" rx="2" fill="#795548"/>
     <text x="16" y="18" font-size="11" font-weight="600" fill="#f1f5f9">Deploy to Pages</text>
@@ -135,7 +135,7 @@
   </g>
 
   <!-- proc_health — Health Check (below deploy) -->
-  <g class="node" transform="translate(535, 295)">
+  <g class="node" transform="translate(575, 295)">
     <rect width="160" height="44" rx="6" fill="#1e293b" stroke="#795548" stroke-width="1.5"/>
     <rect width="4" height="44" rx="2" fill="#795548"/>
     <text x="16" y="18" font-size="11" font-weight="600" fill="#f1f5f9">Health Check</text>
@@ -143,7 +143,7 @@
   </g>
 
   <!-- Footer summary -->
-  <text x="350" y="430" text-anchor="middle" font-size="11" fill="#475569">
+  <text x="390" y="430" text-anchor="middle" font-size="11" fill="#475569">
     5 process nodes &middot; 5 internal edges (2 required + 3 conditional) &middot; 2 ghost inputs &middot; 2 ghost outputs
   </text>
 </svg>
@@ -166,5 +166,6 @@
     <span>External</span>
   </div>
 </div>
+<script src="drag_editor.js"></script>
 </body>
 </html>

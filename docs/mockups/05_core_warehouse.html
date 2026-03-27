@@ -26,6 +26,40 @@
 <h1>Core Warehouse — Drill-In View</h1>
 <p class="subtitle">14 nodes &middot; Conformed storage + time-series enrichment &middot; Accents: <span style="color:#1976d2">#1976d2</span> / <span style="color:#9c27b0">#9c27b0</span></p>
 
+<!--
+  Layout: Two-section design
+    Top: Storage (4 dims left, 4 facts/bridges right) with FK edges in center gap
+    Bottom: Time-Series (6 process nodes in 3 rows)
+    Feed edges routed through left/right margins to avoid crossing intermediate nodes
+
+  Node registry (x, y, w, h):
+    STORAGE — Dimensions (left column, x=100–330)
+      dim_occupation    (100, 80,  230, 50)   L(100,105)  R(330,105)  B(215,130)
+      dim_geography     (100, 155, 230, 45)   L(100,177)  R(330,177)  B(215,200)
+      Descriptors       (100, 225, 230, 60)   L(100,255)  R(330,255)  B(215,285)
+      CPI Dims          (100, 310, 230, 55)   L(100,337)  R(330,337)  B(215,365)
+
+    STORAGE — Facts/Bridges (right column, x=470–740)
+      fact_wages        (470, 80,  270, 50)   L(470,105)  R(740,105)  B(605,130)
+      fact_proj         (470, 155, 270, 45)   L(470,177)  R(740,177)  B(605,200)
+      Bridges           (470, 225, 270, 55)   L(470,252)  R(740,252)  B(605,280)
+      SOC Crosswalk     (470, 310, 270, 50)   L(470,335)  R(740,335)  B(605,360)
+
+    TIME-SERIES (process nodes)
+      Metric Catalog    (100, 435, 230, 50)   L(100,460)  R(330,460)  T(215,435)
+      Time Period       (400, 435, 210, 50)   L(400,460)  R(610,460)  T(505,435) B(505,485)
+      OEWS Loading      (460, 520, 275, 55)   L(460,547)  R(735,547)  T(597,520) B(597,575)
+      CPI Deflation     (100, 525, 230, 50)   L(100,550)  R(330,550)  T(215,525)
+      Comp History      (195, 640, 240, 50)   L(195,665)  R(435,665)  T(315,640)
+      Derived Series    (580, 640, 250, 50)   L(580,665)  R(830,665)  T(705,640)
+
+  Feed edge routing (margin channels):
+    A (dim_occ→Metric):    x=85 left margin,  y=105→375 then right to x=215
+    B (wages→OEWS):        x=755 right margin, y=105→380 then left to x=620
+    C (CPI Dims→CPI Defl): x=80 left margin,  y=337→550 then right to x=100
+    D (Crosswalk→CompHist):x=840 right margin, y=335→635 then left to x=315
+-->
+
 <svg width="980" height="780" viewBox="0 0 980 780">
   <defs>
     <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
@@ -45,110 +79,119 @@
     </marker>
   </defs>
 
+  <!-- Grid background -->
   <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
     <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
   </pattern>
   <rect width="980" height="780" fill="url(#grid)" rx="12"/>
 
-  <!-- Single unified lane background -->
-  <rect x="80" y="30" width="820" height="710" rx="10" fill="#1976d206" stroke="#1976d220" stroke-width="1"/>
+  <!-- Unified lane background -->
+  <rect x="65" y="30" width="850" height="715" rx="10" fill="#1976d206" stroke="#1976d220" stroke-width="1"/>
 
-  <!-- Subtle area labels (not separate lanes — just orientation markers) -->
-  <text x="240" y="62" text-anchor="middle" font-size="10" fill="#1976d2" opacity="0.45">DIMENSIONS</text>
-  <line x1="110" y1="67" x2="370" y2="67" stroke="#1976d210" stroke-width="1"/>
-  <text x="640" y="62" text-anchor="middle" font-size="10" fill="#1976d2" opacity="0.45">FACTS &amp; BRIDGES</text>
-  <line x1="470" y1="67" x2="810" y2="67" stroke="#1976d210" stroke-width="1"/>
-  <text x="490" y="418" text-anchor="middle" font-size="10" fill="#9c27b0" opacity="0.45">TIME-SERIES ENRICHMENT</text>
-  <line x1="110" y1="423" x2="870" y2="423" stroke="#9c27b010" stroke-width="1"/>
+  <!-- Section orientation labels -->
+  <text x="215" y="62" text-anchor="middle" font-size="10" fill="#1976d2" opacity="0.45">DIMENSIONS</text>
+  <line x1="100" y1="67" x2="330" y2="67" stroke="#1976d210" stroke-width="1"/>
+  <text x="605" y="62" text-anchor="middle" font-size="10" fill="#1976d2" opacity="0.45">FACTS &amp; BRIDGES</text>
+  <line x1="470" y1="67" x2="740" y2="67" stroke="#1976d210" stroke-width="1"/>
+  <text x="420" y="410" text-anchor="middle" font-size="10" fill="#9c27b0" opacity="0.45">TIME-SERIES ENRICHMENT</text>
+  <line x1="100" y1="415" x2="870" y2="415" stroke="#9c27b010" stroke-width="1"/>
 
-  <!-- Ghost incoming from Validation -->
-  <text x="20" y="52" font-size="10" fill="#475569" font-style="italic">&larr; from Validation</text>
-  <line x1="15" y1="170" x2="105" y2="170" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <!-- ══════════════════════════════════ -->
+  <!-- GHOST CONNECTORS                   -->
+  <!-- ══════════════════════════════════ -->
 
-  <!-- Ghost outgoing to Marts (from facts) -->
-  <text x="955" y="52" text-anchor="end" font-size="10" fill="#475569" font-style="italic">to Marts &rarr;</text>
-  <line x1="830" y1="120" x2="960" y2="120" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
-  <line x1="830" y1="200" x2="960" y2="200" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <!-- Ghost incoming from Validation (left of lane) -->
+  <text x="52" y="208" text-anchor="middle" font-size="9" fill="#475569" font-style="italic">&larr; from</text>
+  <text x="52" y="220" text-anchor="middle" font-size="9" fill="#475569" font-style="italic">Validation</text>
+  <line x1="40" y1="235" x2="65" y2="235" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
 
-  <!-- Ghost outgoing to Marts (from derived series) -->
-  <line x1="830" y1="680" x2="960" y2="680" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
-  <text x="955" y="698" text-anchor="end" font-size="8" fill="#475569">trend, geo_gap, rank</text>
+  <!-- Ghost outgoing to Marts (from facts, right side) -->
+  <text x="860" y="78" text-anchor="middle" font-size="9" fill="#475569" font-style="italic">to Marts &rarr;</text>
+  <line x1="740" y1="95" x2="900" y2="95" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <line x1="740" y1="172" x2="900" y2="172" stroke="#475569" stroke-width="1.0" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+
+  <!-- Ghost outgoing to Marts (from derived series, right side) -->
+  <line x1="830" y1="650" x2="900" y2="650" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="870" y="668" text-anchor="middle" font-size="8" fill="#475569">trend, geo_gap, rank</text>
 
   <!-- ══════════════════════════════════ -->
   <!-- FK EDGES (dims → facts)            -->
+  <!-- In center gap x=330–470            -->
   <!-- ══════════════════════════════════ -->
 
-  <!-- dim_occupation → fact_wages -->
-  <line x1="345" y1="115" x2="475" y2="115" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
-  <!-- dim_occupation → fact_proj -->
-  <line x1="345" y1="120" x2="475" y2="195" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
-  <!-- dim_occupation → bridges -->
-  <line x1="345" y1="130" x2="475" y2="280" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
-  <!-- dim_geography → fact_wages -->
-  <line x1="345" y1="190" x2="475" y2="120" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
+  <!-- dim_occupation R(330,105) → fact_wages L(470,105) -->
+  <line x1="330" y1="105" x2="470" y2="105" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
+  <!-- dim_occupation R(330,110) → fact_proj L(470,177) -->
+  <line x1="330" y1="110" x2="470" y2="177" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
+  <!-- dim_occupation R(330,115) → Bridges L(470,252) -->
+  <line x1="330" y1="115" x2="470" y2="252" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
+  <!-- dim_geography R(330,177) → fact_wages L(470,108) -->
+  <line x1="330" y1="177" x2="470" y2="108" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
 
-  <!-- FK labels -->
-  <rect x="380" y="97" width="50" height="13" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="0.5"/>
-  <text x="405" y="107" text-anchor="middle" font-size="7" fill="#f59e0b">FK: soc</text>
-  <rect x="380" y="157" width="50" height="13" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="0.5"/>
-  <text x="405" y="167" text-anchor="middle" font-size="7" fill="#f59e0b">FK: geo</text>
+  <!-- FK labels (in center gap, occluding edges behind) -->
+  <rect x="370" y="98" width="50" height="14" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="395" y="109" text-anchor="middle" font-size="7" fill="#f59e0b">FK: soc</text>
+  <rect x="370" y="136" width="50" height="14" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="395" y="147" text-anchor="middle" font-size="7" fill="#f59e0b">FK: geo</text>
 
   <!-- ══════════════════════════════════ -->
   <!-- FEED EDGES (storage → time-series) -->
+  <!-- Margin-routed to avoid nodes       -->
   <!-- ══════════════════════════════════ -->
 
-  <!-- dim_occupation → Metric Catalog Builder -->
-  <path d="M 240 135 L 240 440" fill="none" stroke="#9c27b0" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrow-feed)"/>
-  <rect x="190" y="290" width="95" height="13" rx="6" fill="#0f172a" stroke="#9c27b0" stroke-width="0.5"/>
-  <text x="237" y="300" text-anchor="middle" font-size="7" fill="#9c27b0">occupation keys</text>
+  <!-- A: dim_occupation → Metric Catalog (left margin x=85) -->
+  <path d="M 100,105 L 85,105 L 85,375 L 215,375 L 215,435" fill="none" stroke="#9c27b0" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrow-feed)"/>
+  <rect x="104" y="368" width="92" height="13" rx="6" fill="#0f172a" stroke="#9c27b0" stroke-width="0.5"/>
+  <text x="150" y="378" text-anchor="middle" font-size="7" fill="#9c27b0">occupation keys</text>
 
-  <!-- fact_wages → Multi-Vintage OEWS Loading -->
-  <path d="M 600 135 L 600 440" fill="none" stroke="#9c27b0" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrow-feed)"/>
-  <rect x="545" y="290" width="110" height="13" rx="6" fill="#0f172a" stroke="#9c27b0" stroke-width="0.5"/>
-  <text x="600" y="300" text-anchor="middle" font-size="7" fill="#9c27b0">employment + wages</text>
+  <!-- B: fact_wages → OEWS Loading (right margin x=755) -->
+  <path d="M 740,105 L 755,105 L 755,380 L 620,380 L 620,520" fill="none" stroke="#9c27b0" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrow-feed)"/>
+  <rect x="632" y="373" width="112" height="13" rx="6" fill="#0f172a" stroke="#9c27b0" stroke-width="0.5"/>
+  <text x="688" y="383" text-anchor="middle" font-size="7" fill="#9c27b0">employment + wages</text>
 
-  <!-- CPI Dims → CPI Deflation -->
-  <path d="M 240 385 L 240 550" fill="none" stroke="#9c27b0" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrow-feed)"/>
-  <rect x="248" y="488" width="65" height="13" rx="6" fill="#0f172a" stroke="#9c27b0" stroke-width="0.5"/>
-  <text x="280" y="498" text-anchor="middle" font-size="7" fill="#9c27b0">CPI indices</text>
+  <!-- C: CPI Dims → CPI Deflation (left margin x=80) -->
+  <path d="M 100,337 L 80,337 L 80,550 L 100,550" fill="none" stroke="#9c27b0" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrow-feed)"/>
+  <rect x="48" y="498" width="64" height="13" rx="6" fill="#0f172a" stroke="#9c27b0" stroke-width="0.5"/>
+  <text x="80" y="508" text-anchor="middle" font-size="7" fill="#9c27b0">CPI indices</text>
 
-  <!-- Crosswalk → Comparable History -->
-  <path d="M 600 385 L 430 650" fill="none" stroke="#9c27b0" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrow-feed)"/>
-  <rect x="468" y="520" width="105" height="13" rx="6" fill="#0f172a" stroke="#9c27b0" stroke-width="0.5"/>
-  <text x="520" y="530" text-anchor="middle" font-size="7" fill="#9c27b0">crosswalk mappings</text>
+  <!-- D: SOC Crosswalk → Comparable History (right margin x=840) -->
+  <path d="M 740,335 L 840,335 L 840,635 L 315,635 L 315,640" fill="none" stroke="#9c27b0" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrow-feed)"/>
+  <rect x="522" y="628" width="110" height="13" rx="6" fill="#0f172a" stroke="#9c27b0" stroke-width="0.5"/>
+  <text x="577" y="638" text-anchor="middle" font-size="7" fill="#9c27b0">crosswalk mappings</text>
 
   <!-- ══════════════════════════════════ -->
-  <!-- TIME-SERIES INTERNAL EDGES         -->
+  <!-- INTERNAL TIME-SERIES EDGES         -->
   <!-- ══════════════════════════════════ -->
 
-  <!-- Metrics → Periods (required) -->
-  <line x1="335" y1="472" x2="420" y2="472" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- TS1: Metric Catalog R(330,460) → Time Period L(400,460) -->
+  <line x1="330" y1="460" x2="400" y2="460" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-  <!-- Periods → OEWS Loading (required) -->
-  <line x1="600" y1="490" x2="600" y2="520" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- TS2: Time Period B(535,485) → OEWS Loading T(535,520) — vertical drop in shared x range -->
+  <line x1="535" y1="485" x2="535" y2="520" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-  <!-- OEWS Loading → CPI Deflation (conditional: nominal → real) -->
-  <line x1="500" y1="560" x2="345" y2="575" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
-  <rect x="378" y="548" width="80" height="13" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="0.5"/>
-  <text x="418" y="558" text-anchor="middle" font-size="7" fill="#f59e0b">nominal &rarr; real</text>
+  <!-- TS3: OEWS Loading L(460,547) → CPI Deflation R(330,550) — conditional: nominal → real -->
+  <line x1="460" y1="547" x2="330" y2="550" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
+  <rect x="355" y="541" width="80" height="14" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="395" y="551" text-anchor="middle" font-size="7" fill="#f59e0b">nominal &rarr; real</text>
 
-  <!-- OEWS Loading → Derived Series (derived) -->
-  <line x1="650" y1="570" x2="700" y2="660" stroke="#3b82f6" stroke-width="1.3" stroke-dasharray="2,3" marker-end="url(#arrow-derived)"/>
+  <!-- TS4: OEWS Loading B(650,575) → Derived Series T(650,640) — derived -->
+  <line x1="650" y1="575" x2="650" y2="640" stroke="#3b82f6" stroke-width="1.3" stroke-dasharray="2,3" marker-end="url(#arrow-derived)"/>
 
-  <!-- CPI Deflation → Derived Series (derived) -->
-  <line x1="345" y1="600" x2="610" y2="670" stroke="#3b82f6" stroke-width="1.3" stroke-dasharray="2,3" marker-end="url(#arrow-derived)"/>
+  <!-- TS5: CPI Deflation R(330,565) → Derived Series L(580,655) — derived -->
+  <line x1="330" y1="565" x2="580" y2="655" stroke="#3b82f6" stroke-width="1.3" stroke-dasharray="2,3" marker-end="url(#arrow-derived)"/>
 
-  <!-- Comparable History → OEWS Loading (conditional: comparable history) -->
-  <path d="M 430 670 Q 500 620, 530 570" fill="none" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
-  <rect x="448" y="623" width="100" height="13" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="0.5"/>
-  <text x="498" y="633" text-anchor="middle" font-size="7" fill="#f59e0b">comparable history</text>
+  <!-- TS6: Comparable History T(370,640) → OEWS Loading B(500,575) — conditional: comparable -->
+  <line x1="370" y1="640" x2="500" y2="575" stroke="#f59e0b" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
+  <rect x="385" y="600" width="100" height="13" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="435" y="610" text-anchor="middle" font-size="7" fill="#f59e0b">comparable history</text>
 
   <!-- ══════════════════════════════════════════════ -->
-  <!-- STORAGE NODES — Dimensions (top-left)          -->
+  <!-- STORAGE NODES — Dimensions (left column)       -->
+  <!-- Drawn after edges so nodes render on top       -->
   <!-- ══════════════════════════════════════════════ -->
 
-  <!-- dim_occupation -->
-  <g class="node" transform="translate(110, 85)">
+  <!-- dim_occupation (100, 80, 230×50) -->
+  <g class="node" transform="translate(100, 80)">
     <rect width="230" height="50" rx="8" fill="#1e293b" stroke="#1976d2" stroke-width="1.8"/>
     <rect width="4" height="50" rx="2" fill="#1976d2"/>
     <text x="16" y="20" font-size="12" font-weight="700" fill="#f1f5f9">dim_occupation</text>
@@ -156,16 +199,16 @@
     <text x="16" y="47" font-size="7" fill="#64748b">grain: soc_code + release_id</text>
   </g>
 
-  <!-- dim_geography -->
-  <g class="node" transform="translate(110, 160)">
+  <!-- dim_geography (100, 155, 230×45) -->
+  <g class="node" transform="translate(100, 155)">
     <rect width="230" height="45" rx="8" fill="#1e293b" stroke="#1976d2" stroke-width="1.5"/>
     <rect width="4" height="45" rx="2" fill="#1976d2"/>
     <text x="16" y="20" font-size="12" font-weight="600" fill="#f1f5f9">dim_geography</text>
     <text x="16" y="36" font-size="9" fill="#94a3b8">National, state, MSA areas</text>
   </g>
 
-  <!-- Descriptor Dimensions -->
-  <g class="node" transform="translate(110, 228)">
+  <!-- Descriptor Dimensions (100, 225, 230×60) -->
+  <g class="node" transform="translate(100, 225)">
     <rect width="230" height="60" rx="8" fill="#1e293b" stroke="#1976d2" stroke-width="1.5"/>
     <rect width="4" height="60" rx="2" fill="#1976d2"/>
     <text x="16" y="18" font-size="11" font-weight="600" fill="#f1f5f9">Descriptor Dimensions</text>
@@ -174,8 +217,8 @@
     <text x="16" y="55" font-size="8" fill="#94a3b8">dim_education, dim_tech</text>
   </g>
 
-  <!-- CPI Dimensions & Facts -->
-  <g class="node" transform="translate(110, 330)">
+  <!-- CPI Dimensions & Facts (100, 310, 230×55) -->
+  <g class="node" transform="translate(100, 310)">
     <rect width="230" height="55" rx="8" fill="#1e293b" stroke="#1976d2" stroke-width="1.5"/>
     <rect width="4" height="55" rx="2" fill="#1976d2"/>
     <text x="16" y="18" font-size="11" font-weight="600" fill="#f1f5f9">CPI Dimensions &amp; Facts</text>
@@ -184,11 +227,11 @@
   </g>
 
   <!-- ══════════════════════════════════════════════ -->
-  <!-- STORAGE NODES — Facts & Bridges (top-right)    -->
+  <!-- STORAGE NODES — Facts & Bridges (right column) -->
   <!-- ══════════════════════════════════════════════ -->
 
-  <!-- fact_occupation_employment_wages -->
-  <g class="node" transform="translate(480, 85)">
+  <!-- fact_occupation_employment_wages (470, 80, 270×50) -->
+  <g class="node" transform="translate(470, 80)">
     <rect width="270" height="50" rx="8" fill="#1e293b" stroke="#42a5f5" stroke-width="1.5"/>
     <rect width="4" height="50" rx="2" fill="#42a5f5"/>
     <text x="16" y="20" font-size="11" font-weight="600" fill="#f1f5f9">fact_occupation_employment_wages</text>
@@ -196,16 +239,16 @@
     <text x="16" y="47" font-size="7" fill="#64748b">grain: soc + geo + release_id</text>
   </g>
 
-  <!-- fact_occupation_projections -->
-  <g class="node" transform="translate(480, 160)">
+  <!-- fact_occupation_projections (470, 155, 270×45) -->
+  <g class="node" transform="translate(470, 155)">
     <rect width="270" height="45" rx="8" fill="#1e293b" stroke="#42a5f5" stroke-width="1.5"/>
     <rect width="4" height="45" rx="2" fill="#42a5f5"/>
     <text x="16" y="20" font-size="11" font-weight="600" fill="#f1f5f9">fact_occupation_projections</text>
     <text x="16" y="36" font-size="8" fill="#94a3b8">Base year, projected, change</text>
   </g>
 
-  <!-- Bridge Tables -->
-  <g class="node" transform="translate(480, 228)">
+  <!-- Bridge Tables (470, 225, 270×55) -->
+  <g class="node" transform="translate(470, 225)">
     <rect width="270" height="55" rx="8" fill="#1e293b" stroke="#7e57c2" stroke-width="1.5"/>
     <rect width="4" height="55" rx="2" fill="#7e57c2"/>
     <text x="16" y="18" font-size="11" font-weight="600" fill="#f1f5f9">Bridge Tables</text>
@@ -213,8 +256,8 @@
     <text x="16" y="46" font-size="8" fill="#94a3b8">_ability, _task, _work_activity, _edu, _tech</text>
   </g>
 
-  <!-- SOC Crosswalk Mappings -->
-  <g class="node" transform="translate(480, 330)">
+  <!-- SOC Crosswalk Mappings (470, 310, 270×50) -->
+  <g class="node" transform="translate(470, 310)">
     <rect width="270" height="50" rx="8" fill="#1e293b" stroke="#1976d2" stroke-width="1.5"/>
     <rect width="4" height="50" rx="2" fill="#1976d2"/>
     <text x="16" y="20" font-size="11" font-weight="600" fill="#f1f5f9">SOC Crosswalk Mappings</text>
@@ -222,49 +265,49 @@
   </g>
 
   <!-- ══════════════════════════════════════════════ -->
-  <!-- PROCESS NODES — Time-Series (bottom half)      -->
+  <!-- PROCESS NODES — Time-Series (bottom section)   -->
   <!-- ══════════════════════════════════════════════ -->
 
-  <!-- Metric Catalog Builder -->
-  <g class="node" transform="translate(110, 445)">
-    <rect width="220" height="50" rx="8" fill="#1e293b" stroke="#9c27b0" stroke-width="1.5"/>
-    <text x="110" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#f1f5f9">Metric Catalog Builder</text>
-    <text x="110" y="36" font-size="8" fill="#94a3b8" text-anchor="middle">6 base metrics &middot; populate_dim_metric</text>
+  <!-- Metric Catalog Builder (100, 435, 230×50) -->
+  <g class="node" transform="translate(100, 435)">
+    <rect width="230" height="50" rx="8" fill="#1e293b" stroke="#9c27b0" stroke-width="1.5"/>
+    <text x="115" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#f1f5f9">Metric Catalog Builder</text>
+    <text x="115" y="36" font-size="8" fill="#94a3b8" text-anchor="middle">6 base metrics &middot; populate_dim_metric</text>
   </g>
 
-  <!-- Time Period Builder -->
-  <g class="node" transform="translate(420, 445)">
-    <rect width="200" height="50" rx="8" fill="#1e293b" stroke="#9c27b0" stroke-width="1.5"/>
-    <text x="100" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#f1f5f9">Time Period Builder</text>
-    <text x="100" y="36" font-size="8" fill="#94a3b8" text-anchor="middle">Annual periods &middot; populate_dim_time_period</text>
+  <!-- Time Period Builder (400, 435, 210×50) -->
+  <g class="node" transform="translate(400, 435)">
+    <rect width="210" height="50" rx="8" fill="#1e293b" stroke="#9c27b0" stroke-width="1.5"/>
+    <text x="105" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#f1f5f9">Time Period Builder</text>
+    <text x="105" y="36" font-size="8" fill="#94a3b8" text-anchor="middle">Annual periods &middot; populate_dim_time_period</text>
   </g>
 
-  <!-- Multi-Vintage OEWS Loading (primary) -->
-  <g class="node" transform="translate(480, 525)">
-    <rect width="260" height="55" rx="8" fill="#1e293b" stroke="#9c27b0" stroke-width="2.2"/>
+  <!-- Multi-Vintage OEWS Loading (460, 520, 275×55) — primary process -->
+  <g class="node" transform="translate(460, 520)">
+    <rect width="275" height="55" rx="8" fill="#1e293b" stroke="#9c27b0" stroke-width="2.2"/>
     <rect width="4" height="55" rx="2" fill="#9c27b0"/>
     <text x="16" y="20" font-size="11" font-weight="700" fill="#f1f5f9">Multi-Vintage OEWS Loading</text>
     <text x="16" y="36" font-size="9" fill="#94a3b8">fact_time_series_observation</text>
     <text x="16" y="48" font-size="7" fill="#64748b">comparable + as-published modes</text>
   </g>
 
-  <!-- CPI Deflation -->
-  <g class="node" transform="translate(110, 555)">
+  <!-- CPI Deflation (100, 525, 230×50) -->
+  <g class="node" transform="translate(100, 525)">
     <rect width="230" height="50" rx="8" fill="#1e293b" stroke="#9c27b0" stroke-width="1.5"/>
     <text x="115" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#f1f5f9">CPI Deflation</text>
     <text x="115" y="36" font-size="8" fill="#94a3b8" text-anchor="middle">real = nominal &times; (CPI&#x2082;&#x2080;&#x2082;&#x2083; / CPI&#x2093;) &middot; base 2023</text>
   </g>
 
-  <!-- Comparable History Logic -->
-  <g class="node" transform="translate(210, 645)">
-    <rect width="220" height="50" rx="8" fill="#1e293b" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,3"/>
-    <text x="110" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#94a3b8">Comparable History Logic</text>
-    <text x="110" y="36" font-size="8" fill="#64748b" text-anchor="middle">SOC crosswalk: 1:1 wages, splits/merges employment</text>
+  <!-- Comparable History Logic (195, 640, 240×50) -->
+  <g class="node" transform="translate(195, 640)">
+    <rect width="240" height="50" rx="8" fill="#1e293b" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <text x="120" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="#94a3b8">Comparable History Logic</text>
+    <text x="120" y="36" font-size="8" fill="#64748b" text-anchor="middle">SOC crosswalk: 1:1 wages, splits/merges employment</text>
   </g>
 
-  <!-- Derived Series Computation -->
-  <g class="node" transform="translate(610, 655)">
-    <rect width="230" height="50" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+  <!-- Derived Series Computation (580, 640, 250×50) -->
+  <g class="node" transform="translate(580, 640)">
+    <rect width="250" height="50" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
     <rect width="4" height="50" rx="2" fill="#3b82f6"/>
     <text x="16" y="20" font-size="11" font-weight="600" fill="#f1f5f9">Derived Series Computation</text>
     <text x="16" y="36" font-size="8" fill="#94a3b8">YoY changes, percent changes &middot; fact_derived_series</text>
@@ -309,6 +352,11 @@
     <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#3b82f6" stroke-width="1.3" stroke-dasharray="2,3"/></svg>
     <span>Derived</span>
   </div>
+  <div class="legend-item">
+    <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4"/></svg>
+    <span>Ghost (external)</span>
+  </div>
 </div>
+<script src="drag_editor.js"></script>
 </body>
 </html>

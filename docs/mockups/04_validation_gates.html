@@ -26,7 +26,27 @@
 <h1>Validation Gates — Drill-In View</h1>
 <p class="subtitle">6 gate nodes &middot; 1 lane (Validation Gates) &middot; Accent: <span style="color:#ef4444">#ef4444</span></p>
 
-<svg width="900" height="480" viewBox="0 0 900 480">
+<!--
+  Layout: Z-pattern with 6 diamond gates
+  Row 1 (L→R): Schema Drift → Referential → Grain
+  Row 2 (R→L): Null Semantics → Temporal → SOC Alignment
+  Connection: Grain ↓ Null Semantics (vertical drop)
+  Output: SOC bottom → floor channel → right exit to Core
+
+  Diamond: 120w × 130h, local center at (60,65)
+  Row 1 centers at y=155, Row 2 centers at y=345
+  Column centers: x=190, x=400, x=610 (210px spacing)
+
+  Node tips (L/R/T/B from translate origin):
+    Schema  translate(130, 90):  L(130,155) R(250,155) T(190, 90) B(190,220)
+    Refint  translate(340, 90):  L(340,155) R(460,155) T(400, 90) B(400,220)
+    Grain   translate(550, 90):  L(550,155) R(670,155) T(610, 90) B(610,220)
+    NullSem translate(550,280):  L(550,345) R(670,345) T(610,280) B(610,410)
+    Tempor  translate(340,280):  L(340,345) R(460,345) T(400,280) B(400,410)
+    SOC     translate(130,280):  L(130,345) R(250,345) T(190,280) B(190,410)
+-->
+
+<svg width="900" height="500" viewBox="0 0 900 500">
   <defs>
     <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
       <path d="M 0 0 L 10 3.5 L 0 7 Z" fill="#94a3b8"/>
@@ -42,114 +62,133 @@
     </marker>
   </defs>
 
+  <!-- Grid background -->
   <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
     <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
   </pattern>
-  <rect width="900" height="480" fill="url(#grid)" rx="12"/>
+  <rect width="900" height="500" fill="url(#grid)" rx="12"/>
 
   <!-- Lane background -->
-  <rect x="80" y="35" width="740" height="390" rx="8" fill="#ef444408" stroke="#ef444425" stroke-width="1"/>
-  <text x="450" y="63" text-anchor="middle" font-size="12" font-weight="600" fill="#ef4444" opacity="0.7">Validation Gates — Sequential Fail-Fast Chain</text>
-
-  <!-- Ghost incoming from Parsers -->
-  <text x="25" y="55" font-size="10" fill="#475569" font-style="italic">&larr; from Parsers</text>
-  <line x1="20" y1="130" x2="100" y2="130" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
-  <text x="25" y="160" font-size="8" fill="#475569">7 parsers feed in</text>
-
-  <!-- Ghost outgoing to Core Warehouse -->
-  <text x="875" y="55" text-anchor="end" font-size="10" fill="#475569" font-style="italic">to Core &rarr;</text>
-  <line x1="780" y1="330" x2="880" y2="200" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
-  <text x="875" y="215" text-anchor="end" font-size="8" fill="#475569">8 core tables</text>
+  <rect x="55" y="40" width="790" height="410" rx="8" fill="#ef444408" stroke="#ef444425" stroke-width="1"/>
+  <text x="450" y="65" text-anchor="middle" font-size="12" font-weight="600" fill="#ef4444" opacity="0.7">Validation Gates — Sequential Fail-Fast Chain</text>
 
   <!-- ══════════════════════════════════ -->
-  <!-- EDGES (internal chain)             -->
+  <!-- GHOST INCOMING (from Parsers)      -->
+  <!-- ══════════════════════════════════ -->
+  <text x="95" y="140" text-anchor="middle" font-size="9" fill="#475569" font-style="italic">&larr; from Parsers</text>
+  <line x1="65" y1="155" x2="130" y2="155" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4" marker-end="url(#arrow-ghost)"/>
+  <text x="95" y="172" text-anchor="middle" font-size="8" fill="#475569">7 parsers feed in</text>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- EDGES — Row 1 (L→R)               -->
   <!-- ══════════════════════════════════ -->
 
-  <!-- Schema Drift → Referential (conditional: schema valid) -->
-  <line x1="195" y1="160" x2="300" y2="160" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
-  <rect x="210" y="140" width="75" height="14" rx="7" fill="#0f172a" stroke="#f59e0b" stroke-width="0.7"/>
-  <text x="248" y="151" text-anchor="middle" font-size="8" fill="#f59e0b">schema valid</text>
+  <!-- Schema Drift R(250,155) → Referential L(340,155) — conditional -->
+  <line x1="250" y1="155" x2="340" y2="155" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
+  <rect x="248" y="143" width="90" height="16" rx="8" fill="#0f172a" stroke="#f59e0b" stroke-width="0.7"/>
+  <text x="293" y="154" text-anchor="middle" font-size="8" fill="#f59e0b">schema valid</text>
 
-  <!-- Schema Drift → Grain (blocked: drift blocks) -->
-  <path d="M 165 220 Q 300 280, 480 220" fill="none" stroke="#ef4444" stroke-width="1.8" stroke-dasharray="6,3" marker-end="url(#arrow-blocked)"/>
-  <rect x="250" y="270" width="130" height="14" rx="7" fill="#0f172a" stroke="#ef4444" stroke-width="0.7"/>
-  <text x="315" y="281" text-anchor="middle" font-size="8" fill="#ef4444">drift blocks publication</text>
+  <!-- Referential R(460,155) → Grain L(550,155) — normal -->
+  <line x1="460" y1="155" x2="550" y2="155" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#arrow)"/>
 
-  <!-- Referential → Grain -->
-  <line x1="415" y1="160" x2="420" y2="160" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <!-- ══════════════════════════════════ -->
+  <!-- EDGE — Row connector (vertical)    -->
+  <!-- ══════════════════════════════════ -->
 
-  <!-- Grain → Null Semantics -->
-  <line x1="535" y1="160" x2="535" y2="270" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <!-- Grain B(610,220) → Null Semantics T(610,280) — normal -->
+  <line x1="610" y1="220" x2="610" y2="280" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#arrow)"/>
 
-  <!-- Null Semantics → Temporal -->
-  <line x1="535" y1="335" x2="385" y2="335" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <!-- ══════════════════════════════════ -->
+  <!-- EDGES — Row 2 (R→L)               -->
+  <!-- ══════════════════════════════════ -->
 
-  <!-- Temporal → SOC Alignment -->
-  <line x1="265" y1="335" x2="165" y2="335" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <!-- Null Semantics L(550,345) → Temporal R(460,345) — normal -->
+  <line x1="550" y1="345" x2="460" y2="345" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#arrow)"/>
 
-  <!-- SOC Alignment → out (conditional) -->
-  <line x1="165" y1="365" x2="780" y2="365" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6,3"/>
-  <line x1="780" y1="365" x2="780" y2="335" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
-  <rect x="420" y="371" width="90" height="14" rx="7" fill="#0f172a" stroke="#f59e0b" stroke-width="0.7"/>
-  <text x="465" y="382" text-anchor="middle" font-size="8" fill="#f59e0b">SOC loads first</text>
+  <!-- Temporal L(340,345) → SOC Alignment R(250,345) — normal -->
+  <line x1="340" y1="345" x2="250" y2="345" stroke="#94a3b8" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- BLOCKED PATH (Schema Drift fail)   -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- Schema B(190,220) → blocked indicator in gap between rows -->
+  <line x1="190" y1="220" x2="230" y2="240" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <rect x="215" y="236" width="120" height="20" rx="4" fill="#0f172a" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="275" y="250" text-anchor="middle" font-size="8" fill="#ef4444">&#x2715; blocks publication</text>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- OUTPUT PATH (SOC → Core)           -->
+  <!-- ══════════════════════════════════ -->
+
+  <!-- SOC B(190,410) → floor channel → right exit -->
+  <path d="M 190 410 L 190 435 L 870 435" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrow-cond)"/>
+  <rect x="430" y="424" width="80" height="16" rx="8" fill="#0f172a" stroke="#f59e0b" stroke-width="0.7"/>
+  <text x="470" y="435" text-anchor="middle" font-size="8" fill="#f59e0b">all 6 pass</text>
+  <text x="800" y="428" text-anchor="middle" font-size="9" fill="#475569" font-style="italic">to Core Warehouse &rarr;</text>
 
   <!-- ══════════════════════════════════ -->
   <!-- GATE NODES (diamonds)              -->
   <!-- ══════════════════════════════════ -->
 
-  <!-- Schema Drift Detection -->
-  <g class="node" transform="translate(105, 90)">
+  <!-- 1. Schema Drift Detection — translate(130, 90) -->
+  <g class="node" transform="translate(130, 90)">
     <polygon points="60,0 120,65 60,130 0,65" fill="#1e293b" stroke="#ef4444" stroke-width="1.8"/>
     <text x="60" y="58" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Schema Drift</text>
     <text x="60" y="73" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Detection</text>
   </g>
 
-  <!-- Referential Integrity -->
-  <g class="node" transform="translate(300, 95)">
+  <!-- 2. Referential Integrity — translate(340, 90) -->
+  <g class="node" transform="translate(340, 90)">
     <polygon points="60,0 120,65 60,130 0,65" fill="#1e293b" stroke="#ef4444" stroke-width="1.8"/>
     <text x="60" y="58" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Referential</text>
     <text x="60" y="73" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Integrity</text>
   </g>
 
-  <!-- Grain Uniqueness -->
-  <g class="node" transform="translate(420, 95)">
+  <!-- 3. Grain Uniqueness — translate(550, 90) -->
+  <g class="node" transform="translate(550, 90)">
     <polygon points="60,0 120,65 60,130 0,65" fill="#1e293b" stroke="#ef4444" stroke-width="1.8"/>
     <text x="60" y="58" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Grain</text>
     <text x="60" y="73" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Uniqueness</text>
   </g>
 
-  <!-- Null Semantics Preservation -->
-  <g class="node" transform="translate(475, 270)">
+  <!-- 4. Null Semantics Preservation — translate(550, 280) -->
+  <g class="node" transform="translate(550, 280)">
     <polygon points="60,0 120,65 60,130 0,65" fill="#1e293b" stroke="#ef4444" stroke-width="1.8"/>
     <text x="60" y="55" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Null</text>
     <text x="60" y="70" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Semantics</text>
-    <text x="60" y="85" text-anchor="middle" font-size="9" fill="#94a3b8">Preservation</text>
+    <text x="60" y="84" text-anchor="middle" font-size="9" fill="#94a3b8">Preservation</text>
   </g>
 
-  <!-- Temporal Consistency -->
-  <g class="node" transform="translate(265, 270)">
+  <!-- 5. Temporal Consistency — translate(340, 280) -->
+  <g class="node" transform="translate(340, 280)">
     <polygon points="60,0 120,65 60,130 0,65" fill="#1e293b" stroke="#ef4444" stroke-width="1.8"/>
     <text x="60" y="58" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Temporal</text>
     <text x="60" y="73" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Consistency</text>
   </g>
 
-  <!-- SOC Alignment -->
-  <g class="node" transform="translate(105, 270)">
+  <!-- 6. SOC Alignment — translate(130, 280) -->
+  <g class="node" transform="translate(130, 280)">
     <polygon points="60,0 120,65 60,130 0,65" fill="#1e293b" stroke="#ef4444" stroke-width="1.8"/>
     <text x="60" y="58" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">SOC</text>
     <text x="60" y="73" text-anchor="middle" font-size="10" font-weight="600" fill="#f1f5f9">Alignment</text>
   </g>
 
-  <!-- Final output node indicator -->
-  <g transform="translate(720, 290)">
-    <rect width="70" height="50" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1" stroke-dasharray="3,2"/>
-    <text x="35" y="22" text-anchor="middle" font-size="9" fill="#475569">All gates</text>
-    <text x="35" y="35" text-anchor="middle" font-size="9" fill="#475569">passed</text>
-    <text x="35" y="46" text-anchor="middle" font-size="8" fill="#3b82f6">&rarr; Core</text>
+  <!-- ══════════════════════════════════ -->
+  <!-- STEP INDICATORS                    -->
+  <!-- ══════════════════════════════════ -->
+  <g font-size="9" font-weight="600" fill="#ef4444" opacity="0.5">
+    <text x="190" y="87" text-anchor="middle">1</text>
+    <text x="400" y="87" text-anchor="middle">2</text>
+    <text x="610" y="87" text-anchor="middle">3</text>
+    <text x="610" y="277" text-anchor="middle">4</text>
+    <text x="400" y="277" text-anchor="middle">5</text>
+    <text x="190" y="277" text-anchor="middle">6</text>
   </g>
 
-  <text x="450" y="455" text-anchor="middle" font-size="11" fill="#475569">
-    6 gate nodes (diamonds) &middot; Sequential chain with blocked-path branch &middot; All must pass before Core loading
+  <!-- Footer -->
+  <text x="450" y="475" text-anchor="middle" font-size="11" fill="#475569">
+    6 gate nodes (diamonds) &middot; Sequential fail-fast chain &middot; All must pass before Core loading
   </text>
 </svg>
 
@@ -170,6 +209,11 @@
     <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5,3"/></svg>
     <span>Blocked path</span>
   </div>
+  <div class="legend-item">
+    <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#475569" stroke-width="1.2" stroke-dasharray="3,4"/></svg>
+    <span>Ghost (external)</span>
+  </div>
 </div>
+<script src="drag_editor.js"></script>
 </body>
 </html>
