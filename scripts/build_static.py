@@ -542,6 +542,9 @@ def build_static(base_path: str, output_dir: str) -> None:
     # --- .nojekyll (prevent GitHub Pages Jekyll processing) ---
     (output / ".nojekyll").touch()
 
+    # --- CNAME (custom domain for GitHub Pages) ---
+    (output / "CNAME").write_text("jobclass.johnboen.com\n")
+
     # --- Summary ---
     total_files = sum(1 for _ in output.rglob("*") if _.is_file())
     total_size_mb = sum(f.stat().st_size for f in output.rglob("*") if f.is_file()) / 1024 / 1024
