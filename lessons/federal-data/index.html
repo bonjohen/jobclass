@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Labor market occupation data — employment, wages, skills, tasks, and projections from federal sources.">
+    <title>The Federal Labor Data Landscape — Lessons — JobClass</title>
+    <link rel="stylesheet" href="/static/css/main.css?v=PE0">
+    <script src="/static/js/main.js?v=PE0"></script>
+<script>
+(function(){
+var F=window.fetch,SC=null;
+function LS(b){
+  if(!SC)SC=F(b+'/api/occupations/search.json').then(function(r){return r.json()});
+  return SC;
+}
+window.fetch=function(u){
+  if(typeof u!=='string')return F.apply(this,arguments);
+  var ai=u.indexOf('/api/');
+  if(ai<0)return F.apply(this,arguments);
+  var b=u.substring(0,ai),r=u.substring(ai);
+  var qi=r.indexOf('?'),p=qi>=0?r.substring(0,qi):r;
+  var sp=new URLSearchParams(qi>=0?r.substring(qi+1):'');
+  if(p==='/api/occupations/search'){
+    return LS(b).then(function(d){
+      var q=(sp.get('q')||'').toLowerCase(),
+          lm=+(sp.get('limit')||50),of=+(sp.get('offset')||0),
+          rs=d.results||[];
+      if(q)rs=rs.filter(function(x){
+        return x.soc_code.toLowerCase().indexOf(q)>=0||
+               x.occupation_title.toLowerCase().indexOf(q)>=0;
+      });
+      return new Response(JSON.stringify({
+        results:rs.slice(of,of+lm),total:rs.length,limit:lm,offset:of
+      }),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  var pts=p.split('/');
+  if(pts.length===5&&pts[4]==='wages'&&pts[2]==='occupations'){
+    return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
+  }
+  if(p==='/api/trends/movers'){
+    var yr=sp.get('year'),mt=sp.get('metric')||'employment_count';
+    var mf=mt==='employment_count'?'':'_'+mt;
+    if(yr)return F(b+'/api/trends/movers-'+yr+mf+'.json');
+    return F(b+'/api/trends/movers'+mf+'.json');
+  }
+  if(p==='/api/trends/compare/occupations'){
+    var codes=(sp.get('soc_codes')||'').split(',').filter(Boolean);
+    var met=sp.get('metric')||'employment_count';
+    var gt=sp.get('geo_type')||'national';
+    return Promise.all(codes.map(function(c){
+      var ct=c.trim();
+      var tf=met==='employment_count'?ct+'.json':ct+'-'+met+'.json';
+      return Promise.all([
+        F(b+'/api/trends/'+tf).then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:trend',ct,e);return null}),
+        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:occ',ct,e);return null})
+      ]);
+    })).then(function(arr){
+      var occs=[];
+      arr.forEach(function(pair,i){
+        var d=pair[0],info=pair[1];
+        if(!d||!d.series)return;
+        var title=(info&&info.occupation_title)?info.occupation_title:codes[i];
+        occs.push({soc_code:codes[i],title:title,series:d.series.map(function(s){return{year:s.year,value:s.value}})});
+      });
+      var body=JSON.stringify({metric:met,geo_type:gt,occupations:occs});
+      return new Response(body,{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(pts.length===4&&pts[1]==='api'&&pts[2]==='trends'&&/^\d{2}-\d{4}$/.test(pts[3])){
+    var tm=sp.get('metric');
+    if(tm&&tm!=='employment_count')return F(b+'/api/trends/'+pts[3]+'-'+tm+'.json');
+    return F(b+'/api/trends/'+pts[3]+'.json');
+  }
+  if(p==='/api/trends/compare/geography'){
+    var sc=sp.get('soc_code');
+    if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
+  }
+  if(p==='/api/cpi/search'){
+    return F(b+'/api/cpi/search.json').then(function(r){return r.json()}).then(function(d){
+      var q2=(sp.get('q')||'').toLowerCase(),lm2=+(sp.get('limit')||50),
+          rs2=d.results||[];
+      if(q2)rs2=rs2.filter(function(x){
+        return x.member_code.toLowerCase().indexOf(q2)>=0||x.title.toLowerCase().indexOf(q2)>=0;
+      });
+      return new Response(JSON.stringify({query:sp.get('q')||'',total:rs2.length,results:rs2.slice(0,lm2)}),
+        {headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(p==='/api/cpi/explorer/tree'){
+    var root=sp.get('root')||'SA0',md=sp.get('max_depth')||'3';
+    return F(b+'/api/cpi/explorer/tree-'+root+'-'+md+'.json');
+  }
+  if(p==='/api/cpi/compare'){
+    var cc=(sp.get('codes')||'').split(',').filter(Boolean);
+    var cac=sp.get('area_code')||'0000',cif=sp.get('index_family')||'CPI-U',csa=sp.get('seasonal_adjustment')||'S';
+    return Promise.all(cc.map(function(c){
+      var ct=c.trim();
+      return F(b+'/api/cpi/members/'+ct+'/series.json').then(function(r){return r.json()})
+        .catch(function(){return null});
+    })).then(function(arr){
+      var series={};
+      cc.forEach(function(c,i){
+        var d=arr[i];
+        if(d&&d.series)series[c.trim()]=d.series.map(function(s){return{year:s.year,value:s.value}});
+      });
+      return new Response(JSON.stringify({codes:cc,series:series}),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  return F(b+p+'.json');
+};
+})();
+</script>
+</head>
+<body>
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <header role="banner">
+        <nav aria-label="Main navigation">
+            <div class="nav-brand">
+                <a href="/">JobClass</a>
+            </div>
+            <ul class="nav-links" role="list">
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search</a></li>
+                <li><a href="/hierarchy">Hierarchy</a></li>
+                <li><a href="/trends">Trends</a></li>
+                <li><a href="/cpi">CPI</a></li>
+                <li><a href="/pipeline">Pipeline</a></li>
+                <li><a href="/methodology">Methodology</a></li>
+                <li><a href="/lessons">Lessons</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content" role="main">
+        
+        
+            <section class="lesson-page">
+    <h1>The Federal Labor Data Landscape</h1>
+    <p class="lesson-meta">Lesson 1 &mdash; Data sources &amp; relationships</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <a href="/lessons">&larr; All Lessons</a> | <a href="/pipeline#node=src_soc">View in Pipeline &rarr;</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/dimensional-modeling">Dimensional Modeling &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>The Occupation Code Is Everything</h2>
+        <p>
+            Every data product in this system revolves around the Standard Occupational Classification (SOC)
+            code. A SOC code like <code>11-1011</code> identifies "Chief Executives" &mdash; the <code>11</code>
+            is the major group (Management), <code>1011</code> narrows to the specific occupation. There are
+            roughly 870 detailed occupations in SOC 2018.
+        </p>
+        <p>
+            The SOC taxonomy is published by BLS and updated roughly every 10 years. The current version is
+            SOC 2018. This matters because when the taxonomy changes, occupation codes can split, merge, or
+            disappear &mdash; breaking any naive time-series comparison.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Four Data Products, One Key</h2>
+        <table class="data-table">
+            <thead>
+                <tr><th>Source</th><th>Publisher</th><th>What It Contains</th><th>Update Frequency</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>SOC</strong></td>
+                    <td>BLS</td>
+                    <td>Occupation hierarchy: major &rarr; minor &rarr; broad &rarr; detailed</td>
+                    <td>~10 years</td>
+                </tr>
+                <tr>
+                    <td><strong>OEWS</strong></td>
+                    <td>BLS</td>
+                    <td>Employment counts and wage statistics by occupation, geography, and industry</td>
+                    <td>Annual (May reference period)</td>
+                </tr>
+                <tr>
+                    <td><strong>O*NET</strong></td>
+                    <td>DOL / O*NET Center</td>
+                    <td>Skills, knowledge, abilities, and tasks for each occupation</td>
+                    <td>Continuous (versioned releases)</td>
+                </tr>
+                <tr>
+                    <td><strong>Employment Projections</strong></td>
+                    <td>BLS</td>
+                    <td>10-year employment outlook with growth rates</td>
+                    <td>Every 2 years</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="lesson-section">
+        <h2>How They Connect</h2>
+        <pre class="lesson-code"><code>SOC (taxonomy backbone)
+ ├── OEWS links via occupation_code → how many people, how much they earn
+ ├── O*NET links via SOC code → what skills and tasks the job requires
+ └── Projections link via SOC code → where employment is heading</code></pre>
+        <p>
+            The SOC taxonomy must load first. Every other data product joins to <code>dim_occupation</code>
+            through the SOC code. If a source uses a code that doesn't exist in the loaded SOC version,
+            that row is excluded (this is expected for ~5 NEM 2024 codes that don't map to SOC 2018).
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Why This Matters</h2>
+        <div class="lesson-callout">
+            <p>
+                <strong>Key insight:</strong> You cannot treat these as four independent datasets. They are four
+                views of the same occupational reality, and the SOC code is the thread that connects them.
+                Designing the warehouse around this fact &mdash; occupation as the stable external key &mdash;
+                is the single most important architectural decision in this project.
+            </p>
+        </div>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <a href="/lessons">&larr; All Lessons</a> | <a href="/pipeline#node=src_soc">View in Pipeline &rarr;</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/dimensional-modeling">Dimensional Modeling &rarr;</a>
+        </div>
+    </nav>
+</section>
+        
+        
+    </main>
+
+    <footer role="contentinfo">
+        <div class="footer-content">
+            <p>JobClass — Labor Market Occupation Pipeline</p>
+            <p class="footer-meta">Data sourced from BLS (SOC, OEWS, Employment Projections) and O*NET</p>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Labor market occupation data — employment, wages, skills, tasks, and projections from federal sources.">
+    <title>Data Quality Traps in Government Sources — Lessons — JobClass</title>
+    <link rel="stylesheet" href="/static/css/main.css?v=PE0">
+    <script src="/static/js/main.js?v=PE0"></script>
+<script>
+(function(){
+var F=window.fetch,SC=null;
+function LS(b){
+  if(!SC)SC=F(b+'/api/occupations/search.json').then(function(r){return r.json()});
+  return SC;
+}
+window.fetch=function(u){
+  if(typeof u!=='string')return F.apply(this,arguments);
+  var ai=u.indexOf('/api/');
+  if(ai<0)return F.apply(this,arguments);
+  var b=u.substring(0,ai),r=u.substring(ai);
+  var qi=r.indexOf('?'),p=qi>=0?r.substring(0,qi):r;
+  var sp=new URLSearchParams(qi>=0?r.substring(qi+1):'');
+  if(p==='/api/occupations/search'){
+    return LS(b).then(function(d){
+      var q=(sp.get('q')||'').toLowerCase(),
+          lm=+(sp.get('limit')||50),of=+(sp.get('offset')||0),
+          rs=d.results||[];
+      if(q)rs=rs.filter(function(x){
+        return x.soc_code.toLowerCase().indexOf(q)>=0||
+               x.occupation_title.toLowerCase().indexOf(q)>=0;
+      });
+      return new Response(JSON.stringify({
+        results:rs.slice(of,of+lm),total:rs.length,limit:lm,offset:of
+      }),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  var pts=p.split('/');
+  if(pts.length===5&&pts[4]==='wages'&&pts[2]==='occupations'){
+    return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
+  }
+  if(p==='/api/trends/movers'){
+    var yr=sp.get('year'),mt=sp.get('metric')||'employment_count';
+    var mf=mt==='employment_count'?'':'_'+mt;
+    if(yr)return F(b+'/api/trends/movers-'+yr+mf+'.json');
+    return F(b+'/api/trends/movers'+mf+'.json');
+  }
+  if(p==='/api/trends/compare/occupations'){
+    var codes=(sp.get('soc_codes')||'').split(',').filter(Boolean);
+    var met=sp.get('metric')||'employment_count';
+    var gt=sp.get('geo_type')||'national';
+    return Promise.all(codes.map(function(c){
+      var ct=c.trim();
+      var tf=met==='employment_count'?ct+'.json':ct+'-'+met+'.json';
+      return Promise.all([
+        F(b+'/api/trends/'+tf).then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:trend',ct,e);return null}),
+        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:occ',ct,e);return null})
+      ]);
+    })).then(function(arr){
+      var occs=[];
+      arr.forEach(function(pair,i){
+        var d=pair[0],info=pair[1];
+        if(!d||!d.series)return;
+        var title=(info&&info.occupation_title)?info.occupation_title:codes[i];
+        occs.push({soc_code:codes[i],title:title,series:d.series.map(function(s){return{year:s.year,value:s.value}})});
+      });
+      var body=JSON.stringify({metric:met,geo_type:gt,occupations:occs});
+      return new Response(body,{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(pts.length===4&&pts[1]==='api'&&pts[2]==='trends'&&/^\d{2}-\d{4}$/.test(pts[3])){
+    var tm=sp.get('metric');
+    if(tm&&tm!=='employment_count')return F(b+'/api/trends/'+pts[3]+'-'+tm+'.json');
+    return F(b+'/api/trends/'+pts[3]+'.json');
+  }
+  if(p==='/api/trends/compare/geography'){
+    var sc=sp.get('soc_code');
+    if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
+  }
+  if(p==='/api/cpi/search'){
+    return F(b+'/api/cpi/search.json').then(function(r){return r.json()}).then(function(d){
+      var q2=(sp.get('q')||'').toLowerCase(),lm2=+(sp.get('limit')||50),
+          rs2=d.results||[];
+      if(q2)rs2=rs2.filter(function(x){
+        return x.member_code.toLowerCase().indexOf(q2)>=0||x.title.toLowerCase().indexOf(q2)>=0;
+      });
+      return new Response(JSON.stringify({query:sp.get('q')||'',total:rs2.length,results:rs2.slice(0,lm2)}),
+        {headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(p==='/api/cpi/explorer/tree'){
+    var root=sp.get('root')||'SA0',md=sp.get('max_depth')||'3';
+    return F(b+'/api/cpi/explorer/tree-'+root+'-'+md+'.json');
+  }
+  if(p==='/api/cpi/compare'){
+    var cc=(sp.get('codes')||'').split(',').filter(Boolean);
+    var cac=sp.get('area_code')||'0000',cif=sp.get('index_family')||'CPI-U',csa=sp.get('seasonal_adjustment')||'S';
+    return Promise.all(cc.map(function(c){
+      var ct=c.trim();
+      return F(b+'/api/cpi/members/'+ct+'/series.json').then(function(r){return r.json()})
+        .catch(function(){return null});
+    })).then(function(arr){
+      var series={};
+      cc.forEach(function(c,i){
+        var d=arr[i];
+        if(d&&d.series)series[c.trim()]=d.series.map(function(s){return{year:s.year,value:s.value}});
+      });
+      return new Response(JSON.stringify({codes:cc,series:series}),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  return F(b+p+'.json');
+};
+})();
+</script>
+</head>
+<body>
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <header role="banner">
+        <nav aria-label="Main navigation">
+            <div class="nav-brand">
+                <a href="/">JobClass</a>
+            </div>
+            <ul class="nav-links" role="list">
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search</a></li>
+                <li><a href="/hierarchy">Hierarchy</a></li>
+                <li><a href="/trends">Trends</a></li>
+                <li><a href="/cpi">CPI</a></li>
+                <li><a href="/pipeline">Pipeline</a></li>
+                <li><a href="/methodology">Methodology</a></li>
+                <li><a href="/lessons">Lessons</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content" role="main">
+        
+        
+            <section class="lesson-page">
+    <h1>Data Quality Traps in Government Sources</h1>
+    <p class="lesson-meta">Lesson 4 &mdash; Data quality &amp; defensive parsing</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/multi-vintage">&larr; Multi-Vintage Challenge</a> | <a href="/pipeline#node=gate_schema_drift">View in Pipeline &rarr;</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/time-series">Time-Series Normalization &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>Trap 1: ZIP Files With Garbage Inside</h2>
+        <p>
+            BLS publishes OEWS data as ZIP files containing Excel spreadsheets. The 2022 state ZIP
+            (<code>oesm22st.zip</code>) also contained <code>~$state_M2022_dl.xlsx</code> &mdash;
+            an Excel temp/lock file that someone at BLS left in the archive. Our ZIP extractor tried
+            to read this as the data file and failed with "File is not a zip file."
+        </p>
+        <h3>Defense</h3>
+        <p>Filter any filename starting with <code>~$</code> before selecting the XLSX to extract.
+           BLS does not scrub their archives before publishing.</p>
+        <pre class="lesson-code"><code>xlsx_names = [
+    n for n in zf.namelist()
+    if n.lower().endswith(".xlsx") and not n.split("/")[-1].startswith("~$")
+]</code></pre>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Trap 2: Column Names Change Between Vintages</h2>
+        <p>
+            OEWS 2023 uses the column header <code>O_GROUP</code>. OEWS 2021 uses <code>OCC_GROUP</code>.
+            Older files might use just <code>GROUP</code>. They all mean the same thing.
+        </p>
+        <p>Similarly: <code>AREA_NAME</code> in one vintage, <code>AREA_TITLE</code> in another.</p>
+        <h3>Defense</h3>
+        <p>Maintain an alias map in the parser that normalizes all known column name variations to a
+           single canonical name:</p>
+        <pre class="lesson-code"><code>_OEWS_COLUMN_ALIASES = {
+    "group": "o_group",
+    "occ_group": "o_group",
+    "area_name": "area_title",
+    ...
+}</code></pre>
+        <div class="lesson-callout">
+            <p>
+                <strong>When adding a new vintage:</strong> The first thing to check is whether its column
+                headers match the alias map. New columns or renamed columns will cause silent data loss
+                if not mapped.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Trap 3: Broad/Detailed Group Overlap</h2>
+        <p>
+            BLS categorizes occupations into hierarchical groups: major, minor, broad, and detailed.
+            In the OEWS data, a "detailed" occupation like <code>11-1011</code> (Chief Executives) also
+            appears under its "broad" group <code>11-1010</code>. Both rows carry identical employment
+            counts and wage values.
+        </p>
+        <p>
+            If you load both rows into the fact table and then try to normalize into time-series
+            observations, the unique constraint fires because you're inserting the same
+            <code>(occupation_key, geography_key, period_key)</code> twice with the same values.
+        </p>
+        <h3>Defense</h3>
+        <p>
+            Use <code>SELECT DISTINCT</code> when normalizing from fact to time-series observation
+            tables. The duplicates have identical values, so deduplication is safe and correct.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Trap 4: Suppressed Values Are Not Zeros</h2>
+        <p>
+            BLS suppresses wage and employment data for confidentiality when the number of respondents
+            is too small. These values arrive as null, asterisks (<code>*</code>), or special markers
+            (<code>**</code>). They mean "data exists but cannot be disclosed" &mdash; fundamentally
+            different from zero.
+        </p>
+        <div class="lesson-callout">
+            <p>
+                <strong>Rule:</strong> Preserve nulls through every layer. Never impute, never substitute
+                zero. Display "Data suppressed" or "Not available" in the UI. This is a legal and ethical
+                requirement, not just a data quality preference.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Trap 5: BLS Blocks Bare HTTP Requests</h2>
+        <p>
+            BLS.gov returns 403 Forbidden for HTTP requests that don't include browser-like headers.
+            Specifically, you need <code>Sec-Fetch-Dest</code>, <code>Sec-Fetch-Mode</code>,
+            <code>Sec-Fetch-Site</code>, and <code>Sec-Fetch-User</code> headers.
+        </p>
+        <p>
+            The downloader sends a full set of browser-like headers. This is not scraping &mdash;
+            the data is public &mdash; but BLS's CDN enforces these checks.
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/multi-vintage">&larr; Multi-Vintage Challenge</a> | <a href="/pipeline#node=gate_schema_drift">View in Pipeline &rarr;</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/time-series">Time-Series Normalization &rarr;</a>
+        </div>
+    </nav>
+</section>
+        
+        
+    </main>
+
+    <footer role="contentinfo">
+        <div class="footer-content">
+            <p>JobClass — Labor Market Occupation Pipeline</p>
+            <p class="footer-meta">Data sourced from BLS (SOC, OEWS, Employment Projections) and O*NET</p>
+        </div>
+    </footer>
+
+</body>
+</html>

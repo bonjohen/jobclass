@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Labor market occupation data — employment, wages, skills, tasks, and projections from federal sources.">
+    <title>Derived Metrics from Base Observations — Lessons — JobClass</title>
+    <link rel="stylesheet" href="/static/css/main.css?v=PE0">
+    <script src="/static/js/main.js?v=PE0"></script>
+<script>
+(function(){
+var F=window.fetch,SC=null;
+function LS(b){
+  if(!SC)SC=F(b+'/api/occupations/search.json').then(function(r){return r.json()});
+  return SC;
+}
+window.fetch=function(u){
+  if(typeof u!=='string')return F.apply(this,arguments);
+  var ai=u.indexOf('/api/');
+  if(ai<0)return F.apply(this,arguments);
+  var b=u.substring(0,ai),r=u.substring(ai);
+  var qi=r.indexOf('?'),p=qi>=0?r.substring(0,qi):r;
+  var sp=new URLSearchParams(qi>=0?r.substring(qi+1):'');
+  if(p==='/api/occupations/search'){
+    return LS(b).then(function(d){
+      var q=(sp.get('q')||'').toLowerCase(),
+          lm=+(sp.get('limit')||50),of=+(sp.get('offset')||0),
+          rs=d.results||[];
+      if(q)rs=rs.filter(function(x){
+        return x.soc_code.toLowerCase().indexOf(q)>=0||
+               x.occupation_title.toLowerCase().indexOf(q)>=0;
+      });
+      return new Response(JSON.stringify({
+        results:rs.slice(of,of+lm),total:rs.length,limit:lm,offset:of
+      }),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  var pts=p.split('/');
+  if(pts.length===5&&pts[4]==='wages'&&pts[2]==='occupations'){
+    return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
+  }
+  if(p==='/api/trends/movers'){
+    var yr=sp.get('year'),mt=sp.get('metric')||'employment_count';
+    var mf=mt==='employment_count'?'':'_'+mt;
+    if(yr)return F(b+'/api/trends/movers-'+yr+mf+'.json');
+    return F(b+'/api/trends/movers'+mf+'.json');
+  }
+  if(p==='/api/trends/compare/occupations'){
+    var codes=(sp.get('soc_codes')||'').split(',').filter(Boolean);
+    var met=sp.get('metric')||'employment_count';
+    var gt=sp.get('geo_type')||'national';
+    return Promise.all(codes.map(function(c){
+      var ct=c.trim();
+      var tf=met==='employment_count'?ct+'.json':ct+'-'+met+'.json';
+      return Promise.all([
+        F(b+'/api/trends/'+tf).then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:trend',ct,e);return null}),
+        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:occ',ct,e);return null})
+      ]);
+    })).then(function(arr){
+      var occs=[];
+      arr.forEach(function(pair,i){
+        var d=pair[0],info=pair[1];
+        if(!d||!d.series)return;
+        var title=(info&&info.occupation_title)?info.occupation_title:codes[i];
+        occs.push({soc_code:codes[i],title:title,series:d.series.map(function(s){return{year:s.year,value:s.value}})});
+      });
+      var body=JSON.stringify({metric:met,geo_type:gt,occupations:occs});
+      return new Response(body,{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(pts.length===4&&pts[1]==='api'&&pts[2]==='trends'&&/^\d{2}-\d{4}$/.test(pts[3])){
+    var tm=sp.get('metric');
+    if(tm&&tm!=='employment_count')return F(b+'/api/trends/'+pts[3]+'-'+tm+'.json');
+    return F(b+'/api/trends/'+pts[3]+'.json');
+  }
+  if(p==='/api/trends/compare/geography'){
+    var sc=sp.get('soc_code');
+    if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
+  }
+  if(p==='/api/cpi/search'){
+    return F(b+'/api/cpi/search.json').then(function(r){return r.json()}).then(function(d){
+      var q2=(sp.get('q')||'').toLowerCase(),lm2=+(sp.get('limit')||50),
+          rs2=d.results||[];
+      if(q2)rs2=rs2.filter(function(x){
+        return x.member_code.toLowerCase().indexOf(q2)>=0||x.title.toLowerCase().indexOf(q2)>=0;
+      });
+      return new Response(JSON.stringify({query:sp.get('q')||'',total:rs2.length,results:rs2.slice(0,lm2)}),
+        {headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(p==='/api/cpi/explorer/tree'){
+    var root=sp.get('root')||'SA0',md=sp.get('max_depth')||'3';
+    return F(b+'/api/cpi/explorer/tree-'+root+'-'+md+'.json');
+  }
+  if(p==='/api/cpi/compare'){
+    var cc=(sp.get('codes')||'').split(',').filter(Boolean);
+    var cac=sp.get('area_code')||'0000',cif=sp.get('index_family')||'CPI-U',csa=sp.get('seasonal_adjustment')||'S';
+    return Promise.all(cc.map(function(c){
+      var ct=c.trim();
+      return F(b+'/api/cpi/members/'+ct+'/series.json').then(function(r){return r.json()})
+        .catch(function(){return null});
+    })).then(function(arr){
+      var series={};
+      cc.forEach(function(c,i){
+        var d=arr[i];
+        if(d&&d.series)series[c.trim()]=d.series.map(function(s){return{year:s.year,value:s.value}});
+      });
+      return new Response(JSON.stringify({codes:cc,series:series}),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  return F(b+p+'.json');
+};
+})();
+</script>
+</head>
+<body>
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <header role="banner">
+        <nav aria-label="Main navigation">
+            <div class="nav-brand">
+                <a href="/">JobClass</a>
+            </div>
+            <ul class="nav-links" role="list">
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search</a></li>
+                <li><a href="/hierarchy">Hierarchy</a></li>
+                <li><a href="/trends">Trends</a></li>
+                <li><a href="/cpi">CPI</a></li>
+                <li><a href="/pipeline">Pipeline</a></li>
+                <li><a href="/methodology">Methodology</a></li>
+                <li><a href="/lessons">Lessons</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content" role="main">
+        
+        
+            <section class="lesson-page">
+    <h1>Derived Metrics from Base Observations</h1>
+    <p class="lesson-meta">Lesson 17 &mdash; Computing metrics from base observations</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/government-apis">&larr; Extract Patterns for Government APIs</a>
+        </div>
+        <div style="text-align: center;">
+            <a href="/pipeline#node=proc_ts_derived">View in Pipeline &rarr;</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/outlier-interpretation">Ranked Movers &amp; Outlier Interpretation &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>Why Derived Metrics Need Their Own Table</h2>
+        <p>
+            Base observations are source truth from BLS and O*NET. Derived values &mdash;
+            year-over-year change, rolling averages, real wages &mdash; are computed artifacts.
+            Mixing them in the same table creates ambiguity: is this value a measurement or a
+            calculation? A consumer querying wage data shouldn't have to guess whether a number
+            came directly from BLS or was produced by the pipeline.
+        </p>
+        <p>
+            The pipeline stores base observations in <code>fact_time_series_observation</code>
+            and all derived values in <code>fact_derived_series</code>. Each derived row carries
+            a <code>derivation_method</code> label (e.g., <code>'yoy_absolute_change'</code>,
+            <code>'cpi_deflation'</code>) and a <code>base_metric_key</code> pointing back to
+            the metric it was computed from. This separation means downstream queries always
+            know exactly what kind of value they are working with based on which table they
+            read from.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Self-Join Pattern for Year-over-Year</h2>
+        <p>
+            Computing year-over-year change requires connecting each observation to its
+            prior-year counterpart. The core pattern is a self-join on
+            <code>fact_time_series_observation</code> through the time dimension.
+        </p>
+        <pre class="lesson-code"><code>-- Year-over-year absolute change
+INSERT INTO fact_derived_series (...)
+SELECT
+    derived_key, base_key,
+    curr.occupation_key, curr.geography_key,
+    curr.period_key, curr.comparability_mode,
+    curr.observed_value - prev.observed_value,
+    'yoy_absolute_change', run_id
+FROM fact_time_series_observation curr
+JOIN dim_time_period tp_curr ON curr.period_key = tp_curr.period_key
+JOIN dim_time_period tp_prev
+  ON tp_prev.year = tp_curr.year - 1
+JOIN fact_time_series_observation prev
+  ON prev.metric_key = curr.metric_key
+  AND prev.occupation_key = curr.occupation_key
+  AND prev.geography_key = curr.geography_key
+  AND prev.period_key = tp_prev.period_key
+WHERE curr.observed_value IS NOT NULL
+  AND prev.observed_value IS NOT NULL</code></pre>
+        <p>
+            The self-join connects each observation to its prior-year counterpart through
+            <code>dim_time_period</code>. The <code>tp_prev.year = tp_curr.year - 1</code>
+            condition finds the matching period, and the subsequent join on
+            <code>metric_key</code>, <code>occupation_key</code>, <code>geography_key</code>,
+            and <code>period_key</code> ensures we compare the exact same measure for the
+            exact same occupation in the exact same geography. If either year is missing or
+            NULL, no derived value is produced &mdash; the pipeline never imputes.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Rolling Averages via Triple-Join</h2>
+        <p>
+            A 3-year rolling average smooths out single-year volatility and reveals underlying
+            trends. The SQL pattern extends the self-join approach by connecting three
+            consecutive years.
+        </p>
+        <pre class="lesson-code"><code>-- 3-year rolling average requires three consecutive years
+JOIN dim_time_period tp_1 ON tp_1.year = tp_curr.year - 1
+JOIN dim_time_period tp_2 ON tp_2.year = tp_curr.year - 2
+JOIN fact_time_series_observation p1
+  ON p1.period_key = tp_1.period_key
+  AND p1.metric_key = curr.metric_key
+  AND p1.occupation_key = curr.occupation_key
+  AND p1.geography_key = curr.geography_key
+JOIN fact_time_series_observation p2
+  ON p2.period_key = tp_2.period_key
+  AND p2.metric_key = curr.metric_key
+  AND p2.occupation_key = curr.occupation_key
+  AND p2.geography_key = curr.geography_key
+...
+ROUND((p2.observed_value + p1.observed_value + curr.observed_value) / 3.0, 2)</code></pre>
+        <p>
+            The triple-join naturally handles the "3 consecutive years required" constraint
+            &mdash; if any year is missing, the JOIN produces no rows. No explicit gap detection
+            is needed. This is a general pattern: require N consecutive values by adding N-1
+            self-joins through the time dimension. The database engine handles the absence check
+            for free through inner join semantics.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Idempotent Delete-Before-Insert</h2>
+        <p>
+            Every derived metric computation follows the same two-step pattern: delete all
+            existing rows for that metric, then insert the freshly computed values.
+        </p>
+        <pre class="lesson-code"><code># Every compute function follows this pattern:
+derived_key = get_metric_key(conn, "yoy_absolute_change")
+conn.execute(
+    "DELETE FROM fact_derived_series WHERE metric_key = ?",
+    [derived_key]
+)
+conn.execute(
+    "INSERT INTO fact_derived_series (...) SELECT ..."
+)</code></pre>
+        <div class="lesson-callout">
+            <p>
+                <strong>Key principle:</strong> Delete-before-insert is safe for derived metrics
+                because every value is fully reproducible from base observations. Unlike base data
+                (which could be lost), derived data can always be recomputed. This pattern makes
+                the pipeline idempotent: running it twice produces the same result.
+            </p>
+        </div>
+        <p>
+            The delete is scoped to a single <code>metric_key</code>, so recomputing
+            year-over-year change doesn't touch rolling averages or real wages. Each derived
+            metric is an independent computation that can be re-run in isolation without
+            affecting any other metric in the table.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Derived Metrics Registry</h2>
+        <p>
+            The pipeline computes seven derived metrics, each with a specific derivation method
+            and minimum data requirement. All are stored in <code>fact_derived_series</code>
+            with a <code>base_metric_key</code> linking back to the source observation metric.
+        </p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Units</th>
+                    <th>Method</th>
+                    <th>Min Data Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>yoy_absolute_change</td>
+                    <td>varies</td>
+                    <td>Self-join on year-1</td>
+                    <td>2 consecutive years</td>
+                </tr>
+                <tr>
+                    <td>yoy_percent_change</td>
+                    <td>percent</td>
+                    <td>(curr - prev) / prev &times; 100</td>
+                    <td>2 consecutive years</td>
+                </tr>
+                <tr>
+                    <td>rolling_avg_3yr</td>
+                    <td>varies</td>
+                    <td>Average of 3 consecutive years</td>
+                    <td>3 consecutive years</td>
+                </tr>
+                <tr>
+                    <td>state_vs_national_gap</td>
+                    <td>varies</td>
+                    <td>state_value - national_value</td>
+                    <td>State + national data</td>
+                </tr>
+                <tr>
+                    <td>rank_delta</td>
+                    <td>rank_change</td>
+                    <td>rank(year-1) - rank(year)</td>
+                    <td>2 consecutive years</td>
+                </tr>
+                <tr>
+                    <td>real_mean_annual_wage</td>
+                    <td>dollars</td>
+                    <td>CPI deflation</td>
+                    <td>CPI data for year</td>
+                </tr>
+                <tr>
+                    <td>real_median_annual_wage</td>
+                    <td>dollars</td>
+                    <td>CPI deflation</td>
+                    <td>CPI data for year</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            Each metric is registered in <code>dim_metric</code> with its units and description.
+            The <code>derivation_method</code> column in <code>fact_derived_series</code> makes
+            it possible to trace exactly how any value was produced, and the
+            <code>base_metric_key</code> connects each derived row to the source observation
+            metric it was computed from.
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/government-apis">&larr; Extract Patterns for Government APIs</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/outlier-interpretation">Ranked Movers &amp; Outlier Interpretation &rarr;</a>
+        </div>
+    </nav>
+</section>
+        
+        
+    </main>
+
+    <footer role="contentinfo">
+        <div class="footer-content">
+            <p>JobClass — Labor Market Occupation Pipeline</p>
+            <p class="footer-meta">Data sourced from BLS (SOC, OEWS, Employment Projections) and O*NET</p>
+        </div>
+    </footer>
+
+</body>
+</html>

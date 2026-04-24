@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Labor market occupation data — employment, wages, skills, tasks, and projections from federal sources.">
+    <title>Lessons — JobClass</title>
+    <link rel="stylesheet" href="/static/css/main.css?v=PE0">
+    <script src="/static/js/main.js?v=PE0"></script>
+<script>
+(function(){
+var F=window.fetch,SC=null;
+function LS(b){
+  if(!SC)SC=F(b+'/api/occupations/search.json').then(function(r){return r.json()});
+  return SC;
+}
+window.fetch=function(u){
+  if(typeof u!=='string')return F.apply(this,arguments);
+  var ai=u.indexOf('/api/');
+  if(ai<0)return F.apply(this,arguments);
+  var b=u.substring(0,ai),r=u.substring(ai);
+  var qi=r.indexOf('?'),p=qi>=0?r.substring(0,qi):r;
+  var sp=new URLSearchParams(qi>=0?r.substring(qi+1):'');
+  if(p==='/api/occupations/search'){
+    return LS(b).then(function(d){
+      var q=(sp.get('q')||'').toLowerCase(),
+          lm=+(sp.get('limit')||50),of=+(sp.get('offset')||0),
+          rs=d.results||[];
+      if(q)rs=rs.filter(function(x){
+        return x.soc_code.toLowerCase().indexOf(q)>=0||
+               x.occupation_title.toLowerCase().indexOf(q)>=0;
+      });
+      return new Response(JSON.stringify({
+        results:rs.slice(of,of+lm),total:rs.length,limit:lm,offset:of
+      }),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  var pts=p.split('/');
+  if(pts.length===5&&pts[4]==='wages'&&pts[2]==='occupations'){
+    return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
+  }
+  if(p==='/api/trends/movers'){
+    var yr=sp.get('year'),mt=sp.get('metric')||'employment_count';
+    var mf=mt==='employment_count'?'':'_'+mt;
+    if(yr)return F(b+'/api/trends/movers-'+yr+mf+'.json');
+    return F(b+'/api/trends/movers'+mf+'.json');
+  }
+  if(p==='/api/trends/compare/occupations'){
+    var codes=(sp.get('soc_codes')||'').split(',').filter(Boolean);
+    var met=sp.get('metric')||'employment_count';
+    var gt=sp.get('geo_type')||'national';
+    return Promise.all(codes.map(function(c){
+      var ct=c.trim();
+      var tf=met==='employment_count'?ct+'.json':ct+'-'+met+'.json';
+      return Promise.all([
+        F(b+'/api/trends/'+tf).then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:trend',ct,e);return null}),
+        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:occ',ct,e);return null})
+      ]);
+    })).then(function(arr){
+      var occs=[];
+      arr.forEach(function(pair,i){
+        var d=pair[0],info=pair[1];
+        if(!d||!d.series)return;
+        var title=(info&&info.occupation_title)?info.occupation_title:codes[i];
+        occs.push({soc_code:codes[i],title:title,series:d.series.map(function(s){return{year:s.year,value:s.value}})});
+      });
+      var body=JSON.stringify({metric:met,geo_type:gt,occupations:occs});
+      return new Response(body,{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(pts.length===4&&pts[1]==='api'&&pts[2]==='trends'&&/^\d{2}-\d{4}$/.test(pts[3])){
+    var tm=sp.get('metric');
+    if(tm&&tm!=='employment_count')return F(b+'/api/trends/'+pts[3]+'-'+tm+'.json');
+    return F(b+'/api/trends/'+pts[3]+'.json');
+  }
+  if(p==='/api/trends/compare/geography'){
+    var sc=sp.get('soc_code');
+    if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
+  }
+  if(p==='/api/cpi/search'){
+    return F(b+'/api/cpi/search.json').then(function(r){return r.json()}).then(function(d){
+      var q2=(sp.get('q')||'').toLowerCase(),lm2=+(sp.get('limit')||50),
+          rs2=d.results||[];
+      if(q2)rs2=rs2.filter(function(x){
+        return x.member_code.toLowerCase().indexOf(q2)>=0||x.title.toLowerCase().indexOf(q2)>=0;
+      });
+      return new Response(JSON.stringify({query:sp.get('q')||'',total:rs2.length,results:rs2.slice(0,lm2)}),
+        {headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(p==='/api/cpi/explorer/tree'){
+    var root=sp.get('root')||'SA0',md=sp.get('max_depth')||'3';
+    return F(b+'/api/cpi/explorer/tree-'+root+'-'+md+'.json');
+  }
+  if(p==='/api/cpi/compare'){
+    var cc=(sp.get('codes')||'').split(',').filter(Boolean);
+    var cac=sp.get('area_code')||'0000',cif=sp.get('index_family')||'CPI-U',csa=sp.get('seasonal_adjustment')||'S';
+    return Promise.all(cc.map(function(c){
+      var ct=c.trim();
+      return F(b+'/api/cpi/members/'+ct+'/series.json').then(function(r){return r.json()})
+        .catch(function(){return null});
+    })).then(function(arr){
+      var series={};
+      cc.forEach(function(c,i){
+        var d=arr[i];
+        if(d&&d.series)series[c.trim()]=d.series.map(function(s){return{year:s.year,value:s.value}});
+      });
+      return new Response(JSON.stringify({codes:cc,series:series}),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  return F(b+p+'.json');
+};
+})();
+</script>
+</head>
+<body>
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <header role="banner">
+        <nav aria-label="Main navigation">
+            <div class="nav-brand">
+                <a href="/">JobClass</a>
+            </div>
+            <ul class="nav-links" role="list">
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search</a></li>
+                <li><a href="/hierarchy">Hierarchy</a></li>
+                <li><a href="/trends">Trends</a></li>
+                <li><a href="/cpi">CPI</a></li>
+                <li><a href="/pipeline">Pipeline</a></li>
+                <li><a href="/methodology">Methodology</a></li>
+                <li><a href="/lessons">Lessons</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content" role="main">
+        
+        
+            <section class="lessons-page">
+    <h1>Lessons</h1>
+    <p class="lessons-intro">
+        Practical lessons from building a labor market data warehouse. Each lesson covers a concept
+        encountered during development, with concrete examples from this codebase.
+    </p>
+
+    <div class="lesson-cards">
+        <a href="/lessons/federal-data" class="lesson-card">
+            <span class="lesson-card-number">Lesson 1</span>
+            <h2>The Federal Labor Data Landscape</h2>
+            <p>Four federal data products, one occupation code. How SOC, OEWS, O*NET, and Employment Projections connect through the Standard Occupational Classification.</p>
+            <span class="lesson-card-meta">Data sources &amp; relationships</span>
+        </a>
+
+        <a href="/lessons/dimensional-modeling" class="lesson-card">
+            <span class="lesson-card-number">Lesson 2</span>
+            <h2>Dimensional Modeling for Labor Data</h2>
+            <p>Facts, dimensions, bridges, and the four-layer architecture. Why separating measurements from context makes everything easier to query.</p>
+            <span class="lesson-card-meta">Architecture &amp; data modeling</span>
+        </a>
+
+        <a href="/lessons/multi-vintage" class="lesson-card">
+            <span class="lesson-card-number">Lesson 3</span>
+            <h2>The Multi-Vintage Challenge</h2>
+            <p>What breaks when you load multiple years of the same dataset, and how shared dimensions make cross-vintage time-series analysis possible.</p>
+            <span class="lesson-card-meta">Multi-year data integration</span>
+        </a>
+
+        <a href="/lessons/data-quality" class="lesson-card">
+            <span class="lesson-card-number">Lesson 4</span>
+            <h2>Data Quality Traps in Government Sources</h2>
+            <p>ZIP files with garbage inside, column names that change between releases, overlapping occupation groups, and suppressed values that aren't zeros.</p>
+            <span class="lesson-card-meta">Data quality &amp; defensive parsing</span>
+        </a>
+
+        <a href="/lessons/time-series" class="lesson-card">
+            <span class="lesson-card-number">Lesson 5</span>
+            <h2>Time-Series Normalization</h2>
+            <p>Transforming point-in-time snapshots into proper time-series data. As-published vs. comparable history, and how derived metrics are computed.</p>
+            <span class="lesson-card-meta">Time-series design &amp; analysis</span>
+        </a>
+
+        <a href="/lessons/idempotent-pipelines" class="lesson-card">
+            <span class="lesson-card-number">Lesson 6</span>
+            <h2>Idempotent Pipeline Design</h2>
+            <p>Why every load operation must be safely re-runnable. Delete-before-insert, check-before-insert, and grain uniqueness as the final safety net.</p>
+            <span class="lesson-card-meta">Pipeline reliability patterns</span>
+        </a>
+
+        <a href="/lessons/static-site" class="lesson-card">
+            <span class="lesson-card-number">Lesson 7</span>
+            <h2>Static Site Generation</h2>
+            <p>Converting a dynamic FastAPI application into static files for GitHub Pages. Fetch shims, path rewriting, and the limits of pre-rendering.</p>
+            <span class="lesson-card-meta">Deployment &amp; static generation</span>
+        </a>
+
+        <a href="/lessons/testing-deployment" class="lesson-card">
+            <span class="lesson-card-number">Lesson 8</span>
+            <h2>Testing and Deployment</h2>
+            <p>Three test directories, schema contracts, grain uniqueness, idempotence verification, CI configuration, and the full deployment checklist.</p>
+            <span class="lesson-card-meta">Testing strategy &amp; CI/CD</span>
+        </a>
+
+        <a href="/lessons/similarity-algorithms" class="lesson-card">
+            <span class="lesson-card-number">Lesson 9</span>
+            <h2>Choosing the Right Similarity Algorithm</h2>
+            <p>Why Jaccard similarity produced 100% matches for every occupation pair, and how cosine similarity on importance scores fixed it.</p>
+            <span class="lesson-card-meta">Algorithm selection &amp; data structure</span>
+        </a>
+
+        <a href="/lessons/thread-safety" class="lesson-card">
+            <span class="lesson-card-number">Lesson 10</span>
+            <h2>Thread-Safe Database Connections</h2>
+            <p>Why landing page stats intermittently showed zero, and how per-thread DuckDB connections fixed the concurrency bug.</p>
+            <span class="lesson-card-meta">Concurrency &amp; web server architecture</span>
+        </a>
+
+        <a href="/lessons/multi-vintage-queries" class="lesson-card">
+            <span class="lesson-card-number">Lesson 11</span>
+            <h2>Multi-Vintage Query Pitfalls</h2>
+            <p>Three traps when querying across multiple data releases: duplicate rows, missing derived metrics, and percentages without absolute context.</p>
+            <span class="lesson-card-meta">Querying across multiple data releases</span>
+        </a>
+        <a href="/lessons/ui-data-alignment" class="lesson-card">
+            <span class="lesson-card-number">Lesson 12</span>
+            <h2>UI-Data Alignment</h2>
+            <p>Dead-end links, mixed time periods, and static site shim gaps. Three patterns for making the interface reflect what data actually exists.</p>
+            <span class="lesson-card-meta">UI design &amp; data availability</span>
+        </a>
+
+        <a href="/lessons/schema-drift" class="lesson-card">
+            <span class="lesson-card-number">Lesson 13</span>
+            <h2>Schema Drift Detection</h2>
+            <p>Column adds, removes, and retypes between releases. How validation gates block bad data from reaching the warehouse.</p>
+            <span class="lesson-card-meta">Data validation &amp; drift detection</span>
+        </a>
+
+        <a href="/lessons/inflation-adjustment" class="lesson-card">
+            <span class="lesson-card-number">Lesson 14</span>
+            <h2>Inflation Adjustment with CPI</h2>
+            <p>CPI-U deflation formula, base year selection, and the SQL pattern for computing real wages from nominal observations.</p>
+            <span class="lesson-card-meta">Real wages &amp; economic adjustment</span>
+        </a>
+
+        <a href="/lessons/taxonomy-evolution" class="lesson-card">
+            <span class="lesson-card-number">Lesson 15</span>
+            <h2>Crosswalk &amp; Taxonomy Evolution</h2>
+            <p>SOC version changes, 1:1/split/merge/complex mappings, and why &ldquo;same code&rdquo; doesn&rsquo;t mean &ldquo;same occupation.&rdquo;</p>
+            <span class="lesson-card-meta">Occupation code versioning</span>
+        </a>
+
+        <a href="/lessons/government-apis" class="lesson-card">
+            <span class="lesson-card-number">Lesson 16</span>
+            <h2>Extract Patterns for Government APIs</h2>
+            <p>Browser header spoofing, retry with exponential backoff, format heterogeneity, and manifest-driven downloads.</p>
+            <span class="lesson-card-meta">Data extraction &amp; HTTP patterns</span>
+        </a>
+
+        <a href="/lessons/derived-metrics" class="lesson-card">
+            <span class="lesson-card-number">Lesson 17</span>
+            <h2>Derived Metrics from Base Observations</h2>
+            <p>Why derived metrics need their own fact table. Self-join patterns for YoY, rolling averages, and idempotent computation.</p>
+            <span class="lesson-card-meta">Derived series &amp; computation</span>
+        </a>
+
+        <a href="/lessons/outlier-interpretation" class="lesson-card">
+            <span class="lesson-card-number">Lesson 18</span>
+            <h2>Ranked Movers &amp; Outlier Interpretation</h2>
+            <p>Small-denominator volatility, dual-direction sorting, and why suppressed data causes apparent outliers in top-movers lists.</p>
+            <span class="lesson-card-meta">Statistical interpretation</span>
+        </a>
+
+        <a href="/lessons/geography-pitfalls" class="lesson-card">
+            <span class="lesson-card-number">Lesson 19</span>
+            <h2>Geography Comparison Pitfalls</h2>
+            <p>State-vs-national gaps, cost-of-living confounders, suppressed cells in small states, and dimension-driven filtering.</p>
+            <span class="lesson-card-meta">Geographic data challenges</span>
+        </a>
+
+        <a href="/lessons/fetch-shim" class="lesson-card">
+            <span class="lesson-card-number">Lesson 20</span>
+            <h2>Fetch Shim Architecture</h2>
+            <p>Turning a dynamic API into a static site. JavaScript fetch interception, URL-to-file mapping, and client-side search.</p>
+            <span class="lesson-card-meta">Static site &amp; deployment</span>
+        </a>
+    </div>
+</section>
+        
+        
+    </main>
+
+    <footer role="contentinfo">
+        <div class="footer-content">
+            <p>JobClass — Labor Market Occupation Pipeline</p>
+            <p class="footer-meta">Data sourced from BLS (SOC, OEWS, Employment Projections) and O*NET</p>
+        </div>
+    </footer>
+
+</body>
+</html>

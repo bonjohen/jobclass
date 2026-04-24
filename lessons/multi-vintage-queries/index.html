@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Labor market occupation data — employment, wages, skills, tasks, and projections from federal sources.">
+    <title>Multi-Vintage Query Pitfalls — Lessons — JobClass</title>
+    <link rel="stylesheet" href="/static/css/main.css?v=PE0">
+    <script src="/static/js/main.js?v=PE0"></script>
+<script>
+(function(){
+var F=window.fetch,SC=null;
+function LS(b){
+  if(!SC)SC=F(b+'/api/occupations/search.json').then(function(r){return r.json()});
+  return SC;
+}
+window.fetch=function(u){
+  if(typeof u!=='string')return F.apply(this,arguments);
+  var ai=u.indexOf('/api/');
+  if(ai<0)return F.apply(this,arguments);
+  var b=u.substring(0,ai),r=u.substring(ai);
+  var qi=r.indexOf('?'),p=qi>=0?r.substring(0,qi):r;
+  var sp=new URLSearchParams(qi>=0?r.substring(qi+1):'');
+  if(p==='/api/occupations/search'){
+    return LS(b).then(function(d){
+      var q=(sp.get('q')||'').toLowerCase(),
+          lm=+(sp.get('limit')||50),of=+(sp.get('offset')||0),
+          rs=d.results||[];
+      if(q)rs=rs.filter(function(x){
+        return x.soc_code.toLowerCase().indexOf(q)>=0||
+               x.occupation_title.toLowerCase().indexOf(q)>=0;
+      });
+      return new Response(JSON.stringify({
+        results:rs.slice(of,of+lm),total:rs.length,limit:lm,offset:of
+      }),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  var pts=p.split('/');
+  if(pts.length===5&&pts[4]==='wages'&&pts[2]==='occupations'){
+    return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
+  }
+  if(p==='/api/trends/movers'){
+    var yr=sp.get('year'),mt=sp.get('metric')||'employment_count';
+    var mf=mt==='employment_count'?'':'_'+mt;
+    if(yr)return F(b+'/api/trends/movers-'+yr+mf+'.json');
+    return F(b+'/api/trends/movers'+mf+'.json');
+  }
+  if(p==='/api/trends/compare/occupations'){
+    var codes=(sp.get('soc_codes')||'').split(',').filter(Boolean);
+    var met=sp.get('metric')||'employment_count';
+    var gt=sp.get('geo_type')||'national';
+    return Promise.all(codes.map(function(c){
+      var ct=c.trim();
+      var tf=met==='employment_count'?ct+'.json':ct+'-'+met+'.json';
+      return Promise.all([
+        F(b+'/api/trends/'+tf).then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:trend',ct,e);return null}),
+        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:occ',ct,e);return null})
+      ]);
+    })).then(function(arr){
+      var occs=[];
+      arr.forEach(function(pair,i){
+        var d=pair[0],info=pair[1];
+        if(!d||!d.series)return;
+        var title=(info&&info.occupation_title)?info.occupation_title:codes[i];
+        occs.push({soc_code:codes[i],title:title,series:d.series.map(function(s){return{year:s.year,value:s.value}})});
+      });
+      var body=JSON.stringify({metric:met,geo_type:gt,occupations:occs});
+      return new Response(body,{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(pts.length===4&&pts[1]==='api'&&pts[2]==='trends'&&/^\d{2}-\d{4}$/.test(pts[3])){
+    var tm=sp.get('metric');
+    if(tm&&tm!=='employment_count')return F(b+'/api/trends/'+pts[3]+'-'+tm+'.json');
+    return F(b+'/api/trends/'+pts[3]+'.json');
+  }
+  if(p==='/api/trends/compare/geography'){
+    var sc=sp.get('soc_code');
+    if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
+  }
+  if(p==='/api/cpi/search'){
+    return F(b+'/api/cpi/search.json').then(function(r){return r.json()}).then(function(d){
+      var q2=(sp.get('q')||'').toLowerCase(),lm2=+(sp.get('limit')||50),
+          rs2=d.results||[];
+      if(q2)rs2=rs2.filter(function(x){
+        return x.member_code.toLowerCase().indexOf(q2)>=0||x.title.toLowerCase().indexOf(q2)>=0;
+      });
+      return new Response(JSON.stringify({query:sp.get('q')||'',total:rs2.length,results:rs2.slice(0,lm2)}),
+        {headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(p==='/api/cpi/explorer/tree'){
+    var root=sp.get('root')||'SA0',md=sp.get('max_depth')||'3';
+    return F(b+'/api/cpi/explorer/tree-'+root+'-'+md+'.json');
+  }
+  if(p==='/api/cpi/compare'){
+    var cc=(sp.get('codes')||'').split(',').filter(Boolean);
+    var cac=sp.get('area_code')||'0000',cif=sp.get('index_family')||'CPI-U',csa=sp.get('seasonal_adjustment')||'S';
+    return Promise.all(cc.map(function(c){
+      var ct=c.trim();
+      return F(b+'/api/cpi/members/'+ct+'/series.json').then(function(r){return r.json()})
+        .catch(function(){return null});
+    })).then(function(arr){
+      var series={};
+      cc.forEach(function(c,i){
+        var d=arr[i];
+        if(d&&d.series)series[c.trim()]=d.series.map(function(s){return{year:s.year,value:s.value}});
+      });
+      return new Response(JSON.stringify({codes:cc,series:series}),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  return F(b+p+'.json');
+};
+})();
+</script>
+</head>
+<body>
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <header role="banner">
+        <nav aria-label="Main navigation">
+            <div class="nav-brand">
+                <a href="/">JobClass</a>
+            </div>
+            <ul class="nav-links" role="list">
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search</a></li>
+                <li><a href="/hierarchy">Hierarchy</a></li>
+                <li><a href="/trends">Trends</a></li>
+                <li><a href="/cpi">CPI</a></li>
+                <li><a href="/pipeline">Pipeline</a></li>
+                <li><a href="/methodology">Methodology</a></li>
+                <li><a href="/lessons">Lessons</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content" role="main">
+        
+        
+            <section class="lesson-page">
+    <h1>Multi-Vintage Query Pitfalls</h1>
+    <p class="lesson-meta">Lesson 11 &mdash; Querying across multiple data releases</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/thread-safety">&larr; Thread-Safe Database Connections</a>
+        </div>
+        <div style="text-align: center;">
+            <a href="/pipeline#node=proc_ts_observations">View in Pipeline &rarr;</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/ui-data-alignment">UI-Data Alignment &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>The Core Problem</h2>
+        <p>
+            Once the warehouse holds multiple vintages of the same dataset (OEWS 2021, 2022, 2023),
+            every query must explicitly decide: <strong>do I want the latest snapshot, or all history?</strong>
+            Forgetting this decision produces silent data quality bugs.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Trap 1: Duplicate Rows in Snapshot Views</h2>
+        <p>
+            The wages comparison page (<code>/occupation/{soc}/wages</code>) showed 150 rows for
+            50 states &mdash; three rows per state, one per OEWS vintage. The page was designed
+            to show the latest snapshot, but the query had no vintage filter:
+        </p>
+        <pre class="lesson-code"><code># BROKEN: returns all vintages
+SELECT g.geo_name, f.mean_annual_wage, ...
+FROM fact_occupation_employment_wages f
+JOIN dim_geography g ON f.geography_key = g.geography_key
+WHERE o.soc_code = '11-2021' AND g.geo_type = 'state'
+
+# Result: Alabama (2021), Alabama (2022), Alabama (2023), Alaska (2021), ...
+# 50 states × 3 vintages = 150 rows</code></pre>
+        <pre class="lesson-code"><code># FIXED: latest vintage only
+SELECT MAX(source_release_id) FROM fact_occupation_employment_wages
+-- → '2023.05'
+
+SELECT g.geo_name, f.mean_annual_wage, ...
+WHERE ... AND f.source_release_id = '2023.05'
+
+# Result: Alabama, Alaska, ... (50 rows)</code></pre>
+        <div class="lesson-callout">
+            <p>
+                <strong>Rule:</strong> Any endpoint that shows a point-in-time snapshot must
+                filter to a specific <code>source_release_id</code>. Only time-series and
+                trend endpoints should return multiple vintages.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Trap 2: Derived Metrics Tied to Comparability Mode</h2>
+        <p>
+            The Trend Explorer page showed YoY Change and YoY % as <strong>N/A</strong> for every
+            year. The calculations were correct &mdash; but they only existed in
+            <code>comparable</code> mode, while the UI defaulted to <code>as_published</code>.
+        </p>
+        <pre class="lesson-code"><code># fact_derived_series stores YoY only for comparable mode:
+comparability_mode = 'comparable'  → yoy_change = 33420, yoy_pct = 15.69
+comparability_mode = 'as_published' → (no rows)
+
+# The API query correctly LEFT JOINs to derived series,
+# but when comparability_mode = 'as_published', the join finds nothing → NULL</code></pre>
+        <p>
+            The fix was simple: change the default <code>&lt;select&gt;</code> option from
+            <code>as_published</code> to <code>comparable</code>. The data existed all along
+            &mdash; the UI was pointing at the wrong slice.
+        </p>
+        <div class="lesson-callout">
+            <p>
+                <strong>Rule:</strong> When derived metrics depend on a specific comparability mode,
+                the UI must default to that mode. Otherwise users see empty columns and assume
+                the feature is broken.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Trap 3: Percentages Without Absolute Context</h2>
+        <p>
+            The Ranked Movers page showed only YoY percent change. Without the absolute change,
+            users couldn't distinguish meaningful moves from noise:
+        </p>
+        <pre class="lesson-code"><code># Without absolute context:
+Athletes and Sports Competitors:  +206%   ← How much is that?
+Broadcast Announcers:             +178%   ← Meaningful or tiny base?
+
+# With absolute context:
+Athletes and Sports Competitors:  +$241,150  (+206%)   ← Massive jump
+Broadcast Announcers:             +$99,620   (+178%)   ← Also large</code></pre>
+        <p>
+            The fix: join to <code>yoy_absolute_change</code> in the movers API query
+            and display both columns in the UI. Wage metrics format as dollars; employment
+            metrics format as counts.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Decision Guide: Latest vs. All Vintages</h2>
+        <table class="data-table">
+            <thead>
+                <tr><th>Page / Endpoint</th><th>Vintage Policy</th><th>Filter</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Occupation profile, wages comparison</td>
+                    <td>Latest only</td>
+                    <td><code>source_release_id = MAX(...)</code></td>
+                </tr>
+                <tr>
+                    <td>Trend Explorer, time-series API</td>
+                    <td>All vintages</td>
+                    <td>No filter (ordered by year)</td>
+                </tr>
+                <tr>
+                    <td>Ranked Movers</td>
+                    <td>Latest derived only</td>
+                    <td>Implicit (latest period in derived series)</td>
+                </tr>
+                <tr>
+                    <td>Geography comparison</td>
+                    <td>Specific year (user-selected or latest)</td>
+                    <td><code>tp.year = ?</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/thread-safety">&larr; Thread-Safe Database Connections</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/ui-data-alignment">UI-Data Alignment &rarr;</a>
+        </div>
+    </nav>
+</section>
+        
+        
+    </main>
+
+    <footer role="contentinfo">
+        <div class="footer-content">
+            <p>JobClass — Labor Market Occupation Pipeline</p>
+            <p class="footer-meta">Data sourced from BLS (SOC, OEWS, Employment Projections) and O*NET</p>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Labor market occupation data — employment, wages, skills, tasks, and projections from federal sources.">
+    <title>Methodology — JobClass</title>
+    <link rel="stylesheet" href="/static/css/main.css?v=PE0">
+    <script src="/static/js/main.js?v=PE0"></script>
+<script>
+(function(){
+var F=window.fetch,SC=null;
+function LS(b){
+  if(!SC)SC=F(b+'/api/occupations/search.json').then(function(r){return r.json()});
+  return SC;
+}
+window.fetch=function(u){
+  if(typeof u!=='string')return F.apply(this,arguments);
+  var ai=u.indexOf('/api/');
+  if(ai<0)return F.apply(this,arguments);
+  var b=u.substring(0,ai),r=u.substring(ai);
+  var qi=r.indexOf('?'),p=qi>=0?r.substring(0,qi):r;
+  var sp=new URLSearchParams(qi>=0?r.substring(qi+1):'');
+  if(p==='/api/occupations/search'){
+    return LS(b).then(function(d){
+      var q=(sp.get('q')||'').toLowerCase(),
+          lm=+(sp.get('limit')||50),of=+(sp.get('offset')||0),
+          rs=d.results||[];
+      if(q)rs=rs.filter(function(x){
+        return x.soc_code.toLowerCase().indexOf(q)>=0||
+               x.occupation_title.toLowerCase().indexOf(q)>=0;
+      });
+      return new Response(JSON.stringify({
+        results:rs.slice(of,of+lm),total:rs.length,limit:lm,offset:of
+      }),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  var pts=p.split('/');
+  if(pts.length===5&&pts[4]==='wages'&&pts[2]==='occupations'){
+    return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
+  }
+  if(p==='/api/trends/movers'){
+    var yr=sp.get('year'),mt=sp.get('metric')||'employment_count';
+    var mf=mt==='employment_count'?'':'_'+mt;
+    if(yr)return F(b+'/api/trends/movers-'+yr+mf+'.json');
+    return F(b+'/api/trends/movers'+mf+'.json');
+  }
+  if(p==='/api/trends/compare/occupations'){
+    var codes=(sp.get('soc_codes')||'').split(',').filter(Boolean);
+    var met=sp.get('metric')||'employment_count';
+    var gt=sp.get('geo_type')||'national';
+    return Promise.all(codes.map(function(c){
+      var ct=c.trim();
+      var tf=met==='employment_count'?ct+'.json':ct+'-'+met+'.json';
+      return Promise.all([
+        F(b+'/api/trends/'+tf).then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:trend',ct,e);return null}),
+        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:occ',ct,e);return null})
+      ]);
+    })).then(function(arr){
+      var occs=[];
+      arr.forEach(function(pair,i){
+        var d=pair[0],info=pair[1];
+        if(!d||!d.series)return;
+        var title=(info&&info.occupation_title)?info.occupation_title:codes[i];
+        occs.push({soc_code:codes[i],title:title,series:d.series.map(function(s){return{year:s.year,value:s.value}})});
+      });
+      var body=JSON.stringify({metric:met,geo_type:gt,occupations:occs});
+      return new Response(body,{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(pts.length===4&&pts[1]==='api'&&pts[2]==='trends'&&/^\d{2}-\d{4}$/.test(pts[3])){
+    var tm=sp.get('metric');
+    if(tm&&tm!=='employment_count')return F(b+'/api/trends/'+pts[3]+'-'+tm+'.json');
+    return F(b+'/api/trends/'+pts[3]+'.json');
+  }
+  if(p==='/api/trends/compare/geography'){
+    var sc=sp.get('soc_code');
+    if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
+  }
+  if(p==='/api/cpi/search'){
+    return F(b+'/api/cpi/search.json').then(function(r){return r.json()}).then(function(d){
+      var q2=(sp.get('q')||'').toLowerCase(),lm2=+(sp.get('limit')||50),
+          rs2=d.results||[];
+      if(q2)rs2=rs2.filter(function(x){
+        return x.member_code.toLowerCase().indexOf(q2)>=0||x.title.toLowerCase().indexOf(q2)>=0;
+      });
+      return new Response(JSON.stringify({query:sp.get('q')||'',total:rs2.length,results:rs2.slice(0,lm2)}),
+        {headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(p==='/api/cpi/explorer/tree'){
+    var root=sp.get('root')||'SA0',md=sp.get('max_depth')||'3';
+    return F(b+'/api/cpi/explorer/tree-'+root+'-'+md+'.json');
+  }
+  if(p==='/api/cpi/compare'){
+    var cc=(sp.get('codes')||'').split(',').filter(Boolean);
+    var cac=sp.get('area_code')||'0000',cif=sp.get('index_family')||'CPI-U',csa=sp.get('seasonal_adjustment')||'S';
+    return Promise.all(cc.map(function(c){
+      var ct=c.trim();
+      return F(b+'/api/cpi/members/'+ct+'/series.json').then(function(r){return r.json()})
+        .catch(function(){return null});
+    })).then(function(arr){
+      var series={};
+      cc.forEach(function(c,i){
+        var d=arr[i];
+        if(d&&d.series)series[c.trim()]=d.series.map(function(s){return{year:s.year,value:s.value}});
+      });
+      return new Response(JSON.stringify({codes:cc,series:series}),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  return F(b+p+'.json');
+};
+})();
+</script>
+</head>
+<body>
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <header role="banner">
+        <nav aria-label="Main navigation">
+            <div class="nav-brand">
+                <a href="/">JobClass</a>
+            </div>
+            <ul class="nav-links" role="list">
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search</a></li>
+                <li><a href="/hierarchy">Hierarchy</a></li>
+                <li><a href="/trends">Trends</a></li>
+                <li><a href="/cpi">CPI</a></li>
+                <li><a href="/pipeline">Pipeline</a></li>
+                <li><a href="/methodology">Methodology</a></li>
+                <li><a href="/lessons">Lessons</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content" role="main">
+        
+        
+            <section class="methodology-page">
+    <h1>Methodology</h1>
+    <p class="methodology-intro">
+        JobClass integrates four federal data products into a unified analytical warehouse,
+        with occupation as the stable external key.
+    </p>
+
+    <div class="methodology-sections" id="methodology-content">
+        <div class="methodology-section">
+            <h2>Architecture</h2>
+            <p>The pipeline follows a four-layer warehouse architecture:</p>
+            <ol class="architecture-layers">
+                <li><strong>Raw/Landing</strong> — Immutable capture of downloaded source artifacts</li>
+                <li><strong>Standardized Staging</strong> — Parsed into relational structures with explicit typing</li>
+                <li><strong>Core Warehouse</strong> — Conformed dimensions, facts, and bridges with version-aware joins</li>
+                <li><strong>Analyst Marts</strong> — Denormalized views for specific analytical questions</li>
+            </ol>
+            <p style="margin-top:0.75rem;"><a href="/pipeline" class="pipeline-link">View in Pipeline Explorer &rarr;</a></p>
+        </div>
+
+        <div class="methodology-section" id="data-sources-section">
+            <h2>Data Sources</h2>
+            <div id="sources-content">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Source</th><th>Description</th><th>Role</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>SOC (Standard Occupational Classification)</td>
+                            <td>Bureau of Labor Statistics</td>
+                            <td>Occupation taxonomy backbone — hierarchy from major groups to detailed occupations</td>
+                        </tr>
+                        <tr>
+                            <td>OEWS (Occupational Employment and Wage Statistics)</td>
+                            <td>Bureau of Labor Statistics</td>
+                            <td>Employment counts and wage measures by occupation, geography, and industry</td>
+                        </tr>
+                        <tr>
+                            <td>O*NET (Occupational Information Network)</td>
+                            <td>Department of Labor / O*NET Center</td>
+                            <td>Semantic descriptors — skills, knowledge, abilities, and tasks for each occupation</td>
+                        </tr>
+                        <tr>
+                            <td>Employment Projections</td>
+                            <td>Bureau of Labor Statistics</td>
+                            <td>10-year employment outlook with growth rates and education requirements</td>
+                        </tr>
+                        <tr>
+                            <td>CPI-U (Consumer Price Index for All Urban Consumers)</td>
+                            <td>Bureau of Labor Statistics</td>
+                            <td>Price index for inflation-adjusted wages; full hierarchy of items and areas</td>
+                        </tr>
+                        <tr>
+                            <td>SOC Crosswalk (2010 &harr; 2018)</td>
+                            <td>Bureau of Labor Statistics</td>
+                            <td>Occupation code mappings between SOC taxonomy versions for historical depth</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="methodology-section">
+            <h2>Data Quality</h2>
+            <ul>
+                <li><strong>Idempotent loading</strong> — Re-running the same dataset version never creates duplicates</li>
+                <li><strong>Fail-fast on schema drift</strong> — Parser blocks publication if source format changes</li>
+                <li><strong>Preserved suppression</strong> — BLS suppressed values remain null, never imputed or shown as zero</li>
+                <li><strong>Source lineage</strong> — Every displayed value is traceable to its source release and version</li>
+            </ul>
+        </div>
+
+        <div class="methodology-section">
+            <h2>Time-Series Analysis</h2>
+            <p>The warehouse supports time-indexed analysis of occupation metrics. Key concepts:</p>
+            <ul>
+                <li><strong>Comparability Mode</strong> — Two modes are maintained:
+                    <em>As Published</em> preserves the original values from each source release;
+                    <em>Comparable History</em> includes only observations from vintages sharing the same
+                    SOC taxonomy version, enabling valid trend comparisons.</li>
+                <li><strong>Base vs. Derived Metrics</strong> — Base metrics (employment count, wages) come
+                    directly from source data. Derived metrics (year-over-year change, rolling average,
+                    state-vs-national gap, rank delta) are computed from base observations and always labeled
+                    as derived.</li>
+                <li><strong>Projected Values</strong> — BLS Employment Projections are stored alongside
+                    observed values but are visually distinguished (dashed bars, different color) because
+                    they represent forward-looking estimates with different base years and assumptions.</li>
+                <li><strong>Revisions &amp; Discontinuities</strong> — When BLS revises OEWS data or changes
+                    the SOC taxonomy, previously published values may not be directly comparable to new releases.
+                    The comparable-history mode excludes cross-version comparisons; the as-published mode
+                    preserves the original record.</li>
+            </ul>
+        </div>
+
+        <div class="methodology-section">
+            <h2>CPI Domain</h2>
+            <p>The <a href="/cpi">CPI analytical domain</a> elevates BLS Consumer Price Index data from an internal wage deflator into a first-class browsable domain. Key design decisions:</p>
+            <ul>
+                <li><strong>Member vs. Series Variant</strong> — A CPI member (e.g., SA0 "All Items") is the stable concept.
+                    Series variants encode specific measurement choices: index family (CPI-U, CPI-W, C-CPI-U),
+                    seasonal adjustment (S/U), and geographic area.</li>
+                <li><strong>Hierarchy vs. Cross-Cutting</strong> — The BLS item hierarchy (All Items &rarr; Major Group &rarr;
+                    Expenditure Class &rarr; Item Stratum) is a strict tree. Cross-cutting aggregates
+                    (All Items Less Food &amp; Energy, Energy, Commodities) are classified separately with
+                    <code>semantic_role = special_aggregate</code>.</li>
+                <li><strong>Area Rules</strong> — National and regional areas publish monthly. Smaller metro areas
+                    publish bimonthly. Area indexes do not measure price-level differences between cities.</li>
+                <li><strong>C-CPI-U Revisions</strong> — The Chained CPI initially releases preliminary values,
+                    revised over 10&ndash;12 months as final expenditure data become available. Preliminary and final
+                    values are tracked separately in the revision vintage table.</li>
+                <li><strong>Real-Wage Integration</strong> — CPI-U All Items (SA0) annual averages serve as the deflator
+                    for real-wage metrics, using base year 2023. Formula:
+                    <code>real_wage = nominal &times; CPI<sub>2023</sub> / CPI<sub>year</sub></code></li>
+            </ul>
+        </div>
+
+        <div class="methodology-section" id="versions-section">
+            <h2>Current Versions</h2>
+            <div id="versions-content"><p class="loading">Loading version info...</p></div>
+        </div>
+
+        <div class="methodology-section" id="validation-section">
+            <h2>Pipeline Validation Status</h2>
+            <div id="validation-content"><p class="loading">Loading validation status...</p></div>
+        </div>
+    </div>
+</section>
+
+<script src="/static/js/methodology.js"></script>
+        
+        
+    </main>
+
+    <footer role="contentinfo">
+        <div class="footer-content">
+            <p>JobClass — Labor Market Occupation Pipeline</p>
+            <p class="footer-meta">Data sourced from BLS (SOC, OEWS, Employment Projections) and O*NET</p>
+        </div>
+    </footer>
+
+</body>
+</html>

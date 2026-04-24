@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Labor market occupation data — employment, wages, skills, tasks, and projections from federal sources.">
+    <title>Fetch Shim Architecture — Lessons — JobClass</title>
+    <link rel="stylesheet" href="/static/css/main.css?v=PE0">
+    <script src="/static/js/main.js?v=PE0"></script>
+<script>
+(function(){
+var F=window.fetch,SC=null;
+function LS(b){
+  if(!SC)SC=F(b+'/api/occupations/search.json').then(function(r){return r.json()});
+  return SC;
+}
+window.fetch=function(u){
+  if(typeof u!=='string')return F.apply(this,arguments);
+  var ai=u.indexOf('/api/');
+  if(ai<0)return F.apply(this,arguments);
+  var b=u.substring(0,ai),r=u.substring(ai);
+  var qi=r.indexOf('?'),p=qi>=0?r.substring(0,qi):r;
+  var sp=new URLSearchParams(qi>=0?r.substring(qi+1):'');
+  if(p==='/api/occupations/search'){
+    return LS(b).then(function(d){
+      var q=(sp.get('q')||'').toLowerCase(),
+          lm=+(sp.get('limit')||50),of=+(sp.get('offset')||0),
+          rs=d.results||[];
+      if(q)rs=rs.filter(function(x){
+        return x.soc_code.toLowerCase().indexOf(q)>=0||
+               x.occupation_title.toLowerCase().indexOf(q)>=0;
+      });
+      return new Response(JSON.stringify({
+        results:rs.slice(of,of+lm),total:rs.length,limit:lm,offset:of
+      }),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  var pts=p.split('/');
+  if(pts.length===5&&pts[4]==='wages'&&pts[2]==='occupations'){
+    return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
+  }
+  if(p==='/api/trends/movers'){
+    var yr=sp.get('year'),mt=sp.get('metric')||'employment_count';
+    var mf=mt==='employment_count'?'':'_'+mt;
+    if(yr)return F(b+'/api/trends/movers-'+yr+mf+'.json');
+    return F(b+'/api/trends/movers'+mf+'.json');
+  }
+  if(p==='/api/trends/compare/occupations'){
+    var codes=(sp.get('soc_codes')||'').split(',').filter(Boolean);
+    var met=sp.get('metric')||'employment_count';
+    var gt=sp.get('geo_type')||'national';
+    return Promise.all(codes.map(function(c){
+      var ct=c.trim();
+      var tf=met==='employment_count'?ct+'.json':ct+'-'+met+'.json';
+      return Promise.all([
+        F(b+'/api/trends/'+tf).then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:trend',ct,e);return null}),
+        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:occ',ct,e);return null})
+      ]);
+    })).then(function(arr){
+      var occs=[];
+      arr.forEach(function(pair,i){
+        var d=pair[0],info=pair[1];
+        if(!d||!d.series)return;
+        var title=(info&&info.occupation_title)?info.occupation_title:codes[i];
+        occs.push({soc_code:codes[i],title:title,series:d.series.map(function(s){return{year:s.year,value:s.value}})});
+      });
+      var body=JSON.stringify({metric:met,geo_type:gt,occupations:occs});
+      return new Response(body,{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(pts.length===4&&pts[1]==='api'&&pts[2]==='trends'&&/^\d{2}-\d{4}$/.test(pts[3])){
+    var tm=sp.get('metric');
+    if(tm&&tm!=='employment_count')return F(b+'/api/trends/'+pts[3]+'-'+tm+'.json');
+    return F(b+'/api/trends/'+pts[3]+'.json');
+  }
+  if(p==='/api/trends/compare/geography'){
+    var sc=sp.get('soc_code');
+    if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
+  }
+  if(p==='/api/cpi/search'){
+    return F(b+'/api/cpi/search.json').then(function(r){return r.json()}).then(function(d){
+      var q2=(sp.get('q')||'').toLowerCase(),lm2=+(sp.get('limit')||50),
+          rs2=d.results||[];
+      if(q2)rs2=rs2.filter(function(x){
+        return x.member_code.toLowerCase().indexOf(q2)>=0||x.title.toLowerCase().indexOf(q2)>=0;
+      });
+      return new Response(JSON.stringify({query:sp.get('q')||'',total:rs2.length,results:rs2.slice(0,lm2)}),
+        {headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(p==='/api/cpi/explorer/tree'){
+    var root=sp.get('root')||'SA0',md=sp.get('max_depth')||'3';
+    return F(b+'/api/cpi/explorer/tree-'+root+'-'+md+'.json');
+  }
+  if(p==='/api/cpi/compare'){
+    var cc=(sp.get('codes')||'').split(',').filter(Boolean);
+    var cac=sp.get('area_code')||'0000',cif=sp.get('index_family')||'CPI-U',csa=sp.get('seasonal_adjustment')||'S';
+    return Promise.all(cc.map(function(c){
+      var ct=c.trim();
+      return F(b+'/api/cpi/members/'+ct+'/series.json').then(function(r){return r.json()})
+        .catch(function(){return null});
+    })).then(function(arr){
+      var series={};
+      cc.forEach(function(c,i){
+        var d=arr[i];
+        if(d&&d.series)series[c.trim()]=d.series.map(function(s){return{year:s.year,value:s.value}});
+      });
+      return new Response(JSON.stringify({codes:cc,series:series}),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  return F(b+p+'.json');
+};
+})();
+</script>
+</head>
+<body>
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <header role="banner">
+        <nav aria-label="Main navigation">
+            <div class="nav-brand">
+                <a href="/">JobClass</a>
+            </div>
+            <ul class="nav-links" role="list">
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search</a></li>
+                <li><a href="/hierarchy">Hierarchy</a></li>
+                <li><a href="/trends">Trends</a></li>
+                <li><a href="/cpi">CPI</a></li>
+                <li><a href="/pipeline">Pipeline</a></li>
+                <li><a href="/methodology">Methodology</a></li>
+                <li><a href="/lessons">Lessons</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content" role="main">
+        
+        
+            <section class="lesson-page">
+    <h1>Fetch Shim Architecture</h1>
+    <p class="lesson-meta">Lesson 20 &mdash; Static site architecture</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/geography-pitfalls">&larr; Geography Comparison Pitfalls</a>
+        </div>
+        <div style="text-align: center;">
+            <a href="/pipeline#node=proc_fetch_shim">View in Pipeline &rarr;</a>
+        </div>
+        <div style="text-align: right;">
+            <a href="/lessons">All Lessons &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>The Problem: Dynamic API, Static Host</h2>
+        <p>
+            The FastAPI server handles 18+ API endpoints that accept query parameters, join
+            database tables, and return JSON. GitHub Pages can only serve static files. Every
+            JavaScript <code>fetch('/api/...')</code> call that works on the live server would
+            return 404 on the static site.
+        </p>
+        <p>
+            The solution: intercept every fetch call and redirect it to a pre-built JSON file.
+            The static build process pre-renders every known API response to a <code>.json</code>
+            file on disk. A small JavaScript shim, injected into every HTML page, intercepts
+            <code>fetch()</code> calls and translates dynamic URLs into static file paths. The
+            browser never knows the difference &mdash; it receives the same JSON either way.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>JavaScript Fetch Interception</h2>
+        <p>
+            The core technique is a monkey-patch of the global <code>fetch</code> function.
+            The shim saves a reference to the original, replaces it with a wrapper that inspects
+            each URL, and routes API calls to the correct static JSON file.
+        </p>
+        <pre class="lesson-code"><code>// Save original fetch, replace with interceptor
+var originalFetch = window.fetch;
+
+window.fetch = function(url) {
+    // Only intercept /api/ calls
+    if (url.indexOf('/api/') &lt; 0)
+        return originalFetch(url);
+
+    // Parse the URL into path and query params
+    var path = url.split('?')[0];
+    var params = new URLSearchParams(url.split('?')[1] || '');
+
+    // Route to the correct pre-built JSON file
+    // ... pattern matching rules ...
+
+    // Fallback: try path + .json
+    return originalFetch(path + '.json');
+};</code></pre>
+        <p>
+            The shim is injected into the <code>&lt;head&gt;</code> of every HTML page during
+            the static build. It wraps the browser's native fetch and inspects URLs before
+            they're sent. Non-API calls (stylesheets, images, other resources) pass through
+            untouched. This means the shim has zero impact on non-API network requests.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>URL-to-File Mapping Rules</h2>
+        <p>
+            Each API URL pattern maps to a predictable static file path. Query parameters
+            become filename suffixes, keeping the mapping logic simple and deterministic.
+        </p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>API URL Pattern</th>
+                    <th>Static JSON File</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>/api/occupations/search?q=...</td>
+                    <td>/api/occupations/search.json</td>
+                    <td>Client-side filtering from full index</td>
+                </tr>
+                <tr>
+                    <td>/api/occupations/{soc}/wages?geo_type=X</td>
+                    <td>/api/occupations/{soc}/wages-X.json</td>
+                    <td>Separate file per geo_type</td>
+                </tr>
+                <tr>
+                    <td>/api/trends/movers?metric=M&amp;year=Y</td>
+                    <td>/api/trends/movers-Y_M.json</td>
+                    <td>Per-metric, per-year</td>
+                </tr>
+                <tr>
+                    <td>/api/trends/{soc}?metric=M</td>
+                    <td>/api/trends/{soc}-M.json</td>
+                    <td>Per-metric trend data</td>
+                </tr>
+                <tr>
+                    <td>/api/trends/compare/geography?soc_code=X</td>
+                    <td>/api/trends/compare/geography-X.json</td>
+                    <td>Per-occupation file</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            Query parameters become filename suffixes. The default metric
+            (<code>employment_count</code>) maps to the bare filename; other metrics add a
+            suffix. This convention keeps filenames predictable and the mapping logic simple.
+            Adding a new endpoint means adding one new mapping rule and one new file-generation
+            step in the build script.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Client-Side Search</h2>
+        <p>
+            Search is the most complex shim case because it requires filtering, not just file
+            lookup. The solution downloads the full occupation index once, caches it as a
+            Promise, and filters locally on every search request.
+        </p>
+        <pre class="lesson-code"><code>// Singleton: fetch full index once, cache as Promise
+var searchCache = null;
+function loadSearch(basePath) {
+    if (!searchCache)
+        searchCache = originalFetch(basePath + '/api/occupations/search.json')
+            .then(function(r) { return r.json(); });
+    return searchCache;
+}
+
+// Filter locally when user searches
+loadSearch(basePath).then(function(data) {
+    var query = params.get('q').toLowerCase();
+    var results = data.results.filter(function(x) {
+        return x.soc_code.indexOf(query) &gt;= 0 ||
+               x.occupation_title.toLowerCase().indexOf(query) &gt;= 0;
+    });
+    return new Response(JSON.stringify({
+        results: results.slice(offset, offset + limit),
+        total: results.length
+    }));
+});</code></pre>
+        <p>
+            The full occupation index (1,447 entries) is small enough to download once and
+            filter in JavaScript. This eliminates the need for a server-side search endpoint
+            entirely. The cached Promise ensures only one network request is made, even if the
+            user types multiple search queries in rapid succession. Each keystroke filters
+            against the already-loaded data.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Client-Side Composition for Compare</h2>
+        <p>
+            The occupation comparison endpoint accepts an arbitrary list of SOC codes. No single
+            pre-built file can cover every possible combination. Instead, the shim fetches the
+            building blocks &mdash; individual per-occupation JSON files &mdash; and assembles
+            the response client-side.
+        </p>
+        <pre class="lesson-code"><code>// /api/trends/compare/occupations?soc_codes=15-1252,11-1021
+// No single pre-built file exists &mdash; compose from per-occupation files
+var codes = params.get('soc_codes').split(',');
+return Promise.all(codes.map(function(code) {
+    return Promise.all([
+        originalFetch('/api/trends/' + code + '.json'),
+        originalFetch('/api/occupations/' + code + '.json')
+    ]);
+})).then(function(results) {
+    // Assemble the comparison response from individual files
+    return new Response(JSON.stringify({
+        metric: metric,
+        occupations: assembledData
+    }));
+});</code></pre>
+        <div class="lesson-callout">
+            <p>
+                <strong>Key pattern:</strong> When a pre-built endpoint can't exist (because the
+                query accepts arbitrary code combinations), the shim fetches the building blocks
+                and assembles the response client-side. This is the static-site equivalent of a
+                server-side JOIN.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Path Rewriting for Subpath Deployment</h2>
+        <p>
+            GitHub Pages serves the site at <code>/jobclass/</code>, not <code>/</code>. Every
+            link, asset path, and API URL must include this prefix. The static build script
+            handles this with a simple string replacement pass over the rendered HTML.
+        </p>
+        <pre class="lesson-code"><code># rewrite_paths() handles this at build time:
+replacements = [
+    ('"/api/',        '"/jobclass/api/'),
+    ('"/occupation/', '"/jobclass/occupation/'),
+    ('"/static/',     '"/jobclass/static/'),
+    ('href="/"',      'href="/jobclass/"'),
+    ...
+]</code></pre>
+        <p>
+            The shim itself does NOT need rewriting &mdash; it extracts the base path at runtime
+            from the current URL. If the page is served from <code>/jobclass/trends/movers</code>,
+            the shim sees <code>b = "/jobclass"</code> and prepends it to all JSON file paths
+            automatically. This means the same shim code works both locally (base path
+            <code>""</code>) and on GitHub Pages (base path <code>"/jobclass"</code>) without
+            any changes.
+        </p>
+        <p>
+            The separation of concerns is deliberate: the build script rewrites HTML-level paths
+            (links, script sources, stylesheet references), while the shim handles API-level
+            paths at runtime. Neither needs to know about the other's work.
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/geography-pitfalls">&larr; Geography Comparison Pitfalls</a>
+        </div>
+        <div style="text-align: right;">
+            <a href="/lessons">All Lessons &rarr;</a>
+        </div>
+    </nav>
+</section>
+        
+        
+    </main>
+
+    <footer role="contentinfo">
+        <div class="footer-content">
+            <p>JobClass — Labor Market Occupation Pipeline</p>
+            <p class="footer-meta">Data sourced from BLS (SOC, OEWS, Employment Projections) and O*NET</p>
+        </div>
+    </footer>
+
+</body>
+</html>

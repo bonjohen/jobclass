@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Labor market occupation data — employment, wages, skills, tasks, and projections from federal sources.">
+    <title>Ranked Movers &amp; Outlier Interpretation — Lessons — JobClass</title>
+    <link rel="stylesheet" href="/static/css/main.css?v=PE0">
+    <script src="/static/js/main.js?v=PE0"></script>
+<script>
+(function(){
+var F=window.fetch,SC=null;
+function LS(b){
+  if(!SC)SC=F(b+'/api/occupations/search.json').then(function(r){return r.json()});
+  return SC;
+}
+window.fetch=function(u){
+  if(typeof u!=='string')return F.apply(this,arguments);
+  var ai=u.indexOf('/api/');
+  if(ai<0)return F.apply(this,arguments);
+  var b=u.substring(0,ai),r=u.substring(ai);
+  var qi=r.indexOf('?'),p=qi>=0?r.substring(0,qi):r;
+  var sp=new URLSearchParams(qi>=0?r.substring(qi+1):'');
+  if(p==='/api/occupations/search'){
+    return LS(b).then(function(d){
+      var q=(sp.get('q')||'').toLowerCase(),
+          lm=+(sp.get('limit')||50),of=+(sp.get('offset')||0),
+          rs=d.results||[];
+      if(q)rs=rs.filter(function(x){
+        return x.soc_code.toLowerCase().indexOf(q)>=0||
+               x.occupation_title.toLowerCase().indexOf(q)>=0;
+      });
+      return new Response(JSON.stringify({
+        results:rs.slice(of,of+lm),total:rs.length,limit:lm,offset:of
+      }),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  var pts=p.split('/');
+  if(pts.length===5&&pts[4]==='wages'&&pts[2]==='occupations'){
+    return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
+  }
+  if(p==='/api/trends/movers'){
+    var yr=sp.get('year'),mt=sp.get('metric')||'employment_count';
+    var mf=mt==='employment_count'?'':'_'+mt;
+    if(yr)return F(b+'/api/trends/movers-'+yr+mf+'.json');
+    return F(b+'/api/trends/movers'+mf+'.json');
+  }
+  if(p==='/api/trends/compare/occupations'){
+    var codes=(sp.get('soc_codes')||'').split(',').filter(Boolean);
+    var met=sp.get('metric')||'employment_count';
+    var gt=sp.get('geo_type')||'national';
+    return Promise.all(codes.map(function(c){
+      var ct=c.trim();
+      var tf=met==='employment_count'?ct+'.json':ct+'-'+met+'.json';
+      return Promise.all([
+        F(b+'/api/trends/'+tf).then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:trend',ct,e);return null}),
+        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:occ',ct,e);return null})
+      ]);
+    })).then(function(arr){
+      var occs=[];
+      arr.forEach(function(pair,i){
+        var d=pair[0],info=pair[1];
+        if(!d||!d.series)return;
+        var title=(info&&info.occupation_title)?info.occupation_title:codes[i];
+        occs.push({soc_code:codes[i],title:title,series:d.series.map(function(s){return{year:s.year,value:s.value}})});
+      });
+      var body=JSON.stringify({metric:met,geo_type:gt,occupations:occs});
+      return new Response(body,{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(pts.length===4&&pts[1]==='api'&&pts[2]==='trends'&&/^\d{2}-\d{4}$/.test(pts[3])){
+    var tm=sp.get('metric');
+    if(tm&&tm!=='employment_count')return F(b+'/api/trends/'+pts[3]+'-'+tm+'.json');
+    return F(b+'/api/trends/'+pts[3]+'.json');
+  }
+  if(p==='/api/trends/compare/geography'){
+    var sc=sp.get('soc_code');
+    if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
+  }
+  if(p==='/api/cpi/search'){
+    return F(b+'/api/cpi/search.json').then(function(r){return r.json()}).then(function(d){
+      var q2=(sp.get('q')||'').toLowerCase(),lm2=+(sp.get('limit')||50),
+          rs2=d.results||[];
+      if(q2)rs2=rs2.filter(function(x){
+        return x.member_code.toLowerCase().indexOf(q2)>=0||x.title.toLowerCase().indexOf(q2)>=0;
+      });
+      return new Response(JSON.stringify({query:sp.get('q')||'',total:rs2.length,results:rs2.slice(0,lm2)}),
+        {headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(p==='/api/cpi/explorer/tree'){
+    var root=sp.get('root')||'SA0',md=sp.get('max_depth')||'3';
+    return F(b+'/api/cpi/explorer/tree-'+root+'-'+md+'.json');
+  }
+  if(p==='/api/cpi/compare'){
+    var cc=(sp.get('codes')||'').split(',').filter(Boolean);
+    var cac=sp.get('area_code')||'0000',cif=sp.get('index_family')||'CPI-U',csa=sp.get('seasonal_adjustment')||'S';
+    return Promise.all(cc.map(function(c){
+      var ct=c.trim();
+      return F(b+'/api/cpi/members/'+ct+'/series.json').then(function(r){return r.json()})
+        .catch(function(){return null});
+    })).then(function(arr){
+      var series={};
+      cc.forEach(function(c,i){
+        var d=arr[i];
+        if(d&&d.series)series[c.trim()]=d.series.map(function(s){return{year:s.year,value:s.value}});
+      });
+      return new Response(JSON.stringify({codes:cc,series:series}),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  return F(b+p+'.json');
+};
+})();
+</script>
+</head>
+<body>
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <header role="banner">
+        <nav aria-label="Main navigation">
+            <div class="nav-brand">
+                <a href="/">JobClass</a>
+            </div>
+            <ul class="nav-links" role="list">
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search</a></li>
+                <li><a href="/hierarchy">Hierarchy</a></li>
+                <li><a href="/trends">Trends</a></li>
+                <li><a href="/cpi">CPI</a></li>
+                <li><a href="/pipeline">Pipeline</a></li>
+                <li><a href="/methodology">Methodology</a></li>
+                <li><a href="/lessons">Lessons</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content" role="main">
+        
+        
+            <section class="lesson-page">
+    <h1>Ranked Movers &amp; Outlier Interpretation</h1>
+    <p class="lesson-meta">Lesson 18 &mdash; Understanding ranked movers data</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/derived-metrics">&larr; Derived Metrics from Base Observations</a>
+        </div>
+        <div style="text-align: center;">
+            <a href="/pipeline#node=store_mart_rank">View in Pipeline &rarr;</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/geography-pitfalls">Geography Comparison Pitfalls &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>What Ranked Movers Shows</h2>
+        <p>
+            The Ranked Movers page answers "which occupations changed the most?" for a given
+            metric and year. Top gainers are occupations with the highest year-over-year percent
+            change; top losers have the lowest (most negative). The user selects a metric
+            (employment count, mean wage, median wage) and a year &mdash; the results change
+            for each combination.
+        </p>
+        <p>
+            This makes Ranked Movers a discovery tool rather than a fixed report. A user
+            exploring wage trends will see a completely different set of occupations than one
+            exploring employment shifts, even for the same year. The rankings surface
+            occupations that might not appear on anyone's radar through conventional browsing.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>The Dual-Direction Sort</h2>
+        <p>
+            Gainers and losers come from the same query &mdash; only the sort direction
+            changes. The key join is through <code>base_metric_key</code>, which connects
+            each YoY percent change back to the specific base metric the user selected.
+        </p>
+        <pre class="lesson-code"><code>-- Same query, only ORDER BY direction changes
+movers_sql = """
+    SELECT o.soc_code, o.occupation_title,
+           d.derived_value AS pct_change,
+           abs.derived_value AS abs_change
+    FROM fact_derived_series d
+    JOIN dim_metric m ON d.metric_key = m.metric_key
+    JOIN dim_metric bm ON d.base_metric_key = bm.metric_key
+    JOIN dim_occupation o ON d.occupation_key = o.occupation_key
+    ...
+    WHERE m.metric_name = 'yoy_percent_change'
+      AND bm.metric_name = ?   -- user-selected base metric
+      AND tp.year = ?
+    ORDER BY d.derived_value {direction}
+    LIMIT ?
+"""
+gainers = execute(movers_sql.format(direction="DESC"), params)
+losers  = execute(movers_sql.format(direction="ASC"), params)</code></pre>
+        <p>
+            The key is <code>bm.metric_name = ?</code> &mdash; this joins through
+            <code>base_metric_key</code> to filter YoY percent changes for only the selected
+            base metric. The <code>dim_metric</code> table is joined twice: once for the
+            derived metric itself (<code>m</code>) and once for the base metric it was derived
+            from (<code>bm</code>). Different base metrics produce completely different
+            rankings because the underlying values and their volatility profiles differ.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Small-Denominator Volatility</h2>
+        <p>
+            Percentage changes on small bases are statistically volatile. An occupation with
+            100 workers gaining 50 shows +50% YoY change, outranking an occupation with
+            100,000 workers gaining 5,000 (+5%). The percentage is mathematically correct
+            in both cases, but the economic significance is vastly different.
+        </p>
+        <pre class="lesson-code"><code># Both are "real" changes, but one is much more meaningful:
+Dancers:                3,850 &rarr; 8,930   (+131.9%)  # Volatile
+Software Developers:  1,795,300 &rarr; 1,847,800  (+2.9%)   # Stable</code></pre>
+        <p>
+            The API returns both <code>pct_change</code> and <code>abs_change</code> so the
+            UI shows absolute context alongside percentages. A +131.9% change in 5,080 jobs
+            is less economically significant than a +2.9% change in 52,500 jobs. Users see
+            both numbers side by side and can judge for themselves which changes represent
+            meaningful labor market shifts versus statistical noise in small populations.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Suppressed Data Creates Apparent Outliers</h2>
+        <p>
+            When BLS suppresses a value in year N but not year N+1 (or vice versa), the
+            YoY calculation is NULL &mdash; since the pipeline never imputes, there is simply
+            no derived row. But when suppression is <em>lifted</em>, the "first visible" year
+            may show extreme apparent changes because it is being compared to a period with
+            very different conditions.
+        </p>
+        <p>
+            For example, if an occupation's wage was suppressed in 2021 and published in 2022,
+            there is no 2021&rarr;2022 change. But the 2022&rarr;2023 change is computed
+            normally &mdash; and if the 2022 value was unusually low (the reason it was near
+            the suppression threshold), the 2023 change may appear artificially large.
+        </p>
+        <div class="lesson-callout">
+            <p>
+                <strong>Important:</strong> Always check absolute changes alongside percentages.
+                A +200% wage increase for Broadcast Announcers reflects small-sample volatility
+                in a niche occupation, not a genuine doubling of the profession's pay.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Year and Metric as Filters</h2>
+        <p>
+            The API returns <code>available_years</code> and defaults to the latest year.
+            Users can select any combination of metric and year to explore different facets
+            of the labor market. The static site pre-generates separate JSON files for each
+            combination so the client-side shim can serve the correct data without a live
+            server.
+        </p>
+        <pre class="lesson-code"><code>movers.json                           # default (employment_count, latest year)
+movers_mean_annual_wage.json          # mean wage, latest year
+movers-2022.json                      # employment count, 2022
+movers-2022_median_annual_wage.json   # median wage, 2022</code></pre>
+        <p>
+            This URL-to-file mapping is how the static site shim serves different data per
+            metric and year &mdash; each combination is pre-generated at build time by
+            <code>build_static.py</code>. The naming convention encodes both the year and the
+            metric in the filename. When the JavaScript requests
+            <code>/api/trends/movers?year=2022&amp;metric=median_annual_wage</code>, the shim
+            translates it to <code>movers-2022_median_annual_wage.json</code> and returns the
+            pre-built response.
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/derived-metrics">&larr; Derived Metrics from Base Observations</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/geography-pitfalls">Geography Comparison Pitfalls &rarr;</a>
+        </div>
+    </nav>
+</section>
+        
+        
+    </main>
+
+    <footer role="contentinfo">
+        <div class="footer-content">
+            <p>JobClass — Labor Market Occupation Pipeline</p>
+            <p class="footer-meta">Data sourced from BLS (SOC, OEWS, Employment Projections) and O*NET</p>
+        </div>
+    </footer>
+
+</body>
+</html>

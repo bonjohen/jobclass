@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Labor market occupation data — employment, wages, skills, tasks, and projections from federal sources.">
+    <title>Schema Drift Detection — Lessons — JobClass</title>
+    <link rel="stylesheet" href="/static/css/main.css?v=PE0">
+    <script src="/static/js/main.js?v=PE0"></script>
+<script>
+(function(){
+var F=window.fetch,SC=null;
+function LS(b){
+  if(!SC)SC=F(b+'/api/occupations/search.json').then(function(r){return r.json()});
+  return SC;
+}
+window.fetch=function(u){
+  if(typeof u!=='string')return F.apply(this,arguments);
+  var ai=u.indexOf('/api/');
+  if(ai<0)return F.apply(this,arguments);
+  var b=u.substring(0,ai),r=u.substring(ai);
+  var qi=r.indexOf('?'),p=qi>=0?r.substring(0,qi):r;
+  var sp=new URLSearchParams(qi>=0?r.substring(qi+1):'');
+  if(p==='/api/occupations/search'){
+    return LS(b).then(function(d){
+      var q=(sp.get('q')||'').toLowerCase(),
+          lm=+(sp.get('limit')||50),of=+(sp.get('offset')||0),
+          rs=d.results||[];
+      if(q)rs=rs.filter(function(x){
+        return x.soc_code.toLowerCase().indexOf(q)>=0||
+               x.occupation_title.toLowerCase().indexOf(q)>=0;
+      });
+      return new Response(JSON.stringify({
+        results:rs.slice(of,of+lm),total:rs.length,limit:lm,offset:of
+      }),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  var pts=p.split('/');
+  if(pts.length===5&&pts[4]==='wages'&&pts[2]==='occupations'){
+    return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
+  }
+  if(p==='/api/trends/movers'){
+    var yr=sp.get('year'),mt=sp.get('metric')||'employment_count';
+    var mf=mt==='employment_count'?'':'_'+mt;
+    if(yr)return F(b+'/api/trends/movers-'+yr+mf+'.json');
+    return F(b+'/api/trends/movers'+mf+'.json');
+  }
+  if(p==='/api/trends/compare/occupations'){
+    var codes=(sp.get('soc_codes')||'').split(',').filter(Boolean);
+    var met=sp.get('metric')||'employment_count';
+    var gt=sp.get('geo_type')||'national';
+    return Promise.all(codes.map(function(c){
+      var ct=c.trim();
+      var tf=met==='employment_count'?ct+'.json':ct+'-'+met+'.json';
+      return Promise.all([
+        F(b+'/api/trends/'+tf).then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:trend',ct,e);return null}),
+        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:occ',ct,e);return null})
+      ]);
+    })).then(function(arr){
+      var occs=[];
+      arr.forEach(function(pair,i){
+        var d=pair[0],info=pair[1];
+        if(!d||!d.series)return;
+        var title=(info&&info.occupation_title)?info.occupation_title:codes[i];
+        occs.push({soc_code:codes[i],title:title,series:d.series.map(function(s){return{year:s.year,value:s.value}})});
+      });
+      var body=JSON.stringify({metric:met,geo_type:gt,occupations:occs});
+      return new Response(body,{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(pts.length===4&&pts[1]==='api'&&pts[2]==='trends'&&/^\d{2}-\d{4}$/.test(pts[3])){
+    var tm=sp.get('metric');
+    if(tm&&tm!=='employment_count')return F(b+'/api/trends/'+pts[3]+'-'+tm+'.json');
+    return F(b+'/api/trends/'+pts[3]+'.json');
+  }
+  if(p==='/api/trends/compare/geography'){
+    var sc=sp.get('soc_code');
+    if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
+  }
+  if(p==='/api/cpi/search'){
+    return F(b+'/api/cpi/search.json').then(function(r){return r.json()}).then(function(d){
+      var q2=(sp.get('q')||'').toLowerCase(),lm2=+(sp.get('limit')||50),
+          rs2=d.results||[];
+      if(q2)rs2=rs2.filter(function(x){
+        return x.member_code.toLowerCase().indexOf(q2)>=0||x.title.toLowerCase().indexOf(q2)>=0;
+      });
+      return new Response(JSON.stringify({query:sp.get('q')||'',total:rs2.length,results:rs2.slice(0,lm2)}),
+        {headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(p==='/api/cpi/explorer/tree'){
+    var root=sp.get('root')||'SA0',md=sp.get('max_depth')||'3';
+    return F(b+'/api/cpi/explorer/tree-'+root+'-'+md+'.json');
+  }
+  if(p==='/api/cpi/compare'){
+    var cc=(sp.get('codes')||'').split(',').filter(Boolean);
+    var cac=sp.get('area_code')||'0000',cif=sp.get('index_family')||'CPI-U',csa=sp.get('seasonal_adjustment')||'S';
+    return Promise.all(cc.map(function(c){
+      var ct=c.trim();
+      return F(b+'/api/cpi/members/'+ct+'/series.json').then(function(r){return r.json()})
+        .catch(function(){return null});
+    })).then(function(arr){
+      var series={};
+      cc.forEach(function(c,i){
+        var d=arr[i];
+        if(d&&d.series)series[c.trim()]=d.series.map(function(s){return{year:s.year,value:s.value}});
+      });
+      return new Response(JSON.stringify({codes:cc,series:series}),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  return F(b+p+'.json');
+};
+})();
+</script>
+</head>
+<body>
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <header role="banner">
+        <nav aria-label="Main navigation">
+            <div class="nav-brand">
+                <a href="/">JobClass</a>
+            </div>
+            <ul class="nav-links" role="list">
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search</a></li>
+                <li><a href="/hierarchy">Hierarchy</a></li>
+                <li><a href="/trends">Trends</a></li>
+                <li><a href="/cpi">CPI</a></li>
+                <li><a href="/pipeline">Pipeline</a></li>
+                <li><a href="/methodology">Methodology</a></li>
+                <li><a href="/lessons">Lessons</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content" role="main">
+        
+        
+            <section class="lesson-page">
+    <h1>Schema Drift Detection</h1>
+    <p class="lesson-meta">Lesson 13 &mdash; Defensive data validation</p>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/ui-data-alignment">&larr; UI-Data Alignment</a>
+        </div>
+        <div style="text-align: center;">
+            <a href="/pipeline#node=gate_schema_drift">View in Pipeline &rarr;</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/inflation-adjustment">Inflation Adjustment with CPI &rarr;</a>
+        </div>
+    </nav>
+
+    <div class="lesson-section">
+        <h2>Why Schema Drift Matters</h2>
+        <p>
+            Government data sources change column names, add or remove columns, and retype
+            columns between releases &mdash; often without notice. If your pipeline assumes a
+            fixed schema, it silently breaks or loads garbage. A renamed column becomes all NULLs;
+            a retyped column truncates values or throws cast errors deep in the warehouse layer
+            where the root cause is hard to trace.
+        </p>
+        <p>
+            The pipeline uses <strong>proactive drift detection</strong> to catch these changes
+            before they reach the warehouse. Every dataset load compares the incoming schema
+            against the last known-good schema and flags any differences. This turns silent
+            corruption into a loud, actionable failure at the earliest possible point.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Detecting Column Changes</h2>
+        <p>
+            The core detection function compares two schema snapshots &mdash; each a
+            <code>dict[str, str]</code> mapping column name to data type &mdash; and returns
+            a list of <code>SchemaChange</code> objects classified as "added", "removed",
+            or "retyped".
+        </p>
+        <pre class="lesson-code"><code>def detect_schema_drift(schema_a, schema_b):
+    """Compare two schema snapshots and return a list of changes."""
+    changes = []
+    all_cols = set(schema_a.keys()) | set(schema_b.keys())
+    for col in sorted(all_cols):
+        if col in schema_a and col not in schema_b:
+            changes.append(SchemaChange("removed", col))
+        elif col not in schema_a and col in schema_b:
+            changes.append(SchemaChange("added", col))
+        elif schema_a[col].upper() != schema_b[col].upper():
+            changes.append(SchemaChange("retyped", col))
+    return changes</code></pre>
+        <p>
+            The comparison is case-insensitive on type names because some sources report
+            <code>VARCHAR</code> while the staging layer normalizes to <code>varchar</code>.
+            An empty change list means the schema is stable &mdash; the most common outcome
+            within a single source release cycle.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Row Count Shift Detection</h2>
+        <p>
+            Schema drift catches structural changes, but a source can also change in volume
+            without altering its schema. A 20% threshold on row count shift catches major
+            structural changes &mdash; such as BLS adding a new geography level or dropping
+            an occupation group &mdash; while ignoring normal year-to-year variation.
+        </p>
+        <pre class="lesson-code"><code>ROW_COUNT_SHIFT_THRESHOLD_PCT = 20.0
+
+def detect_row_count_shift(prior_count, current_count, threshold_pct=20.0):
+    """Flag row count changes that exceed the threshold percentage."""
+    pct_change = abs(current_count - prior_count) / prior_count * 100
+    return ValidationResult(
+        passed=pct_change &lt; threshold_pct,
+        message=f"Row count changed {pct_change:.1f}%"
+    )</code></pre>
+        <p>
+            For example, OEWS national data has roughly 830 occupations per year. If a new
+            release suddenly reports 1,000 rows, the 20% threshold fires. This could mean
+            BLS added a new occupation classification level &mdash; something the parser
+            needs to handle explicitly rather than silently ingesting.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Measure Delta Detection</h2>
+        <p>
+            Beyond row counts, the pipeline checks for large relative changes in key measures.
+            This catches wage corrections, employment revisions, and other data-level changes
+            that don't affect the schema or row count but would produce misleading trend analysis
+            if ingested without review.
+        </p>
+        <table class="data-table">
+            <thead>
+                <tr><th>Check</th><th>Threshold</th><th>Catches</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Row count shift</td>
+                    <td>20%</td>
+                    <td>New geography levels, dropped occupation groups</td>
+                </tr>
+                <tr>
+                    <td>Measure delta</td>
+                    <td>15%</td>
+                    <td>Wage corrections, employment revisions</td>
+                </tr>
+                <tr>
+                    <td>Schema drift</td>
+                    <td>Any change</td>
+                    <td>Column renames, type changes, removed fields</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            The measure delta check identifies the top-N measures with the largest relative
+            change between releases. A 15% swing in mean annual wage for a major occupation
+            group almost certainly indicates a methodology change or data error rather than
+            a real labor market shift.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Publication Gates</h2>
+        <p>
+            All validation checks feed into a single publication gate that decides whether
+            data flows from staging into the warehouse. The gate is deliberately simple:
+            pass everything or block everything.
+        </p>
+        <pre class="lesson-code"><code>def check_publication_gate(validation_results):
+    """Binary gate: all validations must pass for data to flow."""
+    failures = [r for r in validation_results if not r.passed]
+    if failures:
+        return f"BLOCKED: {len(failures)} validation(s) failed"
+    return "ALLOWED: All validations passed"</code></pre>
+        <div class="lesson-callout">
+            <p>
+                <strong>Key principle:</strong> The gate is binary &mdash; either all validations
+                pass and data flows to the warehouse, or any failure blocks publication. Raw data
+                is always preserved regardless &mdash; you can fix the parser and re-run without
+                re-downloading.
+            </p>
+        </div>
+        <p>
+            This fail-fast approach means schema drift never silently corrupts the warehouse.
+            When a validation fails, the pipeline logs exactly which check failed and why,
+            giving the developer a clear starting point for investigation. The raw data remains
+            in the landing layer, so once the parser is updated to handle the new schema,
+            a simple re-run loads everything correctly.
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div>
+            <span class="lesson-nav-label">Previous</span>
+            <a href="/lessons/ui-data-alignment">&larr; UI-Data Alignment</a>
+        </div>
+        <div style="text-align: right;">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/inflation-adjustment">Inflation Adjustment with CPI &rarr;</a>
+        </div>
+    </nav>
+</section>
+        
+        
+    </main>
+
+    <footer role="contentinfo">
+        <div class="footer-content">
+            <p>JobClass — Labor Market Occupation Pipeline</p>
+            <p class="footer-meta">Data sourced from BLS (SOC, OEWS, Employment Projections) and O*NET</p>
+        </div>
+    </footer>
+
+</body>
+</html>
