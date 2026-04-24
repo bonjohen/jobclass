@@ -161,12 +161,27 @@ Health check: `GET /api/health` | Metrics: `GET /metrics`
 
 ## Release notes
 
+### PE — Pipeline Explorer (2026-04)
+
+- **Interactive pipeline visualization**: Canvas-based graph at `/pipeline` with 57 nodes, 100+ edges across 10 lane groups representing the full JobClass pipeline.
+- **Semantic zoom**: Three detail levels (overview, subsystem, detail) with smooth camera animation. Focus+context navigation with breadcrumb trail.
+- **Guided educational modes**: 4 walkthrough modes with intro overlay and pulse animation. Cross-links to all 20 lessons and methodology page.
+- **Navigation**: Minimap with drag viewport, search/filter/overlay controls, domain filters, path isolation, arrow-key navigation, URL hash deep-linking.
+- **Accessibility**: Reduced-motion support, keyboard navigation. 19 new tests.
+
+### CR2 — Code Review V2 (2026-04)
+
+- **Security hardening**: Input validation, header sanitization, query parameterization across all API endpoints.
+- **Performance optimization**: Query plan improvements, connection pool tuning, redundant computation elimination.
+- **Code quality**: Dead code removal, consistent error handling patterns, type annotation coverage.
+- **Test coverage**: 18 findings remediated across 62 tasks in 4 phases. Extended test suite to 840+ tests.
+
 ### NDS6-7 — CPI Inflation, SOC Crosswalk, Extended Test Coverage (2026-03-24)
 
 - **BLS CPI-U integration**: Parser, loader, and pipeline for Consumer Price Index data. Real (inflation-adjusted) mean and median wage metrics computed via CPI-U deflation (base year 2023).
 - **SOC 2010↔2018 crosswalk**: Parser auto-classifies mapping types (1:1, split, merge, complex) by cardinality. Bridge table and pipeline wired into `run-all`. Foundation for extending comparable history to pre-2018 OEWS vintages.
 - **Real wage UI**: Trend Explorer and Ranked Movers dropdowns include Real Mean/Median Annual Wage options. Static site generator produces per-occupation real wage JSON files.
-- **Extended test coverage**: 653 tests (+37). New: CPI parser/loader/deflation tests (16), crosswalk parser/loader tests (13), ranked movers year filter tests (7), comparison endpoint edge cases (8), Pydantic contract validation (7), real wage UI tests (2).
+- **Extended test coverage**: 653 tests at time of release (+37 from prior baseline). New: CPI parser/loader/deflation tests (16), crosswalk parser/loader tests (13), ranked movers year filter tests (7), comparison endpoint edge cases (8), Pydantic contract validation (7), real wage UI tests (2).
 
 ### NDS3-5 — Work Activities, Education, Technology Skills (2026-03-24)
 
