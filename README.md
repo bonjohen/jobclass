@@ -2,7 +2,7 @@
 
 Ingests federal labor market data (SOC, OEWS, O*NET, BLS Projections) into a four-layer DuckDB warehouse and serves it through a FastAPI web UI.
 
-**Live site:** https://bonjohen.github.io/jobclass/
+**Live site:** https://jobclass.johnboen.com/
 
 ## Quick start
 
@@ -43,7 +43,7 @@ Four-layer warehouse:
 
 The pipeline is idempotent: re-running the same source version produces no duplicates. Schema drift is detected and blocks publication until resolved.
 
-**Web layer:** FastAPI serves HTML pages (search, occupation profiles, wage comparison, skill/task views, projections, trend explorer, occupation comparison, geography comparison, ranked movers, 12 lesson pages) plus JSON APIs. A static site generator produces the GitHub Pages deployment with a client-side fetch shim for API interception.
+**Web layer:** FastAPI serves HTML pages (search, occupation profiles, wage comparison, skill/task views, projections, trend explorer, occupation comparison, geography comparison, ranked movers, 20 lesson pages) plus JSON APIs. A static site generator produces the GitHub Pages deployment with a client-side fetch shim for API interception.
 
 ## Project structure
 
@@ -84,7 +84,7 @@ jobclass-pipeline timeseries-refresh
 ## Testing
 
 ```bash
-# Full suite (653+ tests)
+# Full suite (840+ tests)
 pytest
 
 # Warehouse-only tests (real data validation)
@@ -96,7 +96,7 @@ Tests cover parsers, schema contracts, grain uniqueness, referential integrity, 
 ## Static site deployment
 
 ```bash
-python scripts/build_static.py --base-path /jobclass
+MSYS_NO_PATHCONV=1 python scripts/build_static.py --base-path /
 python scripts/deploy_pages.py
 ```
 
@@ -125,7 +125,7 @@ docker build -t jobclass .
 docker run -p 8000:8000 -v ./warehouse.duckdb:/app/warehouse.duckdb:ro jobclass
 ```
 
-Health check: `GET /api/health` | Readiness: `GET /api/ready` | Metrics: `GET /metrics`
+Health check: `GET /api/health` | Metrics: `GET /metrics`
 
 ## Release notes
 
