@@ -29,7 +29,7 @@ jobclass-web
 | **OEWS** (Occupational Employment & Wage Statistics) | Employment counts and wage distributions by occupation and geography |
 | **O\*NET** | Skills, knowledge, abilities, work activities, education, technology, and tasks tied to each occupation |
 | **BLS Employment Projections** | Forward-looking employment outlook by occupation |
-| **BLS CPI-U** | Consumer price index for inflation-adjusted (real) wage metrics |
+| **BLS CPI-U** | Consumer price index for inflation-adjusted (real) wage metrics. Full CPI domain: item hierarchy, geographic areas, series metadata, current observations, relative importance weights, average prices |
 | **SOC Crosswalk** | SOC 2010↔2018 occupation code mappings for historical depth |
 
 ## Architecture
@@ -43,7 +43,7 @@ Four-layer warehouse:
 
 The pipeline is idempotent: re-running the same source version produces no duplicates. Schema drift is detected and blocks publication until resolved.
 
-**Web layer:** FastAPI serves HTML pages (search, occupation profiles, wage comparison, skill/task views, projections, trend explorer, occupation comparison, geography comparison, ranked movers, 20 lesson pages) plus JSON APIs. A static site generator produces the GitHub Pages deployment with a client-side fetch shim for API interception.
+**Web layer:** FastAPI serves HTML pages (search, hierarchy browser, occupation profiles, wage comparison, skill/task views, projections, trend explorer, occupation comparison, geography comparison, ranked movers, CPI explorer, Pipeline Explorer, 20 lesson pages) plus JSON APIs backed by 9 API routers. A static site generator produces the GitHub Pages deployment with a client-side fetch shim for API interception.
 
 ## Project structure
 
@@ -55,10 +55,17 @@ src/jobclass/
   load/          Staging and warehouse loaders
   validate/      Structural, semantic, temporal, drift validations
   observe/       Logging, run manifest
-  orchestrate/   Pipeline orchestration
+  orchestrate/   Pipeline orchestration (9 pipelines)
   marts/         Analyst-facing mart views
-  web/           FastAPI app, templates, static assets
-tests/           pytest suite (unit + integration)
+  utils/         Path resolution utilities
+  web/
+    app.py       FastAPI app factory + 18 page routes
+    lessons.py   20-lesson registry (metadata)
+    api/         9 API routers (occupations, wages, skills, projections,
+                   trends, cpi, health, metrics, methodology)
+    templates/   Jinja2 HTML templates
+    static/      CSS and JavaScript assets
+tests/           pytest suite (unit, web, warehouse, integration)
 migrations/      SQL schema migrations (DuckDB)
 config/          Source manifest (YAML)
 scripts/         Static site build and deploy
@@ -99,6 +106,31 @@ Tests cover parsers, schema contracts, grain uniqueness, referential integrity, 
 MSYS_NO_PATHCONV=1 python scripts/build_static.py --base-path /
 python scripts/deploy_pages.py
 ```
+
+## Pipelines
+
+`run-all` executes these pipelines in dependency order:
+
+| Pipeline | Purpose | Depends on |
+|----------|---------|------------|
+| `taxonomy_refresh` | SOC hierarchy and definitions → `dim_occupation` | — |
+| `oews_refresh` | OEWS employment/wages → `dim_geography`, facts | taxonomy |
+| `onet_refresh` | O\*NET descriptors → skill/knowledge/ability dims + bridges | taxonomy |
+| `projections_refresh` | BLS employment projections → projection facts | taxonomy |
+| `cpi_refresh` | CPI-U single series → `dim_price_index`, price facts | — |
+| `cpi_domain_refresh` | Full CPI domain → member/area/series dims, observations, weights, prices | — |
+| `crosswalk_refresh` | SOC 2010↔2018 → `bridge_soc_crosswalk` | — |
+| `warehouse_publish` | Referential integrity gate → mart views | all above |
+| `timeseries_refresh` | Build time-series observations and derived metrics | warehouse_publish |
+
+## Database schema
+
+The warehouse contains **57+ tables** across the four layers:
+
+- **15 dimensions** — `dim_occupation`, `dim_geography`, `dim_industry`, `dim_skill`, `dim_knowledge`, `dim_ability`, `dim_task`, `dim_work_activity`, `dim_technology`, `dim_education_requirement`, `dim_cpi_member`, `dim_cpi_area`, `dim_cpi_series_variant`, `dim_time_period`, `dim_metric`
+- **8 facts** — employment/wages, projections, time-series observations, derived series, CPI observations, relative importance, average prices, revision vintages
+- **12 bridges** — occupation-to-descriptor bridges (skill, knowledge, ability, task, work activity, technology, education), SOC hierarchy, SOC crosswalk, CPI member/area hierarchies
+- **17 staging tables** — one per parsed dataset
 
 ## CLI reference
 
