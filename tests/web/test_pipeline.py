@@ -18,8 +18,8 @@ class TestPipelinePage:
 
     def test_has_control_bar(self, client):
         resp = client.get("/pipeline")
-        assert 'pipeline-controls' in resp.text
-        assert 'pipeline-search-input' in resp.text
+        assert "pipeline-controls" in resp.text
+        assert "pipeline-search-input" in resp.text
 
     def test_has_filter_buttons(self, client):
         resp = client.get("/pipeline")

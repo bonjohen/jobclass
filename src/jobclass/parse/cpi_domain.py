@@ -46,6 +46,7 @@ _AVERAGE_PRICE_PREFIXES = ("SS",)
 # Dataclasses
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class CpiItemRow:
     """Parsed CPI item from cu.item."""
@@ -175,6 +176,7 @@ class CpiRevisionVintageRow:
 # Area type classifier
 # ---------------------------------------------------------------------------
 
+
 def _classify_area_type(area_code: str) -> str:
     """Classify a BLS CPI area code into a type category.
 
@@ -236,6 +238,7 @@ def _classify_publication_frequency(area_code: str) -> str:
 # Item hierarchy: parent inference
 # ---------------------------------------------------------------------------
 
+
 def _infer_parents(items: list[tuple[str, int]]) -> dict[str, str | None]:
     """Infer parent item codes from display_level ordering.
 
@@ -259,6 +262,7 @@ def _infer_parents(items: list[tuple[str, int]]) -> dict[str, str | None]:
 # Semantic role classifier
 # ---------------------------------------------------------------------------
 
+
 def _classify_semantic_role(item_code: str) -> str:
     """Classify a CPI item's semantic role."""
     if item_code in _CROSS_CUTTING_CODES:
@@ -276,8 +280,10 @@ def _classify_semantic_role(item_code: str) -> str:
 # Parsers
 # ---------------------------------------------------------------------------
 
+
 def parse_cpi_item_hierarchy(
-    content: str, source_release_id: str,
+    content: str,
+    source_release_id: str,
 ) -> list[CpiItemRow]:
     """Parse BLS cu.item file into item rows with inferred parent-child edges.
 
@@ -308,17 +314,19 @@ def parse_cpi_item_hierarchy(
 
         level_label = ITEM_HIERARCHY_LEVELS.get(str(display_level), f"Level {display_level}")
         items_for_parents.append((code, display_level))
-        rows.append(CpiItemRow(
-            item_code=code,
-            item_name=name,
-            hierarchy_level=level_label,
-            display_level=display_level,
-            selectable=selectable,
-            sort_sequence=sort_seq,
-            parent_item_code=None,  # filled below
-            source_release_id=source_release_id,
-            parser_version=PARSER_VERSION,
-        ))
+        rows.append(
+            CpiItemRow(
+                item_code=code,
+                item_name=name,
+                hierarchy_level=level_label,
+                display_level=display_level,
+                selectable=selectable,
+                sort_sequence=sort_seq,
+                parent_item_code=None,  # filled below
+                source_release_id=source_release_id,
+                parser_version=PARSER_VERSION,
+            )
+        )
 
     # Infer parent-child relationships from display_level ordering
     parent_map = _infer_parents(items_for_parents)
@@ -329,7 +337,8 @@ def parse_cpi_item_hierarchy(
 
 
 def parse_cpi_area(
-    content: str, source_release_id: str,
+    content: str,
+    source_release_id: str,
 ) -> list[CpiAreaRow]:
     """Parse BLS cu.area file into area rows.
 
@@ -356,21 +365,24 @@ def parse_cpi_area(
         except ValueError:
             sort_seq = 0
 
-        rows.append(CpiAreaRow(
-            area_code=code,
-            area_title=name,
-            area_type=_classify_area_type(code),
-            display_level=display_level,
-            selectable=selectable,
-            sort_sequence=sort_seq,
-            source_release_id=source_release_id,
-            parser_version=PARSER_VERSION,
-        ))
+        rows.append(
+            CpiAreaRow(
+                area_code=code,
+                area_title=name,
+                area_type=_classify_area_type(code),
+                display_level=display_level,
+                selectable=selectable,
+                sort_sequence=sort_seq,
+                source_release_id=source_release_id,
+                parser_version=PARSER_VERSION,
+            )
+        )
     return rows
 
 
 def parse_cpi_series(
-    content: str, source_release_id: str,
+    content: str,
+    source_release_id: str,
 ) -> list[CpiSeriesRow]:
     """Parse BLS cu.series file into series metadata rows.
 
@@ -406,25 +418,28 @@ def parse_cpi_series(
         except ValueError:
             pass
 
-        rows.append(CpiSeriesRow(
-            series_id=series_id,
-            area_code=area_code,
-            item_code=item_code,
-            seasonal_adjustment=seasonal,
-            periodicity=periodicity,
-            base_code=base_code,
-            base_period=base_period,
-            series_title=series_title,
-            begin_year=begin_year,
-            end_year=end_year,
-            source_release_id=source_release_id,
-            parser_version=PARSER_VERSION,
-        ))
+        rows.append(
+            CpiSeriesRow(
+                series_id=series_id,
+                area_code=area_code,
+                item_code=item_code,
+                seasonal_adjustment=seasonal,
+                periodicity=periodicity,
+                base_code=base_code,
+                base_period=base_period,
+                series_title=series_title,
+                begin_year=begin_year,
+                end_year=end_year,
+                source_release_id=source_release_id,
+                parser_version=PARSER_VERSION,
+            )
+        )
     return rows
 
 
 def parse_cpi_observations(
-    content: str, source_release_id: str,
+    content: str,
+    source_release_id: str,
 ) -> list[CpiObservationRow]:
     """Parse BLS cu.data flat file into observation rows.
 
@@ -451,20 +466,23 @@ def parse_cpi_observations(
             continue
         period = parts[2].strip()
 
-        rows.append(CpiObservationRow(
-            series_id=series_id,
-            year=year,
-            period=period,
-            value=value,
-            footnote_codes=footnotes,
-            source_release_id=source_release_id,
-            parser_version=PARSER_VERSION,
-        ))
+        rows.append(
+            CpiObservationRow(
+                series_id=series_id,
+                year=year,
+                period=period,
+                value=value,
+                footnote_codes=footnotes,
+                source_release_id=source_release_id,
+                parser_version=PARSER_VERSION,
+            )
+        )
     return rows
 
 
 def parse_cpi_relative_importance(
-    content: bytes, source_release_id: str,
+    content: bytes,
+    source_release_id: str,
 ) -> list[CpiRelativeImportanceRow]:
     """Parse BLS relative importance XLSX table.
 
@@ -490,7 +508,8 @@ def parse_cpi_relative_importance(
         for i, row in enumerate(all_rows):
             if row and any(
                 str(cell).strip().lower() in ("item", "item code", "expenditure category")
-                for cell in row if cell is not None
+                for cell in row
+                if cell is not None
             ):
                 header_idx = i
                 break
@@ -521,7 +540,7 @@ def parse_cpi_relative_importance(
 
         reference_period = sheet_name.strip()
 
-        for data_row in all_rows[header_idx + 1:]:
+        for data_row in all_rows[header_idx + 1 :]:
             if not data_row or data_row[item_col] is None:
                 continue
             item_code = str(data_row[item_col]).strip()
@@ -538,21 +557,24 @@ def parse_cpi_relative_importance(
 
                 # Derive area_code from area_label — default to national
                 area_code = "0000"
-                rows.append(CpiRelativeImportanceRow(
-                    item_code=item_code,
-                    area_code=area_code,
-                    reference_period=reference_period,
-                    relative_importance=importance,
-                    source_release_id=source_release_id,
-                    parser_version=PARSER_VERSION,
-                ))
+                rows.append(
+                    CpiRelativeImportanceRow(
+                        item_code=item_code,
+                        area_code=area_code,
+                        reference_period=reference_period,
+                        relative_importance=importance,
+                        source_release_id=source_release_id,
+                        parser_version=PARSER_VERSION,
+                    )
+                )
 
     wb.close()
     return rows
 
 
 def parse_cpi_average_prices(
-    content: str, source_release_id: str,
+    content: str,
+    source_release_id: str,
 ) -> list[CpiAveragePriceRow]:
     """Parse BLS average price flat file (ap.data format).
 
@@ -588,23 +610,26 @@ def parse_cpi_average_prices(
             continue
         period = parts[2].strip()
 
-        rows.append(CpiAveragePriceRow(
-            series_id=series_id,
-            item_code=item_code,
-            area_code=area_code,
-            year=year,
-            period=period,
-            average_price=price,
-            footnote_codes=footnotes,
-            source_release_id=source_release_id,
-            parser_version=PARSER_VERSION,
-        ))
+        rows.append(
+            CpiAveragePriceRow(
+                series_id=series_id,
+                item_code=item_code,
+                area_code=area_code,
+                year=year,
+                period=period,
+                average_price=price,
+                footnote_codes=footnotes,
+                source_release_id=source_release_id,
+                parser_version=PARSER_VERSION,
+            )
+        )
     return rows
 
 
 # ---------------------------------------------------------------------------
 # Series ID validation
 # ---------------------------------------------------------------------------
+
 
 def validate_series_decomposition(
     series_rows: list[CpiSeriesRow],
@@ -618,11 +643,7 @@ def validate_series_decomposition(
     warnings: list[str] = []
     for s in series_rows:
         if s.item_code not in known_item_codes:
-            warnings.append(
-                f"Series {s.series_id}: item_code {s.item_code!r} not in known items"
-            )
+            warnings.append(f"Series {s.series_id}: item_code {s.item_code!r} not in known items")
         if s.area_code not in known_area_codes:
-            warnings.append(
-                f"Series {s.series_id}: area_code {s.area_code!r} not in known areas"
-            )
+            warnings.append(f"Series {s.series_id}: area_code {s.area_code!r} not in known areas")
     return warnings

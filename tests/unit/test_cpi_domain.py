@@ -98,9 +98,7 @@ class TestCpiItemHierarchyParser:
         assert rows == []
 
     def test_header_only(self):
-        rows = parse_cpi_item_hierarchy(
-            "item_code\titem_name\tdisplay_level\tselectable\tsort_sequence\n", "test"
-        )
+        rows = parse_cpi_item_hierarchy("item_code\titem_name\tdisplay_level\tselectable\tsort_sequence\n", "test")
         assert rows == []
 
     def test_metadata_populated(self, cpi_item_content):
@@ -345,20 +343,22 @@ class TestSeriesDecompositionValidator:
     def test_unknown_items_flagged(self):
         from jobclass.parse.cpi_domain import CpiSeriesRow
 
-        series = [CpiSeriesRow(
-            series_id="CUSR0000SXYZ",
-            area_code="0000",
-            item_code="SXYZ",
-            seasonal_adjustment="S",
-            periodicity="R",
-            base_code="S",
-            base_period="1982-84=100",
-            series_title="Unknown",
-            begin_year=2020,
-            end_year=2026,
-            source_release_id="test",
-            parser_version="2.0.0",
-        )]
+        series = [
+            CpiSeriesRow(
+                series_id="CUSR0000SXYZ",
+                area_code="0000",
+                item_code="SXYZ",
+                seasonal_adjustment="S",
+                periodicity="R",
+                base_code="S",
+                base_period="1982-84=100",
+                series_title="Unknown",
+                begin_year=2020,
+                end_year=2026,
+                source_release_id="test",
+                parser_version="2.0.0",
+            )
+        ]
         warnings = validate_series_decomposition(series, {"SA0"}, {"0000"})
         assert len(warnings) == 1
         assert "SXYZ" in warnings[0]
@@ -376,13 +376,18 @@ class TestCpiStagingSchemaContracts:
         cols = {
             row[0]
             for row in migrated_db.execute(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name = 'stage__bls__cpi_series'"
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__bls__cpi_series'"
             ).fetchall()
         }
         expected = {
-            "series_id", "index_family", "seasonal_adjustment", "periodicity",
-            "area_code", "item_code", "source_release_id", "parser_version",
+            "series_id",
+            "index_family",
+            "seasonal_adjustment",
+            "periodicity",
+            "area_code",
+            "item_code",
+            "source_release_id",
+            "parser_version",
         }
         assert expected.issubset(cols)
 
@@ -390,13 +395,16 @@ class TestCpiStagingSchemaContracts:
         cols = {
             row[0]
             for row in migrated_db.execute(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name = 'stage__bls__cpi_item_hierarchy'"
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__bls__cpi_item_hierarchy'"
             ).fetchall()
         }
         expected = {
-            "item_code", "item_name", "hierarchy_level", "parent_item_code",
-            "source_release_id", "parser_version",
+            "item_code",
+            "item_name",
+            "hierarchy_level",
+            "parent_item_code",
+            "source_release_id",
+            "parser_version",
         }
         assert expected.issubset(cols)
 
@@ -409,8 +417,12 @@ class TestCpiStagingSchemaContracts:
             ).fetchall()
         }
         expected = {
-            "item_code", "item_name", "area_type", "published",
-            "source_release_id", "parser_version",
+            "item_code",
+            "item_name",
+            "area_type",
+            "published",
+            "source_release_id",
+            "parser_version",
         }
         assert expected.issubset(cols)
 
@@ -423,8 +435,12 @@ class TestCpiStagingSchemaContracts:
             ).fetchall()
         }
         expected = {
-            "item_code", "area_code", "reference_period", "relative_importance",
-            "source_release_id", "parser_version",
+            "item_code",
+            "area_code",
+            "reference_period",
+            "relative_importance",
+            "source_release_id",
+            "parser_version",
         }
         assert expected.issubset(cols)
 
@@ -432,13 +448,17 @@ class TestCpiStagingSchemaContracts:
         cols = {
             row[0]
             for row in migrated_db.execute(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name = 'stage__bls__cpi_average_price'"
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'stage__bls__cpi_average_price'"
             ).fetchall()
         }
         expected = {
-            "item_code", "area_code", "year", "period", "average_price",
-            "source_release_id", "parser_version",
+            "item_code",
+            "area_code",
+            "year",
+            "period",
+            "average_price",
+            "source_release_id",
+            "parser_version",
         }
         assert expected.issubset(cols)
 
@@ -446,14 +466,19 @@ class TestCpiStagingSchemaContracts:
         cols = {
             row[0]
             for row in migrated_db.execute(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name = 'dim_cpi_member'"
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_cpi_member'"
             ).fetchall()
         }
         expected = {
-            "member_key", "member_code", "title", "hierarchy_level",
-            "semantic_role", "is_cross_cutting", "has_average_price",
-            "has_relative_importance", "source_version",
+            "member_key",
+            "member_code",
+            "title",
+            "hierarchy_level",
+            "semantic_role",
+            "is_cross_cutting",
+            "has_average_price",
+            "has_relative_importance",
+            "source_version",
         }
         assert expected.issubset(cols)
 
@@ -461,13 +486,16 @@ class TestCpiStagingSchemaContracts:
         cols = {
             row[0]
             for row in migrated_db.execute(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name = 'dim_cpi_area'"
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_cpi_area'"
             ).fetchall()
         }
         expected = {
-            "area_key", "area_code", "area_title", "area_type",
-            "publication_frequency", "source_version",
+            "area_key",
+            "area_code",
+            "area_title",
+            "area_type",
+            "publication_frequency",
+            "source_version",
         }
         assert expected.issubset(cols)
 
@@ -475,13 +503,19 @@ class TestCpiStagingSchemaContracts:
         cols = {
             row[0]
             for row in migrated_db.execute(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name = 'dim_cpi_series_variant'"
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_cpi_series_variant'"
             ).fetchall()
         }
         expected = {
-            "variant_key", "series_id", "index_family", "seasonal_adjustment",
-            "periodicity", "area_code", "item_code", "member_key", "area_key",
+            "variant_key",
+            "series_id",
+            "index_family",
+            "seasonal_adjustment",
+            "periodicity",
+            "area_code",
+            "item_code",
+            "member_key",
+            "area_key",
             "source_version",
         }
         assert expected.issubset(cols)
@@ -490,13 +524,16 @@ class TestCpiStagingSchemaContracts:
         cols = {
             row[0]
             for row in migrated_db.execute(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name = 'fact_cpi_observation'"
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'fact_cpi_observation'"
             ).fetchall()
         }
         expected = {
-            "member_key", "area_key", "variant_key", "time_period_key",
-            "index_value", "source_release_id",
+            "member_key",
+            "area_key",
+            "variant_key",
+            "time_period_key",
+            "index_value",
+            "source_release_id",
         }
         assert expected.issubset(cols)
 
@@ -504,12 +541,13 @@ class TestCpiStagingSchemaContracts:
         cols = {
             row[0]
             for row in migrated_db.execute(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name = 'bridge_cpi_member_hierarchy'"
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'bridge_cpi_member_hierarchy'"
             ).fetchall()
         }
         expected = {
-            "parent_member_key", "child_member_key", "hierarchy_depth",
+            "parent_member_key",
+            "child_member_key",
+            "hierarchy_depth",
             "source_version",
         }
         assert expected.issubset(cols)
@@ -518,12 +556,14 @@ class TestCpiStagingSchemaContracts:
         cols = {
             row[0]
             for row in migrated_db.execute(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name = 'bridge_cpi_member_relation'"
+                "SELECT column_name FROM information_schema.columns WHERE table_name = 'bridge_cpi_member_relation'"
             ).fetchall()
         }
         expected = {
-            "member_key_a", "member_key_b", "relation_type", "description",
+            "member_key_a",
+            "member_key_b",
+            "relation_type",
+            "description",
             "source_version",
         }
         assert expected.issubset(cols)
@@ -577,63 +617,46 @@ def cpi_domain_loaded_db(migrated_db, cpi_item_content, cpi_area_content, cpi_se
 
 class TestCpiDomainLoaders:
     def test_dim_cpi_member_loaded(self, cpi_domain_loaded_db):
-        count = cpi_domain_loaded_db.execute(
-            "SELECT COUNT(*) FROM dim_cpi_member"
-        ).fetchone()[0]
+        count = cpi_domain_loaded_db.execute("SELECT COUNT(*) FROM dim_cpi_member").fetchone()[0]
         assert count == 16  # matches fixture items
 
     def test_dim_cpi_member_semantic_roles(self, cpi_domain_loaded_db):
         roles = {
             row[0]
-            for row in cpi_domain_loaded_db.execute(
-                "SELECT DISTINCT semantic_role FROM dim_cpi_member"
-            ).fetchall()
+            for row in cpi_domain_loaded_db.execute("SELECT DISTINCT semantic_role FROM dim_cpi_member").fetchall()
         }
         assert "hierarchy_node" in roles
         assert "special_aggregate" in roles
         assert "purchasing_power" in roles
 
     def test_dim_cpi_area_loaded(self, cpi_domain_loaded_db):
-        count = cpi_domain_loaded_db.execute(
-            "SELECT COUNT(*) FROM dim_cpi_area"
-        ).fetchone()[0]
+        count = cpi_domain_loaded_db.execute("SELECT COUNT(*) FROM dim_cpi_area").fetchone()[0]
         assert count == 11  # matches fixture areas
 
     def test_dim_cpi_area_types(self, cpi_domain_loaded_db):
         types = {
-            row[0]
-            for row in cpi_domain_loaded_db.execute(
-                "SELECT DISTINCT area_type FROM dim_cpi_area"
-            ).fetchall()
+            row[0] for row in cpi_domain_loaded_db.execute("SELECT DISTINCT area_type FROM dim_cpi_area").fetchall()
         }
         assert "national" in types
         assert "region" in types
         assert "metro" in types
 
     def test_bridge_member_hierarchy_loaded(self, cpi_domain_loaded_db):
-        count = cpi_domain_loaded_db.execute(
-            "SELECT COUNT(*) FROM bridge_cpi_member_hierarchy"
-        ).fetchone()[0]
+        count = cpi_domain_loaded_db.execute("SELECT COUNT(*) FROM bridge_cpi_member_hierarchy").fetchone()[0]
         # Items with parent_item_code set (non-root items with level > 0)
         assert count > 0
 
     def test_bridge_member_relation_loaded(self, cpi_domain_loaded_db):
-        count = cpi_domain_loaded_db.execute(
-            "SELECT COUNT(*) FROM bridge_cpi_member_relation"
-        ).fetchone()[0]
+        count = cpi_domain_loaded_db.execute("SELECT COUNT(*) FROM bridge_cpi_member_relation").fetchone()[0]
         # Fixture has SA0L1, SA0L1E, SA0R which match known relations
         assert count >= 2
 
     def test_bridge_area_hierarchy_loaded(self, cpi_domain_loaded_db):
-        count = cpi_domain_loaded_db.execute(
-            "SELECT COUNT(*) FROM bridge_cpi_area_hierarchy"
-        ).fetchone()[0]
+        count = cpi_domain_loaded_db.execute("SELECT COUNT(*) FROM bridge_cpi_area_hierarchy").fetchone()[0]
         assert count > 0
 
     def test_series_variant_loaded(self, cpi_domain_loaded_db):
-        count = cpi_domain_loaded_db.execute(
-            "SELECT COUNT(*) FROM dim_cpi_series_variant"
-        ).fetchone()[0]
+        count = cpi_domain_loaded_db.execute("SELECT COUNT(*) FROM dim_cpi_series_variant").fetchone()[0]
         assert count == 8  # matches fixture series
 
     def test_series_variant_foreign_keys_resolved(self, cpi_domain_loaded_db):
@@ -645,9 +668,7 @@ class TestCpiDomainLoaders:
         assert resolved > 0
 
     def test_fact_observation_loaded(self, cpi_domain_loaded_db):
-        count = cpi_domain_loaded_db.execute(
-            "SELECT COUNT(*) FROM fact_cpi_observation"
-        ).fetchone()[0]
+        count = cpi_domain_loaded_db.execute("SELECT COUNT(*) FROM fact_cpi_observation").fetchone()[0]
         # Only M13 annual average observations match dim_time_period
         assert count > 0
 
@@ -657,9 +678,7 @@ class TestCpiDomainLoaders:
         items = parse_cpi_item_hierarchy(cpi_item_content, "test-release")
         load_cpi_item_hierarchy_staging(migrated_db, items, "test-release")
         load_cpi_item_hierarchy_staging(migrated_db, items, "test-release")
-        count = migrated_db.execute(
-            "SELECT COUNT(*) FROM stage__bls__cpi_item_hierarchy"
-        ).fetchone()[0]
+        count = migrated_db.execute("SELECT COUNT(*) FROM stage__bls__cpi_item_hierarchy").fetchone()[0]
         assert count == 16
 
     def test_dimension_idempotent(self, migrated_db, cpi_item_content):
@@ -668,13 +687,12 @@ class TestCpiDomainLoaders:
         items = parse_cpi_item_hierarchy(cpi_item_content, "test-release")
         load_dim_cpi_member(migrated_db, items, "test-release")
         load_dim_cpi_member(migrated_db, items, "test-release")
-        count = migrated_db.execute(
-            "SELECT COUNT(*) FROM dim_cpi_member"
-        ).fetchone()[0]
+        count = migrated_db.execute("SELECT COUNT(*) FROM dim_cpi_member").fetchone()[0]
         assert count == 16
 
-    def test_full_pipeline_idempotent(self, cpi_domain_loaded_db, cpi_item_content,
-                                       cpi_area_content, cpi_series_content, cpi_data_content):
+    def test_full_pipeline_idempotent(
+        self, cpi_domain_loaded_db, cpi_item_content, cpi_area_content, cpi_series_content, cpi_data_content
+    ):
         """Run the full pipeline a second time — no duplicate rows."""
         from jobclass.load.cpi_domain import (
             load_bridge_cpi_area_hierarchy,
@@ -713,9 +731,7 @@ class TestCpiDomainLoaders:
         # Counts unchanged
         assert cpi_domain_loaded_db.execute("SELECT COUNT(*) FROM dim_cpi_member").fetchone()[0] == member_before
         assert cpi_domain_loaded_db.execute("SELECT COUNT(*) FROM dim_cpi_area").fetchone()[0] == area_before
-        variant_after = cpi_domain_loaded_db.execute(
-            "SELECT COUNT(*) FROM dim_cpi_series_variant"
-        ).fetchone()[0]
+        variant_after = cpi_domain_loaded_db.execute("SELECT COUNT(*) FROM dim_cpi_series_variant").fetchone()[0]
         assert variant_after == variant_before
         assert cpi_domain_loaded_db.execute("SELECT COUNT(*) FROM fact_cpi_observation").fetchone()[0] == obs_before
 
@@ -732,21 +748,29 @@ class TestCpiRevisionVintageLoader:
 
         rows = [
             CpiRevisionVintageRow(
-                item_code="SA0", area_code="0000", year=2023, period="M13",
-                vintage_label="2024-Q1-preliminary", index_value=304.7,
-                is_preliminary=True, source_release_id="test-release",
+                item_code="SA0",
+                area_code="0000",
+                year=2023,
+                period="M13",
+                vintage_label="2024-Q1-preliminary",
+                index_value=304.7,
+                is_preliminary=True,
+                source_release_id="test-release",
                 parser_version="2.0.0",
             ),
             CpiRevisionVintageRow(
-                item_code="SA0", area_code="0000", year=2023, period="M13",
-                vintage_label="2024-Q3-final", index_value=304.5,
-                is_preliminary=False, source_release_id="test-release",
+                item_code="SA0",
+                area_code="0000",
+                year=2023,
+                period="M13",
+                vintage_label="2024-Q3-final",
+                index_value=304.5,
+                is_preliminary=False,
+                source_release_id="test-release",
                 parser_version="2.0.0",
             ),
         ]
-        count = load_fact_cpi_revision_vintage(
-            cpi_domain_loaded_db, rows, "test-release", "test-release"
-        )
+        count = load_fact_cpi_revision_vintage(cpi_domain_loaded_db, rows, "test-release", "test-release")
         assert count == 2
 
         # Verify both vintages stored
@@ -765,27 +789,26 @@ class TestCpiRevisionVintageLoader:
 
         rows = [
             CpiRevisionVintageRow(
-                item_code="SA0", area_code="0000", year=2023, period="M13",
-                vintage_label="2024-Q1-preliminary", index_value=304.7,
-                is_preliminary=True, source_release_id="test-release",
+                item_code="SA0",
+                area_code="0000",
+                year=2023,
+                period="M13",
+                vintage_label="2024-Q1-preliminary",
+                index_value=304.7,
+                is_preliminary=True,
+                source_release_id="test-release",
                 parser_version="2.0.0",
             ),
         ]
-        load_fact_cpi_revision_vintage(
-            cpi_domain_loaded_db, rows, "test-release", "test-release"
-        )
+        load_fact_cpi_revision_vintage(cpi_domain_loaded_db, rows, "test-release", "test-release")
         # Second run — same grain, no duplicates
-        count = load_fact_cpi_revision_vintage(
-            cpi_domain_loaded_db, rows, "test-release", "test-release"
-        )
+        count = load_fact_cpi_revision_vintage(cpi_domain_loaded_db, rows, "test-release", "test-release")
         assert count == 0
 
     def test_revision_vintage_empty_rows(self, cpi_domain_loaded_db):
         from jobclass.load.cpi_domain import load_fact_cpi_revision_vintage
 
-        count = load_fact_cpi_revision_vintage(
-            cpi_domain_loaded_db, [], "test-release", "test-release"
-        )
+        count = load_fact_cpi_revision_vintage(cpi_domain_loaded_db, [], "test-release", "test-release")
         assert count == 0
 
     def test_revision_vintage_unknown_member_skipped(self, cpi_domain_loaded_db):
@@ -794,13 +817,16 @@ class TestCpiRevisionVintageLoader:
 
         rows = [
             CpiRevisionVintageRow(
-                item_code="ZZZZZ", area_code="0000", year=2023, period="M13",
-                vintage_label="test", index_value=100.0,
-                is_preliminary=True, source_release_id="test-release",
+                item_code="ZZZZZ",
+                area_code="0000",
+                year=2023,
+                period="M13",
+                vintage_label="test",
+                index_value=100.0,
+                is_preliminary=True,
+                source_release_id="test-release",
                 parser_version="2.0.0",
             ),
         ]
-        count = load_fact_cpi_revision_vintage(
-            cpi_domain_loaded_db, rows, "test-release", "test-release"
-        )
+        count = load_fact_cpi_revision_vintage(cpi_domain_loaded_db, rows, "test-release", "test-release")
         assert count == 0

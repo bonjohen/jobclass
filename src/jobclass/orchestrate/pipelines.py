@@ -742,7 +742,10 @@ def cpi_domain_refresh(
 
         # Facts
         obs_count = load_fact_cpi_observation(
-            conn, observations, source_release_id, source_release_id,
+            conn,
+            observations,
+            source_release_id,
+            source_release_id,
         )
 
         total_loaded = member_count + area_count + variant_count + obs_count

@@ -124,12 +124,15 @@ def cpi_member_detail(member_code: str) -> dict:
                 [current_key],
             ).fetchone()
             if parent_row:
-                ancestors.insert(0, {
-                    "member_code": parent_row[0],
-                    "title": parent_row[1],
-                    "hierarchy_level": parent_row[2],
-                    "semantic_role": parent_row[3],
-                })
+                ancestors.insert(
+                    0,
+                    {
+                        "member_code": parent_row[0],
+                        "title": parent_row[1],
+                        "hierarchy_level": parent_row[2],
+                        "semantic_role": parent_row[3],
+                    },
+                )
                 current_key = parent_row[4]
             else:
                 break
@@ -303,8 +306,7 @@ def cpi_member_siblings(member_code: str) -> dict:
                 [parent[0], member[0]],
             ).fetchall()
             siblings = [
-                {"member_code": r[0], "title": r[1], "hierarchy_level": r[2], "semantic_role": r[3]}
-                for r in rows
+                {"member_code": r[0], "title": r[1], "hierarchy_level": r[2], "semantic_role": r[3]} for r in rows
             ]
 
     return {"member_code": member_code.upper(), "siblings": siblings}
@@ -514,10 +516,7 @@ def cpi_member_average_prices(
                    ORDER BY tp.year""",
                 [member[0], area[0]],
             ).fetchall()
-            entries = [
-                {"year": r[0], "period": r[1], "average_price": r[2], "unit_description": r[3]}
-                for r in rows
-            ]
+            entries = [{"year": r[0], "period": r[1], "average_price": r[2], "unit_description": r[3]} for r in rows]
 
     return {
         "member_code": member_code.upper(),
@@ -608,9 +607,7 @@ def cpi_explorer_tree(
                ORDER BY m.member_code""",
         ).fetchall()
         for edge in all_edges:
-            children_map.setdefault(edge[0], []).append(
-                (edge[1], edge[2], edge[3], edge[4])
-            )
+            children_map.setdefault(edge[0], []).append((edge[1], edge[2], edge[3], edge[4]))
 
     # Build member_key → latest relative importance (national, latest period)
     importance_map: dict[int, float] = {}
@@ -636,9 +633,7 @@ def cpi_explorer_tree(
         }
         if depth < max_depth:
             for child_key, child_code, child_title, child_level in children_map.get(member_key, []):
-                node["children"].append(
-                    build_node(child_key, child_code, child_title, child_level, depth + 1)
-                )
+                node["children"].append(build_node(child_key, child_code, child_title, child_level, depth + 1))
         return node
 
     return build_node(root_row[0], root_row[1], root_row[2], root_row[3], 0)

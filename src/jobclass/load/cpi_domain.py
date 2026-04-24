@@ -26,6 +26,7 @@ from jobclass.parse.cpi_domain import (
 # Staging loaders (delete-before-insert idempotency)
 # ---------------------------------------------------------------------------
 
+
 def load_cpi_item_hierarchy_staging(
     conn: duckdb.DuckDBPyConnection,
     rows: list[CpiItemRow],
@@ -43,8 +44,16 @@ def load_cpi_item_hierarchy_staging(
                  sort_sequence, selectable, source_release_id, parser_version)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             [
-                (r.item_code, r.item_name, r.hierarchy_level, r.parent_item_code,
-                 r.sort_sequence, r.selectable, source_release_id, r.parser_version)
+                (
+                    r.item_code,
+                    r.item_name,
+                    r.hierarchy_level,
+                    r.parent_item_code,
+                    r.sort_sequence,
+                    r.selectable,
+                    source_release_id,
+                    r.parser_version,
+                )
                 for r in rows
             ],
         )
@@ -68,8 +77,16 @@ def load_cpi_series_staging(
                  area_code, item_code, source_release_id, parser_version)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             [
-                (r.series_id, "CPI-U", r.seasonal_adjustment, r.periodicity,
-                 r.area_code, r.item_code, source_release_id, r.parser_version)
+                (
+                    r.series_id,
+                    "CPI-U",
+                    r.seasonal_adjustment,
+                    r.periodicity,
+                    r.area_code,
+                    r.item_code,
+                    source_release_id,
+                    r.parser_version,
+                )
                 for r in rows
             ],
         )
@@ -89,6 +106,7 @@ def load_cpi_area_staging(
 # ---------------------------------------------------------------------------
 # Dimension loaders
 # ---------------------------------------------------------------------------
+
 
 def load_dim_cpi_member(
     conn: duckdb.DuckDBPyConnection,
@@ -112,10 +130,19 @@ def load_dim_cpi_member(
         role = _classify_semantic_role(item.item_code)
         is_cross = role in ("special_aggregate", "purchasing_power")
         has_avg_price = item.item_code.startswith("SS")
-        batch.append((
-            item.item_code, item.item_name, item.hierarchy_level, role,
-            is_cross, has_avg_price, True, str(item.display_level), source_version,
-        ))
+        batch.append(
+            (
+                item.item_code,
+                item.item_name,
+                item.hierarchy_level,
+                role,
+                is_cross,
+                has_avg_price,
+                True,
+                str(item.display_level),
+                source_version,
+            )
+        )
 
     if batch:
         conn.executemany(
@@ -246,8 +273,13 @@ def load_dim_cpi_area(
         return 0
 
     batch = [
-        (area.area_code, area.area_title, area.area_type,
-         _classify_publication_frequency(area.area_code), source_version)
+        (
+            area.area_code,
+            area.area_title,
+            area.area_type,
+            _classify_publication_frequency(area.area_code),
+            source_version,
+        )
         for area in areas
     ]
     if batch:
@@ -346,9 +378,17 @@ def load_dim_cpi_series_variant(
         area_keys[row[0]] = row[1]
 
     batch = [
-        (s.series_id, "CPI-U", s.seasonal_adjustment, s.periodicity,
-         s.area_code, s.item_code, member_keys.get(s.item_code),
-         area_keys.get(s.area_code), source_version)
+        (
+            s.series_id,
+            "CPI-U",
+            s.seasonal_adjustment,
+            s.periodicity,
+            s.area_code,
+            s.item_code,
+            member_keys.get(s.item_code),
+            area_keys.get(s.area_code),
+            source_version,
+        )
         for s in series
     ]
     if batch:
@@ -388,17 +428,13 @@ def load_fact_cpi_observation(
     # Build (year, period) → period_key lookup for monthly periods
     # CPI uses monthly periods: M01-M12 plus M13 (annual average)
     period_keys: dict[tuple[int, str], int] = {}
-    for row in conn.execute(
-        "SELECT period_key, year, period_type FROM dim_time_period"
-    ).fetchall():
+    for row in conn.execute("SELECT period_key, year, period_type FROM dim_time_period").fetchall():
         if row[2] == "annual":
             period_keys[(row[1], "M13")] = row[0]
 
     # Build existing grain set for idempotency check
     existing_grains: set[tuple[int, int]] = set()
-    for row in conn.execute(
-        "SELECT variant_key, time_period_key FROM fact_cpi_observation"
-    ).fetchall():
+    for row in conn.execute("SELECT variant_key, time_period_key FROM fact_cpi_observation").fetchall():
         existing_grains.add((row[0], row[1]))
 
     # Collect batch of rows to insert
@@ -471,8 +507,7 @@ def load_fact_cpi_relative_importance(
             continue
         if (member_key, area_key, ri.reference_period) in existing_grains:
             continue
-        batch.append((member_key, area_key, ri.reference_period,
-                       ri.relative_importance, source_release_id))
+        batch.append((member_key, area_key, ri.reference_period, ri.relative_importance, source_release_id))
         existing_grains.add((member_key, area_key, ri.reference_period))
 
     if batch:
@@ -517,17 +552,13 @@ def load_fact_cpi_average_price(
 
     # Build (year, period) → period_key lookup
     period_keys: dict[tuple[int, str], int] = {}
-    for row in conn.execute(
-        "SELECT period_key, year, period_type FROM dim_time_period"
-    ).fetchall():
+    for row in conn.execute("SELECT period_key, year, period_type FROM dim_time_period").fetchall():
         if row[2] == "annual":
             period_keys[(row[1], "M13")] = row[0]
 
     # Build existing grain set for idempotency
     existing_grains: set[tuple[int, int, int]] = set()
-    for row in conn.execute(
-        "SELECT member_key, area_key, time_period_key FROM fact_cpi_average_price"
-    ).fetchall():
+    for row in conn.execute("SELECT member_key, area_key, time_period_key FROM fact_cpi_average_price").fetchall():
         existing_grains.add((row[0], row[1], row[2]))
 
     batch = []
@@ -589,9 +620,7 @@ def load_fact_cpi_revision_vintage(
 
     # Build (year, period) → period_key lookup
     period_keys: dict[tuple[int, str], int] = {}
-    for row in conn.execute(
-        "SELECT period_key, year, period_type FROM dim_time_period"
-    ).fetchall():
+    for row in conn.execute("SELECT period_key, year, period_type FROM dim_time_period").fetchall():
         if row[2] == "annual":
             period_keys[(row[1], "M13")] = row[0]
 
@@ -614,10 +643,18 @@ def load_fact_cpi_revision_vintage(
         grain = (member_key, area_key, period_key, rv.vintage_label)
         if grain in existing_grains:
             continue
-        batch.append((
-            member_key, area_key, period_key, rv.vintage_label,
-            rv.index_value, rv.is_preliminary, None, source_release_id,
-        ))
+        batch.append(
+            (
+                member_key,
+                area_key,
+                period_key,
+                rv.vintage_label,
+                rv.index_value,
+                rv.is_preliminary,
+                None,
+                source_release_id,
+            )
+        )
         existing_grains.add(grain)
 
     if batch:
@@ -655,7 +692,8 @@ def load_cpi_overlay_members(
 
     # Check existing member codes
     existing_codes: set[str] = {
-        r[0] for r in conn.execute(
+        r[0]
+        for r in conn.execute(
             "SELECT member_code FROM dim_cpi_member WHERE source_version = ?",
             [source_version],
         ).fetchall()
@@ -664,10 +702,19 @@ def load_cpi_overlay_members(
     new_members = []
     for code, (title, _source) in overlay_members.items():
         if code not in existing_codes:
-            new_members.append((
-                code, title, "external_overlay", "external_overlay",
-                False, False, False, "overlay", source_version,
-            ))
+            new_members.append(
+                (
+                    code,
+                    title,
+                    "external_overlay",
+                    "external_overlay",
+                    False,
+                    False,
+                    False,
+                    "overlay",
+                    source_version,
+                )
+            )
 
     if new_members:
         conn.executemany(
@@ -686,7 +733,8 @@ def load_cpi_overlay_members(
     ).fetchone()
     if sa0_key:
         key_map: dict[str, int] = {
-            r[0]: r[1] for r in conn.execute(
+            r[0]: r[1]
+            for r in conn.execute(
                 "SELECT member_code, member_key FROM dim_cpi_member WHERE source_version = ?",
                 [source_version],
             ).fetchall()
