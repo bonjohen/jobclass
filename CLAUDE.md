@@ -65,7 +65,7 @@ pytest tests/warehouse/
 ruff check src/ tests/
 
 # Build static site for GitHub Pages
-MSYS_NO_PATHCONV=1 python scripts/build_static.py --base-path /jobclass
+MSYS_NO_PATHCONV=1 python scripts/build_static.py --base-path /
 
 # Deploy static site to gh-pages branch
 python scripts/deploy_pages.py
@@ -73,12 +73,12 @@ python scripts/deploy_pages.py
 
 ## Static Site / GitHub Pages
 
-The site is published at **https://bonjohen.github.io/jobclass/**
+The site is published at **https://jobclass.johnboen.com/** (custom domain, CNAME in build output)
 
 - `scripts/build_static.py` pre-renders all HTML pages via the FastAPI TestClient and generates all API responses as static JSON files under `_site/`.
 - A fetch shim is injected into each HTML page's `<head>`. It intercepts JavaScript `fetch()` calls to `/api/` and redirects them to the corresponding `.json` files.
 - Search uses a client-side index built from the full occupation list in the database. The shim filters results locally, so no server-side search is needed.
-- Path rewriting handles the GitHub Pages subpath (`/jobclass`) for all links, assets, and API URLs.
+- With the custom domain, the site is built with `--base-path /` (no subpath prefix needed). A `CNAME` file is auto-generated in the build output.
 - `scripts/deploy_pages.py` pushes `_site/` to the `gh-pages` branch via force-push.
 - A `.nojekyll` file is included to prevent GitHub Pages Jekyll processing.
 
@@ -101,11 +101,11 @@ Static assets in `base.html` use a version query parameter: `main.css?v=CR4`, `m
 
 ```bash
 # Build the static site
-MSYS_NO_PATHCONV=1 python scripts/build_static.py --base-path /jobclass
+MSYS_NO_PATHCONV=1 python scripts/build_static.py --base-path /
 
 # Serve locally (Python built-in server)
 cd _site && python -m http.server 8080
-# Open http://localhost:8080/jobclass/
+# Open http://localhost:8080/
 ```
 
 ## Architecture: Four-Layer Warehouse
@@ -127,10 +127,10 @@ cd _site && python -m http.server 8080
 | Source | Internal IDs | Role |
 |--------|-------------|------|
 | SOC | `soc_hierarchy`, `soc_definitions` | Occupation taxonomy backbone |
-| OEWS | `oews_national`, `oews_state`, `oews_metro`, `oews_industry_national` | Employment counts and wage measures |
-| O*NET | `onet_skills`, `onet_knowledge`, `onet_abilities`, `onet_tasks`, `onet_occupation_data` | Semantic descriptors (skills, tasks, etc.) |
+| OEWS | `oews_national_{year}`, `oews_state_{year}` (2021–2023 vintages) | Employment counts and wage measures |
+| O*NET | `onet_skills`, `onet_knowledge`, `onet_abilities`, `onet_tasks`, `onet_work_activities`, `onet_education`, `onet_technology_skills`, `onet_occupation_data` | Semantic descriptors (skills, tasks, etc.) |
 | BLS Projections | `bls_employment_projections` | Forward-looking employment data |
-| BLS CPI-U | `bls_cpi` | Consumer price index for inflation adjustment |
+| BLS CPI-U | `bls_cpi`, `bls_cpi_item`, `bls_cpi_area`, `bls_cpi_series`, `bls_cpi_data_current`, `bls_cpi_relative_importance`, `bls_cpi_average_price` | Consumer price index for inflation adjustment |
 | SOC Crosswalk | `soc_crosswalk` | SOC 2010↔2018 occupation code mappings |
 
 ## Key Design Decisions
@@ -158,11 +158,11 @@ cd _site && python -m http.server 8080
 
 Extract (declarative, manifest-driven) -> Parse (dataset-specific) -> Validate (structural, semantic, temporal, drift) -> Load (idempotent at dataset-version grain)
 
-Logical pipelines: `taxonomy_refresh`, `oews_refresh`, `onet_refresh`, `projections_refresh`, `warehouse_publish`, `timeseries_refresh`. SOC must complete before occupation conformance; OEWS and O*NET may run independently. Time-series refresh runs after warehouse_publish.
+Logical pipelines: `taxonomy_refresh`, `oews_refresh`, `onet_refresh`, `projections_refresh`, `cpi_refresh`, `cpi_domain_refresh`, `crosswalk_refresh`, `warehouse_publish`, `timeseries_refresh`. SOC must complete before occupation conformance; OEWS, O*NET, CPI, and crosswalk may run independently. Time-series refresh runs after warehouse_publish.
 
 ## Testing Strategy
 
-- **653+ tests** across four test directories:
+- **840+ tests** across four test directories:
   - `tests/unit/` — Fixture-based parser, loader, orchestration, validation, and config tests. No database or network needed.
   - `tests/web/` — FastAPI TestClient tests for all API endpoints, HTML pages, security headers, accessibility, and end-to-end smoke tests. No database needed (uses in-memory fixtures).
   - `tests/warehouse/` — Real data validation tests against `warehouse.duckdb`. **Automatically skipped** if the warehouse file is absent. Run `jobclass-pipeline run-all` first to populate it.
