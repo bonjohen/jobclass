@@ -53,7 +53,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: gunzip warehouse.duckdb.gz
-      - run: python scripts/build_static.py --base-path /jobclass
+      - run: python scripts/build_static.py --base-path /
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
