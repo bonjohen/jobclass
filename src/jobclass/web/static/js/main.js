@@ -66,3 +66,34 @@ function escapeAttr(value) {
     return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
+
+/* --- Theme Toggle --- */
+
+(function() {
+    var THEME_KEY = 'jobclass:theme';
+    var btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+    btn.addEventListener('click', function() {
+        var cur = document.documentElement.getAttribute('data-theme');
+        var next = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem(THEME_KEY, next);
+    });
+})();
+
+/* --- Lesson Category Filter --- */
+
+(function() {
+    var btns = document.querySelectorAll('.lesson-filter-btn');
+    if (!btns.length) return;
+    btns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            btns.forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            var cat = btn.getAttribute('data-cat');
+            document.querySelectorAll('.lesson-card').forEach(function(card) {
+                card.style.display = (cat === 'all' || card.getAttribute('data-cat') === cat) ? '' : 'none';
+            });
+        });
+    });
+})();

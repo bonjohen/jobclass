@@ -49,7 +49,9 @@ def create_app() -> FastAPI:
         async def dispatch(self, request: Request, call_next) -> Response:
             response = await call_next(request)
             response.headers["Content-Security-Policy"] = (
-                "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+                "default-src 'self'; script-src 'self'; "
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+                "font-src 'self' https://fonts.gstatic.com"
             )
             response.headers["X-Content-Type-Options"] = "nosniff"
             response.headers["X-Frame-Options"] = "DENY"
