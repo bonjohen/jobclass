@@ -78,7 +78,7 @@ class TestLandingPage:
 
     def test_landing_has_content(self, client):
         html = client.get("/").text
-        assert "Labor Market Occupation Data" in html
+        assert "Occupation" in html and "Intelligence" in html
 
     def test_landing_has_entry_points(self, client):
         html = client.get("/").text

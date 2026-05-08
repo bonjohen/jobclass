@@ -2041,28 +2041,56 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    /* --- Guided Mode --- */
-    var guidedOverlay = document.getElementById("pipeline-guided-overlay");
-    var guidedText = document.getElementById("pipeline-guided-text");
-    var guidedStep = document.getElementById("pipeline-guided-step");
-    var guidedPrev = document.getElementById("pipeline-guided-prev");
-    var guidedNext = document.getElementById("pipeline-guided-next");
-    var guidedExit = document.getElementById("pipeline-guided-exit");
+    /* --- Guided Mode (integrated into detail panel) --- */
     var activeMode = null;
     var activeModeStep = 0;
+
+    function guidedNavHtml(stepLabel, prevDisabled, nextDisabled) {
+        return '<div class="guided-panel">' +
+            '<div class="guided-panel-step">' + escapeHtml(stepLabel) + '</div>' +
+            '<div class="guided-panel-nav">' +
+                '<button class="pipeline-btn guided-nav-prev"' + (prevDisabled ? ' disabled' : '') + '>&larr; Prev</button>' +
+                '<button class="pipeline-btn guided-nav-next"' + (nextDisabled ? ' disabled' : '') + '>Next &rarr;</button>' +
+                '<button class="pipeline-btn pipeline-btn-secondary guided-nav-exit">Exit</button>' +
+            '</div>' +
+        '</div>';
+    }
+
+    function bindGuidedNav() {
+        if (!detailBody) return;
+        var prev = detailBody.querySelector(".guided-nav-prev");
+        var next = detailBody.querySelector(".guided-nav-next");
+        var exit = detailBody.querySelector(".guided-nav-exit");
+        if (prev) prev.addEventListener("click", function () {
+            if (!activeMode) return;
+            if (activeModeStep > 0) { activeModeStep--; showGuidedStep(); }
+            else if (activeModeStep === 0) { activeModeStep = -1; showModeIntro(); }
+        });
+        if (next) next.addEventListener("click", function () {
+            if (!activeMode) return;
+            if (activeModeStep === -1) { activeModeStep = 0; showGuidedStep(); }
+            else if (activeModeStep < activeMode.steps.length - 1) { activeModeStep++; showGuidedStep(); }
+        });
+        if (exit) exit.addEventListener("click", exitGuidedMode);
+    }
 
     function showModeIntro() {
         if (!activeMode) return;
         selectedNode = null;
         highlightedNodes = null;
         highlightedEdges = null;
-        hideDetailPanel();
         fitToScreen();
-        if (guidedText) guidedText.textContent = activeMode.description;
-        if (guidedStep) guidedStep.textContent = "Intro";
-        if (guidedPrev) guidedPrev.disabled = true;
-        if (guidedNext) guidedNext.disabled = false;
-        if (guidedOverlay) guidedOverlay.hidden = false;
+
+        /* Show intro in the detail panel */
+        if (detailTitle) detailTitle.textContent = activeMode.name;
+        if (detailType) { detailType.textContent = "guided"; detailType.className = "pipeline-type-badge"; }
+        if (detailBody) {
+            detailBody.innerHTML =
+                '<p style="margin-bottom:0.75rem;font-size:0.9rem;">' + escapeHtml(activeMode.description) + '</p>' +
+                guidedNavHtml("Intro", true, false);
+            bindGuidedNav();
+        }
+        if (detailPanel) detailPanel.hidden = false;
         dirty = true;
     }
 
@@ -2078,11 +2106,22 @@ document.addEventListener("DOMContentLoaded", function () {
             showDetailPanel(node);
             panToNode(node, 0.6);
         }
-        if (guidedText) guidedText.textContent = step.annotation;
-        if (guidedStep) guidedStep.textContent = "Step " + (activeModeStep + 1) + " of " + activeMode.steps.length;
-        if (guidedPrev) guidedPrev.disabled = false;
-        if (guidedNext) guidedNext.disabled = activeModeStep === activeMode.steps.length - 1;
-        if (guidedOverlay) guidedOverlay.hidden = false;
+
+        /* Prepend guided nav + annotation at top of the detail panel, then node info below */
+        if (detailBody) {
+            var stepLabel = "Step " + (activeModeStep + 1) + " of " + activeMode.steps.length;
+            var atEnd = activeModeStep === activeMode.steps.length - 1;
+            var nodeContent = detailBody.innerHTML;
+            detailBody.innerHTML =
+                guidedNavHtml(stepLabel, false, atEnd) +
+                '<div style="margin-top:0.5rem;margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:1px solid var(--color-border);">' +
+                    '<p style="margin:0;font-size:0.9rem;font-family:var(--font-serif);line-height:1.5;color:var(--color-text-2);">' +
+                        escapeHtml(step.annotation) +
+                    '</p>' +
+                '</div>' +
+                nodeContent;
+            bindGuidedNav();
+        }
         dirty = true;
     }
 
@@ -2090,7 +2129,6 @@ document.addEventListener("DOMContentLoaded", function () {
         activeMode = null;
         activeModeStep = 0;
         guidedPulseT = 0;
-        if (guidedOverlay) guidedOverlay.hidden = true;
         selectedNode = null;
         highlightedNodes = null;
         highlightedEdges = null;
@@ -2106,14 +2144,12 @@ document.addEventListener("DOMContentLoaded", function () {
             var modeId = this.getAttribute("data-mode");
             for (var mj = 0; mj < modeBtns.length; mj++) modeBtns[mj].classList.remove("active");
 
-            /* Toggle off if same mode clicked */
             if (activeMode && activeMode.id === modeId) {
                 exitGuidedMode();
                 return;
             }
 
             this.classList.add("active");
-            /* Auto-switch to detail mode for guided tours */
             if (viewMode === "overview") {
                 viewMode = "detail";
                 updateControlsVisibility();
@@ -2123,41 +2159,13 @@ document.addEventListener("DOMContentLoaded", function () {
             for (var mk = 0; mk < graph.guidedModes.length; mk++) {
                 if (graph.guidedModes[mk].id === modeId) {
                     activeMode = graph.guidedModes[mk];
-                    activeModeStep = -1; /* -1 signals intro step */
+                    activeModeStep = -1;
                     showModeIntro();
                     announce("Guided mode: " + activeMode.name);
                     break;
                 }
             }
         });
-    }
-
-    if (guidedPrev) {
-        guidedPrev.addEventListener("click", function () {
-            if (!activeMode) return;
-            if (activeModeStep > 0) {
-                activeModeStep--;
-                showGuidedStep();
-            } else if (activeModeStep === 0) {
-                activeModeStep = -1;
-                showModeIntro();
-            }
-        });
-    }
-    if (guidedNext) {
-        guidedNext.addEventListener("click", function () {
-            if (!activeMode) return;
-            if (activeModeStep === -1) {
-                activeModeStep = 0;
-                showGuidedStep();
-            } else if (activeModeStep < activeMode.steps.length - 1) {
-                activeModeStep++;
-                showGuidedStep();
-            }
-        });
-    }
-    if (guidedExit) {
-        guidedExit.addEventListener("click", exitGuidedMode);
     }
 
     /* --- Minimap Click-to-Navigate & Drag (PE7-04, PE7-05) --- */

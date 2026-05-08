@@ -1,34 +1,113 @@
-<section class="hero">
-    <h1>Labor Market Occupation Data</h1>
-    <p>Explore employment, wages, skills, tasks, and projections for hundreds of occupations across the United States.</p>
+<section class="landing-hero">
+    <h1>Occupation <em>Intelligence</em></h1>
+    <p class="landing-lede">
+        Federal agencies publish rich labor market data &mdash; occupation taxonomies, employment
+        counts, wage distributions, skill profiles, and employment projections &mdash; but spread
+        across different bureaus, file formats, and release schedules. This project curates those
+        sources into a single dimensional warehouse where every table joins on the SOC occupation
+        code, making it possible to ask questions that span wages, skills, and outlook in one query.
+    </p>
+    <p class="landing-lede-2">
+        Four BLS programs feed the pipeline: the Standard Occupational Classification (taxonomy),
+        the Occupational Employment and Wage Statistics (employment and wages by geography),
+        O*NET (skills, knowledge, abilities, and tasks), and Employment Projections (10-year outlook).
+        The warehouse tracks multiple data vintages, adjusts wages for inflation, computes
+        year-over-year trends, and publishes everything as both a live API and a static site.
+    </p>
+    <div class="landing-hero-stats" id="stats-grid"></div>
 </section>
 
-<section class="stats-bar" id="stats-bar">
-    <div class="wages-grid" id="stats-grid"></div>
-</section>
-
-<section class="entry-points">
-    <div class="card">
-        <h2>Search Occupations</h2>
-        <p>Find occupations by keyword, SOC code, or browse the hierarchy.</p>
-        <a href="/search" class="btn">Search</a>
+<section class="landing-section">
+    <div class="landing-section-head">
+        <h2>Explore</h2>
+        <span class="landing-section-count">6 entry points</span>
     </div>
-    <div class="card">
-        <h2>Browse Hierarchy</h2>
-        <p>Navigate the SOC taxonomy from major groups to detailed occupations.</p>
-        <a href="/hierarchy" class="btn">Browse</a>
-    </div>
-    <div class="card">
-        <h2>Methodology</h2>
-        <p>Understand the data sources, validation approach, and project architecture.</p>
-        <a href="/methodology" class="btn">Learn More</a>
+    <div class="landing-grid">
+        <a href="/search" class="lcard">
+            <div class="lcard-top">
+                <span class="lcard-chip">&#128269;</span>
+                <span class="lcard-pill">870 occupations</span>
+            </div>
+            <div class="lcard-name">Search Occupations</div>
+            <div class="lcard-desc">Find by keyword, SOC code, or job title. Explore wages, skills, projections, and related occupations.</div>
+            <div class="lcard-meta">
+                <span>Keyword &amp; code search</span>
+                <span class="lcard-arrow">&rarr;</span>
+            </div>
+        </a>
+        <a href="/hierarchy" class="lcard">
+            <div class="lcard-top">
+                <span class="lcard-chip">&#127795;</span>
+                <span class="lcard-pill">4 levels deep</span>
+            </div>
+            <div class="lcard-name">Browse Hierarchy</div>
+            <div class="lcard-desc">Navigate the SOC taxonomy from 23 major groups through minor, broad, and detailed occupation levels.</div>
+            <div class="lcard-meta">
+                <span>Tree navigation</span>
+                <span class="lcard-arrow">&rarr;</span>
+            </div>
+        </a>
+        <a href="/trends" class="lcard">
+            <div class="lcard-top">
+                <span class="lcard-chip">&#128200;</span>
+                <span class="lcard-pill">3 vintages</span>
+            </div>
+            <div class="lcard-name">Trends &amp; Movers</div>
+            <div class="lcard-desc">Year-over-year employment and wage changes, top movers, occupation comparison, and geographic analysis.</div>
+            <div class="lcard-meta">
+                <span>Time-series explorer</span>
+                <span class="lcard-arrow">&rarr;</span>
+            </div>
+        </a>
+        <a href="/lessons" class="lcard">
+            <div class="lcard-top">
+                <span class="lcard-chip">&#128218;</span>
+                <span class="lcard-pill">21 lessons</span>
+            </div>
+            <div class="lcard-name">Lessons Learned</div>
+            <div class="lcard-desc">Patterns, mistakes, and decisions from building this warehouse &mdash; dimensional modeling, data quality, pipeline design.</div>
+            <div class="lcard-meta">
+                <span>Engineering lessons</span>
+                <span class="lcard-arrow">&rarr;</span>
+            </div>
+        </a>
+        <a href="/methodology" class="lcard">
+            <div class="lcard-top">
+                <span class="lcard-chip">&#128736;</span>
+                <span class="lcard-pill">4 sources</span>
+            </div>
+            <div class="lcard-name">Methodology</div>
+            <div class="lcard-desc">Data sources, validation gates, warehouse architecture, and the full pipeline from download to publication.</div>
+            <div class="lcard-meta">
+                <span>Architecture &amp; design</span>
+                <span class="lcard-arrow">&rarr;</span>
+            </div>
+        </a>
+        <a href="/pipeline" class="lcard">
+            <div class="lcard-top">
+                <span class="lcard-chip">&#9881;</span>
+                <span class="lcard-pill">57 nodes</span>
+            </div>
+            <div class="lcard-name">Pipeline Explorer</div>
+            <div class="lcard-desc">Interactive canvas visualization of the full data pipeline &mdash; sources, extraction, staging, warehouse, and deployment.</div>
+            <div class="lcard-meta">
+                <span>Interactive graph</span>
+                <span class="lcard-arrow">&rarr;</span>
+            </div>
+        </a>
     </div>
 </section>
 
-<section class="spotlight" id="spotlight" style="display:none;">
-    <h2>Featured: Software Developers (15-1252)</h2>
-    <div id="spotlight-content" class="spotlight-grid"></div>
-    <p><a href="/occupation/15-1252" class="btn">View Full Profile</a></p>
+<section class="showcase" id="showcase">
+    <div class="showcase-header">
+        <div class="showcase-controls">
+            <button class="showcase-btn" id="showcase-prev" aria-label="Previous">&#8592;</button>
+            <button class="showcase-btn" id="showcase-pause" aria-label="Pause">&#10074;&#10074;</button>
+            <button class="showcase-btn" id="showcase-next" aria-label="Next">&#8594;</button>
+        </div>
+        <div class="showcase-dots" id="showcase-dots"></div>
+    </div>
+    <div class="showcase-viewport" id="showcase-viewport"></div>
 </section>
 
-<script src="/static/js/landing.js"></script>
+<script src="/static/js/landing.js?v=DM1" defer></script>

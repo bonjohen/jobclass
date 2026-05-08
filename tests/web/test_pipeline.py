@@ -70,10 +70,6 @@ class TestPipelinePage:
         assert 'id="pipeline-announcements"' in resp.text
         assert 'aria-live="polite"' in resp.text
 
-    def test_has_guided_step_overlay(self, client):
-        resp = client.get("/pipeline")
-        assert 'id="pipeline-guided-overlay"' in resp.text
-
 
 class TestPipelineNavLink:
     """Pipeline nav link appears on all pages."""

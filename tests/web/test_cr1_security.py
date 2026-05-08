@@ -14,11 +14,11 @@ class TestXSSPrevention:
         assert resp.status_code == 200
         assert "function escapeAttr" in resp.text
 
-    def test_landing_js_uses_dom_methods(self, client):
-        """Landing spotlight uses DOM methods, not innerHTML with raw API data."""
+    def test_landing_js_escapes_dynamic_content(self, client):
+        """Landing page escapes all dynamic API data before rendering."""
         resp = client.get("/static/js/landing.js")
         assert resp.status_code == 200
-        assert "textContent" in resp.text or "createElement" in resp.text
+        assert "escapeHtml" in resp.text or "textContent" in resp.text
 
     def test_occupation_js_escapes_lineage(self, client):
         """Occupation JS escapes source_release_id and source_version in lineage badges."""

@@ -27,11 +27,11 @@ class TestLandingPage:
 
     def test_landing_has_stats_section(self, client):
         resp = client.get("/")
-        assert "stats-bar" in resp.text
+        assert "stats-grid" in resp.text
 
-    def test_landing_has_spotlight(self, client):
+    def test_landing_has_showcase(self, client):
         resp = client.get("/")
-        assert "spotlight" in resp.text
+        assert "showcase" in resp.text
 
     def test_landing_has_entry_cards(self, client):
         html = client.get("/").text

@@ -96,4 +96,23 @@ function escapeAttr(value) {
             });
         });
     });
+
+    /* --- Hash scroll-to + highlight animation --- */
+    var hash = window.location.hash;
+    if (hash && hash.length > 1) {
+        var target = document.getElementById(hash.substring(1));
+        if (target && target.classList.contains('lesson-card')) {
+            /* Reset filter to "All" so target card is visible */
+            btns.forEach(function(b) { b.classList.toggle('active', b.getAttribute('data-cat') === 'all'); });
+            document.querySelectorAll('.lesson-card').forEach(function(c) { c.style.display = ''; });
+
+            setTimeout(function() {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                target.classList.add('lesson-card-highlight');
+                setTimeout(function() {
+                    target.classList.remove('lesson-card-highlight');
+                }, 2200);
+            }, 300);
+        }
+    }
 })();
