@@ -4,6 +4,7 @@ from __future__ import annotations
 
 # Each entry: (slug, title, template_name)
 LESSONS: list[tuple[str, str, str]] = [
+    ("design-system", "Design System Cross-Pollination", "lessons_design_system.html"),
     ("federal-data", "The Federal Labor Data Landscape", "lessons_federal_data.html"),
     ("dimensional-modeling", "Dimensional Modeling for Labor Data", "lessons_dimensional_modeling.html"),
     ("multi-vintage", "The Multi-Vintage Challenge", "lessons_multi_vintage.html"),
