@@ -26,9 +26,19 @@ _VALID_METRICS = {
     "projected_employment",
     "employment_change",
     "employment_change_pct",
+    "real_mean_annual_wage",
+    "real_median_annual_wage",
 }
 
+_VALID_GEO_TYPES = {"national", "state"}
+_VALID_COMPARABILITY_MODES = {"as_published", "comparable"}
 _VALID_TABLE_RE = re.compile(r"^[a-z_]+$")
+
+
+def _validate_enum(value: str, valid: set[str], name: str) -> None:
+    if value not in valid:
+        allowed = ", ".join(sorted(valid))
+        raise HTTPException(status_code=400, detail=f"Invalid {name}: {value}. Must be one of: {allowed}")
 
 
 def _table_exists(conn, table_name: str) -> bool:
@@ -49,6 +59,9 @@ def compare_occupations(
     comparability_mode: str = Query("as_published"),
 ) -> dict:
     """Compare a metric across multiple occupations over time."""
+    _validate_enum(metric, _VALID_METRICS, "metric")
+    _validate_enum(geo_type, _VALID_GEO_TYPES, "geo_type")
+    _validate_enum(comparability_mode, _VALID_COMPARABILITY_MODES, "comparability_mode")
     codes = [c.strip() for c in soc_codes.split(",") if c.strip()]
     if not codes or len(codes) > 10:
         raise HTTPException(status_code=400, detail="Provide 1-10 comma-separated SOC codes")
@@ -99,6 +112,7 @@ def compare_geography(
     """Compare a metric for one occupation across states."""
     if not _SOC_CODE_RE.match(soc_code):
         raise HTTPException(status_code=400, detail=f"Invalid SOC code: {soc_code}")
+    _validate_enum(metric, _VALID_METRICS, "metric")
 
     conn = get_db()
 
@@ -158,6 +172,8 @@ def ranked_movers(
     limit: int = Query(20, ge=1, le=100),
 ) -> dict:
     """Return top gainers and losers by metric change."""
+    _validate_enum(metric, _VALID_METRICS, "metric")
+    _validate_enum(geo_type, _VALID_GEO_TYPES, "geo_type")
     conn = get_db()
 
     if not _table_exists(conn, "fact_derived_series"):
@@ -179,7 +195,7 @@ def ranked_movers(
     if year is None and available_years:
         year = max(available_years)
 
-    movers_sql = """
+    movers_sql_desc = """
         SELECT
             o.soc_code, o.occupation_title,
             d.derived_value AS pct_change,
@@ -203,17 +219,19 @@ def ranked_movers(
           AND tp.year = ?
           AND d.derived_value IS NOT NULL
           AND o.is_current = true
-        ORDER BY d.derived_value {direction}
+        ORDER BY d.derived_value DESC
         LIMIT ?
     """
 
+    movers_sql_asc = movers_sql_desc.replace("ORDER BY d.derived_value DESC", "ORDER BY d.derived_value ASC")
+
     gainers = conn.execute(
-        movers_sql.format(direction="DESC"),
+        movers_sql_desc,
         [metric, geo_type, year, limit],
     ).fetchall()
 
     losers = conn.execute(
-        movers_sql.format(direction="ASC"),
+        movers_sql_asc,
         [metric, geo_type, year, limit],
     ).fetchall()
 
@@ -270,6 +288,9 @@ def occupation_trend(
     """Return time-series trend data for one occupation."""
     if not _SOC_CODE_RE.match(soc_code):
         raise HTTPException(status_code=400, detail=f"Invalid SOC code: {soc_code}")
+    _validate_enum(metric, _VALID_METRICS, "metric")
+    _validate_enum(geo_type, _VALID_GEO_TYPES, "geo_type")
+    _validate_enum(comparability_mode, _VALID_COMPARABILITY_MODES, "comparability_mode")
 
     conn = get_db()
 

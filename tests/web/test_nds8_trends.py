@@ -176,3 +176,60 @@ class TestRealWageUI:
         assert r.status_code == 200
         assert "real_mean_annual_wage" in r.text
         assert "real_median_annual_wage" in r.text
+
+
+# ============================================================
+# F-01: Query parameter validation
+# ============================================================
+
+
+class TestTrendsParameterValidation:
+    def test_compare_occupations_invalid_metric(self, client):
+        r = client.get("/api/trends/compare/occupations?soc_codes=15-1252&metric=bogus")
+        assert r.status_code == 400
+        assert "Invalid metric" in r.json()["detail"]
+
+    def test_compare_occupations_invalid_geo_type(self, client):
+        r = client.get("/api/trends/compare/occupations?soc_codes=15-1252&geo_type=bogus")
+        assert r.status_code == 400
+        assert "Invalid geo_type" in r.json()["detail"]
+
+    def test_compare_occupations_invalid_comparability_mode(self, client):
+        r = client.get("/api/trends/compare/occupations?soc_codes=15-1252&comparability_mode=bogus")
+        assert r.status_code == 400
+        assert "Invalid comparability_mode" in r.json()["detail"]
+
+    def test_compare_geography_invalid_metric(self, client):
+        r = client.get("/api/trends/compare/geography?soc_code=15-1252&metric=bogus")
+        assert r.status_code == 400
+        assert "Invalid metric" in r.json()["detail"]
+
+    def test_movers_invalid_metric(self, client):
+        r = client.get("/api/trends/movers?metric=bogus")
+        assert r.status_code == 400
+        assert "Invalid metric" in r.json()["detail"]
+
+    def test_movers_invalid_geo_type(self, client):
+        r = client.get("/api/trends/movers?geo_type=bogus")
+        assert r.status_code == 400
+        assert "Invalid geo_type" in r.json()["detail"]
+
+    def test_trend_data_invalid_metric(self, client):
+        r = client.get("/api/trends/15-1252?metric=bogus")
+        assert r.status_code == 400
+        assert "Invalid metric" in r.json()["detail"]
+
+    def test_trend_data_invalid_geo_type(self, client):
+        r = client.get("/api/trends/15-1252?geo_type=bogus")
+        assert r.status_code == 400
+        assert "Invalid geo_type" in r.json()["detail"]
+
+    def test_trend_data_invalid_comparability_mode(self, client):
+        r = client.get("/api/trends/15-1252?comparability_mode=bogus")
+        assert r.status_code == 400
+        assert "Invalid comparability_mode" in r.json()["detail"]
+
+    def test_valid_metrics_accepted(self, client):
+        for m in ("employment_count", "mean_annual_wage", "real_mean_annual_wage"):
+            r = client.get(f"/api/trends/movers?metric={m}")
+            assert r.status_code == 200, f"Valid metric {m} rejected"

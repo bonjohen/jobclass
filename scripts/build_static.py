@@ -294,11 +294,18 @@ def build_static(base_path: str, output_dir: str) -> None:
     print("  7 root pages")
 
     # --- HTML: CPI member pages ---
+    # Only generate pages for top-tier hierarchy levels to keep build size manageable.
+    # Leaf-level members (Expenditure class, Item stratum, ELI, ELI sub-item) are
+    # trimmed from the static demo; the full dataset is available in the warehouse.
     cpi_member_codes = []
     with contextlib.suppress(Exception):
         cpi_member_codes = [
             r[0]
-            for r in db.execute("SELECT member_code FROM dim_cpi_member ORDER BY member_code").fetchall()
+            for r in db.execute(
+                "SELECT member_code FROM dim_cpi_member "
+                "WHERE hierarchy_level IN ('All items', 'Major group', 'Intermediate aggregate') "
+                "ORDER BY member_code"
+            ).fetchall()
         ]
     if cpi_member_codes:
         t0_cpi = time.time()

@@ -12,12 +12,6 @@ FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
 
 @pytest.fixture
-def tmp_dir(tmp_path):
-    """Provide a temporary directory for test artifacts."""
-    return tmp_path
-
-
-@pytest.fixture
 def db(tmp_path):
     """Provide a fresh DuckDB connection for each test."""
     db_path = tmp_path / "test.duckdb"

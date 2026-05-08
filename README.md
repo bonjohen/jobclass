@@ -127,10 +127,10 @@ python scripts/deploy_pages.py
 
 The warehouse contains **57+ tables** across the four layers:
 
-- **15 dimensions** — `dim_occupation`, `dim_geography`, `dim_industry`, `dim_skill`, `dim_knowledge`, `dim_ability`, `dim_task`, `dim_work_activity`, `dim_technology`, `dim_education_requirement`, `dim_cpi_member`, `dim_cpi_area`, `dim_cpi_series_variant`, `dim_time_period`, `dim_metric`
+- **16 dimensions** — `dim_occupation`, `dim_geography`, `dim_industry`, `dim_skill`, `dim_knowledge`, `dim_ability`, `dim_task`, `dim_work_activity`, `dim_technology`, `dim_education_requirement`, `dim_cpi_member`, `dim_cpi_area`, `dim_cpi_series_variant`, `dim_price_index`, `dim_time_period`, `dim_metric`
 - **8 facts** — employment/wages, projections, time-series observations, derived series, CPI observations, relative importance, average prices, revision vintages
 - **12 bridges** — occupation-to-descriptor bridges (skill, knowledge, ability, task, work activity, technology, education), SOC hierarchy, SOC crosswalk, CPI member/area hierarchies
-- **17 staging tables** — one per parsed dataset
+- **19 staging tables** — one per parsed dataset
 
 ## CLI reference
 

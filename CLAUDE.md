@@ -6,15 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Labor market occupation data pipeline that ingests federal data products (SOC, OEWS, O*NET, Employment Projections) into a layered analytical warehouse. The core design principle: **occupation is the stable external key**; job titles, roles, and internal classifications map onto it, not the other way around.
 
-The full design specification lives in `docs\specs\base_design_document.md`.
-This was consolidated into `docs\specs\project_detail_design.md`.
+The full design specification lives in `docs/specs/archive/base_design_document.md`.
+This was consolidated into `docs/specs/archive/project_detail_design.md`.
 This was used to construct two working documents:
-* `docs\specs\phased_release_plan.md` — **Complete** (all tasks done)
-* `docs\specs\test_plan.md`
+* `docs/specs/archive/phased_release_plan.md` — **Complete** (all tasks done)
+* `docs/specs/archive/test_plan.md`
 
 Subsequent release plans (all complete):
-* `docs\specs\time_series_labor_plan.md` — Time-series intelligence pipeline (101/101 tasks)
-* `docs\specs\lessons_release_plan.md` — Lessons section with 12 educational pages (36/36 tasks)
+* `docs/specs/time_series_labor_plan.md` — Time-series intelligence pipeline (101/101 tasks)
+* `docs/specs/lessons_release_plan.md` — Lessons section with 20 educational pages (36/36 tasks + 8 added later)
 
 Active release plans:
 (none)
@@ -180,7 +180,7 @@ Logical pipelines: `taxonomy_refresh`, `oews_refresh`, `onet_refresh`, `projecti
 
 **Time-Series Release** — Multi-vintage OEWS (2021–2023), conformed metric catalog, time-period dimension, observation + derived-series facts, 5 time-series marts, trend explorer, occupation comparison, geography comparison, ranked movers, comparable history framework.
 
-**Lessons Release** — 12 educational lesson pages covering federal data, dimensional modeling, multi-vintage challenges, data quality, time-series normalization, idempotent pipelines, static site generation, testing/deployment, similarity algorithms, thread safety, multi-vintage queries, and UI-data alignment.
+**Lessons Release** — 20 educational lesson pages covering federal data, dimensional modeling, multi-vintage challenges, data quality, time-series normalization, idempotent pipelines, static site generation, testing/deployment, similarity algorithms, thread safety, multi-vintage queries, UI-data alignment, schema drift, inflation adjustment, taxonomy evolution, government APIs, derived metrics, outlier interpretation, geography pitfalls, and fetch shim architecture.
 
 **New Data Sources Release** — 7 new data sources (O*NET knowledge/abilities/work-activities/education/technology, BLS CPI-U, SOC crosswalk), CPI explorer pages, integrated code review fixes.
 
