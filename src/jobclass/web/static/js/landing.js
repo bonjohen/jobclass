@@ -255,7 +255,7 @@
     var current = 0;
     var timer = null;
     var paused = false;
-    var INTERVAL = 18000; /* 18 seconds — gradual pace */
+    var INTERVAL = 5000; /* 5 seconds */
 
     if (viewport) {
         buildShowcase();
