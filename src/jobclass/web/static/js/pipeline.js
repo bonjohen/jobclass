@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var LANE_PADDING = 20;
 
     /* --- Color Palettes --- */
-    var TYPE_COLORS = {
+    var LIGHT_TYPE_COLORS = {
         source:    { fill: "#dbeafe", stroke: "#3b82f6", text: "#1e40af" },
         process:   { fill: "#fef3c7", stroke: "#f59e0b", text: "#92400e" },
         storage:   { fill: "#d1fae5", stroke: "#10b981", text: "#065f46" },
@@ -48,7 +48,16 @@ document.addEventListener("DOMContentLoaded", function () {
         lesson:    { fill: "#fae8ff", stroke: "#a855f7", text: "#6b21a8" }
     };
 
-    var EDGE_STYLES = {
+    var DARK_TYPE_COLORS = {
+        source:    { fill: "#1e3a5f", stroke: "#60a5fa", text: "#93c5fd" },
+        process:   { fill: "#422006", stroke: "#fbbf24", text: "#fde68a" },
+        storage:   { fill: "#064e3b", stroke: "#34d399", text: "#6ee7b7" },
+        gate:      { fill: "#450a0a", stroke: "#f87171", text: "#fca5a5" },
+        "interface": { fill: "#312e81", stroke: "#818cf8", text: "#a5b4fc" },
+        lesson:    { fill: "#3b0764", stroke: "#c084fc", text: "#d8b4fe" }
+    };
+
+    var LIGHT_EDGE_STYLES = {
         required:    { color: "#64748b", width: 1.5, dash: [] },
         conditional: { color: "#d97706", width: 1.5, dash: [6, 4] },
         blocked:     { color: "#ef4444", width: 2,   dash: [] },
@@ -56,6 +65,96 @@ document.addEventListener("DOMContentLoaded", function () {
         educational: { color: "#a855f7", width: 1,   dash: [2, 4] },
         derived:     { color: "#3b82f6", width: 1.5, dash: [8, 3] }
     };
+
+    var DARK_EDGE_STYLES = {
+        required:    { color: "#94a3b8", width: 1.5, dash: [] },
+        conditional: { color: "#fbbf24", width: 1.5, dash: [6, 4] },
+        blocked:     { color: "#f87171", width: 2,   dash: [] },
+        optional:    { color: "#64748b", width: 1,   dash: [3, 3] },
+        educational: { color: "#c084fc", width: 1,   dash: [2, 4] },
+        derived:     { color: "#60a5fa", width: 1.5, dash: [8, 3] }
+    };
+
+    /* Light/dark canvas colors for non-node/edge elements */
+    var LIGHT_CANVAS = {
+        laneBorder: "#cbd5e1", laneLabel: "#475569", laneCount: "#94a3b8",
+        lessonChip: "#a855f7", guidedPulse: "#3b82f6", minimapViewport: "#3b82f6",
+        arrowFill: "#94a3b8", arrowStroke: "#94a3b8",
+        cardFill: "#ffffff", cardBorder: "#d1d5db", cardTitle: "#111827",
+        cardPurpose: "#6b7280", cardDivider: "#e5e7eb", cardItem: "#374151",
+        tooltipBg: "rgba(15, 23, 42, 0.92)", tooltipTitle: "#f8fafc",
+        tooltipBadgeText: "#fff", tooltipBody: "#cbd5e1",
+        detailMuted: "#64748b", detailWarn: "#b45309", detailBorder: "#e2e8f0",
+        detailLink: "#6366f1",
+        shadow: "rgba(0,0,0,0.15)", shadowLight: "rgba(0,0,0,0.07)",
+        searchHoverBg: "#f1f5f9", searchBorder: "#e2e8f0"
+    };
+
+    var DARK_CANVAS = {
+        laneBorder: "#2d3748", laneLabel: "#B8B5AC", laneCount: "#777874",
+        lessonChip: "#c084fc", guidedPulse: "#60a5fa", minimapViewport: "#60a5fa",
+        arrowFill: "#64748b", arrowStroke: "#64748b",
+        cardFill: "#15171C", cardBorder: "#2d3748", cardTitle: "#F2EEE3",
+        cardPurpose: "#B8B5AC", cardDivider: "#2d3748", cardItem: "#B8B5AC",
+        tooltipBg: "rgba(30, 32, 40, 0.95)", tooltipTitle: "#F2EEE3",
+        tooltipBadgeText: "#fff", tooltipBody: "#B8B5AC",
+        detailMuted: "#777874", detailWarn: "#D9B25A", detailBorder: "#2d3748",
+        detailLink: "#818cf8",
+        shadow: "rgba(0,0,0,0.4)", shadowLight: "rgba(0,0,0,0.2)",
+        searchHoverBg: "#1E2028", searchBorder: "#2d3748"
+    };
+
+    /* Dark mode lane color mapping (light pastel → dark muted) */
+    var DARK_LANE_COLORS = {
+        "#e8f4fd": "#0d2137", "#fef3e2": "#2a1a05", "#fce4ec": "#2a0a14",
+        "#e8f5e9": "#0a2410", "#fff3e0": "#2a1a00", "#e3f2fd": "#0a1929",
+        "#f3e5f5": "#1a0a24", "#e0f2f1": "#0a2420", "#fff9c4": "#24220a",
+        "#efebe9": "#1a1614"
+    };
+    var originalLaneColors = null;
+
+    function isDarkTheme() {
+        return document.documentElement.getAttribute("data-theme") === "dark";
+    }
+
+    var TYPE_COLORS = LIGHT_TYPE_COLORS;
+    var EDGE_STYLES = LIGHT_EDGE_STYLES;
+    var C = LIGHT_CANVAS;
+
+    function refreshThemeColors() {
+        var dark = isDarkTheme();
+        TYPE_COLORS = dark ? DARK_TYPE_COLORS : LIGHT_TYPE_COLORS;
+        EDGE_STYLES = dark ? DARK_EDGE_STYLES : LIGHT_EDGE_STYLES;
+        C = dark ? DARK_CANVAS : LIGHT_CANVAS;
+
+        /* Remap lane colors */
+        if (graph && graph.lanes) {
+            if (!originalLaneColors) {
+                originalLaneColors = {};
+                for (var i = 0; i < graph.lanes.length; i++) {
+                    originalLaneColors[graph.lanes[i].id] = graph.lanes[i].color;
+                }
+            }
+            for (var j = 0; j < graph.lanes.length; j++) {
+                var orig = originalLaneColors[graph.lanes[j].id];
+                graph.lanes[j].color = dark ? (DARK_LANE_COLORS[orig] || orig) : orig;
+            }
+        }
+
+        dirty = true;
+    }
+
+    /* Listen for theme changes */
+    new MutationObserver(function (mutations) {
+        for (var i = 0; i < mutations.length; i++) {
+            if (mutations[i].attributeName === "data-theme") {
+                refreshThemeColors();
+                break;
+            }
+        }
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+    refreshThemeColors();
 
     /* --- Build node index for quick lookup --- */
     var nodeById = {};
@@ -546,12 +645,12 @@ document.addEventListener("DOMContentLoaded", function () {
             ctx.globalAlpha = entAlpha;
             ctx.fillStyle = lane.color;
             ctx.fillRect(lane.x, lane.y, lane.w, lane.h);
-            ctx.strokeStyle = "#cbd5e1";
+            ctx.strokeStyle = C.laneBorder;
             ctx.lineWidth = 1;
             ctx.strokeRect(lane.x, lane.y, lane.w, lane.h);
 
             /* Lane label at top */
-            ctx.fillStyle = "#475569";
+            ctx.fillStyle = C.laneLabel;
             ctx.font = "bold 11px " + fontFamily;
             ctx.textAlign = "center";
             ctx.fillText(lane.label, lane.x + lane.w / 2, lane.y + 16);
@@ -562,7 +661,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 for (var j = 0; j < graph.nodes.length; j++) {
                     if (graph.nodes[j].lane === lane.id && isNodeVisible(graph.nodes[j])) count++;
                 }
-                ctx.fillStyle = "#94a3b8";
+                ctx.fillStyle = C.laneCount;
                 ctx.font = "bold 14px " + fontFamily;
                 ctx.fillText(count + " node" + (count !== 1 ? "s" : ""), lane.x + lane.w / 2, lane.y + lane.h / 2);
             }
@@ -640,7 +739,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ctx.shadowColor = colors.stroke;
             ctx.shadowBlur = 12;
         } else if (isHovered) {
-            ctx.shadowColor = "rgba(0,0,0,0.15)";
+            ctx.shadowColor = C.shadow;
             ctx.shadowBlur = 8;
         }
 
@@ -707,7 +806,7 @@ document.addEventListener("DOMContentLoaded", function () {
             var chipX = node.x + NODE_W / 2 - 8;
             var chipY = node.y - NODE_H / 2 - 4;
             ctx.save();
-            ctx.fillStyle = "#a855f7";
+            ctx.fillStyle = C.lessonChip;
             ctx.beginPath();
             ctx.arc(chipX, chipY, 4, 0, Math.PI * 2);
             ctx.fill();
@@ -773,7 +872,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (metaText) {
                     var metaAlpha = blend.detailFade < 1 ? blend.detailFade : 1;
                     ctx.globalAlpha = nodeAlpha * metaAlpha;
-                    ctx.fillStyle = "#94a3b8";
+                    ctx.fillStyle = C.laneCount;
                     ctx.font = "8px " + fontFamily;
                     ctx.textAlign = "center";
                     ctx.textBaseline = "top";
@@ -815,7 +914,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 var lx2 = tl.x;
                 var ly2 = tl.y + tl.h / 2;
                 ctx.save();
-                ctx.strokeStyle = "#94a3b8";
+                ctx.strokeStyle = C.arrowStroke;
                 ctx.lineWidth = Math.min(le.count * 0.5, 4);
                 ctx.globalAlpha = 0.5;
                 ctx.beginPath();
@@ -946,7 +1045,7 @@ document.addEventListener("DOMContentLoaded", function () {
             var py = u * u * y1 + 2 * u * t * y1 + t * t * y2;
 
             ctx.save();
-            ctx.fillStyle = "#3b82f6";
+            ctx.fillStyle = C.guidedPulse;
             ctx.globalAlpha = 0.9;
             ctx.beginPath();
             ctx.arc(px, py, 4 / camera.scale, 0, Math.PI * 2);
@@ -991,7 +1090,7 @@ document.addEventListener("DOMContentLoaded", function () {
         var vy = (-camera.y / camera.scale - bounds.minY) * scale + 5;
         var vw = (canvasW / camera.scale) * scale;
         var vh = (canvasH / camera.scale) * scale;
-        minimapCtx.strokeStyle = "#3b82f6";
+        minimapCtx.strokeStyle = C.minimapViewport;
         minimapCtx.lineWidth = 1.5;
         minimapCtx.strokeRect(vx, vy, vw, vh);
     }
@@ -1026,17 +1125,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         /* Shadow + fill */
         ctx.save();
-        ctx.shadowColor = isHovered ? "rgba(0,0,0,0.18)" : "rgba(0,0,0,0.07)";
+        ctx.shadowColor = isHovered ? C.shadow : C.shadowLight;
         ctx.shadowBlur = isHovered ? 14 : 6;
         ctx.shadowOffsetY = isHovered ? 3 : 1;
         overviewRoundRect(bx, by, block.w, block.h, r);
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle = C.cardFill;
         ctx.fill();
         ctx.restore();
 
         /* Border */
         overviewRoundRect(bx, by, block.w, block.h, r);
-        ctx.strokeStyle = isHovered ? block.accent : "#d1d5db";
+        ctx.strokeStyle = isHovered ? block.accent : C.cardBorder;
         ctx.lineWidth = isHovered ? 2 : 1;
         ctx.stroke();
 
@@ -1064,20 +1163,20 @@ document.addEventListener("DOMContentLoaded", function () {
         ctx.fillText((idx + 1) + ".", badgeX, badgeY);
 
         /* Title */
-        ctx.fillStyle = "#111827";
+        ctx.fillStyle = C.cardTitle;
         ctx.font = "bold 14px " + font;
         ctx.textAlign = "left";
         ctx.fillText(block.label, badgeX + 18, badgeY);
 
         /* Purpose line */
-        ctx.fillStyle = "#6b7280";
+        ctx.fillStyle = C.cardPurpose;
         ctx.font = "11px " + font;
         ctx.textAlign = "left";
         var purposeY = badgeY + 22;
         ctx.fillText(block.purpose, badgeX, purposeY);
 
         /* Divider */
-        ctx.strokeStyle = "#e5e7eb";
+        ctx.strokeStyle = C.cardDivider;
         ctx.lineWidth = 0.5;
         ctx.beginPath();
         ctx.moveTo(badgeX, purposeY + 12);
@@ -1085,7 +1184,7 @@ document.addEventListener("DOMContentLoaded", function () {
         ctx.stroke();
 
         /* Item list */
-        ctx.fillStyle = "#374151";
+        ctx.fillStyle = C.cardItem;
         ctx.font = "11px " + font;
         var itemStartY = purposeY + 26;
         var itemH = 16;
@@ -1098,14 +1197,14 @@ document.addEventListener("DOMContentLoaded", function () {
             ctx.arc(badgeX + 3, iy, 2, 0, Math.PI * 2);
             ctx.fill();
             /* Text */
-            ctx.fillStyle = "#374151";
+            ctx.fillStyle = C.cardItem;
             ctx.fillText(block.items[j], badgeX + 12, iy);
         }
     }
 
     function drawOverviewArrows() {
         var cols = 4;
-        ctx.strokeStyle = "#94a3b8";
+        ctx.strokeStyle = C.arrowStroke;
         ctx.lineWidth = 1.8;
         ctx.setLineDash([]);
 
@@ -1149,7 +1248,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function drawArrowhead(tipX, tipY, angle) {
         var aSize = 7;
-        ctx.fillStyle = "#94a3b8";
+        ctx.fillStyle = C.arrowFill;
         ctx.beginPath();
         ctx.moveTo(tipX, tipY);
         ctx.lineTo(tipX - aSize * Math.cos(angle - 0.4), tipY - aSize * Math.sin(angle - 0.4));
@@ -1307,12 +1406,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (ty < 4) ty = 4;
 
         /* Draw background */
-        ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
+        ctx.fillStyle = C.tooltipBg;
         roundedRect(tx, ty, boxW, boxH, 4);
         ctx.fill();
 
         /* Draw title */
-        ctx.fillStyle = "#f8fafc";
+        ctx.fillStyle = C.tooltipTitle;
         ctx.font = "bold 11px " + fontFamily;
         ctx.textAlign = "left";
         ctx.textBaseline = "top";
@@ -1331,12 +1430,12 @@ document.addEventListener("DOMContentLoaded", function () {
             ctx.fillStyle = colors.stroke;
             roundedRect(badgeX, ty + pad + 1, badgeW, 13, 2);
             ctx.fill();
-            ctx.fillStyle = "#fff";
+            ctx.fillStyle = C.tooltipBadgeText;
             ctx.fillText(badgeText, badgeX + 3, ty + pad + 2);
         }
 
         /* Draw purpose lines */
-        ctx.fillStyle = "#cbd5e1";
+        ctx.fillStyle = C.tooltipBody;
         ctx.font = "10px " + fontFamily;
         for (var pi = 0; pi < purposeLines.length; pi++) {
             ctx.fillText(purposeLines[pi], tx + pad, ty + pad + titleH + pi * lineH);
@@ -1459,10 +1558,10 @@ document.addEventListener("DOMContentLoaded", function () {
             html += '<p style="margin-bottom:0.75rem;font-size:0.9rem;">' + escapeHtml(node.purpose) + "</p>";
         }
         if (node.caveats) {
-            html += '<p style="margin-bottom:0.5rem;font-size:0.85rem;color:#b45309;"><strong>Caveat:</strong> ' + escapeHtml(node.caveats) + "</p>";
+            html += '<p style="margin-bottom:0.5rem;font-size:0.85rem;color:var(--color-warning);"><strong>Caveat:</strong> ' + escapeHtml(node.caveats) + "</p>";
         }
         if (node.metadata) {
-            html += '<div style="font-size:0.8rem;color:#64748b;margin-top:0.5rem;">';
+            html += '<div style="font-size:0.8rem;color:var(--color-text-muted);margin-top:0.5rem;">';
             for (var key in node.metadata) {
                 var val = node.metadata[key];
                 if (Array.isArray(val)) val = val.join(", ");
@@ -1479,17 +1578,17 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
         if (lessonLinks.length > 0) {
-            html += '<div style="margin-top:0.75rem;border-top:1px solid #e2e8f0;padding-top:0.5rem;">';
+            html += '<div style="margin-top:0.75rem;border-top:1px solid var(--color-border);padding-top:0.5rem;">';
             html += '<strong style="font-size:0.8rem;">Related Lessons:</strong>';
             for (var li = 0; li < lessonLinks.length; li++) {
-                html += ' <a href="/lessons/' + escapeAttr(lessonLinks[li]) + '" style="font-size:0.8rem;color:#6366f1;">' + escapeHtml(lessonLinks[li].replace(/-/g, " ")) + "</a>";
+                html += ' <a href="/lessons/' + escapeAttr(lessonLinks[li]) + '" style="font-size:0.8rem;color:var(--color-accent);">' + escapeHtml(lessonLinks[li].replace(/-/g, " ")) + "</a>";
                 if (li < lessonLinks.length - 1) html += ",";
             }
             html += "</div>";
         }
 
         /* Isolate Path and Copy Link buttons (PE8-08, PE11-07) */
-        html += '<div style="margin-top:0.75rem;border-top:1px solid #e2e8f0;padding-top:0.5rem;display:flex;gap:6px;">';
+        html += '<div style="margin-top:0.75rem;border-top:1px solid var(--color-border);padding-top:0.5rem;display:flex;gap:6px;">';
         html += '<button class="pipeline-btn pipeline-isolate-btn" data-node-id="' + escapeAttr(node.id) + '" style="font-size:0.78rem;flex:1;">Isolate Path</button>';
         html += '<button class="pipeline-btn pipeline-copy-link-btn" data-node-id="' + escapeAttr(node.id) + '" style="font-size:0.78rem;flex:1;">Copy Link</button>';
         html += '</div>';
@@ -1555,16 +1654,16 @@ document.addEventListener("DOMContentLoaded", function () {
         var html = '<p style="margin-bottom:0.75rem;font-size:0.9rem;">' + escapeHtml(typeDescriptions[edge.type] || "Data flows from source to target.") + "</p>";
 
         if (edge.condition) {
-            html += '<p style="margin-bottom:0.5rem;font-size:0.85rem;color:#b45309;"><strong>Condition:</strong> ' + escapeHtml(edge.condition) + "</p>";
+            html += '<p style="margin-bottom:0.5rem;font-size:0.85rem;color:var(--color-warning);"><strong>Condition:</strong> ' + escapeHtml(edge.condition) + "</p>";
         }
 
-        html += '<div style="font-size:0.85rem;margin-top:0.75rem;border-top:1px solid #e2e8f0;padding-top:0.5rem;">';
-        html += '<div style="margin-bottom:0.25rem;"><strong>From:</strong> ' + escapeHtml(fromLabel) + ' <span style="color:#64748b;">(' + (fromNode ? fromNode.type : "?") + ')</span></div>';
-        html += '<div><strong>To:</strong> ' + escapeHtml(toLabel) + ' <span style="color:#64748b;">(' + (toNode ? toNode.type : "?") + ')</span></div>';
+        html += '<div style="font-size:0.85rem;margin-top:0.75rem;border-top:1px solid var(--color-border);padding-top:0.5rem;">';
+        html += '<div style="margin-bottom:0.25rem;"><strong>From:</strong> ' + escapeHtml(fromLabel) + ' <span style="color:var(--color-text-muted);">(' + (fromNode ? fromNode.type : "?") + ')</span></div>';
+        html += '<div><strong>To:</strong> ' + escapeHtml(toLabel) + ' <span style="color:var(--color-text-muted);">(' + (toNode ? toNode.type : "?") + ')</span></div>';
         html += "</div>";
 
         /* Visual style info */
-        html += '<div style="font-size:0.8rem;color:#64748b;margin-top:0.5rem;">';
+        html += '<div style="font-size:0.8rem;color:var(--color-text-muted);margin-top:0.5rem;">';
         html += '<div><strong>Line style:</strong> <span style="color:' + style.color + ';">' + (style.dash.length > 0 ? "dashed" : "solid") + " (" + edge.type + ")</span></div>";
         html += "</div>";
 
@@ -1867,7 +1966,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 opt.style.padding = "6px 10px";
                 opt.style.cursor = "pointer";
                 opt.style.fontSize = "0.85rem";
-                opt.style.borderBottom = "1px solid #e2e8f0";
+                opt.style.borderBottom = "1px solid var(--color-border)";
                 opt.textContent = matches[sj].label.replace(/\n/g, " ");
                 opt.setAttribute("data-node-id", matches[sj].id);
                 opt.addEventListener("click", function () {
@@ -1893,7 +1992,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     searchDropdown.style.display = "none";
                     searchInput.value = "";
                 });
-                opt.addEventListener("mouseenter", function () { this.style.background = "#f1f5f9"; });
+                opt.addEventListener("mouseenter", function () { this.style.background = "var(--color-surface-2)"; });
                 opt.addEventListener("mouseleave", function () { this.style.background = ""; });
                 searchDropdown.appendChild(opt);
             }
