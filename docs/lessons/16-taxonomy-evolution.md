@@ -66,6 +66,6 @@ A labor market data warehouse needed to support time-series analysis across SOC 
 
 ## Related Lessons
 
-- [Multi-Vintage Challenge](04-multi-vintage-challenge.md)
+- [The Multi-Vintage Challenge](04-multi-vintage-challenge.md)
 - [Multi-Vintage Query Pitfalls](12-multi-vintage-queries.md)
-- [Federal Data Landscape](02-federal-data-landscape.md)
+- [The Federal Labor Data Landscape](02-federal-data-landscape.md)

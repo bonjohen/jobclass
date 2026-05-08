@@ -51,3 +51,4 @@ The JobClass web application uses FastAPI with server-side Jinja2 template rende
 - [Testing and Deployment](09-testing-deployment.md) — CI and deployment pipeline that includes the static build
 - [Fetch Shim Architecture](21-fetch-shim.md) — deeper treatment of the shim's URL mapping patterns
 - [UI-Data Alignment](13-ui-data-alignment.md) — ensuring the static site's data matches what the live server would produce
+- [Design System Cross-Pollination](01-design-system-cross-pollination.md) — porting the Atlas design system to the static site's visual layer

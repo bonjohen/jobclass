@@ -72,4 +72,4 @@ The JobClass warehouse includes an occupation similarity feature that identifies
 
 - [Dimensional Modeling for Labor Data](03-dimensional-modeling.md) — the bridge table structure that stores skill scores
 - [Data Quality Traps in Government Sources](05-data-quality-traps.md) — another case where source data artifacts caused incorrect results
-- [Derived Metrics](18-derived-metrics.md) — other computed analytical values in the warehouse
+- [Derived Metrics from Base Observations](18-derived-metrics.md) — other computed analytical values in the warehouse

@@ -106,5 +106,5 @@ A labor market data pipeline downloaded data from BLS, O*NET, and SOC — all fe
 ## Related Lessons
 
 - [Schema Drift Detection](14-schema-drift.md)
-- [Idempotent Pipelines](07-idempotent-pipelines.md)
-- [Federal Data Landscape](02-federal-data-landscape.md)
+- [Idempotent Pipeline Design](07-idempotent-pipelines.md)
+- [The Federal Labor Data Landscape](02-federal-data-landscape.md)

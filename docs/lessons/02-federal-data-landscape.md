@@ -25,5 +25,5 @@ The JobClass project ingests four federal data products — SOC taxonomy, OEWS e
 ## Related Lessons
 
 - [The Multi-Vintage Challenge](04-multi-vintage-challenge.md) — how taxonomy changes interact with multi-year analysis
-- [Taxonomy Evolution](16-taxonomy-evolution.md) — deeper treatment of SOC version transitions
+- [Crosswalk and Taxonomy Evolution](16-taxonomy-evolution.md) — deeper treatment of SOC version transitions
 - [Dimensional Modeling for Labor Data](03-dimensional-modeling.md) — the warehouse architecture that implements these connections

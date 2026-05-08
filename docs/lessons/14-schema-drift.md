@@ -70,6 +70,6 @@ A labor market data pipeline ingested data from BLS, O*NET, and SOC — all fede
 
 ## Related Lessons
 
-- [Data Quality Traps](05-data-quality-traps.md)
-- [Idempotent Pipelines](07-idempotent-pipelines.md)
-- [Government API Extract Patterns](17-government-apis.md)
+- [Data Quality Traps in Government Sources](05-data-quality-traps.md)
+- [Idempotent Pipeline Design](07-idempotent-pipelines.md)
+- [Extract Patterns for Government APIs](17-government-apis.md)

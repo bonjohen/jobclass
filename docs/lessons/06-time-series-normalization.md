@@ -35,6 +35,6 @@ The JobClass warehouse stores employment and wage data from three OEWS vintages 
 ## Related Lessons
 
 - [The Multi-Vintage Challenge](04-multi-vintage-challenge.md) — the dimension deduplication that makes cross-vintage alignment possible
-- [Derived Metrics](18-derived-metrics.md) — deeper treatment of derived metric computation and edge cases
-- [Inflation Adjustment](15-inflation-adjustment.md) — CPI-based real wage computation as another derived series
-- [Multi-Vintage Queries](12-multi-vintage-queries.md) — query patterns for the normalized time-series schema
+- [Derived Metrics from Base Observations](18-derived-metrics.md) — deeper treatment of derived metric computation and edge cases
+- [Inflation Adjustment with CPI](15-inflation-adjustment.md) — CPI-based real wage computation as another derived series
+- [Multi-Vintage Query Pitfalls](12-multi-vintage-queries.md) — query patterns for the normalized time-series schema

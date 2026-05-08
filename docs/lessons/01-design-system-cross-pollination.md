@@ -81,4 +81,6 @@ This pattern applies whenever you maintain multiple projects and want visual coh
 
 ## Related Lessons
 
-*(First lesson in this collection — cross-references will be added as more lessons are written.)*
+- [Static Site Generation](08-static-site-generation.md) — the static build pipeline that serves the redesigned pages
+- [Testing and Deployment](09-testing-deployment.md) — the 430-test suite that constrained the refactor scope
+- [Fetch Shim Architecture](21-fetch-shim.md) — the shim that makes the redesigned static site work without a server

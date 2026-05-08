@@ -67,4 +67,4 @@ A labor market data warehouse computed year-over-year percent changes for every 
 
 - [Derived Metrics from Base Observations](18-derived-metrics.md)
 - [Multi-Vintage Query Pitfalls](12-multi-vintage-queries.md)
-- [Data Quality Traps](05-data-quality-traps.md)
+- [Data Quality Traps in Government Sources](05-data-quality-traps.md)

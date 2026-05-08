@@ -46,6 +46,6 @@ A labor market data warehouse ingested three vintages of OEWS wage data (2021, 2
 
 ## Related Lessons
 
-- [Multi-Vintage Challenge](04-multi-vintage-challenge.md)
+- [The Multi-Vintage Challenge](04-multi-vintage-challenge.md)
 - [UI-Data Alignment](13-ui-data-alignment.md)
 - [Derived Metrics from Base Observations](18-derived-metrics.md)

@@ -78,4 +78,4 @@ A labor market data warehouse stored multi-vintage OEWS observations (employment
 
 - [Inflation Adjustment with CPI](15-inflation-adjustment.md)
 - [Time-Series Normalization](06-time-series-normalization.md)
-- [Idempotent Pipelines](07-idempotent-pipelines.md)
+- [Idempotent Pipeline Design](07-idempotent-pipelines.md)

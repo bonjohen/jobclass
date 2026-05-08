@@ -39,5 +39,5 @@ WHERE geo_type = ? AND geo_code = ?
 
 - [Dimensional Modeling for Labor Data](03-dimensional-modeling.md) — the warehouse architecture that dimension deduplication operates within
 - [Time-Series Normalization](06-time-series-normalization.md) — the analytical layer built on top of cross-vintage joins
-- [Multi-Vintage Queries](12-multi-vintage-queries.md) — query patterns for working with conformed multi-vintage data
-- [Taxonomy Evolution](16-taxonomy-evolution.md) — handling dimensions that genuinely do change between versions
+- [Multi-Vintage Query Pitfalls](12-multi-vintage-queries.md) — query patterns for working with conformed multi-vintage data
+- [Crosswalk and Taxonomy Evolution](16-taxonomy-evolution.md) — handling dimensions that genuinely do change between versions

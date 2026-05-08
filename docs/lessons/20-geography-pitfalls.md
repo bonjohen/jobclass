@@ -71,6 +71,6 @@ A labor market data warehouse stored OEWS wage observations at national and stat
 
 ## Related Lessons
 
-- [Dimensional Modeling](03-dimensional-modeling.md)
+- [Dimensional Modeling for Labor Data](03-dimensional-modeling.md)
 - [Inflation Adjustment with CPI](15-inflation-adjustment.md)
-- [Data Quality Traps](05-data-quality-traps.md)
+- [Data Quality Traps in Government Sources](05-data-quality-traps.md)

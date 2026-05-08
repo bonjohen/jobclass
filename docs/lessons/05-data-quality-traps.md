@@ -46,6 +46,6 @@ The JobClass pipeline downloads and parses data from BLS (OEWS employment/wage s
 
 ## Related Lessons
 
-- [Schema Drift](14-schema-drift.md) — systematic handling of column and format changes across releases
+- [Schema Drift Detection](14-schema-drift.md) — systematic handling of column and format changes across releases
 - [The Multi-Vintage Challenge](04-multi-vintage-challenge.md) — the broader problem of loading multiple releases of the same dataset
-- [Government APIs](17-government-apis.md) — patterns for working with government data distribution infrastructure
+- [Extract Patterns for Government APIs](17-government-apis.md) — patterns for working with government data distribution infrastructure
