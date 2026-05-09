@@ -69,9 +69,7 @@ class TestCheckTaxonomyLoaded:
     @pytest.fixture()
     def conn(self):
         c = duckdb.connect(":memory:")
-        c.execute(
-            "CREATE TABLE dim_occupation (soc_code VARCHAR, soc_version VARCHAR, occupation_title VARCHAR)"
-        )
+        c.execute("CREATE TABLE dim_occupation (soc_code VARCHAR, soc_version VARCHAR, occupation_title VARCHAR)")
         yield c
         c.close()
 
