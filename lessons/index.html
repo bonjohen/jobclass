@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Labor market occupation data — employment, wages, skills, tasks, and projections from federal sources.">
+    <title>Lessons — JobClass</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="/static/css/main.css?v=DM1">
+    <script src="/static/js/theme-init.js?v=DM1"></script>
+    <script src="/static/js/main.js?v=DM1" defer></script>
+<script>
+(function(){
+var F=window.fetch,SC=null;
+function LS(b){
+  if(!SC)SC=F(b+'/api/occupations/search.json').then(function(r){return r.json()});
+  return SC;
+}
+window.fetch=function(u){
+  if(typeof u!=='string')return F.apply(this,arguments);
+  var ai=u.indexOf('/api/');
+  if(ai<0)return F.apply(this,arguments);
+  var b=u.substring(0,ai),r=u.substring(ai);
+  var qi=r.indexOf('?'),p=qi>=0?r.substring(0,qi):r;
+  var sp=new URLSearchParams(qi>=0?r.substring(qi+1):'');
+  if(p==='/api/occupations/search'){
+    return LS(b).then(function(d){
+      var q=(sp.get('q')||'').toLowerCase(),
+          lm=+(sp.get('limit')||50),of=+(sp.get('offset')||0),
+          rs=d.results||[];
+      if(q)rs=rs.filter(function(x){
+        return x.soc_code.toLowerCase().indexOf(q)>=0||
+               x.occupation_title.toLowerCase().indexOf(q)>=0;
+      });
+      return new Response(JSON.stringify({
+        results:rs.slice(of,of+lm),total:rs.length,limit:lm,offset:of
+      }),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  var pts=p.split('/');
+  if(pts.length===5&&pts[4]==='wages'&&pts[2]==='occupations'){
+    return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
+  }
+  if(p==='/api/trends/movers'){
+    var yr=sp.get('year'),mt=sp.get('metric')||'employment_count';
+    var mf=mt==='employment_count'?'':'_'+mt;
+    if(yr)return F(b+'/api/trends/movers-'+yr+mf+'.json');
+    return F(b+'/api/trends/movers'+mf+'.json');
+  }
+  if(p==='/api/trends/compare/occupations'){
+    var codes=(sp.get('soc_codes')||'').split(',').filter(Boolean);
+    var met=sp.get('metric')||'employment_count';
+    var gt=sp.get('geo_type')||'national';
+    return Promise.all(codes.map(function(c){
+      var ct=c.trim();
+      var tf=met==='employment_count'?ct+'.json':ct+'-'+met+'.json';
+      return Promise.all([
+        F(b+'/api/trends/'+tf).then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:trend',ct,e);return null}),
+        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:occ',ct,e);return null})
+      ]);
+    })).then(function(arr){
+      var occs=[];
+      arr.forEach(function(pair,i){
+        var d=pair[0],info=pair[1];
+        if(!d||!d.series)return;
+        var title=(info&&info.occupation_title)?info.occupation_title:codes[i];
+        occs.push({soc_code:codes[i],title:title,series:d.series.map(function(s){return{year:s.year,value:s.value}})});
+      });
+      var body=JSON.stringify({metric:met,geo_type:gt,occupations:occs});
+      return new Response(body,{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(pts.length===4&&pts[1]==='api'&&pts[2]==='trends'&&/^\d{2}-\d{4}$/.test(pts[3])){
+    var tm=sp.get('metric');
+    if(tm&&tm!=='employment_count')return F(b+'/api/trends/'+pts[3]+'-'+tm+'.json');
+    return F(b+'/api/trends/'+pts[3]+'.json');
+  }
+  if(p==='/api/trends/compare/geography'){
+    var sc=sp.get('soc_code');
+    if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
+  }
+  if(p==='/api/cpi/search'){
+    return F(b+'/api/cpi/search.json').then(function(r){return r.json()}).then(function(d){
+      var q2=(sp.get('q')||'').toLowerCase(),lm2=+(sp.get('limit')||50),
+          rs2=d.results||[];
+      if(q2)rs2=rs2.filter(function(x){
+        return x.member_code.toLowerCase().indexOf(q2)>=0||x.title.toLowerCase().indexOf(q2)>=0;
+      });
+      return new Response(JSON.stringify({query:sp.get('q')||'',total:rs2.length,results:rs2.slice(0,lm2)}),
+        {headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(p==='/api/cpi/explorer/tree'){
+    var root=sp.get('root')||'SA0',md=sp.get('max_depth')||'3';
+    return F(b+'/api/cpi/explorer/tree-'+root+'-'+md+'.json');
+  }
+  if(p==='/api/cpi/compare'){
+    var cc=(sp.get('codes')||'').split(',').filter(Boolean);
+    var cac=sp.get('area_code')||'0000',cif=sp.get('index_family')||'CPI-U',csa=sp.get('seasonal_adjustment')||'S';
+    return Promise.all(cc.map(function(c){
+      var ct=c.trim();
+      return F(b+'/api/cpi/members/'+ct+'/series.json').then(function(r){return r.json()})
+        .catch(function(){return null});
+    })).then(function(arr){
+      var series={};
+      cc.forEach(function(c,i){
+        var d=arr[i];
+        if(d&&d.series)series[c.trim()]=d.series.map(function(s){return{year:s.year,value:s.value}});
+      });
+      return new Response(JSON.stringify({codes:cc,series:series}),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  return F(b+p+'.json');
+};
+})();
+</script>
+</head>
+<body>
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <header role="banner">
+        <nav aria-label="Main navigation">
+            <div class="nav-brand">
+                <a href="/">JobClass</a>
+            </div>
+            <ul class="nav-links" role="list">
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search</a></li>
+                <li><a href="/hierarchy">Hierarchy</a></li>
+                <li><a href="/trends">Trends</a></li>
+                <li><a href="/cpi">CPI</a></li>
+                <li><a href="/pipeline">Pipeline</a></li>
+                <li><a href="/methodology">Methodology</a></li>
+                <li><a href="/lessons">Lessons</a></li>
+                <li>
+                    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content" role="main">
+        
+        
+            <section class="lessons-page">
+    <header class="lesson-hero">
+        <h1>Lessons <em>Learned</em></h1>
+        <p class="lesson-lede">
+            Patterns, mistakes, and decisions extracted from building a labor market data warehouse.
+            Each lesson is standalone and rooted in concrete examples from this codebase.
+        </p>
+        <div class="lesson-hero-stats">
+            <div class="lesson-stat"><b>21</b>Lessons</div>
+            <div class="lesson-stat"><b>5</b>Categories</div>
+        </div>
+    </header>
+
+    <div class="lesson-filter-bar">
+        <button class="lesson-filter-btn active" data-cat="all">All</button>
+        <button class="lesson-filter-btn" data-cat="data">Data Engineering</button>
+        <button class="lesson-filter-btn" data-cat="arch">Architecture</button>
+        <button class="lesson-filter-btn" data-cat="web">Web / Static</button>
+        <button class="lesson-filter-btn" data-cat="test">Testing</button>
+        <button class="lesson-filter-btn" data-cat="pipe">Pipeline</button>
+    </div>
+
+    <div class="lesson-cards">
+        <a href="/lessons/design-system" id="design-system" class="lesson-card" data-cat="arch">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 01</span>
+                <span class="lesson-card-category">Architecture</span>
+            </div>
+            <h2>Design System Cross-Pollination</h2>
+            <p>Porting visual feel between projects via design tokens without coupling architectures. Tokens first, typography second, dark mode site-wide.</p>
+            <div class="lesson-card-meta"><span>Architecture &amp; visual design</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/federal-data" id="federal-data" class="lesson-card" data-cat="data">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 02</span>
+                <span class="lesson-card-category">Data</span>
+            </div>
+            <h2>The Federal Labor Data Landscape</h2>
+            <p>Four federal data products, one occupation code. How SOC, OEWS, O*NET, and Employment Projections connect through the Standard Occupational Classification.</p>
+            <div class="lesson-card-meta"><span>Data sources &amp; relationships</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/dimensional-modeling" id="dimensional-modeling" class="lesson-card" data-cat="arch">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 03</span>
+                <span class="lesson-card-category">Architecture</span>
+            </div>
+            <h2>Dimensional Modeling for Labor Data</h2>
+            <p>Facts, dimensions, bridges, and the four-layer architecture. Why separating measurements from context makes everything easier to query.</p>
+            <div class="lesson-card-meta"><span>Architecture &amp; data modeling</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/multi-vintage" id="multi-vintage" class="lesson-card" data-cat="arch">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 04</span>
+                <span class="lesson-card-category">Architecture</span>
+            </div>
+            <h2>The Multi-Vintage Challenge</h2>
+            <p>What breaks when you load multiple years of the same dataset, and how shared dimensions make cross-vintage time-series analysis possible.</p>
+            <div class="lesson-card-meta"><span>Multi-year data integration</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/data-quality" id="data-quality" class="lesson-card" data-cat="data">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 05</span>
+                <span class="lesson-card-category">Data</span>
+            </div>
+            <h2>Data Quality Traps in Government Sources</h2>
+            <p>ZIP files with garbage inside, column names that change between releases, overlapping occupation groups, and suppressed values that aren't zeros.</p>
+            <div class="lesson-card-meta"><span>Data quality &amp; defensive parsing</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/time-series" id="time-series" class="lesson-card" data-cat="pipe">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 06</span>
+                <span class="lesson-card-category">Pipeline</span>
+            </div>
+            <h2>Time-Series Normalization</h2>
+            <p>Transforming point-in-time snapshots into proper time-series data. As-published vs. comparable history, and how derived metrics are computed.</p>
+            <div class="lesson-card-meta"><span>Time-series design &amp; analysis</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/idempotent-pipelines" id="idempotent-pipelines" class="lesson-card" data-cat="arch">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 07</span>
+                <span class="lesson-card-category">Architecture</span>
+            </div>
+            <h2>Idempotent Pipeline Design</h2>
+            <p>Why every load operation must be safely re-runnable. Delete-before-insert, check-before-insert, and grain uniqueness as the final safety net.</p>
+            <div class="lesson-card-meta"><span>Pipeline reliability patterns</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/static-site" id="static-site" class="lesson-card" data-cat="web">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 08</span>
+                <span class="lesson-card-category">Web</span>
+            </div>
+            <h2>Static Site Generation</h2>
+            <p>Converting a dynamic FastAPI application into static files for GitHub Pages. Fetch shims, path rewriting, and the limits of pre-rendering.</p>
+            <div class="lesson-card-meta"><span>Deployment &amp; static generation</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/testing-deployment" id="testing-deployment" class="lesson-card" data-cat="test">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 09</span>
+                <span class="lesson-card-category">Testing</span>
+            </div>
+            <h2>Testing and Deployment</h2>
+            <p>Three test directories, schema contracts, grain uniqueness, idempotence verification, CI configuration, and the full deployment checklist.</p>
+            <div class="lesson-card-meta"><span>Testing strategy &amp; CI/CD</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/similarity-algorithms" id="similarity-algorithms" class="lesson-card" data-cat="test">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 10</span>
+                <span class="lesson-card-category">Testing</span>
+            </div>
+            <h2>Choosing the Right Similarity Algorithm</h2>
+            <p>Why Jaccard similarity produced 100% matches for every occupation pair, and how cosine similarity on importance scores fixed it.</p>
+            <div class="lesson-card-meta"><span>Algorithm selection &amp; data structure</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/thread-safety" id="thread-safety" class="lesson-card" data-cat="test">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 11</span>
+                <span class="lesson-card-category">Testing</span>
+            </div>
+            <h2>Thread-Safe Database Connections</h2>
+            <p>Why landing page stats intermittently showed zero, and how per-thread DuckDB connections fixed the concurrency bug.</p>
+            <div class="lesson-card-meta"><span>Concurrency &amp; web server architecture</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/multi-vintage-queries" id="multi-vintage-queries" class="lesson-card" data-cat="test">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 12</span>
+                <span class="lesson-card-category">Testing</span>
+            </div>
+            <h2>Multi-Vintage Query Pitfalls</h2>
+            <p>Three traps when querying across multiple data releases: duplicate rows, missing derived metrics, and percentages without absolute context.</p>
+            <div class="lesson-card-meta"><span>Querying across multiple data releases</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/ui-data-alignment" id="ui-data-alignment" class="lesson-card" data-cat="web">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 13</span>
+                <span class="lesson-card-category">Web</span>
+            </div>
+            <h2>UI-Data Alignment</h2>
+            <p>Dead-end links, mixed time periods, and static site shim gaps. Three patterns for making the interface reflect what data actually exists.</p>
+            <div class="lesson-card-meta"><span>UI design &amp; data availability</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/schema-drift" id="schema-drift" class="lesson-card" data-cat="data">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 14</span>
+                <span class="lesson-card-category">Data</span>
+            </div>
+            <h2>Schema Drift Detection</h2>
+            <p>Column adds, removes, and retypes between releases. How validation gates block bad data from reaching the warehouse.</p>
+            <div class="lesson-card-meta"><span>Data validation &amp; drift detection</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/inflation-adjustment" id="inflation-adjustment" class="lesson-card" data-cat="data">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 15</span>
+                <span class="lesson-card-category">Data</span>
+            </div>
+            <h2>Inflation Adjustment with CPI</h2>
+            <p>CPI-U deflation formula, base year selection, and the SQL pattern for computing real wages from nominal observations.</p>
+            <div class="lesson-card-meta"><span>Real wages &amp; economic adjustment</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/taxonomy-evolution" id="taxonomy-evolution" class="lesson-card" data-cat="arch">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 16</span>
+                <span class="lesson-card-category">Architecture</span>
+            </div>
+            <h2>Crosswalk &amp; Taxonomy Evolution</h2>
+            <p>SOC version changes, 1:1/split/merge/complex mappings, and why &ldquo;same code&rdquo; doesn&rsquo;t mean &ldquo;same occupation.&rdquo;</p>
+            <div class="lesson-card-meta"><span>Occupation code versioning</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/government-apis" id="government-apis" class="lesson-card" data-cat="data">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 17</span>
+                <span class="lesson-card-category">Data</span>
+            </div>
+            <h2>Extract Patterns for Government APIs</h2>
+            <p>Browser header spoofing, retry with exponential backoff, format heterogeneity, and manifest-driven downloads.</p>
+            <div class="lesson-card-meta"><span>Data extraction &amp; HTTP patterns</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/derived-metrics" id="derived-metrics" class="lesson-card" data-cat="pipe">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 18</span>
+                <span class="lesson-card-category">Pipeline</span>
+            </div>
+            <h2>Derived Metrics from Base Observations</h2>
+            <p>Why derived metrics need their own fact table. Self-join patterns for YoY, rolling averages, and idempotent computation.</p>
+            <div class="lesson-card-meta"><span>Derived series &amp; computation</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/outlier-interpretation" id="outlier-interpretation" class="lesson-card" data-cat="pipe">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 19</span>
+                <span class="lesson-card-category">Pipeline</span>
+            </div>
+            <h2>Ranked Movers &amp; Outlier Interpretation</h2>
+            <p>Small-denominator volatility, dual-direction sorting, and why suppressed data causes apparent outliers in top-movers lists.</p>
+            <div class="lesson-card-meta"><span>Statistical interpretation</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/geography-pitfalls" id="geography-pitfalls" class="lesson-card" data-cat="web">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 20</span>
+                <span class="lesson-card-category">Web</span>
+            </div>
+            <h2>Geography Comparison Pitfalls</h2>
+            <p>State-vs-national gaps, cost-of-living confounders, suppressed cells in small states, and dimension-driven filtering.</p>
+            <div class="lesson-card-meta"><span>Geographic data challenges</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+
+        <a href="/lessons/fetch-shim" id="fetch-shim" class="lesson-card" data-cat="web">
+            <div class="lesson-card-top">
+                <span class="lesson-card-number">Lesson 21</span>
+                <span class="lesson-card-category">Web</span>
+            </div>
+            <h2>Fetch Shim Architecture</h2>
+            <p>Turning a dynamic API into a static site. JavaScript fetch interception, URL-to-file mapping, and client-side search.</p>
+            <div class="lesson-card-meta"><span>Static site &amp; deployment</span><span class="lesson-card-arrow">&#8594;</span></div>
+        </a>
+    </div>
+</section>
+        
+        
+    </main>
+
+    <footer role="contentinfo">
+        <div class="footer-content">
+            <p>JobClass — Labor Market Occupation Pipeline</p>
+            <p class="footer-meta">Data sourced from BLS (SOC, OEWS, Employment Projections) and O*NET</p>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,1 @@
+{"status":"ok","warehouse_version":"2018","table_counts":{"dim_occupation":1447,"dim_geography":55,"dim_industry":1,"dim_skill":35,"dim_knowledge":33,"dim_ability":52,"dim_task":18796,"fact_occupation_employment_wages":116047,"fact_occupation_projections":827}}

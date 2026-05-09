@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Labor market occupation data — employment, wages, skills, tasks, and projections from federal sources.">
+    <title>Design System Cross-Pollination — Lessons — JobClass</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="/static/css/main.css?v=DM1">
+    <script src="/static/js/theme-init.js?v=DM1"></script>
+    <script src="/static/js/main.js?v=DM1" defer></script>
+<script>
+(function(){
+var F=window.fetch,SC=null;
+function LS(b){
+  if(!SC)SC=F(b+'/api/occupations/search.json').then(function(r){return r.json()});
+  return SC;
+}
+window.fetch=function(u){
+  if(typeof u!=='string')return F.apply(this,arguments);
+  var ai=u.indexOf('/api/');
+  if(ai<0)return F.apply(this,arguments);
+  var b=u.substring(0,ai),r=u.substring(ai);
+  var qi=r.indexOf('?'),p=qi>=0?r.substring(0,qi):r;
+  var sp=new URLSearchParams(qi>=0?r.substring(qi+1):'');
+  if(p==='/api/occupations/search'){
+    return LS(b).then(function(d){
+      var q=(sp.get('q')||'').toLowerCase(),
+          lm=+(sp.get('limit')||50),of=+(sp.get('offset')||0),
+          rs=d.results||[];
+      if(q)rs=rs.filter(function(x){
+        return x.soc_code.toLowerCase().indexOf(q)>=0||
+               x.occupation_title.toLowerCase().indexOf(q)>=0;
+      });
+      return new Response(JSON.stringify({
+        results:rs.slice(of,of+lm),total:rs.length,limit:lm,offset:of
+      }),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  var pts=p.split('/');
+  if(pts.length===5&&pts[4]==='wages'&&pts[2]==='occupations'){
+    return F(b+'/api/occupations/'+pts[3]+'/wages-'+(sp.get('geo_type')||'national')+'.json');
+  }
+  if(p==='/api/trends/movers'){
+    var yr=sp.get('year'),mt=sp.get('metric')||'employment_count';
+    var mf=mt==='employment_count'?'':'_'+mt;
+    if(yr)return F(b+'/api/trends/movers-'+yr+mf+'.json');
+    return F(b+'/api/trends/movers'+mf+'.json');
+  }
+  if(p==='/api/trends/compare/occupations'){
+    var codes=(sp.get('soc_codes')||'').split(',').filter(Boolean);
+    var met=sp.get('metric')||'employment_count';
+    var gt=sp.get('geo_type')||'national';
+    return Promise.all(codes.map(function(c){
+      var ct=c.trim();
+      var tf=met==='employment_count'?ct+'.json':ct+'-'+met+'.json';
+      return Promise.all([
+        F(b+'/api/trends/'+tf).then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:trend',ct,e);return null}),
+        F(b+'/api/occupations/'+ct+'.json').then(function(r){return r.json()})
+          .catch(function(e){console.warn('shim:occ',ct,e);return null})
+      ]);
+    })).then(function(arr){
+      var occs=[];
+      arr.forEach(function(pair,i){
+        var d=pair[0],info=pair[1];
+        if(!d||!d.series)return;
+        var title=(info&&info.occupation_title)?info.occupation_title:codes[i];
+        occs.push({soc_code:codes[i],title:title,series:d.series.map(function(s){return{year:s.year,value:s.value}})});
+      });
+      var body=JSON.stringify({metric:met,geo_type:gt,occupations:occs});
+      return new Response(body,{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(pts.length===4&&pts[1]==='api'&&pts[2]==='trends'&&/^\d{2}-\d{4}$/.test(pts[3])){
+    var tm=sp.get('metric');
+    if(tm&&tm!=='employment_count')return F(b+'/api/trends/'+pts[3]+'-'+tm+'.json');
+    return F(b+'/api/trends/'+pts[3]+'.json');
+  }
+  if(p==='/api/trends/compare/geography'){
+    var sc=sp.get('soc_code');
+    if(sc)return F(b+'/api/trends/compare/geography-'+sc+'.json');
+  }
+  if(p==='/api/cpi/search'){
+    return F(b+'/api/cpi/search.json').then(function(r){return r.json()}).then(function(d){
+      var q2=(sp.get('q')||'').toLowerCase(),lm2=+(sp.get('limit')||50),
+          rs2=d.results||[];
+      if(q2)rs2=rs2.filter(function(x){
+        return x.member_code.toLowerCase().indexOf(q2)>=0||x.title.toLowerCase().indexOf(q2)>=0;
+      });
+      return new Response(JSON.stringify({query:sp.get('q')||'',total:rs2.length,results:rs2.slice(0,lm2)}),
+        {headers:{'Content-Type':'application/json'}});
+    });
+  }
+  if(p==='/api/cpi/explorer/tree'){
+    var root=sp.get('root')||'SA0',md=sp.get('max_depth')||'3';
+    return F(b+'/api/cpi/explorer/tree-'+root+'-'+md+'.json');
+  }
+  if(p==='/api/cpi/compare'){
+    var cc=(sp.get('codes')||'').split(',').filter(Boolean);
+    var cac=sp.get('area_code')||'0000',cif=sp.get('index_family')||'CPI-U',csa=sp.get('seasonal_adjustment')||'S';
+    return Promise.all(cc.map(function(c){
+      var ct=c.trim();
+      return F(b+'/api/cpi/members/'+ct+'/series.json').then(function(r){return r.json()})
+        .catch(function(){return null});
+    })).then(function(arr){
+      var series={};
+      cc.forEach(function(c,i){
+        var d=arr[i];
+        if(d&&d.series)series[c.trim()]=d.series.map(function(s){return{year:s.year,value:s.value}});
+      });
+      return new Response(JSON.stringify({codes:cc,series:series}),{headers:{'Content-Type':'application/json'}});
+    });
+  }
+  return F(b+p+'.json');
+};
+})();
+</script>
+</head>
+<body>
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <header role="banner">
+        <nav aria-label="Main navigation">
+            <div class="nav-brand">
+                <a href="/">JobClass</a>
+            </div>
+            <ul class="nav-links" role="list">
+                <li><a href="/">Home</a></li>
+                <li><a href="/search">Search</a></li>
+                <li><a href="/hierarchy">Hierarchy</a></li>
+                <li><a href="/trends">Trends</a></li>
+                <li><a href="/cpi">CPI</a></li>
+                <li><a href="/pipeline">Pipeline</a></li>
+                <li><a href="/methodology">Methodology</a></li>
+                <li><a href="/lessons">Lessons</a></li>
+                <li>
+                    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content" role="main">
+        
+        
+            <section class="lesson-page">
+    <h1>Design System Cross-Pollination</h1>
+    <p class="lesson-meta">Lesson 1 &mdash; Architecture &amp; visual design</p>
+    <a href="/lessons" class="lesson-back">&#8592; All Lessons</a>
+
+    <nav class="lesson-nav">
+        <div class="lesson-nav-prev"></div>
+        <div class="lesson-nav-center">
+            <a href="/pipeline#node=proc_build_static">View in Pipeline &#8594;</a>
+        </div>
+        <div class="lesson-nav-next">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/federal-data">The Federal Labor Data Landscape &#8594;</a>
+        </div>
+    </nav>
+
+
+    <div class="lesson-section">
+        <h2>The Lesson</h2>
+        <p>
+            When two projects share an author, the stronger design system should inform the weaker one &mdash;
+            but adopting visual feel is a different task than adopting architecture. Port the tokens and
+            typography; don&rsquo;t port the rendering pipeline.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Context</h2>
+        <p>
+            The JobClass project is a FastAPI + Jinja2 data warehouse with 20 educational lesson pages rendered
+            server-side as HTML templates. The certification project (Atlas) is a pure static site with
+            client-side markdown rendering, a token-based design system (CSS custom properties for every color,
+            spacing, radius, and motion value), Google Fonts (Source Serif 4, Inter Tight, JetBrains Mono),
+            and full dark mode support. JobClass lessons were functional but visually generic &mdash; system fonts,
+            cold blue palette, dark code blocks. The goal was to bring the Atlas &ldquo;feel&rdquo; (serif typography,
+            warm neutrals, elegant spacing, dark mode) to JobClass without changing its server-rendered architecture.
+        </p>
+    </div>
+
+    <div class="lesson-section">
+        <h2>What Happened</h2>
+        <ul>
+            <li><strong>Started with a structured review.</strong> A full codebase review identified 11 findings across security, documentation, and code quality. This established the baseline state and surfaced stale documentation that would need updating alongside any visual changes.</li>
+            <li><strong>Explored both projects in parallel.</strong> Multiple exploration agents documented the exact HTML structure, CSS classes, design tokens, and content patterns of both the JobClass lessons (20 Jinja2 templates, ~200 lines of lesson CSS) and the Atlas lessons (token-driven system.css, client-side markdown rendering, 28 lessons from markdown files).</li>
+            <li><strong>Separated visual feel from architecture.</strong> Atlas renders markdown client-side with marked.js; JobClass renders Jinja2 templates server-side. Adopting Atlas&rsquo;s rendering approach would have broken 430 tests. The decision was to port only the design tokens, typography, and CSS patterns.</li>
+            <li><strong>Designed a phased plan.</strong> Six phases: (1) design tokens and font loading, (2) lessons index page with hero and category filters, (3) individual lesson CSS, (4) template nav restructuring, (5) site-wide dark mode polish, (6) static build verification.</li>
+            <li><strong>Chose Google Fonts CDN over self-hosting.</strong> Self-hosting WOFF2 files would have added 200&ndash;400KB to the repo. The CDN approach required only a CSP header update (<code>style-src</code> for googleapis.com, <code>font-src</code> for gstatic.com).</li>
+            <li><strong>Committed to site-wide dark mode.</strong> Lessons-only dark mode would create a jarring seam at the nav/footer boundary. Site-wide dark mode required remapping all CSS custom properties under a <code>[data-theme="dark"]</code> selector with localStorage-persisted toggle.</li>
+            <li><strong>Executed tokens-first.</strong> The <code>:root</code> block was rewritten from 12 variables to 40+ (serif/sans/mono font stacks, surface-2, text-2, border-hard, accent-2, radius scale, motion timing, and the full dark-mode override block). This single change propagated to every component that already used <code>var(--color-*)</code> references.</li>
+            <li><strong>Lesson CSS was a complete rewrite.</strong> The ~200 lines of lesson CSS were replaced with ~300 lines matching Atlas patterns: serif italic headings, mono eyebrow metadata, light-background code blocks, blockquote-style callouts, category filter pills, animated card arrows, and a hero section with fluid <code>clamp()</code> typography.</li>
+        </ul>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Key Insights</h2>
+        <div class="lesson-callout">
+            <p>
+                <strong>Tokens are the highest-leverage change.</strong> Rewriting <code>:root</code> custom
+                properties propagated the new palette to every component that already referenced them. Headers,
+                footers, cards, tables, buttons &mdash; all shifted from cold blue to warm neutrals without
+                touching their CSS rules. This only works if the existing codebase consistently uses variables
+                instead of hardcoded hex values.
+            </p>
+        </div>
+        <div class="lesson-callout">
+            <p>
+                <strong>Typography carries more &ldquo;feel&rdquo; than color.</strong> Switching from system
+                sans-serif to Source Serif 4 for body text and headings was the single change that most
+                transformed the perceived quality. The serif font, combined with lighter weights (400 instead of 700)
+                and negative letter-spacing, immediately evoked the Atlas aesthetic. Color changes were secondary.
+            </p>
+        </div>
+        <div class="lesson-callout">
+            <p>
+                <strong>Dark mode is an all-or-nothing commitment.</strong> Scoping dark mode to a subset of
+                pages was technically possible but created an ugly visual seam at the nav/footer boundaries.
+                Once the dark token block exists, extending it site-wide is incremental &mdash; the hard part
+                is the initial token mapping, not the per-component adjustments.
+            </p>
+        </div>
+        <div class="lesson-callout">
+            <p>
+                <strong>Don&rsquo;t port architecture, port aesthetics.</strong> Atlas renders markdown
+                client-side; JobClass renders Jinja2 templates server-side. Adopting Atlas&rsquo;s rendering
+                approach would have broken 430 tests and required rewriting 20 templates. The correct
+                abstraction boundary was the CSS layer: port the design tokens, font choices, and component
+                styles while keeping the existing rendering pipeline untouched.
+            </p>
+        </div>
+        <div class="lesson-callout">
+            <p>
+                <strong>Category filters are cheap interactivity.</strong> Adding <code>data-cat</code>
+                attributes to existing card elements and a 15-line vanilla JS filter handler gave the
+                lessons index page a significant UX upgrade (filtering 21 lessons across 5 categories)
+                for minimal complexity. No framework, no state management &mdash; just DOM show/hide.
+            </p>
+        </div>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Before &amp; After</h2>
+        <h3>Root tokens &mdash; cold blue to warm neutrals</h3>
+        <pre class="lesson-code"><code>/* Before */
+:root {
+    --color-primary: #1a365d;
+    --color-accent: #3182ce;
+    --color-bg: #f7fafc;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* After */
+:root {
+    --color-primary: #1A1D24;
+    --color-accent: #2F5DA8;
+    --color-bg: #F6F4EF;
+    --color-surface-2: #EDEAE0;
+    --font-serif: 'Source Serif 4', Georgia, serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+[data-theme="dark"] {
+    --color-primary: #F2EEE3;
+    --color-accent: #6FA0E8;
+    --color-bg: #0F1014;
+}</code></pre>
+        <h3>Code blocks &mdash; dark background to light surface</h3>
+        <pre class="lesson-code"><code>/* Before */
+.lesson-code {
+    background: #1a202c;
+    color: #e2e8f0;
+}
+
+/* After */
+.lesson-code {
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+}</code></pre>
+    </div>
+
+    <div class="lesson-section">
+        <h2>Applicability</h2>
+        <p>
+            This pattern applies whenever you maintain multiple projects and want visual coherence without
+            architectural coupling. The key constraint is that the source project must use a token-based
+            design system (CSS custom properties or equivalent) &mdash; without tokens, there&rsquo;s nothing
+            portable to extract. The pattern does <strong>not</strong> apply when the projects share components
+            at the code level (use a shared component library instead) or when the &ldquo;feel&rdquo; is
+            inseparable from interactive behavior that depends on specific DOM structures.
+        </p>
+    </div>
+
+    <nav class="lesson-nav">
+        <div class="lesson-nav-prev"></div>
+        <div class="lesson-nav-center">
+            <a href="/pipeline#node=proc_build_static">View in Pipeline &#8594;</a>
+        </div>
+        <div class="lesson-nav-next">
+            <span class="lesson-nav-label">Next</span>
+            <a href="/lessons/federal-data">The Federal Labor Data Landscape &#8594;</a>
+        </div>
+    </nav>
+
+</section>
+        
+        
+    </main>
+
+    <footer role="contentinfo">
+        <div class="footer-content">
+            <p>JobClass — Labor Market Occupation Pipeline</p>
+            <p class="footer-meta">Data sourced from BLS (SOC, OEWS, Employment Projections) and O*NET</p>
+        </div>
+    </footer>
+
+</body>
+</html>
